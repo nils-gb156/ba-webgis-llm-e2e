@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box, Flex, Separator } from "@chakra-ui/react";
 import { DefaultMapProvider, MapAnchor, MapContainer, useMapModel } from "@open-pioneer/map";
 import { ToolButton } from "@open-pioneer/map-ui-components";
 import { TitledSection, SectionHeading } from "@open-pioneer/react-utils";
 import { InitialExtent, ZoomIn, ZoomOut } from "@open-pioneer/map-navigation";
-import { LuMenu } from "react-icons/lu";
+import { LuMenu, LuImages } from "react-icons/lu";
 import { Toc } from "@open-pioneer/toc";
 import { Legend } from "@open-pioneer/legend";
 
@@ -62,7 +62,9 @@ export function MapComponent() {
                                         />
                                     </TitledSection>
                                 )}
-                                <Separator my={3} data-testid="toc-legend-separator" />
+                                {tocIsActive && legendIsActive && (
+                                    <Separator my={3} data-testid="toc-legend-separator" />
+                                )}
                                 {legendIsActive && (
                                     <TitledSection
                                         title={
@@ -101,6 +103,13 @@ export function MapComponent() {
                                 icon={<LuMenu />}
                                 active={tocIsActive}
                                 onClick={toggleToc}
+                            />
+                            <ToolButton
+                                data-testid="legend-toggle"
+                                label="Legend Switcher"
+                                icon={<LuImages />}
+                                active={legendIsActive}
+                                onClick={toggleLegend}
                             />
                         </Flex>
                     </MapAnchor>
