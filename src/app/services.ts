@@ -8,6 +8,7 @@ import {
 } from "@open-pioneer/map";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
+import XYZ from "ol/source/XYZ";
 
 export const MAP_ID = "main";
 
@@ -25,10 +26,22 @@ export class MainMapProvider implements MapConfigProvider {
             layers: [
                 layerFactory.create({
                     type: SimpleLayer,
+                    title: "Carto Light",
+                    olLayer: new TileLayer({
+                        source: new XYZ({
+                            url: "https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                            crossOrigin: "anonymous"
+                        }),
+                        properties: { title: "Carto Light" }
+                    }),
+                    isBaseLayer: true
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
                     title: "OpenStreetMap",
                     olLayer: new TileLayer({
                         source: new OSM(),
-                        properties: { title: "OSM" }
+                        properties: { title: "OpenStreetMap" }
                     }),
                     isBaseLayer: true
                 })
