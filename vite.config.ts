@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
 
     return {
         root: resolve(__dirname, "src"),
+        publicDir: resolve(__dirname, "public"),
 
         // Load .env files from this directory instead of `root`.
         envDir: __dirname,
