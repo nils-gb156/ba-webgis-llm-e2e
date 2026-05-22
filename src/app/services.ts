@@ -8,7 +8,6 @@ import {
 } from "@open-pioneer/map";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
-import XYZ from "ol/source/XYZ";
 
 export const MAP_ID = "main";
 
