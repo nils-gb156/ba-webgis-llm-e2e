@@ -27,13 +27,7 @@ export function Footer() {
             borderTopWidth="1px"
             minHeight="auto"
         >
-            <Flex
-                role="region"
-                gap={3}
-                alignItems="center"
-                justifyContent="center"
-                data-testid="footer-flex"
-            >
+            <Flex role="region" gap={3} alignItems="center" justifyContent="center">
                 <CoordinateViewer
                     data-testid="coordinate-viewer"
                     map={map}
