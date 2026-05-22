@@ -9,4 +9,4 @@ const Element = createCustomElement({
     appMetadata
 });
 
-customElements.define("empty-app", Element);
+customElements.define("webgis-app", Element);
