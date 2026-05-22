@@ -1,9 +1,31 @@
 {
-    "name": "empty",
+    "name": "webgis-app",
     "private": true,
     "dependencies": {
         "@chakra-ui/react": "catalog:",
+        "@emotion/react": "catalog:",
+        "@emotion/styled": "catalog:",
+        "@open-pioneer/basemap-switcher": "catalog:",
+        "@open-pioneer/coordinate-viewer": "catalog:",
+        "@open-pioneer/geolocation": "catalog:",
+        "@open-pioneer/legend": "catalog:",
+        "@open-pioneer/map": "catalog:",
+        "@open-pioneer/map-navigation": "catalog:",
+        "@open-pioneer/map-ui-components": "catalog:",
+        "@open-pioneer/measurement": "catalog:",
+        "@open-pioneer/notifier": "catalog:",
+        "@open-pioneer/overview-map": "catalog:",
         "@open-pioneer/runtime": "catalog:",
-        "sample-package": "workspace:*"
+        "@open-pioneer/scale-bar": "catalog:",
+        "@open-pioneer/scale-viewer": "catalog:",
+        "@open-pioneer/toc": "catalog:",
+        "@playwright/test": "^1.59.1",
+        "ol": "catalog:",
+        "openai": "^6.37.0",
+        "opencage-api-client": "^2.1.0",
+        "react": "catalog:",
+        "react-dom": "catalog:",
+        "react-icons": "catalog:",
+        "react-use": "catalog:"
     }
 }
