@@ -9,8 +9,10 @@ import {
 import { TemperatureLegend } from "./styles/TemperatureLegend";
 import { PrecipitationLegend } from "./styles/PrecipitationLegend";
 import { CloudsLegend } from "./styles/CloudsLegend";
+import { UviStationsLegend } from "./styles/UviStationsLegend";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
+import TileWMS from "ol/source/TileWMS";
 import XYZ from "ol/source/XYZ";
 
 export const MAP_ID = "main";
@@ -48,6 +50,32 @@ export class MainMapProvider implements MapConfigProvider {
                         properties: { title: "OpenStreetMap" }
                     }),
                     isBaseLayer: true
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "UVI Stations",
+                    visible: true,
+                    olLayer: new TileLayer({
+                        source: new TileWMS({
+                            url: "https://maps.dwd.de/geoserver/dwd/wms",
+                            params: {
+                                CRS: "EPSG:3857",
+                                dpiMode: "7",
+                                featureCount: "10",
+                                FORMAT: "image/png",
+                                LAYERS: "Uv_Stationen",
+                                STYLES: "",
+                                tilePixelRatio: "0"
+                            },
+                            crossOrigin: "anonymous",
+                            serverType: "geoserver"
+                        })
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: UviStationsLegend
+                        }
+                    }
                 }),
                 layerFactory.create({
                     type: SimpleLayer,

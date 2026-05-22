@@ -71,7 +71,9 @@ export function MapComponent() {
                                             </SectionHeading>
                                         }
                                     >
-                                        <Legend showBaseLayers={false} />
+                                        <Box maxH="450px" overflowY="auto">
+                                            <Legend showBaseLayers={false} />
+                                        </Box>
                                     </TitledSection>
                                 )}
                             </Box>
