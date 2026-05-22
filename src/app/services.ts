@@ -6,11 +6,15 @@ import {
     MapConfigProviderOptions,
     SimpleLayer
 } from "@open-pioneer/map";
+import { TemperatureLegend } from "./styles/TemperatureLegend";
+import { PrecipitationLegend } from "./styles/PrecipitationLegend";
+import { CloudsLegend } from "./styles/CloudsLegend";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import XYZ from "ol/source/XYZ";
 
 export const MAP_ID = "main";
+const OPEN_WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 export class MainMapProvider implements MapConfigProvider {
     mapId = MAP_ID;
@@ -44,6 +48,63 @@ export class MainMapProvider implements MapConfigProvider {
                         properties: { title: "OpenStreetMap" }
                     }),
                     isBaseLayer: true
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "Temperature",
+                    visible: true,
+                    olLayer: new TileLayer({
+                        source: new XYZ({
+                            url:
+                                "https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=" +
+                                OPEN_WEATHER_API_KEY,
+                            crossOrigin: "anonymous"
+                        }),
+                        properties: { title: "Temperature" }
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: TemperatureLegend
+                        }
+                    }
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "Precipitation",
+                    visible: false,
+                    olLayer: new TileLayer({
+                        source: new XYZ({
+                            url:
+                                "https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=" +
+                                OPEN_WEATHER_API_KEY,
+                            crossOrigin: "anonymous"
+                        }),
+                        properties: { title: "Precipitation" }
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: PrecipitationLegend
+                        }
+                    }
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "Clouds",
+                    visible: false,
+                    olLayer: new TileLayer({
+                        source: new XYZ({
+                            url:
+                                "https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=" +
+                                OPEN_WEATHER_API_KEY,
+                            crossOrigin: "anonymous"
+                        }),
+                        properties: { title: "Clouds" }
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: CloudsLegend
+                        }
+                    }
                 })
             ]
         };
