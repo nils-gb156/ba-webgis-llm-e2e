@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "incremental": true,
+        "tsBuildInfoFile": "./node_modules/.cache/tsconfig.node.tsbuildinfo",
+        "outDir": "node",
+
+        "target": "ESNext",
+        "lib": ["ES2024"],
+        "module": "esnext",
+        "types": ["node"],
+        "moduleResolution": "Bundler",
+        "allowJs": false,
+
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+
+        "isolatedModules": true,
+        "skipLibCheck": true
+    },
+    "include": ["vite.config.ts", "support"]
+}
