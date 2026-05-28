@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 import { useEffect, useState } from "react";
-import { Box, Separator } from "@chakra-ui/react";
+import { Box, Separator, Text } from "@chakra-ui/react";
 
 export interface WeatherForecastProps {
     coordinate?: [number, number];
@@ -79,42 +79,64 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     return (
         <>
             {locationLabel && (
-                <div data-testid="weather-forecast-location">
-                    <strong>location:</strong> {locationLabel}
-                </div>
+                <Text data-testid="weather-forecast-location" fontSize="sm" color="gray.600" mb={2}>
+                    <Text as="span" fontWeight="semibold">
+                        Location:
+                    </Text>{" "}
+                    {locationLabel}
+                </Text>
             )}
             <Box
                 data-testid="weather-forecast-container"
                 maxHeight="780px"
                 overflowY="auto"
-                border="1px solid #ccc"
+                border="1px solid"
+                borderColor="gray.200"
                 borderRadius="md"
                 p={2}
             >
                 {forecast.map((entry: ForecastEntry, idx: number) => (
-                    <div key={entry.dt} data-testid={`forecast-entry-${idx}`}>
-                        <div data-testid={`forecast-dt-${idx}`}>
-                            <strong>Datetime:</strong> {entry.dt_txt}
-                        </div>
-                        <div data-testid={`forecast-weather-${idx}`}>
-                            <strong>Weather:</strong> {entry.weather?.[0]?.description}
-                        </div>
-                        <div data-testid={`forecast-temp-${idx}`}>
-                            <strong>Temperature:</strong> {entry.main?.temp} °C
-                        </div>
-                        <div data-testid={`forecast-humidity-${idx}`}>
-                            <strong>Humidity:</strong> {entry.main?.humidity} %
-                        </div>
-                        <div data-testid={`forecast-wind-deg-${idx}`}>
-                            <strong>Winddirection:</strong> {entry.wind?.deg}°
-                        </div>
-                        <div data-testid={`forecast-wind-speed-${idx}`}>
-                            <strong>Windspeed:</strong> {entry.wind?.speed} m/s
-                        </div>
+                    <Box key={entry.dt} data-testid={`forecast-entry-${idx}`}>
+                        <Text data-testid={`forecast-dt-${idx}`} fontSize="sm">
+                            <Text as="span" fontWeight="semibold">
+                                Datetime:
+                            </Text>{" "}
+                            {entry.dt_txt}
+                        </Text>
+                        <Text data-testid={`forecast-weather-${idx}`} fontSize="sm">
+                            <Text as="span" fontWeight="semibold">
+                                Weather:
+                            </Text>{" "}
+                            {entry.weather?.[0]?.description}
+                        </Text>
+                        <Text data-testid={`forecast-temp-${idx}`} fontSize="sm">
+                            <Text as="span" fontWeight="semibold">
+                                Temperature:
+                            </Text>{" "}
+                            {entry.main?.temp} °C
+                        </Text>
+                        <Text data-testid={`forecast-humidity-${idx}`} fontSize="sm">
+                            <Text as="span" fontWeight="semibold">
+                                Humidity:
+                            </Text>{" "}
+                            {entry.main?.humidity} %
+                        </Text>
+                        <Text data-testid={`forecast-wind-deg-${idx}`} fontSize="sm">
+                            <Text as="span" fontWeight="semibold">
+                                Wind direction:
+                            </Text>{" "}
+                            {entry.wind?.deg}°
+                        </Text>
+                        <Text data-testid={`forecast-wind-speed-${idx}`} fontSize="sm">
+                            <Text as="span" fontWeight="semibold">
+                                Wind speed:
+                            </Text>{" "}
+                            {entry.wind?.speed} m/s
+                        </Text>
                         {idx < forecast.length - 1 && (
                             <Separator my={3} data-testid={`forecast-separator-${idx}`} />
                         )}
-                    </div>
+                    </Box>
                 ))}
             </Box>
         </>
