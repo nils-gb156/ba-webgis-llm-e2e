@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Flex, Separator } from "@chakra-ui/react";
 import { DefaultMapProvider, MapAnchor, MapContainer, useMapModel } from "@open-pioneer/map";
 import { ToolButton } from "@open-pioneer/map-ui-components";
 import { TitledSection, SectionHeading } from "@open-pioneer/react-utils";
 import { InitialExtent, ZoomIn, ZoomOut } from "@open-pioneer/map-navigation";
-import { LuMenu, LuImages } from "react-icons/lu";
+import { LuMenu, LuImages, LuInfo } from "react-icons/lu";
 import { Toc } from "@open-pioneer/toc";
 import { Legend } from "@open-pioneer/legend";
+import { InfoPanel } from "./InfoPanel";
+import { Point } from "ol/geom";
+import { transform } from "ol/proj";
+import type MapBrowserEvent from "ol/MapBrowserEvent";
+import type BaseEvent from "ol/events/Event";
 
 const MAP_ID = "main";
 
@@ -16,6 +21,11 @@ export function MapComponent() {
     const { map } = useMapModel(MAP_ID);
     const [tocIsActive, setTocIsActive] = useState<boolean>(true);
     const [legendIsActive, setLegendIsActive] = useState<boolean>(true);
+    const [infoPanelIsActive, setInfoPanelisActive] = useState<boolean>(true);
+    const [measurementIsActive] = useState<boolean>(false);
+    const [clickedLocation, setClickedLocation] = useState<
+        { coordinate: [number, number]; mapCoordinate: [number, number] } | undefined
+    >(undefined);
 
     function toggleToc() {
         setTocIsActive(!tocIsActive);
@@ -24,6 +34,68 @@ export function MapComponent() {
     function toggleLegend() {
         setLegendIsActive(!legendIsActive);
     }
+
+    function toggleInfoPanel() {
+        setInfoPanelisActive(!infoPanelIsActive);
+    }
+
+    useEffect(() => {
+        if (!map) {
+            return;
+        }
+
+        const handleMapClick = (event: BaseEvent | Event) => {
+            if (measurementIsActive) {
+                return;
+            }
+
+            if (!event || typeof event !== "object" || !("coordinate" in event)) {
+                return;
+            }
+
+            const mapEvent = event as MapBrowserEvent<PointerEvent>;
+            const coordinate = mapEvent.coordinate;
+
+            if (!Array.isArray(coordinate) || coordinate.length < 2) {
+                return;
+            }
+
+            const [lon, lat] = transform(
+                coordinate as [number, number],
+                map.olMap.getView().getProjection(),
+                "EPSG:4326"
+            );
+            if (lon == null || lat == null) {
+                return;
+            }
+
+            setClickedLocation({
+                coordinate: [lat, lon],
+                mapCoordinate: coordinate as [number, number]
+            });
+        };
+
+        map.olMap.on(["singleclick"], handleMapClick);
+        return () => {
+            map.olMap.un(["singleclick"], handleMapClick);
+        };
+    }, [map, measurementIsActive]);
+
+    useEffect(() => {
+        if (!map || !clickedLocation) {
+            return;
+        }
+
+        const highlight = (
+            map as unknown as {
+                highlight?: (geometries: Point[]) => { destroy: () => void };
+            }
+        ).highlight?.([new Point(clickedLocation.mapCoordinate)]);
+
+        return () => {
+            highlight?.destroy();
+        };
+    }, [map, clickedLocation]);
 
     if (!map) {
         return null;
@@ -82,14 +154,14 @@ export function MapComponent() {
                         </MapAnchor>
                     )}
                     <MapAnchor
-                        position="top-right"
+                        position="bottom-center"
                         horizontalGap={10}
                         verticalGap={10}
                         data-testid="maptools-anchor"
                     >
                         <Flex
                             aria-label="Maptools"
-                            direction="column"
+                            direction="row"
                             gap={1}
                             padding={1}
                             data-testid="map-tools"
@@ -111,8 +183,30 @@ export function MapComponent() {
                                 active={legendIsActive}
                                 onClick={toggleLegend}
                             />
+                            <ToolButton
+                                data-testid="info-panel-toggle"
+                                label="Info Panel Switcher"
+                                icon={<LuInfo />}
+                                active={infoPanelIsActive}
+                                onClick={toggleInfoPanel}
+                            />
                         </Flex>
                     </MapAnchor>
+                    {infoPanelIsActive && (
+                        <MapAnchor position="top-right" horizontalGap={10} verticalGap={10}>
+                            <Box
+                                backgroundColor="white"
+                                borderWidth="1px"
+                                borderRadius="lg"
+                                padding={2}
+                                boxShadow="lg"
+                                aria-label="Map controls"
+                                w="400px"
+                            >
+                                <InfoPanel coordinate={clickedLocation?.coordinate} />
+                            </Box>
+                        </MapAnchor>
+                    )}
                 </MapContainer>
             </DefaultMapProvider>
         </div>
