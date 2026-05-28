@@ -10,6 +10,7 @@ import { LuMenu, LuImages, LuInfo } from "react-icons/lu";
 import { Toc } from "@open-pioneer/toc";
 import { Legend } from "@open-pioneer/legend";
 import { InfoPanel } from "./InfoPanel";
+import { GeocoderSearch } from "./GeocoderSearch";
 import { Point } from "ol/geom";
 import { transform } from "ol/proj";
 import type MapBrowserEvent from "ol/MapBrowserEvent";
@@ -155,7 +156,6 @@ export function MapComponent() {
                     )}
                     <MapAnchor
                         position="bottom-center"
-                        horizontalGap={10}
                         verticalGap={10}
                         data-testid="maptools-anchor"
                     >
@@ -207,6 +207,26 @@ export function MapComponent() {
                             </Box>
                         </MapAnchor>
                     )}
+                    <MapAnchor position="top-center" verticalGap={10} data-testid="geocoder-anchor">
+                        <Box
+                            backgroundColor="white"
+                            borderWidth="1px"
+                            borderRadius="lg"
+                            padding={2}
+                            boxShadow="lg"
+                            aria-label="Geocoder"
+                        >
+                            <GeocoderSearch
+                                map={map}
+                                onSelect={(selection) =>
+                                    setClickedLocation({
+                                        coordinate: selection.coordinate,
+                                        mapCoordinate: selection.mapCoordinate
+                                    })
+                                }
+                            />
+                        </Box>
+                    </MapAnchor>
                 </MapContainer>
             </DefaultMapProvider>
         </div>
