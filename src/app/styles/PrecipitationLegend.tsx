@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Box, Text } from "@chakra-ui/react";
 import type { LegendItemComponentProps } from "@open-pioneer/legend";
+import { SectionHeading } from "@open-pioneer/react-utils";
 
 const Precipitation_STOPS = [
     { value: 0, color: "rgba(225, 200, 100, 0)" },
@@ -43,7 +44,9 @@ export function PrecipitationLegend({ layer }: LegendItemComponentProps) {
 
     return (
         <Box>
-            <Text>{layer.title} (mm)</Text>
+            <SectionHeading size="sm" data-testid="toc-heading">
+                {layer.title} (mm)
+            </SectionHeading>
             <Box
                 borderRadius="sm"
                 borderWidth="1px"

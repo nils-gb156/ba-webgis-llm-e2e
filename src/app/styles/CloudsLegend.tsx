@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Box, Text } from "@chakra-ui/react";
 import type { LegendItemComponentProps } from "@open-pioneer/legend";
+import { SectionHeading } from "@open-pioneer/react-utils";
 
 const CLOUD_COVER_STOPS = [
     { value: 0, color: "rgba(255, 255, 255, 0.0)" },
@@ -35,7 +36,9 @@ export function CloudsLegend({ layer }: LegendItemComponentProps) {
 
     return (
         <Box>
-            <Text>{layer.title} (%)</Text>
+            <SectionHeading size="sm" data-testid="toc-heading">
+                {layer.title} (%)
+            </SectionHeading>
             <Box
                 borderRadius="sm"
                 borderWidth="1px"

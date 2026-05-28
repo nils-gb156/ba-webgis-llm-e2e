@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Box, Image, Text } from "@chakra-ui/react";
 import type { LegendItemComponentProps } from "@open-pioneer/legend";
+import { SectionHeading } from "@open-pioneer/react-utils";
 
 const LEGEND_URL =
     "https://maps.dwd.de/geoserver/dwd/wms?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png" +
@@ -10,7 +11,9 @@ const LEGEND_URL =
 export function UviStationsLegend({ layer }: LegendItemComponentProps) {
     return (
         <Box>
-            <Text>{layer.title}</Text>
+            <SectionHeading size="sm" data-testid="toc-heading">
+                {layer.title}
+            </SectionHeading>
             <Image src={LEGEND_URL} alt={`${layer.title} legend`} mt={2} maxW="200px" />
         </Box>
     );

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import type { LegendItemComponentProps } from "@open-pioneer/legend";
+import { SectionHeading } from "@open-pioneer/react-utils";
 
 const TEMPERATURE_STOPS = [
     { value: -65, color: "rgba(130, 22, 146, 1)" },
@@ -35,7 +36,9 @@ export function TemperatureLegend({ layer }: LegendItemComponentProps) {
 
     return (
         <Box>
-            <Text>{layer.title} (°C)</Text>
+            <SectionHeading size="sm" data-testid="toc-heading">
+                {layer.title} (°C)
+            </SectionHeading>
             <VStack align="stretch" gap={1} mt={2}>
                 {ranges.map((range) => (
                     <LegendRow
