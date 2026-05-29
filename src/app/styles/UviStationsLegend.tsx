@@ -11,9 +11,7 @@ const LEGEND_URL =
 export function UviStationsLegend({ layer }: LegendItemComponentProps) {
     return (
         <Box>
-            <SectionHeading size="sm" data-testid="toc-heading">
-                {layer.title}
-            </SectionHeading>
+            <SectionHeading size="sm">{layer.title}</SectionHeading>
             <Image src={LEGEND_URL} alt={`${layer.title} legend`} mt={2} maxW="200px" />
         </Box>
     );

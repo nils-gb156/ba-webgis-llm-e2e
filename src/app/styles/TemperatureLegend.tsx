@@ -36,9 +36,7 @@ export function TemperatureLegend({ layer }: LegendItemComponentProps) {
 
     return (
         <Box>
-            <SectionHeading size="sm" data-testid="toc-heading">
-                {layer.title} (°C)
-            </SectionHeading>
+            <SectionHeading size="sm">{layer.title} (°C)</SectionHeading>
             <VStack align="stretch" gap={1} mt={2}>
                 {ranges.map((range) => (
                     <LegendRow

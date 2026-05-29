@@ -117,7 +117,7 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
             />
             {isOpen && results.length > 0 && (
                 <Box mt={2} borderWidth="1px" borderRadius="md" overflow="hidden">
-                    <Box data-testid="geocoder-results" role="list">
+                    <Box role="list">
                         {results.map((result, index) => (
                             <Box
                                 key={`${result.display_name ?? "result"}-${index}`}
@@ -126,7 +126,6 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
                                 cursor="pointer"
                                 _hover={{ backgroundColor: "gray.50" }}
                                 onClick={() => selectResult(result)}
-                                data-testid={`geocoder-result-${index}`}
                                 role="listitem"
                             >
                                 <Text

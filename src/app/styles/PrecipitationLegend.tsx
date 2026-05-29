@@ -44,9 +44,7 @@ export function PrecipitationLegend({ layer }: LegendItemComponentProps) {
 
     return (
         <Box>
-            <SectionHeading size="sm" data-testid="toc-heading">
-                {layer.title} (mm)
-            </SectionHeading>
+            <SectionHeading size="sm">{layer.title} (mm)</SectionHeading>
             <Box
                 borderRadius="sm"
                 borderWidth="1px"

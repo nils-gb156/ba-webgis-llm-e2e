@@ -229,12 +229,11 @@ export function MapComponent() {
                                 boxShadow="lg"
                                 aria-label="Map controls"
                                 w="400px"
-                                data-testid="map-controls-panel"
                             >
                                 {tocIsActive && (
                                     <TitledSection
                                         title={
-                                            <SectionHeading size="md" data-testid="toc-heading">
+                                            <SectionHeading size="md">
                                                 Layer Switcher
                                             </SectionHeading>
                                         }
@@ -244,20 +243,13 @@ export function MapComponent() {
                                             basemapSwitcherProps={{
                                                 allowSelectingEmptyBasemap: true
                                             }}
-                                            data-testid="toc-panel"
                                         />
                                     </TitledSection>
                                 )}
-                                {tocIsActive && legendIsActive && (
-                                    <Separator my={3} data-testid="toc-legend-separator" />
-                                )}
+                                {tocIsActive && legendIsActive && <Separator my={3} />}
                                 {legendIsActive && (
                                     <TitledSection
-                                        title={
-                                            <SectionHeading size="md" data-testid="legend-heading">
-                                                Legend
-                                            </SectionHeading>
-                                        }
+                                        title={<SectionHeading size="md">Legend</SectionHeading>}
                                     >
                                         <Box maxH="450px" overflowY="auto">
                                             <Legend showBaseLayers={false} />
@@ -267,44 +259,30 @@ export function MapComponent() {
                             </Box>
                         </MapAnchor>
                     )}
-                    <MapAnchor
-                        position="bottom-center"
-                        verticalGap={10}
-                        data-testid="maptools-anchor"
-                    >
-                        <Flex
-                            aria-label="Maptools"
-                            direction="row"
-                            gap={1}
-                            padding={1}
-                            data-testid="map-tools"
-                        >
-                            <InitialExtent data-testid="initial-extent-button" />
-                            <ZoomIn data-testid="zoom-in-button" />
-                            <ZoomOut data-testid="zoom-out-button" />
+                    <MapAnchor position="bottom-center" verticalGap={10}>
+                        <Flex aria-label="Maptools" direction="row" gap={1} padding={1}>
+                            <InitialExtent />
+                            <ZoomIn />
+                            <ZoomOut />
                             <ToolButton
-                                data-testid="toc-toggle"
                                 label="Layer Switcher"
                                 icon={<LuMenu />}
                                 active={tocIsActive}
                                 onClick={toggleToc}
                             />
                             <ToolButton
-                                data-testid="legend-toggle"
                                 label="Legend Switcher"
                                 icon={<LuImages />}
                                 active={legendIsActive}
                                 onClick={toggleLegend}
                             />
                             <ToolButton
-                                data-testid="measurement-toggle"
                                 label="Measurement"
                                 icon={<LuRuler />}
                                 active={measurementIsActive}
                                 onClick={toggleMeasurement}
                             />
                             <ToolButton
-                                data-testid="info-panel-toggle"
                                 label="Info Panel Switcher"
                                 icon={<LuInfo />}
                                 active={infoPanelIsActive}
@@ -330,7 +308,7 @@ export function MapComponent() {
                             </Box>
                         </MapAnchor>
                     )}
-                    <MapAnchor position="top-center" verticalGap={10} data-testid="geocoder-anchor">
+                    <MapAnchor position="top-center" verticalGap={10}>
                         <Box
                             backgroundColor="white"
                             borderWidth="1px"
@@ -350,12 +328,7 @@ export function MapComponent() {
                             />
                         </Box>
                     </MapAnchor>
-                    <MapAnchor
-                        position="bottom-right"
-                        horizontalGap={600}
-                        verticalGap={10}
-                        data-testid="bottom-right-measurement-anchor"
-                    >
+                    <MapAnchor position="bottom-right" horizontalGap={600} verticalGap={10}>
                         {measurementIsActive && (
                             <Box
                                 backgroundColor="white"
@@ -364,26 +337,20 @@ export function MapComponent() {
                                 padding={2}
                                 boxShadow="lg"
                                 aria-label="Measurement"
-                                data-testid="measurement-panel"
                             >
-                                <Box
-                                    role="dialog"
-                                    aria-labelledby={measurementTitleId}
-                                    data-testid="measurement-dialog"
-                                >
+                                <Box role="dialog" aria-labelledby={measurementTitleId}>
                                     <TitledSection
                                         title={
                                             <SectionHeading
                                                 id={measurementTitleId}
                                                 size="md"
                                                 mb={2}
-                                                data-testid="measurement-heading"
                                             >
                                                 Measurement
                                             </SectionHeading>
                                         }
                                     >
-                                        <Measurement data-testid="measurement-content" />
+                                        <Measurement />
                                     </TitledSection>
                                 </Box>
                             </Box>

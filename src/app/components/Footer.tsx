@@ -19,7 +19,6 @@ export function Footer() {
         <Box
             role="region"
             aria-label="Footer Bar"
-            data-testid="footer"
             textAlign="center"
             py={2}
             px={4}
@@ -29,14 +28,13 @@ export function Footer() {
         >
             <Flex role="region" gap={3} alignItems="center" justifyContent="center">
                 <CoordinateViewer
-                    data-testid="coordinate-viewer"
                     map={map}
                     displayProjectionCode="EPSG:4326"
                     format="degree"
                     precision={2}
                 />
-                <ScaleBar map={map} data-testid="scale-bar" />
-                <ScaleViewer data-testid="scale-viewer" map={map} />
+                <ScaleBar map={map} />
+                <ScaleViewer map={map} />
             </Flex>
         </Box>
     );

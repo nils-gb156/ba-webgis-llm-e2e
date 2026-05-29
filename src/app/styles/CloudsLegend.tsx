@@ -36,9 +36,7 @@ export function CloudsLegend({ layer }: LegendItemComponentProps) {
 
     return (
         <Box>
-            <SectionHeading size="sm" data-testid="toc-heading">
-                {layer.title} (%)
-            </SectionHeading>
+            <SectionHeading size="sm">{layer.title} (%)</SectionHeading>
             <Box
                 borderRadius="sm"
                 borderWidth="1px"

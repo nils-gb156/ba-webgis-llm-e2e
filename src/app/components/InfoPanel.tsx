@@ -14,31 +14,23 @@ export function InfoPanel({ coordinate, uviFeatureInfo }: InfoPanelProps) {
     const showUviInfo = uviFeatureInfo?.status === "json" || uviFeatureInfo?.status === "text";
 
     return (
-        <TitledSection
-            title={
-                <SectionHeading size="md" data-testid="toc-heading">
-                    Information
-                </SectionHeading>
-            }
-        >
-            <SectionHeading size="sm" data-testid="toc-heading">
-                Weather Forecast
-            </SectionHeading>
-            <Box mt={2} data-testid="info-panel-content">
+        <TitledSection title={<SectionHeading size="md">Information</SectionHeading>}>
+            <SectionHeading size="sm">Weather Forecast</SectionHeading>
+            <Box mt={2}>
                 {coordinate ? (
                     <WeatherForecast coordinate={coordinate} />
                 ) : (
-                    <p data-testid="info-panel-empty">Click on the map to load a forecast.</p>
+                    <p>Click on the map to load a forecast.</p>
                 )}
             </Box>
 
             {showUviInfo && (
                 <>
                     <Separator my={3} />
-                    <SectionHeading size="sm" mt={4} data-testid="uvi-info-heading">
+                    <SectionHeading size="sm" mt={4}>
                         UVI Station
                     </SectionHeading>
-                    <Box mt={2} data-testid="uvi-info-content">
+                    <Box mt={2}>
                         <UviStationInfo uviFeatureInfo={uviFeatureInfo} />
                     </Box>
                 </>

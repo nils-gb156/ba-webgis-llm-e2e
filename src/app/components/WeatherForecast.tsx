@@ -69,17 +69,17 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     }, [coordinate, apiKey]);
 
     if (error) {
-        return <p data-testid="weather-forecast-error">{error}</p>;
+        return <p>{error}</p>;
     }
 
     if (!forecast.length) {
-        return <p data-testid="weather-forecast-loading">Loading...</p>;
+        return <p>Loading...</p>;
     }
 
     return (
         <>
             {locationLabel && (
-                <Text data-testid="weather-forecast-location" fontSize="sm" color="gray.600" mb={2}>
+                <Text fontSize="sm" color="gray.600" mb={2}>
                     <Text as="span" fontWeight="semibold">
                         Location:
                     </Text>{" "}
@@ -87,7 +87,6 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                 </Text>
             )}
             <Box
-                data-testid="weather-forecast-container"
                 maxHeight="500px"
                 overflowY="auto"
                 border="1px solid"
@@ -96,46 +95,44 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                 p={2}
             >
                 {forecast.map((entry: ForecastEntry, idx: number) => (
-                    <Box key={entry.dt} data-testid={`forecast-entry-${idx}`}>
-                        <Text data-testid={`forecast-dt-${idx}`} fontSize="sm">
+                    <Box key={entry.dt}>
+                        <Text fontSize="sm">
                             <Text as="span" fontWeight="semibold">
                                 Datetime:
                             </Text>{" "}
                             {entry.dt_txt}
                         </Text>
-                        <Text data-testid={`forecast-weather-${idx}`} fontSize="sm">
+                        <Text fontSize="sm">
                             <Text as="span" fontWeight="semibold">
                                 Weather:
                             </Text>{" "}
                             {entry.weather?.[0]?.description}
                         </Text>
-                        <Text data-testid={`forecast-temp-${idx}`} fontSize="sm">
+                        <Text fontSize="sm">
                             <Text as="span" fontWeight="semibold">
                                 Temperature:
                             </Text>{" "}
                             {entry.main?.temp} °C
                         </Text>
-                        <Text data-testid={`forecast-humidity-${idx}`} fontSize="sm">
+                        <Text fontSize="sm">
                             <Text as="span" fontWeight="semibold">
                                 Humidity:
                             </Text>{" "}
                             {entry.main?.humidity} %
                         </Text>
-                        <Text data-testid={`forecast-wind-deg-${idx}`} fontSize="sm">
+                        <Text fontSize="sm">
                             <Text as="span" fontWeight="semibold">
                                 Wind direction:
                             </Text>{" "}
                             {entry.wind?.deg}°
                         </Text>
-                        <Text data-testid={`forecast-wind-speed-${idx}`} fontSize="sm">
+                        <Text fontSize="sm">
                             <Text as="span" fontWeight="semibold">
                                 Wind speed:
                             </Text>{" "}
                             {entry.wind?.speed} m/s
                         </Text>
-                        {idx < forecast.length - 1 && (
-                            <Separator my={3} data-testid={`forecast-separator-${idx}`} />
-                        )}
+                        {idx < forecast.length - 1 && <Separator my={3} />}
                     </Box>
                 ))}
             </Box>
