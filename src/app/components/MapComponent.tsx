@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
 import { Box, Flex, Separator } from "@chakra-ui/react";
 import { DefaultMapProvider, MapAnchor, MapContainer, useMapModel } from "@open-pioneer/map";
 import { ToolButton } from "@open-pioneer/map-ui-components";
 import { TitledSection, SectionHeading } from "@open-pioneer/react-utils";
 import { InitialExtent, ZoomIn, ZoomOut } from "@open-pioneer/map-navigation";
-import { LuMenu, LuImages, LuInfo } from "react-icons/lu";
+import { LuMenu, LuImages, LuInfo, LuRuler } from "react-icons/lu";
 import { Toc } from "@open-pioneer/toc";
 import { Legend } from "@open-pioneer/legend";
+import { Measurement } from "@open-pioneer/measurement";
 import { InfoPanel } from "./InfoPanel";
 import type { UviFeatureInfo } from "./UviStationInfo";
 import { GeocoderSearch } from "./GeocoderSearch";
@@ -44,7 +45,8 @@ export function MapComponent() {
     const [tocIsActive, setTocIsActive] = useState<boolean>(true);
     const [legendIsActive, setLegendIsActive] = useState<boolean>(true);
     const [infoPanelIsActive, setInfoPanelisActive] = useState<boolean>(true);
-    const [measurementIsActive] = useState<boolean>(false);
+    const [measurementIsActive, setMeasurementIsActive] = useState<boolean>(false);
+    const measurementTitleId = useId();
     const [clickedLocation, setClickedLocation] = useState<
         { coordinate: [number, number]; mapCoordinate: [number, number] } | undefined
     >(undefined);
@@ -60,6 +62,10 @@ export function MapComponent() {
 
     function toggleInfoPanel() {
         setInfoPanelisActive(!infoPanelIsActive);
+    }
+
+    function toggleMeasurement() {
+        setMeasurementIsActive(!measurementIsActive);
     }
 
     useEffect(() => {
@@ -291,6 +297,13 @@ export function MapComponent() {
                                 onClick={toggleLegend}
                             />
                             <ToolButton
+                                data-testid="measurement-toggle"
+                                label="Measurement"
+                                icon={<LuRuler />}
+                                active={measurementIsActive}
+                                onClick={toggleMeasurement}
+                            />
+                            <ToolButton
                                 data-testid="info-panel-toggle"
                                 label="Info Panel Switcher"
                                 icon={<LuInfo />}
@@ -336,6 +349,45 @@ export function MapComponent() {
                                 }
                             />
                         </Box>
+                    </MapAnchor>
+                    <MapAnchor
+                        position="bottom-right"
+                        horizontalGap={600}
+                        verticalGap={10}
+                        data-testid="bottom-right-measurement-anchor"
+                    >
+                        {measurementIsActive && (
+                            <Box
+                                backgroundColor="white"
+                                borderWidth="1px"
+                                borderRadius="lg"
+                                padding={2}
+                                boxShadow="lg"
+                                aria-label="Measurement"
+                                data-testid="measurement-panel"
+                            >
+                                <Box
+                                    role="dialog"
+                                    aria-labelledby={measurementTitleId}
+                                    data-testid="measurement-dialog"
+                                >
+                                    <TitledSection
+                                        title={
+                                            <SectionHeading
+                                                id={measurementTitleId}
+                                                size="md"
+                                                mb={2}
+                                                data-testid="measurement-heading"
+                                            >
+                                                Measurement
+                                            </SectionHeading>
+                                        }
+                                    >
+                                        <Measurement data-testid="measurement-content" />
+                                    </TitledSection>
+                                </Box>
+                            </Box>
+                        )}
                     </MapAnchor>
                 </MapContainer>
             </DefaultMapProvider>
