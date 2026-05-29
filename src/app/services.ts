@@ -35,7 +35,7 @@ export class MainMapProvider implements MapConfigProvider {
                     title: "Carto Light",
                     olLayer: new TileLayer({
                         source: new XYZ({
-                            url: "https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                            url: "https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
                             crossOrigin: "anonymous"
                         }),
                         properties: { title: "Carto Light" }
@@ -50,32 +50,6 @@ export class MainMapProvider implements MapConfigProvider {
                         properties: { title: "OpenStreetMap" }
                     }),
                     isBaseLayer: true
-                }),
-                layerFactory.create({
-                    type: SimpleLayer,
-                    title: "UVI Stations",
-                    visible: true,
-                    olLayer: new TileLayer({
-                        source: new TileWMS({
-                            url: "https://maps.dwd.de/geoserver/dwd/wms",
-                            params: {
-                                CRS: "EPSG:3857",
-                                dpiMode: "7",
-                                featureCount: "10",
-                                FORMAT: "image/png",
-                                LAYERS: "Uv_Stationen",
-                                STYLES: "",
-                                tilePixelRatio: "0"
-                            },
-                            crossOrigin: "anonymous",
-                            serverType: "geoserver"
-                        })
-                    }),
-                    attributes: {
-                        legend: {
-                            Component: UviStationsLegend
-                        }
-                    }
                 }),
                 layerFactory.create({
                     type: SimpleLayer,
@@ -131,6 +105,32 @@ export class MainMapProvider implements MapConfigProvider {
                     attributes: {
                         legend: {
                             Component: CloudsLegend
+                        }
+                    }
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "UVI Stations",
+                    visible: true,
+                    olLayer: new TileLayer({
+                        source: new TileWMS({
+                            url: "https://maps.dwd.de/geoserver/dwd/wms",
+                            params: {
+                                CRS: "EPSG:3857",
+                                dpiMode: "7",
+                                featureCount: "10",
+                                FORMAT: "image/png",
+                                LAYERS: "Uv_Stationen",
+                                STYLES: "",
+                                tilePixelRatio: "0"
+                            },
+                            crossOrigin: "anonymous",
+                            serverType: "geoserver"
+                        })
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: UviStationsLegend
                         }
                     }
                 })
