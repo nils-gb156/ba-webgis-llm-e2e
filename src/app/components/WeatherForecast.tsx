@@ -88,7 +88,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
             )}
             <Box
                 data-testid="weather-forecast-container"
-                maxHeight="780px"
+                maxHeight="500px"
                 overflowY="auto"
                 border="1px solid"
                 borderColor="gray.200"

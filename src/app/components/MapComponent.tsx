@@ -10,13 +10,34 @@ import { LuMenu, LuImages, LuInfo } from "react-icons/lu";
 import { Toc } from "@open-pioneer/toc";
 import { Legend } from "@open-pioneer/legend";
 import { InfoPanel } from "./InfoPanel";
+import type { UviFeatureInfo } from "./UviStationInfo";
 import { GeocoderSearch } from "./GeocoderSearch";
 import { Point } from "ol/geom";
 import { transform } from "ol/proj";
+import TileWMS from "ol/source/TileWMS";
 import type MapBrowserEvent from "ol/MapBrowserEvent";
 import type BaseEvent from "ol/events/Event";
 
 const MAP_ID = "main";
+const UVI_LAYER_TITLE = "UVI Stations";
+
+function findLayerByTitle(layerOrGroup: unknown, title: string): unknown | undefined {
+    const layer = layerOrGroup as { get?: (key: string) => unknown; getLayers?: () => unknown };
+    if (layer?.get?.("title") === title) {
+        return layerOrGroup;
+    }
+
+    const layersCollection = layer?.getLayers?.() as { getArray?: () => unknown[] } | undefined;
+    const children = layersCollection?.getArray?.() ?? [];
+    for (const child of children) {
+        const match = findLayerByTitle(child, title);
+        if (match) {
+            return match;
+        }
+    }
+
+    return undefined;
+}
 
 export function MapComponent() {
     const { map } = useMapModel(MAP_ID);
@@ -27,6 +48,7 @@ export function MapComponent() {
     const [clickedLocation, setClickedLocation] = useState<
         { coordinate: [number, number]; mapCoordinate: [number, number] } | undefined
     >(undefined);
+    const [uviFeatureInfo, setUviFeatureInfo] = useState<UviFeatureInfo>({ status: "idle" });
 
     function toggleToc() {
         setTocIsActive(!tocIsActive);
@@ -95,6 +117,91 @@ export function MapComponent() {
 
         return () => {
             highlight?.destroy();
+        };
+    }, [map, clickedLocation]);
+
+    useEffect(() => {
+        if (!map || !clickedLocation) {
+            setUviFeatureInfo({ status: "idle" });
+            return;
+        }
+
+        let isCancelled = false;
+        const view = map.olMap.getView();
+        const resolution = view.getResolution();
+        const uviLayer = findLayerByTitle(map.olMap, UVI_LAYER_TITLE) as
+            | { getSource?: () => TileWMS | undefined }
+            | undefined;
+        const source = uviLayer?.getSource?.();
+
+        if (!resolution || !source?.getFeatureInfoUrl) {
+            setUviFeatureInfo({ status: "error", message: "UVI layer not available." });
+            return;
+        }
+
+        setUviFeatureInfo({ status: "loading" });
+
+        const url = source.getFeatureInfoUrl(
+            clickedLocation.mapCoordinate,
+            resolution,
+            view.getProjection(),
+            {
+                INFO_FORMAT: "application/json",
+                FEATURE_COUNT: "5"
+            }
+        );
+
+        if (!url) {
+            setUviFeatureInfo({ status: "empty" });
+            return;
+        }
+
+        fetch(url)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to load station info.");
+                }
+                const contentType = response.headers.get("content-type") ?? "";
+                if (contentType.includes("application/json")) {
+                    return response.json().then((data) => ({ kind: "json", data }));
+                }
+                return response.text().then((data) => ({ kind: "text", data }));
+            })
+            .then((payload) => {
+                if (isCancelled) {
+                    return;
+                }
+
+                if (payload.kind === "json") {
+                    const features = Array.isArray(payload.data?.features)
+                        ? payload.data.features.map(
+                              (feature: { id?: string; properties?: unknown }) => ({
+                                  id: feature.id,
+                                  properties:
+                                      feature.properties && typeof feature.properties === "object"
+                                          ? (feature.properties as Record<string, unknown>)
+                                          : {}
+                              })
+                          )
+                        : [];
+
+                    setUviFeatureInfo(
+                        features.length ? { status: "json", features } : { status: "empty" }
+                    );
+                    return;
+                }
+
+                const text = payload.data?.toString().trim();
+                setUviFeatureInfo(text ? { status: "text", content: text } : { status: "empty" });
+            })
+            .catch(() => {
+                if (!isCancelled) {
+                    setUviFeatureInfo({ status: "error", message: "Failed to load station info." });
+                }
+            });
+
+        return () => {
+            isCancelled = true;
         };
     }, [map, clickedLocation]);
 
@@ -203,7 +310,10 @@ export function MapComponent() {
                                 aria-label="Map controls"
                                 w="400px"
                             >
-                                <InfoPanel coordinate={clickedLocation?.coordinate} />
+                                <InfoPanel
+                                    coordinate={clickedLocation?.coordinate}
+                                    uviFeatureInfo={uviFeatureInfo}
+                                />
                             </Box>
                         </MapAnchor>
                     )}

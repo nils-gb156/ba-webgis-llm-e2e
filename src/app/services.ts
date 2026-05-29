@@ -126,7 +126,8 @@ export class MainMapProvider implements MapConfigProvider {
                             },
                             crossOrigin: "anonymous",
                             serverType: "geoserver"
-                        })
+                        }),
+                        properties: { title: "UVI Stations" }
                     }),
                     attributes: {
                         legend: {
