@@ -10,6 +10,8 @@ import { TemperatureLegend } from "./styles/TemperatureLegend";
 import { PrecipitationLegend } from "./styles/PrecipitationLegend";
 import { CloudsLegend } from "./styles/CloudsLegend";
 import { UviStationsLegend } from "./styles/UviStationsLegend";
+import { UvIndexLegend } from "./styles/UvIndexLegend";
+import { EucosStationsLegend } from "./styles/EucosStationsLegend";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import TileWMS from "ol/source/TileWMS";
@@ -62,6 +64,36 @@ export class MainMapProvider implements MapConfigProvider {
                         properties: { title: "OpenStreetMap" }
                     }),
                     isBaseLayer: true
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "UV-Index",
+                    visible: false,
+                    olLayer: new TileLayer({
+                        source: new TileWMS({
+                            url: "https://maps.dwd.de/geoserver/dwd/wms",
+                            params: {
+                                CRS: "EPSG:4326",
+                                dpiMode: "7",
+                                featureCount: "10",
+                                FORMAT: "image/png",
+                                LAYERS: "UVIndex",
+                                STYLES: "",
+                                temporalSource: "provider",
+                                timeDimensionExtent:
+                                    "2026-05-30T00:00:00.000Z/2026-06-02T00:00:00.000Z/P1D",
+                                tilePixelRatio: "0"
+                            },
+                            crossOrigin: "anonymous",
+                            serverType: "geoserver"
+                        }),
+                        properties: { title: "UV-Index" }
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: UvIndexLegend
+                        }
+                    }
                 }),
                 layerFactory.create({
                     type: SimpleLayer,
@@ -122,7 +154,7 @@ export class MainMapProvider implements MapConfigProvider {
                 }),
                 layerFactory.create({
                     type: SimpleLayer,
-                    title: "UVI Stations",
+                    title: "UV-Index Stations",
                     visible: true,
                     olLayer: new TileLayer({
                         source: new TileWMS({
@@ -139,11 +171,38 @@ export class MainMapProvider implements MapConfigProvider {
                             crossOrigin: "anonymous",
                             serverType: "geoserver"
                         }),
-                        properties: { title: "UVI Stations" }
+                        properties: { title: "UV-Index Stations" }
                     }),
                     attributes: {
                         legend: {
                             Component: UviStationsLegend
+                        }
+                    }
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
+                    title: "EUCOS Ground Stations",
+                    visible: true,
+                    olLayer: new TileLayer({
+                        source: new TileWMS({
+                            url: "https://maps.dwd.de/geoserver/dwd/wms",
+                            params: {
+                                CRS: "EPSG:3857",
+                                dpiMode: "7",
+                                featureCount: "10",
+                                FORMAT: "image/png",
+                                LAYERS: "EUCOS_surface_stations",
+                                STYLES: "",
+                                tilePixelRatio: "0"
+                            },
+                            crossOrigin: "anonymous",
+                            serverType: "geoserver"
+                        }),
+                        properties: { title: "EUCOS Ground Stations" }
+                    }),
+                    attributes: {
+                        legend: {
+                            Component: EucosStationsLegend
                         }
                     }
                 })
