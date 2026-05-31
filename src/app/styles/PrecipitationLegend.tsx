@@ -28,8 +28,6 @@ function buildGradient() {
 }
 
 export function PrecipitationLegend({ layer }: LegendItemComponentProps) {
-    const min = Precipitation_STOPS[0]?.value ?? 0;
-    const max = Precipitation_STOPS[Precipitation_STOPS.length - 1]?.value ?? 0;
     const labels = [0, 50, 100, 150];
 
     function formatLabel(value: number) {
