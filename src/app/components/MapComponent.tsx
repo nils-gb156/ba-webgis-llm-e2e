@@ -334,32 +334,45 @@ export function MapComponent() {
                                 boxShadow="lg"
                                 aria-label="Map controls"
                                 w="400px"
+                                maxH="calc(100vh - 100px)"
+                                display="flex"
+                                flexDirection="column"
                             >
                                 {tocIsActive && (
-                                    <TitledSection
-                                        title={
-                                            <SectionHeading size="md">
-                                                Layer Switcher
-                                            </SectionHeading>
-                                        }
-                                    >
-                                        <Toc
-                                            showTools={true}
-                                            basemapSwitcherProps={{
-                                                allowSelectingEmptyBasemap: true
-                                            }}
-                                        />
-                                    </TitledSection>
+                                    <Box flexShrink={0}>
+                                        <TitledSection
+                                            title={
+                                                <SectionHeading size="md">
+                                                    Layer Switcher
+                                                </SectionHeading>
+                                            }
+                                        >
+                                            <Toc
+                                                showTools={true}
+                                                basemapSwitcherProps={{
+                                                    allowSelectingEmptyBasemap: true
+                                                }}
+                                            />
+                                        </TitledSection>
+                                    </Box>
                                 )}
-                                {tocIsActive && legendIsActive && <Separator my={3} />}
+                                {tocIsActive && legendIsActive && (
+                                    <Box flexShrink={0}>
+                                        <Separator my={3} />
+                                    </Box>
+                                )}
                                 {legendIsActive && (
-                                    <TitledSection
-                                        title={<SectionHeading size="md">Legend</SectionHeading>}
-                                    >
-                                        <Box maxH="450px" overflowY="auto">
-                                            <Legend showBaseLayers={false} />
-                                        </Box>
-                                    </TitledSection>
+                                    <Box display="flex" flexDirection="column" flex="1" minH="0">
+                                        <TitledSection
+                                            title={
+                                                <SectionHeading size="md">Legend</SectionHeading>
+                                            }
+                                        >
+                                            <Box overflowY="auto" flex="1" minH="0">
+                                                <Legend showBaseLayers={false} />
+                                            </Box>
+                                        </TitledSection>
+                                    </Box>
                                 )}
                             </Box>
                         </MapAnchor>
