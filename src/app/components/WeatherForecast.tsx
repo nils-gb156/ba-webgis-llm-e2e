@@ -32,16 +32,21 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     const [locationLabel, setLocationLabel] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const lat = coordinate?.[0];
+    const lon = coordinate?.[1];
+
     useEffect(() => {
-        if (!coordinate || !apiKey) {
+        if (lat == null || lon == null || !apiKey) {
             setForecast([]);
             setLocationLabel(null);
             setError(null);
             return;
         }
-        const [lat, lon] = coordinate;
+
+        const controller = new AbortController();
         fetch(
-            `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&cnt=24`
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&cnt=24`,
+            { signal: controller.signal }
         )
             .then((res) => res.json())
             .then((data) => {
@@ -61,12 +66,17 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                     setError(null);
                 }
             })
-            .catch(() => {
+            .catch((err: unknown) => {
+                if (err instanceof Error && err.name === "AbortError") return;
                 setForecast([]);
                 setLocationLabel(null);
                 setError("Fehler beim Laden der Wetterdaten");
             });
-    }, [coordinate, apiKey]);
+
+        return () => {
+            controller.abort();
+        };
+    }, [lat, lon, apiKey]);
 
     if (error) {
         return <p>{error}</p>;
@@ -87,7 +97,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                 </Text>
             )}
             <Box
-                maxHeight="500px"
+                maxHeight="300px"
                 overflowY="auto"
                 border="1px solid"
                 borderColor="gray.200"

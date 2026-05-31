@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { useEffect, useState, useId } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { Box, Flex, Separator } from "@chakra-ui/react";
 import { DefaultMapProvider, MapAnchor, MapContainer, useMapModel } from "@open-pioneer/map";
 import { ToolButton } from "@open-pioneer/map-ui-components";
@@ -12,6 +12,7 @@ import { Legend } from "@open-pioneer/legend";
 import { Measurement } from "@open-pioneer/measurement";
 import { InfoPanel } from "./InfoPanel";
 import type { UviFeatureInfo } from "./UviStationInfo";
+import type { EucosFeatureInfo } from "./EucosStationInfo";
 import { GeocoderSearch } from "./GeocoderSearch";
 import { Point } from "ol/geom";
 import { transform } from "ol/proj";
@@ -20,7 +21,8 @@ import type MapBrowserEvent from "ol/MapBrowserEvent";
 import type BaseEvent from "ol/events/Event";
 
 const MAP_ID = "main";
-const UVI_LAYER_TITLE = "UVI Stations";
+const UVI_LAYER_TITLE = "UV-Index Stations";
+const EUCOS_LAYER_TITLE = "EUCOS Ground Stations";
 
 function findLayerByTitle(layerOrGroup: unknown, title: string): unknown | undefined {
     const layer = layerOrGroup as { get?: (key: string) => unknown; getLayers?: () => unknown };
@@ -51,6 +53,25 @@ export function MapComponent() {
         { coordinate: [number, number]; mapCoordinate: [number, number] } | undefined
     >(undefined);
     const [uviFeatureInfo, setUviFeatureInfo] = useState<UviFeatureInfo>({ status: "idle" });
+    const [eucosFeatureInfo, setEucosFeatureInfo] = useState<EucosFeatureInfo>({ status: "idle" });
+    const uviSourceRef = useRef<TileWMS | null>(null);
+    const eucosSourceRef = useRef<TileWMS | null>(null);
+
+    useEffect(() => {
+        if (!map) return;
+        uviSourceRef.current =
+            (
+                findLayerByTitle(map.olMap, UVI_LAYER_TITLE) as
+                    | { getSource?: () => TileWMS | undefined }
+                    | undefined
+            )?.getSource?.() ?? null;
+        eucosSourceRef.current =
+            (
+                findLayerByTitle(map.olMap, EUCOS_LAYER_TITLE) as
+                    | { getSource?: () => TileWMS | undefined }
+                    | undefined
+            )?.getSource?.() ?? null;
+    }, [map]);
 
     function toggleToc() {
         setTocIsActive(!tocIsActive);
@@ -132,29 +153,20 @@ export function MapComponent() {
             return;
         }
 
-        let isCancelled = false;
+        const source = uviSourceRef.current;
         const view = map.olMap.getView();
         const resolution = view.getResolution();
-        const uviLayer = findLayerByTitle(map.olMap, UVI_LAYER_TITLE) as
-            | { getSource?: () => TileWMS | undefined }
-            | undefined;
-        const source = uviLayer?.getSource?.();
 
         if (!resolution || !source?.getFeatureInfoUrl) {
             setUviFeatureInfo({ status: "error", message: "UVI layer not available." });
             return;
         }
 
-        setUviFeatureInfo({ status: "loading" });
-
         const url = source.getFeatureInfoUrl(
             clickedLocation.mapCoordinate,
             resolution,
             view.getProjection(),
-            {
-                INFO_FORMAT: "application/json",
-                FEATURE_COUNT: "5"
-            }
+            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
         );
 
         if (!url) {
@@ -162,11 +174,13 @@ export function MapComponent() {
             return;
         }
 
-        fetch(url)
+        const controller = new AbortController();
+        setUviFeatureInfo({ status: "loading" });
+
+        const proxiedUrl = url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms");
+        fetch(proxiedUrl, { signal: controller.signal })
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to load station info.");
-                }
+                if (!response.ok) throw new Error("Failed to load station info.");
                 const contentType = response.headers.get("content-type") ?? "";
                 if (contentType.includes("application/json")) {
                     return response.json().then((data) => ({ kind: "json", data }));
@@ -174,10 +188,6 @@ export function MapComponent() {
                 return response.text().then((data) => ({ kind: "text", data }));
             })
             .then((payload) => {
-                if (isCancelled) {
-                    return;
-                }
-
                 if (payload.kind === "json") {
                     const features = Array.isArray(payload.data?.features)
                         ? payload.data.features.map(
@@ -190,24 +200,92 @@ export function MapComponent() {
                               })
                           )
                         : [];
-
                     setUviFeatureInfo(
                         features.length ? { status: "json", features } : { status: "empty" }
                     );
                     return;
                 }
-
                 const text = payload.data?.toString().trim();
                 setUviFeatureInfo(text ? { status: "text", content: text } : { status: "empty" });
             })
-            .catch(() => {
-                if (!isCancelled) {
-                    setUviFeatureInfo({ status: "error", message: "Failed to load station info." });
-                }
+            .catch((err: unknown) => {
+                if (err instanceof Error && err.name === "AbortError") return;
+                setUviFeatureInfo({ status: "error", message: "Failed to load station info." });
             });
 
         return () => {
-            isCancelled = true;
+            controller.abort();
+        };
+    }, [map, clickedLocation]);
+
+    useEffect(() => {
+        if (!map || !clickedLocation) {
+            setEucosFeatureInfo({ status: "idle" });
+            return;
+        }
+
+        const source = eucosSourceRef.current;
+        const view = map.olMap.getView();
+        const resolution = view.getResolution();
+
+        if (!resolution || !source?.getFeatureInfoUrl) {
+            setEucosFeatureInfo({ status: "error", message: "EUCOS layer not available." });
+            return;
+        }
+
+        const url = source.getFeatureInfoUrl(
+            clickedLocation.mapCoordinate,
+            resolution,
+            view.getProjection(),
+            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
+        );
+
+        if (!url) {
+            setEucosFeatureInfo({ status: "empty" });
+            return;
+        }
+
+        const controller = new AbortController();
+        setEucosFeatureInfo({ status: "loading" });
+
+        const proxiedUrl = url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms");
+        fetch(proxiedUrl, { signal: controller.signal })
+            .then((response) => {
+                if (!response.ok) throw new Error("Failed to load station info.");
+                const contentType = response.headers.get("content-type") ?? "";
+                if (contentType.includes("application/json")) {
+                    return response.json().then((data) => ({ kind: "json", data }));
+                }
+                return response.text().then((data) => ({ kind: "text", data }));
+            })
+            .then((payload) => {
+                if (payload.kind === "json") {
+                    const features = Array.isArray(payload.data?.features)
+                        ? payload.data.features.map(
+                              (feature: { id?: string; properties?: unknown }) => ({
+                                  id: feature.id,
+                                  properties:
+                                      feature.properties && typeof feature.properties === "object"
+                                          ? (feature.properties as Record<string, unknown>)
+                                          : {}
+                              })
+                          )
+                        : [];
+                    setEucosFeatureInfo(
+                        features.length ? { status: "json", features } : { status: "empty" }
+                    );
+                    return;
+                }
+                const text = payload.data?.toString().trim();
+                setEucosFeatureInfo(text ? { status: "text", content: text } : { status: "empty" });
+            })
+            .catch((err: unknown) => {
+                if (err instanceof Error && err.name === "AbortError") return;
+                setEucosFeatureInfo({ status: "error", message: "Failed to load station info." });
+            });
+
+        return () => {
+            controller.abort();
         };
     }, [map, clickedLocation]);
 
@@ -304,6 +382,7 @@ export function MapComponent() {
                                 <InfoPanel
                                     coordinate={clickedLocation?.coordinate}
                                     uviFeatureInfo={uviFeatureInfo}
+                                    eucosFeatureInfo={eucosFeatureInfo}
                                 />
                             </Box>
                         </MapAnchor>

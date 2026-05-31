@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 import { Box, Separator, Text } from "@chakra-ui/react";
-import { UVI_ATTRIBUTE_LABELS, UVI_ATTRIBUTE_ORDER } from "./uviAttributes";
+import { EUCOS_ATTRIBUTE_LABELS, EUCOS_ATTRIBUTE_ORDER } from "./eucosAttributes";
 
-export type UviFeatureInfo =
+export type EucosFeatureInfo =
     | { status: "idle" }
     | { status: "loading" }
     | { status: "empty" }
@@ -11,8 +11,8 @@ export type UviFeatureInfo =
     | { status: "text"; content: string }
     | { status: "json"; features: { id?: string; properties: Record<string, unknown> }[] };
 
-export interface UviStationInfoProps {
-    uviFeatureInfo?: UviFeatureInfo;
+export interface EucosStationInfoProps {
+    eucosFeatureInfo?: EucosFeatureInfo;
 }
 
 function formatValue(value: unknown): string {
@@ -29,16 +29,16 @@ function formatValue(value: unknown): string {
     }
 }
 
-export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
-    if (!uviFeatureInfo || uviFeatureInfo.status === "idle") {
+export function EucosStationInfo({ eucosFeatureInfo }: EucosStationInfoProps) {
+    if (!eucosFeatureInfo || eucosFeatureInfo.status === "idle") {
         return (
             <Text fontSize="sm" color="gray.600">
-                Click on a UVI station to load station info.
+                Click on a EUCOS station to load station info.
             </Text>
         );
     }
 
-    if (uviFeatureInfo.status === "loading") {
+    if (eucosFeatureInfo.status === "loading") {
         return (
             <Text fontSize="sm" color="gray.600">
                 Loading station info...
@@ -46,15 +46,15 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
         );
     }
 
-    if (uviFeatureInfo.status === "error") {
+    if (eucosFeatureInfo.status === "error") {
         return (
             <Text fontSize="sm" color="red.600">
-                {uviFeatureInfo.message}
+                {eucosFeatureInfo.message}
             </Text>
         );
     }
 
-    if (uviFeatureInfo.status === "empty") {
+    if (eucosFeatureInfo.status === "empty") {
         return (
             <Text fontSize="sm" color="gray.600">
                 No station at this location.
@@ -62,10 +62,10 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
         );
     }
 
-    if (uviFeatureInfo.status === "text") {
+    if (eucosFeatureInfo.status === "text") {
         return (
             <Text fontSize="sm" whiteSpace="pre-wrap">
-                {uviFeatureInfo.content}
+                {eucosFeatureInfo.content}
             </Text>
         );
     }
@@ -79,14 +79,14 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
             maxHeight="260px"
             overflowY="auto"
         >
-            {uviFeatureInfo.features.map((feature, featureIndex) => (
+            {eucosFeatureInfo.features.map((feature, featureIndex) => (
                 <Box key={feature.id ?? featureIndex}>
                     {Object.entries(feature.properties).length ? (
-                        UVI_ATTRIBUTE_ORDER.filter((key) => key in feature.properties).map(
+                        EUCOS_ATTRIBUTE_ORDER.filter((key) => key in feature.properties).map(
                             (key) => (
                                 <Text key={key} fontSize="sm">
                                     <Text as="span" fontWeight="semibold">
-                                        {UVI_ATTRIBUTE_LABELS[key] ?? key}:
+                                        {EUCOS_ATTRIBUTE_LABELS[key] ?? key}:
                                     </Text>{" "}
                                     {formatValue(feature.properties[key])}
                                 </Text>
@@ -97,7 +97,7 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
                             No attribute data available.
                         </Text>
                     )}
-                    {featureIndex < uviFeatureInfo.features.length - 1 && <Separator my={2} />}
+                    {featureIndex < eucosFeatureInfo.features.length - 1 && <Separator my={2} />}
                 </Box>
             ))}
         </Box>
