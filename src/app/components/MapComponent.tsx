@@ -54,23 +54,54 @@ export function MapComponent() {
     >(undefined);
     const [uviFeatureInfo, setUviFeatureInfo] = useState<UviFeatureInfo>({ status: "idle" });
     const [eucosFeatureInfo, setEucosFeatureInfo] = useState<EucosFeatureInfo>({ status: "idle" });
+    const [uviVisible, setUviVisible] = useState(true);
+    const [eucosVisible, setEucosVisible] = useState(true);
     const uviSourceRef = useRef<TileWMS | null>(null);
     const eucosSourceRef = useRef<TileWMS | null>(null);
+    const uviLayerRef = useRef<{
+        getVisible?: () => boolean;
+        on?: (event: string, handler: () => void) => void;
+        un?: (event: string, handler: () => void) => void;
+    } | null>(null);
+    const eucosLayerRef = useRef<{
+        getVisible?: () => boolean;
+        on?: (event: string, handler: () => void) => void;
+        un?: (event: string, handler: () => void) => void;
+    } | null>(null);
 
     useEffect(() => {
         if (!map) return;
-        uviSourceRef.current =
-            (
-                findLayerByTitle(map.olMap, UVI_LAYER_TITLE) as
-                    | { getSource?: () => TileWMS | undefined }
-                    | undefined
-            )?.getSource?.() ?? null;
-        eucosSourceRef.current =
-            (
-                findLayerByTitle(map.olMap, EUCOS_LAYER_TITLE) as
-                    | { getSource?: () => TileWMS | undefined }
-                    | undefined
-            )?.getSource?.() ?? null;
+        type OlLayer = {
+            getSource?: () => TileWMS | undefined;
+            getVisible?: () => boolean;
+            on?: (event: string, handler: () => void) => void;
+            un?: (event: string, handler: () => void) => void;
+        };
+        const uviLayer = findLayerByTitle(map.olMap, UVI_LAYER_TITLE) as OlLayer | undefined;
+        uviSourceRef.current = uviLayer?.getSource?.() ?? null;
+        uviLayerRef.current = uviLayer ?? null;
+        setUviVisible(uviLayer?.getVisible?.() ?? true);
+
+        const eucosLayer = findLayerByTitle(map.olMap, EUCOS_LAYER_TITLE) as OlLayer | undefined;
+        eucosSourceRef.current = eucosLayer?.getSource?.() ?? null;
+        eucosLayerRef.current = eucosLayer ?? null;
+        setEucosVisible(eucosLayer?.getVisible?.() ?? true);
+    }, [map]);
+
+    useEffect(() => {
+        const uviLayer = uviLayerRef.current;
+        const eucosLayer = eucosLayerRef.current;
+
+        const onUviChange = () => setUviVisible(uviLayer?.getVisible?.() ?? true);
+        const onEucosChange = () => setEucosVisible(eucosLayer?.getVisible?.() ?? true);
+
+        uviLayer?.on?.("change:visible", onUviChange);
+        eucosLayer?.on?.("change:visible", onEucosChange);
+
+        return () => {
+            uviLayer?.un?.("change:visible", onUviChange);
+            eucosLayer?.un?.("change:visible", onEucosChange);
+        };
     }, [map]);
 
     function toggleToc() {
@@ -136,19 +167,15 @@ export function MapComponent() {
             return;
         }
 
-        const highlight = (
-            map as unknown as {
-                highlight?: (geometries: Point[]) => { destroy: () => void };
-            }
-        ).highlight?.([new Point(clickedLocation.mapCoordinate)]);
+        const highlight = map.highlights.add([new Point(clickedLocation.mapCoordinate)]);
 
         return () => {
-            highlight?.destroy();
+            highlight.destroy();
         };
     }, [map, clickedLocation]);
 
     useEffect(() => {
-        if (!map || !clickedLocation) {
+        if (!map || !clickedLocation || !uviVisible) {
             setUviFeatureInfo({ status: "idle" });
             return;
         }
@@ -166,7 +193,7 @@ export function MapComponent() {
             clickedLocation.mapCoordinate,
             resolution,
             view.getProjection(),
-            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
+            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "20" }
         );
 
         if (!url) {
@@ -216,10 +243,10 @@ export function MapComponent() {
         return () => {
             controller.abort();
         };
-    }, [map, clickedLocation]);
+    }, [map, clickedLocation, uviVisible]);
 
     useEffect(() => {
-        if (!map || !clickedLocation) {
+        if (!map || !clickedLocation || !eucosVisible) {
             setEucosFeatureInfo({ status: "idle" });
             return;
         }
@@ -237,7 +264,7 @@ export function MapComponent() {
             clickedLocation.mapCoordinate,
             resolution,
             view.getProjection(),
-            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
+            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "20" }
         );
 
         if (!url) {
@@ -287,7 +314,7 @@ export function MapComponent() {
         return () => {
             controller.abort();
         };
-    }, [map, clickedLocation]);
+    }, [map, clickedLocation, eucosVisible]);
 
     if (!map) {
         return null;

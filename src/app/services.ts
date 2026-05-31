@@ -84,7 +84,6 @@ export class MainMapProvider implements MapConfigProvider {
                                     "2026-05-30T00:00:00.000Z/2026-06-02T00:00:00.000Z/P1D",
                                 tilePixelRatio: "0"
                             },
-                            crossOrigin: "anonymous",
                             serverType: "geoserver"
                         }),
                         properties: { title: "UV-Index" }
@@ -168,7 +167,6 @@ export class MainMapProvider implements MapConfigProvider {
                                 STYLES: "",
                                 tilePixelRatio: "0"
                             },
-                            crossOrigin: "anonymous",
                             serverType: "geoserver"
                         }),
                         properties: { title: "UV-Index Stations" }
@@ -195,7 +193,6 @@ export class MainMapProvider implements MapConfigProvider {
                                 STYLES: "",
                                 tilePixelRatio: "0"
                             },
-                            crossOrigin: "anonymous",
                             serverType: "geoserver"
                         }),
                         properties: { title: "EUCOS Ground Stations" }
