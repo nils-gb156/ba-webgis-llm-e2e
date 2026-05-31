@@ -44,6 +44,18 @@ export class MainMapProvider implements MapConfigProvider {
                 }),
                 layerFactory.create({
                     type: SimpleLayer,
+                    title: "Carto Dark",
+                    olLayer: new TileLayer({
+                        source: new XYZ({
+                            url: "https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            crossOrigin: "anonymous"
+                        }),
+                        properties: { title: "Carto Dark" }
+                    }),
+                    isBaseLayer: true
+                }),
+                layerFactory.create({
+                    type: SimpleLayer,
                     title: "OpenStreetMap",
                     olLayer: new TileLayer({
                         source: new OSM(),
