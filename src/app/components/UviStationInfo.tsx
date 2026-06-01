@@ -76,7 +76,7 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
             borderColor="gray.200"
             borderRadius="md"
             p={2}
-            maxHeight="260px"
+            maxHeight="200px"
             overflowY="auto"
         >
             {uviFeatureInfo.features.map((feature, featureIndex) => (

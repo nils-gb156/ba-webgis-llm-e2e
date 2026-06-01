@@ -76,7 +76,7 @@ export function EucosStationInfo({ eucosFeatureInfo }: EucosStationInfoProps) {
             borderColor="gray.200"
             borderRadius="md"
             p={2}
-            maxHeight="260px"
+            maxHeight="200px"
             overflowY="auto"
         >
             {eucosFeatureInfo.features.map((feature, featureIndex) => (
