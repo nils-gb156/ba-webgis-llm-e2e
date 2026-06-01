@@ -97,7 +97,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     return (
         <>
             {locationLabel && (
-                <Text fontSize="sm" color="gray.600" mb={2}>
+                <Text fontSize="sm" mb={2}>
                     <Text as="span" fontWeight="semibold">
                         Location:
                     </Text>{" "}

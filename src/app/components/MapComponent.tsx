@@ -193,7 +193,7 @@ export function MapComponent() {
             clickedLocation.mapCoordinate,
             resolution,
             view.getProjection(),
-            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "20" }
+            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
         );
 
         if (!url) {
@@ -264,7 +264,7 @@ export function MapComponent() {
             clickedLocation.mapCoordinate,
             resolution,
             view.getProjection(),
-            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "20" }
+            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
         );
 
         if (!url) {
