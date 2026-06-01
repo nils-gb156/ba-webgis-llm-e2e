@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { Box, Separator, Text } from "@chakra-ui/react";
+import { Box, Separator, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { UVI_ATTRIBUTE_LABELS, UVI_ATTRIBUTE_ORDER } from "./uviAttributes";
 
 export type UviFeatureInfo =
@@ -64,9 +64,11 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
 
     if (uviFeatureInfo.status === "text") {
         return (
-            <Text fontSize="sm" whiteSpace="pre-wrap">
-                {uviFeatureInfo.content}
-            </Text>
+            <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={3} bg="gray.50">
+                <Text fontSize="sm" whiteSpace="pre-wrap">
+                    {uviFeatureInfo.content}
+                </Text>
+            </Box>
         );
     }
 
@@ -75,31 +77,36 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
             border="1px solid"
             borderColor="gray.200"
             borderRadius="md"
-            p={2}
+            p={3}
             maxHeight="200px"
             overflowY="auto"
+            bg="gray.50"
         >
-            {uviFeatureInfo.features.map((feature, featureIndex) => (
-                <Box key={feature.id ?? featureIndex}>
-                    {Object.entries(feature.properties).length ? (
-                        UVI_ATTRIBUTE_ORDER.filter((key) => key in feature.properties).map(
-                            (key) => (
-                                <Text key={key} fontSize="sm">
-                                    <Text as="span" fontWeight="semibold">
-                                        {UVI_ATTRIBUTE_LABELS[key] ?? key}:
-                                    </Text>{" "}
-                                    {formatValue(feature.properties[key])}
-                                </Text>
-                            )
-                        )
-                    ) : (
-                        <Text fontSize="sm" color="gray.600">
-                            No attribute data available.
-                        </Text>
-                    )}
-                    {featureIndex < uviFeatureInfo.features.length - 1 && <Separator my={2} />}
-                </Box>
-            ))}
+            <Stack gap={3}>
+                {uviFeatureInfo.features.map((feature, featureIndex) => (
+                    <Box key={feature.id ?? featureIndex}>
+                        {Object.entries(feature.properties).length ? (
+                            <SimpleGrid columns={2} columnGap={4} rowGap={1}>
+                                {UVI_ATTRIBUTE_ORDER.filter(
+                                    (key) => key in feature.properties
+                                ).flatMap((key) => [
+                                    <Text key={`${key}-label`} fontSize="sm" color="gray.600">
+                                        {UVI_ATTRIBUTE_LABELS[key] ?? key}
+                                    </Text>,
+                                    <Text key={`${key}-value`} fontSize="sm" wordBreak="break-word">
+                                        {formatValue(feature.properties[key])}
+                                    </Text>
+                                ])}
+                            </SimpleGrid>
+                        ) : (
+                            <Text fontSize="sm" color="gray.600">
+                                No attribute data available.
+                            </Text>
+                        )}
+                        {featureIndex < uviFeatureInfo.features.length - 1 && <Separator mt={3} />}
+                    </Box>
+                ))}
+            </Stack>
         </Box>
     );
 }

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 import { useEffect, useState } from "react";
-import { Box, Separator, Text } from "@chakra-ui/react";
+import { Box, Separator, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 
 export interface WeatherForecastProps {
     coordinate?: [number, number];
@@ -79,11 +79,19 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     }, [lat, lon, apiKey]);
 
     if (error) {
-        return <p>{error}</p>;
+        return (
+            <Text fontSize="sm" color="red.600">
+                {error}
+            </Text>
+        );
     }
 
     if (!forecast.length) {
-        return <p>Loading...</p>;
+        return (
+            <Text fontSize="sm" color="gray.600">
+                Loading...
+            </Text>
+        );
     }
 
     return (
@@ -102,49 +110,40 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                 border="1px solid"
                 borderColor="gray.200"
                 borderRadius="md"
-                p={2}
+                p={3}
+                bg="gray.50"
             >
-                {forecast.map((entry: ForecastEntry, idx: number) => (
-                    <Box key={entry.dt}>
-                        <Text fontSize="sm">
-                            <Text as="span" fontWeight="semibold">
-                                Datetime:
-                            </Text>{" "}
-                            {entry.dt_txt}
-                        </Text>
-                        <Text fontSize="sm">
-                            <Text as="span" fontWeight="semibold">
-                                Weather:
-                            </Text>{" "}
-                            {entry.weather?.[0]?.description}
-                        </Text>
-                        <Text fontSize="sm">
-                            <Text as="span" fontWeight="semibold">
-                                Temperature:
-                            </Text>{" "}
-                            {entry.main?.temp} °C
-                        </Text>
-                        <Text fontSize="sm">
-                            <Text as="span" fontWeight="semibold">
-                                Humidity:
-                            </Text>{" "}
-                            {entry.main?.humidity} %
-                        </Text>
-                        <Text fontSize="sm">
-                            <Text as="span" fontWeight="semibold">
-                                Wind direction:
-                            </Text>{" "}
-                            {entry.wind?.deg}°
-                        </Text>
-                        <Text fontSize="sm">
-                            <Text as="span" fontWeight="semibold">
-                                Wind speed:
-                            </Text>{" "}
-                            {entry.wind?.speed} m/s
-                        </Text>
-                        {idx < forecast.length - 1 && <Separator my={3} />}
-                    </Box>
-                ))}
+                <Stack gap={4}>
+                    {forecast.map((entry: ForecastEntry, idx: number) => (
+                        <Box key={entry.dt}>
+                            <Text fontSize="sm" fontWeight="semibold">
+                                {entry.dt_txt}
+                            </Text>
+                            <Text fontSize="sm" color="gray.600">
+                                {entry.weather?.[0]?.description}
+                            </Text>
+                            <SimpleGrid columns={2} columnGap={4} rowGap={1} mt={2}>
+                                <Text fontSize="sm" color="gray.600">
+                                    Temperature
+                                </Text>
+                                <Text fontSize="sm">{entry.main?.temp} °C</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                    Humidity
+                                </Text>
+                                <Text fontSize="sm">{entry.main?.humidity} %</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                    Wind direction
+                                </Text>
+                                <Text fontSize="sm">{entry.wind?.deg}°</Text>
+                                <Text fontSize="sm" color="gray.600">
+                                    Wind speed
+                                </Text>
+                                <Text fontSize="sm">{entry.wind?.speed} m/s</Text>
+                            </SimpleGrid>
+                            {idx < forecast.length - 1 && <Separator mt={3} />}
+                        </Box>
+                    ))}
+                </Stack>
             </Box>
         </>
     );

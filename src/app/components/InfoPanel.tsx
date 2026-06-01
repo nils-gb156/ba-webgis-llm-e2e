@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { Box, Separator } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import { TitledSection, SectionHeading } from "@open-pioneer/react-utils";
 import { WeatherForecast } from "./WeatherForecast";
 import { UviStationInfo, type UviFeatureInfo } from "./UviStationInfo";
@@ -19,38 +19,38 @@ export function InfoPanel({ coordinate, uviFeatureInfo, eucosFeatureInfo }: Info
 
     return (
         <TitledSection title={<SectionHeading size="md">Information</SectionHeading>}>
-            <SectionHeading size="sm">Weather Forecast</SectionHeading>
-            <Box mt={2}>
-                {coordinate ? (
-                    <WeatherForecast coordinate={coordinate} />
-                ) : (
-                    <p>Click on the map to load a forecast.</p>
+            <Stack gap={5}>
+                <Box>
+                    <SectionHeading size="sm">Weather Forecast</SectionHeading>
+                    <Box mt={2}>
+                        {coordinate ? (
+                            <WeatherForecast coordinate={coordinate} />
+                        ) : (
+                            <Text fontSize="sm" color="gray.600">
+                                Click on the map to load a forecast.
+                            </Text>
+                        )}
+                    </Box>
+                </Box>
+
+                {showUviInfo && (
+                    <Box>
+                        <SectionHeading size="sm">UV-Index Station</SectionHeading>
+                        <Box mt={2}>
+                            <UviStationInfo uviFeatureInfo={uviFeatureInfo} />
+                        </Box>
+                    </Box>
                 )}
-            </Box>
 
-            {showUviInfo && (
-                <>
-                    <Separator my={3} />
-                    <SectionHeading size="sm" mt={4}>
-                        UV-Index Station
-                    </SectionHeading>
-                    <Box mt={2}>
-                        <UviStationInfo uviFeatureInfo={uviFeatureInfo} />
+                {showEucosInfo && (
+                    <Box>
+                        <SectionHeading size="sm">EUCOS Ground Station</SectionHeading>
+                        <Box mt={2}>
+                            <EucosStationInfo eucosFeatureInfo={eucosFeatureInfo} />
+                        </Box>
                     </Box>
-                </>
-            )}
-
-            {showEucosInfo && (
-                <>
-                    <Separator my={3} />
-                    <SectionHeading size="sm" mt={4}>
-                        EUCOS Ground Station
-                    </SectionHeading>
-                    <Box mt={2}>
-                        <EucosStationInfo eucosFeatureInfo={eucosFeatureInfo} />
-                    </Box>
-                </>
-            )}
+                )}
+            </Stack>
         </TitledSection>
     );
 }
