@@ -26,6 +26,21 @@ interface ForecastCity {
     country?: string;
 }
 
+const DATE_TIME_FORMAT = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit"
+});
+
+function formatForecastDate(unixSeconds: number, fallback: string): string {
+    if (!Number.isFinite(unixSeconds)) {
+        return fallback;
+    }
+    return DATE_TIME_FORMAT.format(new Date(unixSeconds * 1000));
+}
+
 export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const [forecast, setForecast] = useState<ForecastEntry[]>([]);
@@ -117,7 +132,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                     {forecast.map((entry: ForecastEntry, idx: number) => (
                         <Box key={entry.dt}>
                             <Text fontSize="sm" fontWeight="semibold">
-                                {entry.dt_txt}
+                                {formatForecastDate(entry.dt, entry.dt_txt)}
                             </Text>
                             <Text fontSize="sm" color="gray.600">
                                 {entry.weather?.[0]?.description}
