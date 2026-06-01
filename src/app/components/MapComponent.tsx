@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
-import { useEffect, useRef, useState, useId } from "react";
+import React, { useEffect, useRef, useState, useId } from "react";
 import { Box, Flex, Separator } from "@chakra-ui/react";
 import { DefaultMapProvider, MapAnchor, MapContainer, useMapModel } from "@open-pioneer/map";
 import { ToolButton } from "@open-pioneer/map-ui-components";
@@ -49,6 +49,13 @@ export function MapComponent() {
     const [infoPanelIsActive, setInfoPanelisActive] = useState<boolean>(true);
     const [measurementIsActive, setMeasurementIsActive] = useState<boolean>(false);
     const measurementTitleId = useId();
+    const [measurePos, setMeasurePos] = useState<{ x: number; y: number } | null>(null);
+    const measureDragRef = useRef<{
+        startX: number;
+        startY: number;
+        origX: number;
+        origY: number;
+    } | null>(null);
     const [clickedLocation, setClickedLocation] = useState<
         { coordinate: [number, number]; mapCoordinate: [number, number] } | undefined
     >(undefined);
@@ -118,6 +125,38 @@ export function MapComponent() {
 
     function toggleMeasurement() {
         setMeasurementIsActive(!measurementIsActive);
+    }
+
+    function handleMeasureDragStart(e: React.PointerEvent<HTMLDivElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        const panel = (e.currentTarget as HTMLElement).closest(
+            "[data-measurement-panel]"
+        ) as HTMLElement | null;
+        const rect = panel?.getBoundingClientRect();
+        if (!rect) return;
+        measureDragRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            origX: rect.left,
+            origY: rect.top
+        };
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    }
+
+    function handleMeasureDragMove(e: React.PointerEvent<HTMLDivElement>) {
+        if (!measureDragRef.current) return;
+        e.preventDefault();
+        const dx = e.clientX - measureDragRef.current.startX;
+        const dy = e.clientY - measureDragRef.current.startY;
+        setMeasurePos({
+            x: measureDragRef.current.origX + dx,
+            y: measureDragRef.current.origY + dy
+        });
+    }
+
+    function handleMeasureDragEnd() {
+        measureDragRef.current = null;
     }
 
     useEffect(() => {
@@ -447,8 +486,17 @@ export function MapComponent() {
                             />
                         </Box>
                     </MapAnchor>
-                    <MapAnchor position="bottom-right" horizontalGap={600} verticalGap={10}>
-                        {measurementIsActive && (
+                    {measurementIsActive && (
+                        <div
+                            data-measurement-panel=""
+                            style={{
+                                position: "fixed",
+                                ...(measurePos
+                                    ? { left: measurePos.x, top: measurePos.y }
+                                    : { right: 620, bottom: 10 }),
+                                zIndex: 1000
+                            }}
+                        >
                             <Box
                                 backgroundColor="white"
                                 borderWidth="1px"
@@ -460,21 +508,29 @@ export function MapComponent() {
                                 <Box role="dialog" aria-labelledby={measurementTitleId}>
                                     <TitledSection
                                         title={
-                                            <SectionHeading
-                                                id={measurementTitleId}
-                                                size="md"
-                                                mb={2}
+                                            <Box
+                                                cursor="grab"
+                                                userSelect="none"
+                                                onPointerDown={handleMeasureDragStart}
+                                                onPointerMove={handleMeasureDragMove}
+                                                onPointerUp={handleMeasureDragEnd}
                                             >
-                                                Measurement
-                                            </SectionHeading>
+                                                <SectionHeading
+                                                    id={measurementTitleId}
+                                                    size="md"
+                                                    mb={2}
+                                                >
+                                                    Measurement
+                                                </SectionHeading>
+                                            </Box>
                                         }
                                     >
                                         <Measurement />
                                     </TitledSection>
                                 </Box>
                             </Box>
-                        )}
-                    </MapAnchor>
+                        </div>
+                    )}
                 </MapContainer>
             </DefaultMapProvider>
         </div>
