@@ -20,6 +20,23 @@ import XYZ from "ol/source/XYZ";
 export const MAP_ID = "main";
 const OPEN_WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
+/**
+ * Builds the WMS time dimension extent for the DWD UV-Index layer dynamically.
+ *
+ * The extent spans from the start of the current day (UTC) to two days ahead
+ * with a daily interval (P1D), so the demo always requests an up-to-date,
+ * valid time range instead of a fixed (and eventually stale) date.
+ */
+function buildUvIndexTimeExtent(daysAhead = 2): string {
+    const start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + daysAhead);
+
+    return `${start.toISOString()}/${end.toISOString()}/P1D`;
+}
+
 export class MainMapProvider implements MapConfigProvider {
     mapId = MAP_ID;
 
@@ -80,8 +97,7 @@ export class MainMapProvider implements MapConfigProvider {
                                 LAYERS: "UVIndex",
                                 STYLES: "",
                                 temporalSource: "provider",
-                                timeDimensionExtent:
-                                    "2026-05-30T00:00:00.000Z/2026-06-02T00:00:00.000Z/P1D",
+                                timeDimensionExtent: buildUvIndexTimeExtent(),
                                 tilePixelRatio: "0"
                             },
                             serverType: "geoserver"
