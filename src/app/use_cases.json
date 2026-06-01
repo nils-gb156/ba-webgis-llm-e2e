@@ -1,0 +1,200 @@
+{
+    "use_cases": [
+        {
+            "id": 1,
+            "title": "Show and hide the layer switcher via the toolbar button",
+            "description": "The user toggles the layer switcher (TOC) panel off and on using the toolbar button.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The layer switcher (TOC) is initially visible."
+            ],
+            "steps": [
+                "The user clicks the 'Layer Switcher' button in the toolbar to hide the panel.",
+                "The user clicks the 'Layer Switcher' button again to show the panel."
+            ],
+            "expected_result": [
+                "After the first click, the layer switcher panel is no longer visible.",
+                "After the second click, the layer switcher panel is visible again."
+            ],
+            "complexity": "easy"
+        },
+        {
+            "id": 2,
+            "title": "Show and hide the legend via the toolbar button",
+            "description": "The user toggles the legend panel off and on using the toolbar button.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The legend panel is initially visible."
+            ],
+            "steps": [
+                "The user clicks the 'Legend Switcher' button in the toolbar to hide the legend.",
+                "The user clicks the 'Legend Switcher' button again to show the legend."
+            ],
+            "expected_result": [
+                "After the first click, the legend panel is no longer visible.",
+                "After the second click, the legend panel is visible again."
+            ],
+            "complexity": "easy"
+        },
+        {
+            "id": 3,
+            "title": "Switch the base map from Carto Light to OpenStreetMap",
+            "description": "The user changes the active base map in the layer switcher.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The Carto Light base map is active by default.",
+                "The layer switcher (TOC) is visible."
+            ],
+            "steps": [
+                "The user opens the base map selector in the layer switcher.",
+                "The user selects 'OpenStreetMap' as the base map."
+            ],
+            "expected_result": [
+                "The OpenStreetMap base map is selected.",
+                "The Carto Light base map is no longer selected."
+            ],
+            "complexity": "easy"
+        },
+        {
+            "id": 4,
+            "title": "Toggle the visibility of the Temperature overlay",
+            "description": "The user hides and re-shows the Temperature overlay layer using its visibility toggle in the layer switcher.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The layer switcher (TOC) is visible.",
+                "The Temperature overlay layer is initially visible."
+            ],
+            "steps": [
+                "The user clicks the visibility toggle of the Temperature overlay layer to hide it.",
+                "The user clicks the visibility toggle of the Temperature overlay layer again to show it."
+            ],
+            "expected_result": [
+                "After the first click, the Temperature overlay layer toggle is in the disabled (unchecked) state.",
+                "After the second click, the Temperature overlay layer toggle is in the enabled (checked) state again."
+            ],
+            "complexity": "easy"
+        },
+        {
+            "id": 5,
+            "title": "Activate the UV-Index overlay and verify it is rendered on the map",
+            "description": "The user activates the initially hidden UV-Index overlay and verifies that the layer is requested and rendered on the map.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The layer switcher (TOC) is visible.",
+                "The UV-Index overlay layer is initially hidden."
+            ],
+            "steps": [
+                "The user clicks the visibility toggle of the UV-Index overlay layer to show it.",
+                "The user waits for the map to load the layer tiles."
+            ],
+            "expected_result": [
+                "The UV-Index overlay layer toggle is in the enabled (checked) state.",
+                "A WMS GetMap request for the UV-Index layer is sent to the DWD geoserver.",
+                "The UV-Index overlay tiles are rendered on the map canvas."
+            ],
+            "complexity": "medium"
+        },
+        {
+            "id": 6,
+            "title": "Activate the Precipitation overlay and verify the legend updates",
+            "description": "The user activates the Precipitation overlay and checks that the legend reflects the newly active layer.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The layer switcher (TOC) and legend are visible.",
+                "The Precipitation overlay layer is initially hidden."
+            ],
+            "steps": [
+                "The user clicks the visibility toggle of the Precipitation overlay layer to show it.",
+                "The user views the legend."
+            ],
+            "expected_result": [
+                "The Precipitation overlay layer toggle is in the enabled (checked) state.",
+                "The legend displays an entry corresponding to the Precipitation layer."
+            ],
+            "complexity": "medium"
+        },
+        {
+            "id": 7,
+            "title": "Search for a place and select a result",
+            "description": "The user searches for a location with the geocoder and navigates the map to the selected result.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The search field (geocoder) is accessible."
+            ],
+            "steps": [
+                "The user clicks the search field.",
+                "The user types a place name (e.g. 'Münster').",
+                "The user waits for the result list to appear.",
+                "The user selects the first result."
+            ],
+            "expected_result": [
+                "A result list with at least one entry is displayed.",
+                "After selecting a result, the result list is closed.",
+                "The map navigates to the selected location."
+            ],
+            "complexity": "medium"
+        },
+        {
+            "id": 8,
+            "title": "Click an map position to show the weather forecast",
+            "description": "The user clicks an position on the map and checks that the weather forecast appears in the info panel.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The info panel is visible.",
+                "The map canvas is interactive.",
+                "No measurement tool is active."
+            ],
+            "steps": [
+                "The user clicks on a position on the map canvas.",
+                "The user waits for the info panel to load the forecast."
+            ],
+            "expected_result": [
+                "The clicked position is highlighted on the map.",
+                "The info panel displays a weather forecast section.",
+                "The forecast contains 24 entries."
+            ],
+            "complexity": "hard"
+        },
+        {
+            "id": 9,
+            "title": "Click a UVI station to show feature info",
+            "description": "The user clicks on a UVI station marker and checks that the WMS GetFeatureInfo result appears in the info panel.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The info panel is visible.",
+                "The UV-Index Stations layer is active (visible by default).",
+                "The map is positioned so at least one UVI station is visible.",
+                "No measurement tool is active."
+            ],
+            "steps": [
+                "The user clicks on a UVI station marker on the map canvas.",
+                "The user waits for the info panel to load the station info."
+            ],
+            "expected_result": [
+                "A WMS GetFeatureInfo request for the UV-Index Stations layer is sent to the DWD geoserver.",
+                "The info panel displays a 'UV-Index Station' section with feature information from the GetFeatureInfo response."
+            ],
+            "complexity": "hard"
+        },
+        {
+            "id": 10,
+            "title": "Measure a distance by drawing a line on the map",
+            "description": "The user activates the measurement tool, draws a line on the map and checks that a measurement result is shown.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The measurement tool is accessible via the toolbar.",
+                "The map canvas is interactive."
+            ],
+            "steps": [
+                "The user clicks the 'Measurement' button in the toolbar to open the measurement panel.",
+                "The user clicks several points on the map canvas to draw a line.",
+                "The user double-clicks to finish the measurement."
+            ],
+            "expected_result": [
+                "The measurement panel is visible.",
+                "The measurement panel displays a length value with a unit."
+            ],
+            "complexity": "hard"
+        }
+    ]
+}
