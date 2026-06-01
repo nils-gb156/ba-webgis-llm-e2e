@@ -12,7 +12,10 @@ export interface InfoPanelProps {
     eucosFeatureInfo?: EucosFeatureInfo;
 }
 
+// Side panel that combines the weather forecast with the UV-Index and EUCOS
+// station details for the currently selected location.
 export function InfoPanel({ coordinate, uviFeatureInfo, eucosFeatureInfo }: InfoPanelProps) {
+    // Only show the station sections when there is actual feature data to display.
     const showUviInfo = uviFeatureInfo?.status === "json" || uviFeatureInfo?.status === "text";
     const showEucosInfo =
         eucosFeatureInfo?.status === "json" || eucosFeatureInfo?.status === "text";

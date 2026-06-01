@@ -26,6 +26,8 @@ interface ForecastCity {
     country?: string;
 }
 
+// Shared formatter instance (created once, not per render) for the forecast
+// timestamps. Uses the browser's locale and time zone.
 const DATE_TIME_FORMAT = new Intl.DateTimeFormat(undefined, {
     weekday: "short",
     day: "2-digit",
@@ -34,6 +36,8 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat(undefined, {
     minute: "2-digit"
 });
 
+// Formats a Unix timestamp (seconds) into a readable local date/time string,
+// falling back to the raw API string if the value is invalid.
 function formatForecastDate(unixSeconds: number, fallback: string): string {
     if (!Number.isFinite(unixSeconds)) {
         return fallback;
@@ -41,6 +45,7 @@ function formatForecastDate(unixSeconds: number, fallback: string): string {
     return DATE_TIME_FORMAT.format(new Date(unixSeconds * 1000));
 }
 
+// Shows a 24-step OpenWeather forecast for the coordinate the user clicked on.
 export function WeatherForecast({ coordinate }: WeatherForecastProps) {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const [forecast, setForecast] = useState<ForecastEntry[]>([]);
@@ -58,6 +63,8 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
             return;
         }
 
+        // Fetch the 24-step forecast for the clicked coordinate; abort the request
+        // if the coordinate changes or the component unmounts.
         const controller = new AbortController();
         fetch(
             `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&cnt=24`,

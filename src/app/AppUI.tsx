@@ -5,6 +5,8 @@ import { MapComponent } from "./components/MapComponent";
 import { Footer } from "./components/Footer";
 
 export function AppUI() {
+    // Root layout: the map fills the available space, the footer sits below it.
+    // Notifier renders global toast/notification messages.
     return (
         <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100%" }}>
             <Notifier />

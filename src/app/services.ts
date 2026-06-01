@@ -18,6 +18,7 @@ import TileWMS from "ol/source/TileWMS";
 import XYZ from "ol/source/XYZ";
 
 export const MAP_ID = "main";
+// API key for the OpenWeatherMap tile layers, injected at build time via Vite.
 const OPEN_WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 /**
@@ -40,6 +41,8 @@ function buildUvIndexTimeExtent(daysAhead = 2): string {
 export class MainMapProvider implements MapConfigProvider {
     mapId = MAP_ID;
 
+    // Defines the map's initial view and all layers: base maps (Carto/OSM),
+    // OpenWeather weather overlays and DWD WMS layers (UV-Index + stations).
     async getMapConfig({ layerFactory }: MapConfigProviderOptions): Promise<MapConfig> {
         return {
             initialView: {

@@ -4,6 +4,8 @@ import { createCustomElement } from "@open-pioneer/runtime";
 import * as appMetadata from "open-pioneer:app";
 import { AppUI } from "./AppUI";
 
+// Entry point: wrap the React app in a <webgis-app> web component so it can be
+// embedded into any HTML page as a custom element.
 const Element = createCustomElement({
     component: AppUI,
     appMetadata

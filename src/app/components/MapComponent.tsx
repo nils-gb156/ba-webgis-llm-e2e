@@ -24,6 +24,9 @@ const MAP_ID = "main";
 const UVI_LAYER_TITLE = "UV-Index Stations";
 const EUCOS_LAYER_TITLE = "EUCOS Ground Stations";
 
+// Recursively walks the (possibly nested) OpenLayers layer tree and returns the
+// first layer whose "title" property matches. Used to locate the WMS station
+// layers without holding direct references to them.
 function findLayerByTitle(layerOrGroup: unknown, title: string): unknown | undefined {
     const layer = layerOrGroup as { get?: (key: string) => unknown; getLayers?: () => unknown };
     if (layer?.get?.("title") === title) {
@@ -42,12 +45,17 @@ function findLayerByTitle(layerOrGroup: unknown, title: string): unknown | undef
     return undefined;
 }
 
+// Main map view and orchestrator: renders the OpenLayers map, the tool buttons,
+// the searchable geocoder and the info/legend/measurement panels, and wires map
+// clicks to weather forecasts and WMS station queries.
 export function MapComponent() {
     const { map } = useMapModel(MAP_ID);
+    // Visibility toggles for the four UI panels (layer switcher, legend, info, measurement).
     const [tocIsActive, setTocIsActive] = useState<boolean>(true);
     const [legendIsActive, setLegendIsActive] = useState<boolean>(true);
     const [infoPanelIsActive, setInfoPanelisActive] = useState<boolean>(true);
     const [measurementIsActive, setMeasurementIsActive] = useState<boolean>(false);
+    // State for the draggable measurement panel.
     const measurementTitleId = useId();
     const [measurePos, setMeasurePos] = useState<{ x: number; y: number } | null>(null);
     const measureDragRef = useRef<{
@@ -56,13 +64,16 @@ export function MapComponent() {
         origX: number;
         origY: number;
     } | null>(null);
+    // The location the user clicked, in both lat/lon and the map's projection.
     const [clickedLocation, setClickedLocation] = useState<
         { coordinate: [number, number]; mapCoordinate: [number, number] } | undefined
     >(undefined);
+    // GetFeatureInfo results for the two WMS station layers.
     const [uviFeatureInfo, setUviFeatureInfo] = useState<UviFeatureInfo>({ status: "idle" });
     const [eucosFeatureInfo, setEucosFeatureInfo] = useState<EucosFeatureInfo>({ status: "idle" });
     const [uviVisible, setUviVisible] = useState(true);
     const [eucosVisible, setEucosVisible] = useState(true);
+    // Cached references to the station layers/sources, populated once the map loads.
     const uviSourceRef = useRef<TileWMS | null>(null);
     const eucosSourceRef = useRef<TileWMS | null>(null);
     const uviLayerRef = useRef<{
@@ -78,6 +89,8 @@ export function MapComponent() {
 
     useEffect(() => {
         if (!map) return;
+        // Once the map is ready, look up the two WMS station layers and cache their
+        // sources/layers in refs so click handlers can query them later.
         type OlLayer = {
             getSource?: () => TileWMS | undefined;
             getVisible?: () => boolean;
@@ -99,6 +112,8 @@ export function MapComponent() {
         const uviLayer = uviLayerRef.current;
         const eucosLayer = eucosLayerRef.current;
 
+        // Keep the local visibility state in sync when the user toggles the
+        // station layers via the layer switcher (TOC).
         const onUviChange = () => setUviVisible(uviLayer?.getVisible?.() ?? true);
         const onEucosChange = () => setEucosVisible(eucosLayer?.getVisible?.() ?? true);
 
@@ -130,6 +145,7 @@ export function MapComponent() {
     function handleMeasureDragStart(e: React.PointerEvent<HTMLDivElement>) {
         e.preventDefault();
         e.stopPropagation();
+        // Record the pointer and panel positions so the panel can follow the cursor.
         const panel = (e.currentTarget as HTMLElement).closest(
             "[data-measurement-panel]"
         ) as HTMLElement | null;
@@ -180,6 +196,8 @@ export function MapComponent() {
                 return;
             }
 
+            // Convert the clicked map coordinate (projected) to lat/lon for the
+            // weather forecast, while keeping the original for WMS queries.
             const [lon, lat] = transform(
                 coordinate as [number, number],
                 map.olMap.getView().getProjection(),
@@ -206,6 +224,8 @@ export function MapComponent() {
             return;
         }
 
+        // Draw a marker at the clicked location and remove it when the location
+        // changes or the component unmounts.
         const highlight = map.highlights.add([new Point(clickedLocation.mapCoordinate)]);
 
         return () => {
@@ -219,6 +239,8 @@ export function MapComponent() {
             return;
         }
 
+        // Query the UV-Index station WMS layer at the clicked location via
+        // GetFeatureInfo and store the result for the info panel.
         const source = uviSourceRef.current;
         const view = map.olMap.getView();
         const resolution = view.getResolution();
@@ -243,6 +265,8 @@ export function MapComponent() {
         const controller = new AbortController();
         setUviFeatureInfo({ status: "loading" });
 
+        // Route the DWD request through the local dev proxy (see vite.config.ts)
+        // to avoid CORS issues.
         const proxiedUrl = url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms");
         fetch(proxiedUrl, { signal: controller.signal })
             .then((response) => {
@@ -290,6 +314,7 @@ export function MapComponent() {
             return;
         }
 
+        // Same GetFeatureInfo query as above, but for the EUCOS ground stations.
         const source = eucosSourceRef.current;
         const view = map.olMap.getView();
         const resolution = view.getResolution();

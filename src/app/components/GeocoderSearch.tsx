@@ -20,6 +20,8 @@ export interface GeocoderSearchProps {
     }) => void;
 }
 
+// Free-text place search backed by the OpenStreetMap Nominatim API. On select
+// it pans/zooms the map to the chosen location and notifies the parent.
 export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
     const [query, setQuery] = useState<string>("");
     const [results, setResults] = useState<NominatimResult[]>([]);
@@ -33,6 +35,8 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
     }, []);
 
     useEffect(() => {
+        // After selecting a result we set the input to its label; skip the search
+        // that this programmatic change would otherwise trigger.
         if (skipNextSearchRef.current) {
             skipNextSearchRef.current = false;
             setResults([]);
@@ -47,6 +51,8 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
             return;
         }
 
+        // Debounce the request (300 ms) and abort it on cleanup so fast typing
+        // does not spam the Nominatim API.
         const controller = new AbortController();
         const timeoutId = window.setTimeout(() => {
             setIsLoading(true);
@@ -87,6 +93,7 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
             return;
         }
 
+        // Animate the map to the selected place (project lat/lon into the map's CRS).
         const view = map.olMap.getView();
         const target = transform([lon, lat], "EPSG:4326", view.getProjection());
         view.animate({ center: target, zoom: Math.max(view.getZoom() ?? 13, 13), duration: 400 });
