@@ -80,7 +80,7 @@ export class MainMapProvider implements MapConfigProvider {
                     type: SimpleLayer,
                     title: "OpenStreetMap",
                     olLayer: new TileLayer({
-                        source: new OSM(),
+                        source: new OSM({ crossOrigin: "anonymous" }),
                         properties: { title: "OpenStreetMap" }
                     }),
                     isBaseLayer: true
@@ -103,7 +103,8 @@ export class MainMapProvider implements MapConfigProvider {
                                 timeDimensionExtent: buildUvIndexTimeExtent(),
                                 tilePixelRatio: "0"
                             },
-                            serverType: "geoserver"
+                            serverType: "geoserver",
+                            crossOrigin: "anonymous"
                         }),
                         properties: { title: "UV-Index" }
                     }),
@@ -186,7 +187,8 @@ export class MainMapProvider implements MapConfigProvider {
                                 STYLES: "",
                                 tilePixelRatio: "0"
                             },
-                            serverType: "geoserver"
+                            serverType: "geoserver",
+                            crossOrigin: "anonymous"
                         }),
                         properties: { title: "UV-Index Stations" }
                     }),
@@ -212,7 +214,8 @@ export class MainMapProvider implements MapConfigProvider {
                                 STYLES: "",
                                 tilePixelRatio: "0"
                             },
-                            serverType: "geoserver"
+                            serverType: "geoserver",
+                            crossOrigin: "anonymous"
                         }),
                         properties: { title: "EUCOS Ground Stations" }
                     }),

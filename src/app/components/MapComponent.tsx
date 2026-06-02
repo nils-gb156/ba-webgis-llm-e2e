@@ -6,10 +6,11 @@ import { DefaultMapProvider, MapAnchor, MapContainer, useMapModel } from "@open-
 import { ToolButton } from "@open-pioneer/map-ui-components";
 import { TitledSection, SectionHeading } from "@open-pioneer/react-utils";
 import { InitialExtent, ZoomIn, ZoomOut } from "@open-pioneer/map-navigation";
-import { LuMenu, LuImages, LuInfo, LuRuler } from "react-icons/lu";
+import { LuMenu, LuImages, LuInfo, LuRuler, LuPrinter } from "react-icons/lu";
 import { Toc } from "@open-pioneer/toc";
 import { Legend } from "@open-pioneer/legend";
 import { Measurement } from "@open-pioneer/measurement";
+import { Printing } from "@open-pioneer/printing";
 import { InfoPanel } from "./InfoPanel";
 import type { UviFeatureInfo } from "./UviStationInfo";
 import type { EucosFeatureInfo } from "./EucosStationInfo";
@@ -55,10 +56,20 @@ export function MapComponent() {
     const [legendIsActive, setLegendIsActive] = useState<boolean>(true);
     const [infoPanelIsActive, setInfoPanelisActive] = useState<boolean>(true);
     const [measurementIsActive, setMeasurementIsActive] = useState<boolean>(false);
+    const [printingIsActive, setPrintingIsActive] = useState<boolean>(false);
     // State for the draggable measurement panel.
     const measurementTitleId = useId();
     const [measurePos, setMeasurePos] = useState<{ x: number; y: number } | null>(null);
     const measureDragRef = useRef<{
+        startX: number;
+        startY: number;
+        origX: number;
+        origY: number;
+    } | null>(null);
+    // State for the draggable printing panel.
+    const printingTitleId = useId();
+    const [printingPos, setPrintingPos] = useState<{ x: number; y: number } | null>(null);
+    const printingDragRef = useRef<{
         startX: number;
         startY: number;
         origX: number;
@@ -142,6 +153,10 @@ export function MapComponent() {
         setMeasurementIsActive(!measurementIsActive);
     }
 
+    function togglePrinting() {
+        setPrintingIsActive(!printingIsActive);
+    }
+
     function handleMeasureDragStart(e: React.PointerEvent<HTMLDivElement>) {
         e.preventDefault();
         e.stopPropagation();
@@ -173,6 +188,38 @@ export function MapComponent() {
 
     function handleMeasureDragEnd() {
         measureDragRef.current = null;
+    }
+
+    function handlePrintingDragStart(e: React.PointerEvent<HTMLDivElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        const panel = (e.currentTarget as HTMLElement).closest(
+            "[data-printing-panel]"
+        ) as HTMLElement | null;
+        const rect = panel?.getBoundingClientRect();
+        if (!rect) return;
+        printingDragRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            origX: rect.left,
+            origY: rect.top
+        };
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    }
+
+    function handlePrintingDragMove(e: React.PointerEvent<HTMLDivElement>) {
+        if (!printingDragRef.current) return;
+        e.preventDefault();
+        const dx = e.clientX - printingDragRef.current.startX;
+        const dy = e.clientY - printingDragRef.current.startY;
+        setPrintingPos({
+            x: printingDragRef.current.origX + dx,
+            y: printingDragRef.current.origY + dy
+        });
+    }
+
+    function handlePrintingDragEnd() {
+        printingDragRef.current = null;
     }
 
     useEffect(() => {
@@ -447,6 +494,18 @@ export function MapComponent() {
                             <ZoomIn />
                             <ZoomOut />
                             <ToolButton
+                                label="Measurement"
+                                icon={<LuRuler />}
+                                active={measurementIsActive}
+                                onClick={toggleMeasurement}
+                            />
+                            <ToolButton
+                                label="Print Map"
+                                icon={<LuPrinter />}
+                                active={printingIsActive}
+                                onClick={togglePrinting}
+                            />
+                            <ToolButton
                                 label="Layer Switcher"
                                 icon={<LuMenu />}
                                 active={tocIsActive}
@@ -457,12 +516,6 @@ export function MapComponent() {
                                 icon={<LuImages />}
                                 active={legendIsActive}
                                 onClick={toggleLegend}
-                            />
-                            <ToolButton
-                                label="Measurement"
-                                icon={<LuRuler />}
-                                active={measurementIsActive}
-                                onClick={toggleMeasurement}
                             />
                             <ToolButton
                                 label="Info Panel Switcher"
@@ -511,6 +564,53 @@ export function MapComponent() {
                             />
                         </Box>
                     </MapAnchor>
+                    {printingIsActive && (
+                        <div
+                            data-printing-panel=""
+                            style={{
+                                position: "fixed",
+                                ...(printingPos
+                                    ? { left: printingPos.x, top: printingPos.y }
+                                    : { right: 420, top: 10 }),
+                                zIndex: 1000
+                            }}
+                        >
+                            <Box
+                                backgroundColor="white"
+                                borderWidth="1px"
+                                borderRadius="lg"
+                                padding={2}
+                                boxShadow="lg"
+                                aria-label="Printing"
+                                w="400px"
+                                className="printing-hide"
+                            >
+                                <Box role="dialog" aria-labelledby={printingTitleId}>
+                                    <TitledSection
+                                        title={
+                                            <Box
+                                                cursor="grab"
+                                                userSelect="none"
+                                                onPointerDown={handlePrintingDragStart}
+                                                onPointerMove={handlePrintingDragMove}
+                                                onPointerUp={handlePrintingDragEnd}
+                                            >
+                                                <SectionHeading
+                                                    id={printingTitleId}
+                                                    size="md"
+                                                    mb={2}
+                                                >
+                                                    Print Map
+                                                </SectionHeading>
+                                            </Box>
+                                        }
+                                    >
+                                        <Printing />
+                                    </TitledSection>
+                                </Box>
+                            </Box>
+                        </div>
+                    )}
                     {measurementIsActive && (
                         <div
                             data-measurement-panel=""
@@ -518,7 +618,7 @@ export function MapComponent() {
                                 position: "fixed",
                                 ...(measurePos
                                     ? { left: measurePos.x, top: measurePos.y }
-                                    : { right: 620, bottom: 10 }),
+                                    : { left: 420, top: 10 }),
                                 zIndex: 1000
                             }}
                         >

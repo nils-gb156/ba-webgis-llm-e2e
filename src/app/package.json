@@ -15,6 +15,7 @@
         "@open-pioneer/measurement": "catalog:",
         "@open-pioneer/notifier": "catalog:",
         "@open-pioneer/overview-map": "catalog:",
+        "@open-pioneer/printing": "catalog:",
         "@open-pioneer/runtime": "catalog:",
         "@open-pioneer/scale-bar": "catalog:",
         "@open-pioneer/scale-viewer": "catalog:",
