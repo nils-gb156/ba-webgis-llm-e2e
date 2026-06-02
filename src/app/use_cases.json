@@ -20,24 +20,6 @@
         },
         {
             "id": 2,
-            "title": "Show and hide the legend via the toolbar button",
-            "description": "The user toggles the legend panel off and on using the toolbar button.",
-            "preconditions": [
-                "The app is loaded successfully.",
-                "The legend panel is initially visible."
-            ],
-            "steps": [
-                "The user clicks the 'Legend Switcher' button in the toolbar to hide the legend.",
-                "The user clicks the 'Legend Switcher' button again to show the legend."
-            ],
-            "expected_result": [
-                "After the first click, the legend panel is no longer visible.",
-                "After the second click, the legend panel is visible again."
-            ],
-            "complexity": "easy"
-        },
-        {
-            "id": 3,
             "title": "Switch the base map from Carto Light to OpenStreetMap",
             "description": "The user changes the active base map in the layer switcher.",
             "preconditions": [
@@ -56,7 +38,7 @@
             "complexity": "easy"
         },
         {
-            "id": 4,
+            "id": 3,
             "title": "Toggle the visibility of the Temperature overlay",
             "description": "The user hides and re-shows the Temperature overlay layer using its visibility toggle in the layer switcher.",
             "preconditions": [
@@ -75,7 +57,7 @@
             "complexity": "easy"
         },
         {
-            "id": 5,
+            "id": 4,
             "title": "Activate the UV-Index overlay and verify it is rendered on the map",
             "description": "The user activates the initially hidden UV-Index overlay and verifies that the layer is requested and rendered on the map.",
             "preconditions": [
@@ -95,7 +77,7 @@
             "complexity": "medium"
         },
         {
-            "id": 6,
+            "id": 5,
             "title": "Activate the Precipitation overlay and verify the legend updates",
             "description": "The user activates the Precipitation overlay and checks that the legend reflects the newly active layer.",
             "preconditions": [
@@ -114,7 +96,7 @@
             "complexity": "medium"
         },
         {
-            "id": 7,
+            "id": 6,
             "title": "Search for a place and select a result",
             "description": "The user searches for a location with the geocoder and navigates the map to the selected result.",
             "preconditions": [
@@ -135,7 +117,7 @@
             "complexity": "medium"
         },
         {
-            "id": 8,
+            "id": 7,
             "title": "Click an map position to show the weather forecast",
             "description": "The user clicks an position on the map and checks that the weather forecast appears in the info panel.",
             "preconditions": [
@@ -156,7 +138,7 @@
             "complexity": "hard"
         },
         {
-            "id": 9,
+            "id": 8,
             "title": "Click a UVI station to show feature info",
             "description": "The user clicks on a UVI station marker and checks that the WMS GetFeatureInfo result appears in the info panel.",
             "preconditions": [
@@ -177,7 +159,7 @@
             "complexity": "hard"
         },
         {
-            "id": 10,
+            "id": 9,
             "title": "Measure a distance by drawing a line on the map",
             "description": "The user activates the measurement tool, draws a line on the map and checks that a measurement result is shown.",
             "preconditions": [
@@ -193,6 +175,28 @@
             "expected_result": [
                 "The measurement panel is visible.",
                 "The measurement panel displays a length value with a unit."
+            ],
+            "complexity": "hard"
+        },
+        {
+            "id": 10,
+            "title": "Print the current map view as a PNG",
+            "description": "The user opens the printing panel, enters a title, selects the PNG format and triggers the export of the current map view.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The printing tool is accessible via the toolbar.",
+                "At least one base map and one overlay layer are visible on the map."
+            ],
+            "steps": [
+                "The user clicks the 'Print Map' button in the toolbar to open the printing panel.",
+                "The user enters a title for the printout.",
+                "The user selects the PNG file format.",
+                "The user clicks the export/print button."
+            ],
+            "expected_result": [
+                "The printing panel is visible.",
+                "A PNG file containing the current map view is generated and downloaded.",
+                "The printed image shows the visible base map and overlay layers as well as the scale bar."
             ],
             "complexity": "hard"
         }
