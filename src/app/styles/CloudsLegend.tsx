@@ -35,7 +35,7 @@ export function CloudsLegend({ layer }: LegendItemComponentProps) {
     const labels = [0, 25, 50, 75, 100];
 
     return (
-        <Box>
+        <Box data-testid="clouds-legend">
             <SectionHeading size="sm">{layer.title} (%)</SectionHeading>
             <Box
                 borderRadius="sm"

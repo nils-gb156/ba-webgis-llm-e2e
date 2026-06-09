@@ -41,7 +41,7 @@ export function PrecipitationLegend({ layer }: LegendItemComponentProps) {
     }
 
     return (
-        <Box>
+        <Box data-testid="precipitation-legend">
             <SectionHeading size="sm">{layer.title} (mm)</SectionHeading>
             <Box
                 borderRadius="sm"

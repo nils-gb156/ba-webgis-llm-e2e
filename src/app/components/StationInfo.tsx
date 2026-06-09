@@ -18,6 +18,8 @@ export interface StationInfoProps {
     attributeLabels: Record<string, string>;
     /** Message shown while the component is idle (e.g. "Click on a UVI station ..."). */
     idleMessage: string;
+    /** Optional test id applied to the rendered station data container. */
+    testId?: string;
 }
 
 function formatValue(value: unknown): string {
@@ -38,7 +40,8 @@ export function StationInfo({
     featureInfo,
     attributeOrder,
     attributeLabels,
-    idleMessage
+    idleMessage,
+    testId
 }: StationInfoProps) {
     if (!featureInfo || featureInfo.status === "idle") {
         return (
@@ -74,7 +77,14 @@ export function StationInfo({
 
     if (featureInfo.status === "text") {
         return (
-            <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={3} bg="gray.50">
+            <Box
+                data-testid={testId}
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="md"
+                p={3}
+                bg="gray.50"
+            >
                 <Text fontSize="sm" whiteSpace="pre-wrap">
                     {featureInfo.content}
                 </Text>
@@ -84,6 +94,7 @@ export function StationInfo({
 
     return (
         <Box
+            data-testid={testId}
             border="1px solid"
             borderColor="gray.200"
             borderRadius="md"

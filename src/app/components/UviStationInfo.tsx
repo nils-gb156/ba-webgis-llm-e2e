@@ -16,6 +16,7 @@ export function UviStationInfo({ uviFeatureInfo }: UviStationInfoProps) {
             attributeOrder={UVI_ATTRIBUTE_ORDER}
             attributeLabels={UVI_ATTRIBUTE_LABELS}
             idleMessage="Click on a UVI station to load station info."
+            testId="uvi-station-info"
         />
     );
 }

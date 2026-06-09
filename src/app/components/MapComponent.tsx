@@ -438,10 +438,11 @@ export function MapComponent() {
     return (
         <div style={{ width: "100%", height: "100%" }}>
             <DefaultMapProvider map={map}>
-                <MapContainer aria-label="webgis map">
+                <MapContainer data-testid="map-container" aria-label="webgis map">
                     {(tocIsActive || legendIsActive) && (
                         <MapAnchor position="top-left" horizontalGap={10} verticalGap={10}>
                             <Box
+                                data-testid="map-controls-panel"
                                 backgroundColor="white"
                                 borderWidth="1px"
                                 borderRadius="lg"
@@ -454,7 +455,7 @@ export function MapComponent() {
                                 flexDirection="column"
                             >
                                 {tocIsActive && (
-                                    <Box flexShrink={0}>
+                                    <Box data-testid="layer-switcher" flexShrink={0}>
                                         <TitledSection
                                             title={
                                                 <SectionHeading size="md">
@@ -477,7 +478,13 @@ export function MapComponent() {
                                     </Box>
                                 )}
                                 {legendIsActive && (
-                                    <Box display="flex" flexDirection="column" flex="1" minH="0">
+                                    <Box
+                                        data-testid="legend"
+                                        display="flex"
+                                        flexDirection="column"
+                                        flex="1"
+                                        minH="0"
+                                    >
                                         <TitledSection
                                             title={
                                                 <SectionHeading size="md">Legend</SectionHeading>
@@ -493,35 +500,46 @@ export function MapComponent() {
                         </MapAnchor>
                     )}
                     <MapAnchor position="bottom-center" verticalGap={10}>
-                        <Flex aria-label="Maptools" direction="row" gap={1} padding={1}>
-                            <InitialExtent />
-                            <ZoomIn />
-                            <ZoomOut />
+                        <Flex
+                            data-testid="map-toolbar"
+                            aria-label="Maptools"
+                            direction="row"
+                            gap={1}
+                            padding={1}
+                        >
+                            <InitialExtent data-testid="initial-extent-button" />
+                            <ZoomIn data-testid="zoom-in-button" />
+                            <ZoomOut data-testid="zoom-out-button" />
                             <ToolButton
+                                data-testid="measurement-toggle"
                                 label="Measurement"
                                 icon={<LuRuler />}
                                 active={measurementIsActive}
                                 onClick={toggleMeasurement}
                             />
                             <ToolButton
+                                data-testid="print-toggle"
                                 label="Print Map"
                                 icon={<LuPrinter />}
                                 active={printingIsActive}
                                 onClick={togglePrinting}
                             />
                             <ToolButton
+                                data-testid="layer-switcher-toggle"
                                 label="Layer Switcher"
                                 icon={<LuMenu />}
                                 active={tocIsActive}
                                 onClick={toggleToc}
                             />
                             <ToolButton
+                                data-testid="legend-toggle"
                                 label="Legend Switcher"
                                 icon={<LuImages />}
                                 active={legendIsActive}
                                 onClick={toggleLegend}
                             />
                             <ToolButton
+                                data-testid="info-panel-toggle"
                                 label="Info Panel Switcher"
                                 icon={<LuInfo />}
                                 active={infoPanelIsActive}
@@ -532,6 +550,7 @@ export function MapComponent() {
                     {infoPanelIsActive && (
                         <MapAnchor position="top-right" horizontalGap={10} verticalGap={10}>
                             <Box
+                                data-testid="info-panel"
                                 backgroundColor="white"
                                 borderWidth="1px"
                                 borderRadius="lg"
@@ -550,6 +569,7 @@ export function MapComponent() {
                     )}
                     <MapAnchor position="top-center" verticalGap={10}>
                         <Box
+                            data-testid="geocoder-panel"
                             backgroundColor="white"
                             borderWidth="1px"
                             borderRadius="lg"
@@ -571,6 +591,7 @@ export function MapComponent() {
                     {printingIsActive && (
                         <div
                             data-printing-panel=""
+                            data-testid="printing-panel"
                             style={{
                                 position: "fixed",
                                 ...(printingPos
@@ -609,7 +630,7 @@ export function MapComponent() {
                                             </Box>
                                         }
                                     >
-                                        <Printing />
+                                        <Printing data-testid="printing" />
                                     </TitledSection>
                                 </Box>
                             </Box>
@@ -618,6 +639,7 @@ export function MapComponent() {
                     {measurementIsActive && (
                         <div
                             data-measurement-panel=""
+                            data-testid="measurement-panel"
                             style={{
                                 position: "fixed",
                                 ...(measurePos
@@ -654,7 +676,7 @@ export function MapComponent() {
                                             </Box>
                                         }
                                     >
-                                        <Measurement />
+                                        <Measurement data-testid="measurement" />
                                     </TitledSection>
                                 </Box>
                             </Box>

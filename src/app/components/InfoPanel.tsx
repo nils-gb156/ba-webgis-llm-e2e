@@ -23,7 +23,7 @@ export function InfoPanel({ coordinate, uviFeatureInfo, eucosFeatureInfo }: Info
     return (
         <TitledSection title={<SectionHeading size="md">Information</SectionHeading>}>
             <Stack gap={5}>
-                <Box>
+                <Box data-testid="weather-forecast-section">
                     <SectionHeading size="sm">Weather Forecast</SectionHeading>
                     <Box mt={2}>
                         {coordinate ? (
@@ -37,7 +37,7 @@ export function InfoPanel({ coordinate, uviFeatureInfo, eucosFeatureInfo }: Info
                 </Box>
 
                 {showUviInfo && (
-                    <Box>
+                    <Box data-testid="uvi-station-section">
                         <SectionHeading size="sm">UV-Index Station</SectionHeading>
                         <Box mt={2}>
                             <UviStationInfo uviFeatureInfo={uviFeatureInfo} />
@@ -46,7 +46,7 @@ export function InfoPanel({ coordinate, uviFeatureInfo, eucosFeatureInfo }: Info
                 )}
 
                 {showEucosInfo && (
-                    <Box>
+                    <Box data-testid="eucos-station-section">
                         <SectionHeading size="sm">EUCOS Ground Station</SectionHeading>
                         <Box mt={2}>
                             <EucosStationInfo eucosFeatureInfo={eucosFeatureInfo} />

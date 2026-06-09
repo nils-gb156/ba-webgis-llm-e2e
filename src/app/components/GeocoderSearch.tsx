@@ -123,6 +123,7 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
         <Box w="360px">
             <Box position="relative">
                 <Input
+                    data-testid="geocoder-input"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Search for a place"
@@ -135,6 +136,7 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
                     <Button
                         type="button"
                         variant="ghost"
+                        data-testid="geocoder-clear-button"
                         position="absolute"
                         top="50%"
                         right="0.5rem"
@@ -155,10 +157,11 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
             </Box>
             {isOpen && results.length > 0 && (
                 <Box mt={2} borderWidth="1px" borderRadius="md" overflow="hidden">
-                    <Box role="list">
+                    <Box data-testid="geocoder-results" role="list">
                         {results.map((result, index) => (
                             <Box
                                 key={`${result.display_name ?? "result"}-${index}`}
+                                data-testid={`geocoder-result-item-${index}`}
                                 px={3}
                                 py={2}
                                 cursor="pointer"

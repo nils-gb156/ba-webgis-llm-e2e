@@ -35,7 +35,7 @@ export function TemperatureLegend({ layer }: LegendItemComponentProps) {
         .filter((range): range is { from: number; to: number; color: string } => !!range);
 
     return (
-        <Box>
+        <Box data-testid="temperature-legend">
             <SectionHeading size="sm">{layer.title} (°C)</SectionHeading>
             <VStack align="stretch" gap={1} mt={2}>
                 {ranges.map((range) => (
