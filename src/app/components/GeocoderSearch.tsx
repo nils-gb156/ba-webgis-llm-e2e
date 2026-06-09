@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
 // SPDX-License-Identifier: Apache-2.0
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Input, Text } from "@chakra-ui/react";
+import { Box, Button, Input, Text } from "@chakra-ui/react";
 import type { MapModel } from "@open-pioneer/map";
 import { transform } from "ol/proj";
 
@@ -112,16 +112,47 @@ export function GeocoderSearch({ map, onSelect }: GeocoderSearchProps) {
         setResults([]);
     }
 
+    function clearQuery() {
+        skipNextSearchRef.current = true;
+        setQuery("");
+        setResults([]);
+        setIsOpen(false);
+    }
+
     return (
         <Box w="360px">
-            <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search for a place"
-                size="sm"
-                backgroundColor="white"
-                aria-label="Geocoder search"
-            />
+            <Box position="relative">
+                <Input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search for a place"
+                    size="sm"
+                    backgroundColor="white"
+                    aria-label="Geocoder search"
+                    pr={query ? "2rem" : undefined}
+                />
+                {query && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        position="absolute"
+                        top="50%"
+                        right="0.5rem"
+                        transform="translateY(-50%)"
+                        minWidth="auto"
+                        padding={0}
+                        width="1.25rem"
+                        height="1.25rem"
+                        borderRadius="full"
+                        color="gray.500"
+                        _hover={{ backgroundColor: "gray.100", color: "gray.700" }}
+                        onClick={clearQuery}
+                        aria-label="Clear search"
+                    >
+                        ✕
+                    </Button>
+                )}
+            </Box>
             {isOpen && results.length > 0 && (
                 <Box mt={2} borderWidth="1px" borderRadius="md" overflow="hidden">
                     <Box role="list">
