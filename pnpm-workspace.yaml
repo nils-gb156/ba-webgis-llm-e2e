@@ -17,11 +17,14 @@ catalog:
   "@open-pioneer/basemap-switcher": *ol_base_packages_version
   "@open-pioneer/coordinate-viewer": *ol_base_packages_version
   "@open-pioneer/geolocation": *ol_base_packages_version
+  "@open-pioneer/legend": *ol_base_packages_version
   "@open-pioneer/map-navigation": *ol_base_packages_version
   "@open-pioneer/map-ui-components": *ol_base_packages_version
   "@open-pioneer/map": *ol_base_packages_version
   "@open-pioneer/measurement": *ol_base_packages_version
+  "@open-pioneer/toc": *ol_base_packages_version
   "@open-pioneer/overview-map": *ol_base_packages_version
+  "@open-pioneer/printing": *ol_base_packages_version
   "@open-pioneer/scale-bar": *ol_base_packages_version
   "@open-pioneer/scale-viewer": *ol_base_packages_version
 

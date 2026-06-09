@@ -10,8 +10,6 @@ import { defineConfig } from "vite";
 // @ts-expect-error Invalid typings
 import eslint from "vite-plugin-eslint";
 
-const sampleSites = ["samples/map-sample", "samples/i18n-howto"];
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
     const devMode = mode === "development";
@@ -21,12 +19,14 @@ export default defineConfig(({ mode }) => {
 
     return {
         root: resolve(__dirname, "src"),
+        publicDir: resolve(__dirname, "public"),
 
         // Load .env files from this directory instead of `root`.
         envDir: __dirname,
 
-        // Generates relative urls in html etc.
-        base: "./",
+        // Base public path. Must match the GitHub Pages project path
+        // (https://<user>.github.io/ba-webgis-llm-e2e/) so that asset URLs resolve correctly.
+        base: "/ba-webgis-llm-e2e/",
 
         // Vite's build output is written to dist/www
         build: {
@@ -52,12 +52,7 @@ export default defineConfig(({ mode }) => {
                 rootSite: true,
 
                 // Additional directories to include as html (must contain index.html files)
-                sites: [
-                    "sites/empty",
-
-                    // Include sample sites in the build
-                    ...sampleSites
-                ],
+                sites: ["sites"],
 
                 // Apps to distribute as .js files for embedded use cases
                 apps: []
@@ -101,11 +96,20 @@ export default defineConfig(({ mode }) => {
             // Use this option if your development setup uses hostnames other than localhost.
             // See also https://vite.dev/config/server-options.html#server-allowedhosts
             // allowedHosts: [".example.com"],
-                        
+
             // disable hot reloading
             // in dev mode press "r" to trigger reload and make changes active
             // See also: https://vitejs.dev/config/server-options.html#server-hmr
             // hmr: false
+
+            proxy: {
+                // Proxy DWD WMS GetFeatureInfo requests to avoid CORS (server sends no Access-Control-Allow-Origin)
+                "/dwd-wms": {
+                    target: "https://maps.dwd.de",
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/dwd-wms/, "/geoserver/dwd/wms")
+                }
+            }
         }
     };
 });
