@@ -32,7 +32,7 @@ pnpm install
 pnpm run dev
 ```
 
-Vite will print the local address (usually <http://localhost:5173/>) — open it
+Vite will print the local address (usually <http://localhost:5173/ba-webgis-llm-e2e/>) — open it
 in your browser.
 
 ### Environment variables
@@ -41,15 +41,15 @@ Configure these in `.env` (see `.env.example`):
 
 ## Scripts
 
-| Command            | Description                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| `pnpm dev`         | Start the Vite development server                               |
-| `pnpm build`       | Create an optimized production build in `./dist`                |
-| `pnpm preview`     | Serve the built app locally (default: <http://localhost:4173/>) |
-| `pnpm test`        | Run the test suite (Vitest)                                     |
-| `pnpm lint`        | Run ESLint over `src/` and `support/`                           |
-| `pnpm check-types` | Type-check the project without emitting files                   |
-| `pnpm prettier`    | Format the codebase                                             |
+| Command            | Description                                                                       |
+| ------------------ | --------------------------------------------------------------------------------- |
+| `pnpm dev`         | Start the Vite development server                                                 |
+| `pnpm build`       | Create an optimized production build in `./dist`                                  |
+| `pnpm preview`     | Serve the built app locally (default: <http://localhost:4173/ba-webgis-llm-e2e/>) |
+| `pnpm test`        | Run the test suite (Vitest)                                                       |
+| `pnpm lint`        | Run ESLint over `src/` and `support/`                                             |
+| `pnpm check-types` | Type-check the project without emitting files                                     |
+| `pnpm prettier`    | Format the codebase                                                               |
 
 ## Deployment
 

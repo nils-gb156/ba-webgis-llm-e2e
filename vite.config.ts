@@ -24,8 +24,9 @@ export default defineConfig(({ mode }) => {
         // Load .env files from this directory instead of `root`.
         envDir: __dirname,
 
-        // Generates relative urls in html etc.
-        base: "./",
+        // Base public path. Must match the GitHub Pages project path
+        // (https://<user>.github.io/ba-webgis-llm-e2e/) so that asset URLs resolve correctly.
+        base: "/ba-webgis-llm-e2e/",
 
         // Vite's build output is written to dist/www
         build: {
