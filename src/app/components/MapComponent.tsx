@@ -99,6 +99,16 @@ export function MapComponent() {
     } | null>(null);
 
     useEffect(() => {
+        // Expose the map model on globalThis so E2E tests can inspect the actual
+        // OpenLayers state (rendered layers, visibility, features) which is not
+        // accessible through the DOM (the map renders into a canvas).
+        (globalThis as { __openPioneerMap?: unknown }).__openPioneerMap = map;
+        return () => {
+            delete (globalThis as { __openPioneerMap?: unknown }).__openPioneerMap;
+        };
+    }, [map]);
+
+    useEffect(() => {
         if (!map) return;
         // Once the map is ready, look up the two WMS station layers and cache their
         // sources/layers in refs so click handlers can query them later.
