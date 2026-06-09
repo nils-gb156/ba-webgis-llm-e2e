@@ -127,7 +127,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                 </Text>
             )}
             <Box
-                maxHeight="300px"
+                maxHeight="200px"
                 overflowY="auto"
                 border="1px solid"
                 borderColor="gray.200"
