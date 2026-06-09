@@ -312,9 +312,11 @@ export function MapComponent() {
         const controller = new AbortController();
         setUviFeatureInfo({ status: "loading" });
 
-        // Route the DWD request through the local dev proxy (see vite.config.ts)
-        // to avoid CORS issues.
-        const proxiedUrl = url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms");
+        // In dev mode, route the DWD request through the local Vite proxy (see vite.config.ts).
+        // In production the DWD server allows CORS, so the URL is used directly.
+        const proxiedUrl = import.meta.env.DEV
+            ? url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms")
+            : url;
         fetch(proxiedUrl, { signal: controller.signal })
             .then((response) => {
                 if (!response.ok) throw new Error("Failed to load station info.");
@@ -386,7 +388,9 @@ export function MapComponent() {
         const controller = new AbortController();
         setEucosFeatureInfo({ status: "loading" });
 
-        const proxiedUrl = url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms");
+        const proxiedUrl = import.meta.env.DEV
+            ? url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms")
+            : url;
         fetch(proxiedUrl, { signal: controller.signal })
             .then((response) => {
                 if (!response.ok) throw new Error("Failed to load station info.");
