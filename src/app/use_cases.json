@@ -39,20 +39,19 @@
         },
         {
             "id": 3,
-            "title": "Toggle the visibility of the Temperature overlay",
-            "description": "The user hides and re-shows the Temperature overlay layer using its visibility toggle in the layer switcher.",
+            "title": "Zoom in and out using the zoom buttons",
+            "description": "The user changes the map zoom level using the zoom in and zoom out buttons.",
             "preconditions": [
                 "The app is loaded successfully.",
-                "The layer switcher (TOC) is visible.",
-                "The Temperature overlay layer is initially visible."
+                "The zoom in and zoom out buttons are visible on the map."
             ],
             "steps": [
-                "The user clicks the visibility toggle of the Temperature overlay layer to hide it.",
-                "The user clicks the visibility toggle of the Temperature overlay layer again to show it."
+                "The user clicks the 'Zoom in' button to increase the zoom level.",
+                "The user clicks the 'Zoom out' button to decrease the zoom level."
             ],
             "expected_result": [
-                "After the first click, the Temperature overlay layer toggle is in the disabled (unchecked) state.",
-                "After the second click, the Temperature overlay layer toggle is in the enabled (checked) state again."
+                "After clicking the 'Zoom in' button, the map zoom level is higher than before.",
+                "After clicking the 'Zoom out' button, the map zoom level is lower than after zooming in."
             ],
             "complexity": "easy"
         },
@@ -71,7 +70,6 @@
             ],
             "expected_result": [
                 "The UV-Index overlay layer toggle is in the enabled (checked) state.",
-                "A WMS GetMap request for the UV-Index layer is sent to the DWD geoserver.",
                 "The UV-Index overlay tiles are rendered on the map canvas."
             ],
             "complexity": "medium"
