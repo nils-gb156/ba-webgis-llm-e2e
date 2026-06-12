@@ -95,27 +95,6 @@
         },
         {
             "id": 6,
-            "title": "Search for a place and select a result",
-            "description": "The user searches for a location with the geocoder and navigates the map to the selected result.",
-            "preconditions": [
-                "The app is loaded successfully.",
-                "The search field (geocoder) is accessible."
-            ],
-            "steps": [
-                "The user clicks the search field.",
-                "The user types a place name (e.g. 'Münster').",
-                "The user waits for the result list to appear.",
-                "The user selects the first result."
-            ],
-            "expected_result": [
-                "A result list with at least one entry is displayed.",
-                "After selecting a result, the result list is closed.",
-                "The map navigates to the selected location."
-            ],
-            "complexity": "medium"
-        },
-        {
-            "id": 7,
             "title": "Click an map position to show the weather forecast",
             "description": "The user clicks an position on the map and checks that the weather forecast appears in the info panel.",
             "preconditions": [
@@ -136,7 +115,7 @@
             "complexity": "hard"
         },
         {
-            "id": 8,
+            "id": 7,
             "title": "Click a UVI station to show feature info",
             "description": "The user clicks on a UVI station marker and checks that the WMS GetFeatureInfo result appears in the info panel.",
             "preconditions": [
@@ -157,7 +136,7 @@
             "complexity": "hard"
         },
         {
-            "id": 9,
+            "id": 8,
             "title": "Measure a distance by drawing a line on the map",
             "description": "The user activates the measurement tool, draws a line on the map and checks that a measurement result is shown.",
             "preconditions": [
@@ -177,7 +156,7 @@
             "complexity": "hard"
         },
         {
-            "id": 10,
+            "id": 9,
             "title": "Print the current map view as a PNG",
             "description": "The user opens the printing panel, enters a title, selects the PNG format and triggers the export of the current map view.",
             "preconditions": [
@@ -195,6 +174,35 @@
                 "The printing panel is visible.",
                 "A PNG file containing the current map view is generated and downloaded.",
                 "The printed image shows the visible base map and overlay layers as well as the scale bar."
+            ],
+            "complexity": "hard"
+        },
+        {
+            "id": 10,
+            "title": "Configure layers, search for a location and load the weather forecast",
+            "description": "The user reconfigures the layer visibility, searches for a location using the geocoder, navigates the map to the selected result, and load the weather forecast for that position.",
+            "preconditions": [
+                "The app is loaded successfully.",
+                "The layer switcher (TOC) is visible.",
+                "The Temperature overlay layer is initially visible.",
+                "The Precipitation overlay layer is initially hidden.",
+                "The search field (geocoder) is accessible.",
+                "The info panel is visible.",
+                "No measurement tool is active."
+            ],
+            "steps": [
+                "The user clicks the visibility toggle of the Temperature overlay layer to hide it.",
+                "The user clicks the visibility toggle of the Precipitation overlay layer to show it.",
+                "The user clicks the search field and types a place name (e.g. 'Münster').",
+                "The user waits for the result list to appear and selects the first result.",
+                "The user waits for the map to navigate to the selected location.",
+                "The user waits for the info panel to load the forecast."
+            ],
+            "expected_result": [
+                "The Precipitation overlay layer toggle is in the disabled state.",
+                "The Temperature overlay layer toggle is in the enabled state.",
+                "After selecting the search result, the map navigates to the searched location.",
+                "The info panel displays a weather forecast section with 24 entries."
             ],
             "complexity": "hard"
         }
