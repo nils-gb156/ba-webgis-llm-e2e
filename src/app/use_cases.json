@@ -144,10 +144,11 @@
                 "The info panel is visible.",
                 "The UV-Index Stations layer is active (visible by default).",
                 "The map is positioned so at least one UVI station is visible.",
-                "No measurement tool is active."
+                "No measurement tool is active.",
+                "A known UVI station is located at map coordinates [1188692.84, 6767643.28] (EPSG:3857)."
             ],
             "steps": [
-                "The user clicks on a UVI station marker on the map canvas.",
+                "The user clicks on the UVI station marker at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.",
                 "The user waits for the info panel to load the station info."
             ],
             "expected_result": [
