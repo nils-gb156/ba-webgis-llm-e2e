@@ -6,6 +6,7 @@ import { pioneer } from "@open-pioneer/vite-plugin-pioneer";
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 
 // @ts-expect-error Invalid typings
 import eslint from "vite-plugin-eslint";
@@ -81,6 +82,9 @@ export default defineConfig(({ mode }) => {
             globals: true,
             environment: "happy-dom",
             setupFiles: ["testing/global-setup.ts"],
+
+            // Generated Playwright tests live here; they must not be run by vitest.
+            exclude: [...configDefaults.exclude, "**/app/tests/**"],
 
             server: {
                 deps: {
