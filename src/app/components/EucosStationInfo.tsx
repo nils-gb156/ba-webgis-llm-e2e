@@ -16,6 +16,7 @@ export function EucosStationInfo({ eucosFeatureInfo }: EucosStationInfoProps) {
             attributeOrder={EUCOS_ATTRIBUTE_ORDER}
             attributeLabels={EUCOS_ATTRIBUTE_LABELS}
             idleMessage="Click on a EUCOS station to load station info."
+            testId="eucos-station-info"
         />
     );
 }

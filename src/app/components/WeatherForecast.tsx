@@ -127,6 +127,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
                 </Text>
             )}
             <Box
+                data-testid="weather-forecast"
                 maxHeight="200px"
                 overflowY="auto"
                 border="1px solid"
@@ -137,7 +138,7 @@ export function WeatherForecast({ coordinate }: WeatherForecastProps) {
             >
                 <Stack gap={4}>
                     {forecast.map((entry: ForecastEntry, idx: number) => (
-                        <Box key={entry.dt}>
+                        <Box key={entry.dt} data-testid="weather-forecast-entry">
                             <Text fontSize="sm" fontWeight="semibold">
                                 {formatForecastDate(entry.dt, entry.dt_txt)}
                             </Text>
