@@ -14,7 +14,7 @@ TEMPERATURE = 0.0
 MAX_TOKENS = 4096          # documented constant: prevents silent truncation of long tests
 THINKING_ENABLED = False   # explicitly off; Qwen3 defaults to on
 
-STAGE = "stage_3_auto_ui_map"
+STAGE = "stage_3_generated_ui_map"
 
 SCRIPT_DIR = Path(__file__).parent
 USE_CASES_FILE = SCRIPT_DIR / "use_cases.md"
