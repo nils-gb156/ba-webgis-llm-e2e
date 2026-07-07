@@ -6,14 +6,14 @@ from openai import OpenAI
 from playwright.sync_api import sync_playwright, Page
 
 
-# --- Configuration (identical across all stages) ---
+# --- Configuration ---
 LM_STUDIO_BASE_URL = "http://dgx01:8000/v1"
 LM_STUDIO_API_KEY = "lm-studio"
 MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
 MODEL_QUANTIZATION = "FP8"
 TEMPERATURE = 0.0
 MAX_TOKENS = 4096          # documented constant: prevents silent truncation of long tests
-THINKING_ENABLED = False   # explicitly off; Qwen3 defaults to on. Verify this parameter at the endpoint!
+THINKING_ENABLED = False   # explicitly off; Qwen3 defaults to on
 
 STAGE = "stage_2_accessibility_snapshot"
 

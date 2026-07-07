@@ -5,14 +5,14 @@ from typing import Any, Dict, List
 from openai import OpenAI
 
 
-# --- Configuration (identical across all stages) ---
+# --- Configuration ---
 LM_STUDIO_BASE_URL = "http://dgx01:8000/v1"
 LM_STUDIO_API_KEY = "lm-studio"
 MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
 MODEL_QUANTIZATION = "FP8"
 TEMPERATURE = 0.0
 MAX_TOKENS = 4096          # documented constant: prevents silent truncation of long tests
-THINKING_ENABLED = False   # explicitly off; Qwen3 defaults to on. Verify this parameter at the endpoint!
+THINKING_ENABLED = False   # explicitly off; Qwen3 defaults to on
 
 STAGE = "stage_3_auto_ui_map"
 
@@ -87,9 +87,6 @@ def load_ui_context() -> str:
     ui_map = UI_MAP_FILE.read_text(encoding="utf-8")
     map_helpers = MAP_HELPERS_FILE.read_text(encoding="utf-8")
 
-    # Note: the sentence "Use them to assert ..." is a mild description of the
-    # context's purpose. For strict neutrality regarding prompt engineering,
-    # remove it and justify the decision in chapter 4.
     return f"""\
 ## UI Map (auto-generated from source)
 
