@@ -14,6 +14,8 @@ These conventions are fixed and apply to every test you produce.
     ```
 - Followed by: `import { test, expect } from '@playwright/test';`
 - Use a single `test(...)` block. The test title must contain the use case id and title.
+- Do not use `test.describe`, `test.beforeEach`, or custom fixtures. All logic,
+  including precondition checks, belongs in the single test body.
 - Begin the test by navigating to the base URL given in the prompt
   (`await page.goto(...)`).
 
@@ -22,15 +24,28 @@ These conventions are fixed and apply to every test you produce.
 - Address elements by user-facing properties: `getByRole`, `getByText`, `getByLabel`.
 - Use `getByTestId` when a test id is available.
 - Do not use CSS selectors or XPath bound to the DOM structure.
+- If an element has no accessible role, label, visible text, or test id, a
+  scoped CSS class selector may be used as a last resort.
 
 ## Waiting and assertions
 
 - Use `async`/`await` for every Playwright call.
 - Use web-first, auto-retrying `expect` assertions
   (e.g. `await expect(locator).toBeVisible()`).
+- For asynchronous values that are not covered by Playwright's built-in
+  auto-retrying assertions (e.g. values read from application state rather
+  than the DOM), use `expect.poll(() => ...)` instead of a single
+  `expect(await ...)`, since the latter evaluates the value only once and
+  does not wait for it to settle.
 - Do not use fixed waits (no `waitForTimeout`, no `sleep`).
 - For steps that depend on network responses or page loads, use
   `waitForResponse` / `waitForLoadState`.
+- To verify that a specific network request was sent, register a `page.on('request', ...)`
+  listener before performing the triggering action, then assert on the captured
+  request (e.g. with `expect.poll()`).
+- For actions that trigger a file download, call `page.waitForEvent('download')`
+  before performing the triggering action, then await the resulting download
+  and assert on it (e.g. `suggestedFilename()`).
 - Derive the assertions from the `expected_result` field of the use case.
 - Cover the steps in order as a single user flow.
 
