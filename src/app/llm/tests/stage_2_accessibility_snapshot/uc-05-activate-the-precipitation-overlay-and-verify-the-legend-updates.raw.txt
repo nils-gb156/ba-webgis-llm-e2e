@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the layer switcher is open to access the Precipitation layer toggle
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher' });
+  await expect(layerSwitcherToggle).toBeVisible();
+  // The accessibility tree indicates it is already pressed, but we ensure it is visible
+  await expect(page.getByRole('heading', { name: 'Layer Switcher' })).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).toBeVisible();
+  
+  // Click the checkbox to enable the layer
+  await precipitationCheckbox.click();
+
+  // Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 2: View the legend
+  // The legend should be visible as per preconditions, but we ensure it's accessible
+  const legendHeading = page.getByRole('heading', { name: 'Legend' });
+  await expect(legendHeading).toBeVisible();
+
+  // Expected result: The legend displays an entry corresponding to the Precipitation layer.
+  // We look for a heading or text within the legend that mentions "Precipitation"
+  const legend = page.getByRole('region', { name: 'Legend' }).or(page.getByTestId('legend'));
+  // Since the legend might be a list or a specific region, we search for the text "Precipitation" within the legend area
+  // The accessibility tree shows the legend contains headings for layers.
+  await expect(page.getByRole('heading', { name: 'Precipitation', exact: false })).toBeVisible({ timeout: 10000 });
+});

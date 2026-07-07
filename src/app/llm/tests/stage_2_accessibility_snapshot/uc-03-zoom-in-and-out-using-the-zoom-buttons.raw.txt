@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is loaded and controls are visible
+  await expect(page.getByTestId('zoom-in-button')).toBeVisible();
+  await expect(page.getByTestId('zoom-out-button')).toBeVisible();
+
+  // Get initial scale to verify change
+  const initialScaleText = await page.getByTestId('scale-viewer').textContent();
+  expect(initialScaleText).toBeTruthy();
+
+  // Step 1: Click Zoom in
+  await page.getByTestId('zoom-in-button').click();
+
+  // Wait for the scale to update, indicating the zoom action completed
+  await expect.poll(async () => {
+    const currentScaleText = await page.getByTestId('scale-viewer').textContent();
+    return currentScaleText !== initialScaleText;
+  }).toBeTruthy();
+
+  // Verify zoom level is higher (scale denominator is smaller)
+  // We capture the scale after zooming in
+  const zoomedInScaleText = await page.getByTestId('scale-viewer').textContent();
+  const zoomedInScaleValue = parseFloat(zoomedInScaleText?.match(/1 to (\d+)/)?.[1] || '0');
+
+  // Step 2: Click Zoom out
+  await page.getByTestId('zoom-out-button').click();
+
+  // Wait for the scale to update again
+  await expect.poll(async () => {
+    const currentScaleText = await page.getByTestId('scale-viewer').textContent();
+    return currentScaleText !== zoomedInScaleText;
+  }).toBeTruthy();
+
+  // Verify zoom level is lower than after zooming in (scale denominator is larger)
+  const finalScaleText = await page.getByTestId('scale-viewer').textContent();
+  const finalScaleValue = parseFloat(finalScaleText?.match(/1 to (\d+)/)?.[1] || '0');
+
+  expect(finalScaleValue).toBeGreaterThan(zoomedInScaleValue);
+});

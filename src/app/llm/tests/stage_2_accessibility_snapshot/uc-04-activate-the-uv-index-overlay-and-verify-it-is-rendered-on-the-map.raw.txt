@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByRole('heading', { name: 'Layer Switcher' })).toBeVisible();
+
+  // Locate the UV-Index layer checkbox in the operational layers list
+  const uvIndexLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+
+  // Verify the layer is initially hidden (unchecked)
+  await expect(uvIndexLayerCheckbox).not.toBeChecked();
+
+  // Register a listener for the WMS GetMap or tile request that will be triggered by enabling the layer
+  // We look for a request to the map service that includes 'UV-Index' or similar layer parameter
+  const uvIndexLayerRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    // Typical WMS GetMap request or tile request containing the layer name
+    return url.includes('UV-Index') || (url.includes('GetMap') && request.postData()?.includes('UV-Index'));
+  });
+
+  // Click the visibility toggle to enable the UV-Index layer
+  await uvIndexLayerCheckbox.click();
+
+  // Wait for the layer request to be sent
+  await uvIndexLayerRequestPromise;
+
+  // Verify the UV-Index overlay layer toggle is in the enabled (checked) state
+  await expect(uvIndexLayerCheckbox).toBeChecked();
+
+  // Verify the UV-Index legend is visible, indicating the layer is rendered/loaded
+  await expect(page.getByRole('heading', { name: 'UV-Index' })).toBeVisible();
+  
+  // Additionally, verify the UV-Index stations legend is visible as part of the layer info
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+});
