@@ -1,0 +1,245 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context generated automatically from the application source:
+## UI Map (auto-generated from source)
+
+# UI Map
+
+Generated from source. 39 unique data-testid values across 13 files.
+
+## Components
+
+| data-testid                   | type    | interaction              | visible by default | activate via       |
+| ----------------------------- | ------- | ------------------------ | ------------------ | ------------------ |
+| footer                        | element | read / assert            | —                  | —                  |
+| coordinate-viewer             | text    | read / assert text       | —                  | —                  |
+| scale-bar                     | element | read / assert            | —                  | —                  |
+| scale-viewer                  | text    | read / assert text       | —                  | —                  |
+| geocoder-input                | element | read / assert            | —                  | —                  |
+| geocoder-clear-button         | button  | click                    | —                  | —                  |
+| geocoder-results              | element | read / assert            | false              | —                  |
+| geocoder-result-item-${index} | element | read / assert            | false              | —                  |
+| weather-forecast-section      | element | read / assert            | —                  | —                  |
+| uvi-station-section           | element | read / assert            | —                  | —                  |
+| eucos-station-section         | element | read / assert            | —                  | —                  |
+| map-container                 | map     | click / pan / zoom       | —                  | —                  |
+| map-controls-panel            | panel   | read / assert visibility | —                  | —                  |
+| layer-switcher                | panel   | read / assert visibility | true               | —                  |
+| legend                        | element | read / assert            | true               | —                  |
+| map-toolbar                   | element | read / assert            | —                  | —                  |
+| initial-extent-button         | button  | click                    | —                  | —                  |
+| zoom-in-button                | button  | click                    | —                  | —                  |
+| zoom-out-button               | button  | click                    | —                  | —                  |
+| measurement-toggle            | button  | click                    | —                  | —                  |
+| print-toggle                  | button  | click                    | —                  | —                  |
+| layer-switcher-toggle         | button  | click                    | —                  | —                  |
+| legend-toggle                 | button  | click                    | —                  | —                  |
+| info-panel-toggle             | button  | click                    | —                  | —                  |
+| info-panel                    | panel   | read / assert visibility | true               | —                  |
+| geocoder-panel                | panel   | read / assert visibility | —                  | —                  |
+| printing-panel                | panel   | read / assert visibility | false              | print-toggle       |
+| printing                      | element | read / assert            | —                  | —                  |
+| measurement-panel             | panel   | read / assert visibility | false              | measurement-toggle |
+| measurement                   | element | read / assert            | —                  | —                  |
+| weather-forecast              | element | read / assert            | —                  | —                  |
+| weather-forecast-entry        | element | read / assert            | —                  | —                  |
+| ...                           | element | read / assert            | —                  | —                  |
+| ...                           | element | read / assert            | —                  | —                  |
+| ...                           | element | read / assert            | —                  | —                  |
+| weather-forecast              | element | read / assert            | —                  | —                  |
+| clouds-legend                 | element | read / assert            | —                  | —                  |
+| eucos-stations-legend         | element | read / assert            | —                  | —                  |
+| precipitation-legend          | element | read / assert            | —                  | —                  |
+| temperature-legend            | element | read / assert            | —                  | —                  |
+| uv-index-legend               | element | read / assert            | —                  | —                  |
+| uvi-stations-legend           | element | read / assert            | —                  | —                  |
+
+## Layers
+
+| name                  | type        | visible by default |
+| --------------------- | ----------- | ------------------ |
+| Carto Light           | base        | true               |
+| Carto Dark            | base        | false              |
+| OpenStreetMap         | base        | false              |
+| UV-Index              | operational | false              |
+| Temperature           | operational | true               |
+| Precipitation         | operational | false              |
+| Clouds                | operational | false              |
+| UV-Index Stations     | operational | true               |
+| EUCOS Ground Stations | operational | true               |
+
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 10: Configure layers, search for a location and load the weather forecast
+
+**Description:** The user reconfigures the layer visibility, searches for a location using the geocoder, navigates the map to the selected result, and loads the weather forecast for that position.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The layer switcher (TOC) is visible.
+- The Temperature overlay layer is initially visible.
+- The Precipitation overlay layer is initially hidden.
+- The search field (geocoder) is accessible.
+- The info panel is visible.
+- No measurement tool is active.
+
+**Steps:**
+
+1. The user clicks the visibility toggle of the Temperature overlay layer to hide it.
+2. The user clicks the visibility toggle of the Precipitation overlay layer to show it.
+3. The user clicks the search field and types a place name (e.g. 'Münster').
+4. The user waits for the result list to appear and selects the first result.
+5. The user waits for the map to navigate to the selected location.
+6. The user waits for the info panel to load the forecast.
+
+**Expected result:**
+
+- The Precipitation overlay layer toggle is in the disabled state.
+- The Temperature overlay layer toggle is in the enabled state.
+- After selecting the search result, the map navigates to the searched location.
+- The info panel displays a weather forecast section with 24 entries.
+
+**Complexity:** hard
+
+Return only the test code.

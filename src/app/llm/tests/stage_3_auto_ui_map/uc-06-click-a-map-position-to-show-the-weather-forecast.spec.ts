@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (it might interfere with map clicks)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if (await measurementToggle.isVisible()) {
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive === 'true') {
+      await measurementToggle.click();
+    }
+  }
+
+  // Wait for the map to be ready and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Wait for initial layers to render to ensure map is ready
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Click on the center of the map canvas
+  const mapBox = await mapContainer.boundingBox();
+  if (mapBox) {
+    await page.mouse.click(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+  }
+
+  // Wait for the info panel to be visible (it is visible by default, but we wait for content)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear in the info panel
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the weather forecast entries to load
+  const weatherForecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(weatherForecastEntries).toHaveCount(24);
+
+  // Verify the clicked position is highlighted on the map
+  const highlightedCoord = await getHighlightedCoordinate(page);
+  expect(highlightedCoord).toBeDefined();
+  expect(highlightedCoord![0]).toBeGreaterThan(0);
+  expect(highlightedCoord![1]).toBeGreaterThan(0);
+});

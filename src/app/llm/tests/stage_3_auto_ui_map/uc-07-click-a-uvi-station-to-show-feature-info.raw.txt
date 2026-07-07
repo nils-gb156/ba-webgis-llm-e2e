@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../map-model-helpers';
+
+test('Use Case 7: Click a UVI station to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the UV-Index Stations layer is rendered before interacting
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Capture the GetFeatureInfo request
+  const requestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('SERVICE=WMS') && url.includes('REQUEST=GetFeatureInfo') && url.includes('UV-Index Stations');
+  });
+
+  // Click on the UVI station marker at the specified coordinates
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28,
+    },
+  });
+
+  // Wait for the GetFeatureInfo request to be sent
+  await requestPromise;
+
+  // Wait for the info panel to update with the station info
+  // The info panel is visible by default, so we check for the presence of the specific section
+  await expect(page.getByText('UV-Index Station')).toBeVisible();
+});

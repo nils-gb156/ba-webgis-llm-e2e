@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to load
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer.
+  // The layer switcher is visible by default. We locate the UV-Index layer item
+  // and click its toggle button.
+  const uvIndexLayerItem = page.getByRole('group', { name: /UV-Index/i }).first();
+  // The toggle is typically a checkbox or button within the layer item.
+  // We look for a checkbox or toggle control associated with "UV-Index".
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true }).first();
+  
+  // If the checkbox is not directly found by name, we might need to find the layer row first.
+  // Based on typical TOC structures, the layer name is often a label for the checkbox.
+  // Let's try to find the toggle via the layer name text if the checkbox role isn't direct.
+  // However, getByRole('checkbox', { name: 'UV-Index' }) is the most robust ARIA approach.
+  
+  // In case the layer is not immediately visible or needs scrolling, we ensure the layer switcher is visible.
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Click the toggle to enable the UV-Index layer
+  await uvIndexToggle.click();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We poll the map model to verify the UV-Index layer is rendered.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+
+  // Expected result: The UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexToggle).toBeChecked();
+});
