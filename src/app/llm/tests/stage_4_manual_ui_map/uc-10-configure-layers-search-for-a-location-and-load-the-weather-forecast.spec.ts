@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapCenter } from '../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature layer
+  await page.getByRole('checkbox', { name: 'Temperature' }).uncheck();
+
+  // Step 2: Show Precipitation layer
+  await page.getByRole('checkbox', { name: 'Precipitation' }).check();
+
+  // Verify layer visibility changes via map model
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 3: Search for a location
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  // The results list appears after typing. We wait for the first result item to be visible.
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map navigation
+  // We poll the map center to ensure it has changed from the initial default position.
+  // The initial center is roughly [2.5e6, 5.4e6] (Paris-ish). Münster is roughly [2.6e6, 6.5e6].
+  // We just check that the map has moved significantly or settled.
+  const initialCenter = await getMapCenter(page);
+  await expect.poll(async () => {
+    const currentCenter = await getMapCenter(page);
+    if (!initialCenter || !currentCenter) return false;
+    // Check if center has changed by more than 1000 units in either x or y
+    const dx = Math.abs(currentCenter[0] - initialCenter[0]);
+    const dy = Math.abs(currentCenter[1] - initialCenter[1]);
+    return dx > 1000 || dy > 1000;
+  }).toBe(true);
+
+  // Step 6: Wait for weather forecast to load
+  // The forecast section appears after clicking the map or navigating.
+  // We wait for the weather forecast container to be visible.
+  const weatherForecast = page.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+
+  // Verify the forecast has 24 entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});
