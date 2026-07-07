@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from "@playwright/test";
+
+test("Use Case 10: Configure layers, search for a location and load the weather forecast", async ({
+    page
+}) => {
+    await page.goto("http://localhost:5173/ba-webgis-llm-e2e/");
+
+    // Wait for the app to load and initial state to settle
+    await expect(page.getByRole("button", { name: /layer|toc/i })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: /search/i })).toBeVisible();
+    await expect(page.getByRole("region", { name: /info|panel/i })).toBeVisible();
+
+    // Step 1: Hide Temperature overlay layer
+    const temperatureToggle = page.getByRole("checkbox", { name: /Temperature/i }).first();
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.uncheck();
+
+    // Step 2: Show Precipitation overlay layer
+    const precipitationToggle = page.getByRole("checkbox", { name: /Precipitation/i }).first();
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.check();
+
+    // Verify layer states
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect(precipitationToggle).toBeChecked();
+
+    // Step 3: Search for a location
+    const searchField = page.getByRole("textbox", { name: /search/i });
+    await searchField.fill("Münster");
+
+    // Step 4: Wait for result list and select first result
+    // The result list usually appears as a dropdown or list below the search field
+    // We wait for the first result item to be visible
+    const firstResult = page.getByRole("option", { name: /Münster/i }).first();
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for map to navigate
+    // Since we can't assert map canvas content directly, we wait for the info panel to start updating
+    // or for the search field to clear/close, indicating navigation started.
+    // We'll wait for the info panel to show loading or new content.
+    const infoPanel = page.getByRole("region", { name: /info|panel/i });
+
+    // Step 6: Wait for info panel to load the forecast with 24 entries
+    // The expected result is 24 entries in the weather forecast section.
+    // We poll for the number of forecast entries.
+    await expect
+        .poll(async () => {
+            // Try to find elements representing forecast entries.
+            // Common patterns: list items, cards, or specific grid cells.
+            // Assuming the forecast entries are rendered as distinct elements within the info panel.
+            // We look for a container that likely holds the forecast list.
+            const forecastContainer = infoPanel.locator('[data-testid="weather-forecast"]');
+            if ((await forecastContainer.count()) > 0) {
+                return await forecastContainer.locator("> *").count();
+            }
+            // Fallback: look for any list items that might represent hours/days
+            const listItems = infoPanel.locator("li").filter({ hasText: /^/ }).count();
+            // This is a heuristic. A more robust way would be to look for specific forecast data.
+            // Let's assume the forecast entries are in a list or grid.
+            // We'll try to count elements that look like forecast items.
+            // Often, weather apps show hourly forecasts.
+            const hourlyItems = infoPanel
+                .locator('[class*="hourly"], [class*="forecast-item"], [class*="weather-entry"]')
+                .count();
+            if ((await hourlyItems) > 0) {
+                return await hourlyItems;
+            }
+            return 0;
+        })
+        .toBeGreaterThanOrEqual(24);
+
+    // Final verification of layer states to ensure they persisted
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect(precipitationToggle).toBeChecked();
+});

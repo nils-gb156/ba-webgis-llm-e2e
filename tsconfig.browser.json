@@ -29,5 +29,5 @@
         "declarationMap": true
     },
     "include": ["src"],
-    "exclude": ["**/dist/**", "**/node_modules/**", "src/app/tests"]
+    "exclude": ["**/dist/**", "**/node_modules/**", "src/app/llm/tests"]
 }

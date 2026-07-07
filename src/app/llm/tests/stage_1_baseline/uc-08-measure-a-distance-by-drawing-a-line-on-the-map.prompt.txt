@@ -1,0 +1,29 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 8: Measure a distance by drawing a line on the map
+
+**Description:** The user activates the measurement tool, draws a line on the map and checks that a measurement result is shown.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The measurement tool is accessible via the toolbar.
+- The map canvas is interactive.
+
+**Steps:**
+
+1. The user clicks the 'Measurement' button in the toolbar to open the measurement panel.
+2. The user clicks several points on the map canvas to draw a line.
+3. The user double-clicks to finish the measurement.
+
+**Expected result:**
+
+- The measurement panel is visible.
+- The measurement panel displays a length value with a unit.
+
+**Complexity:** hard
+
+Return only the test code.

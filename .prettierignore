@@ -4,4 +4,4 @@ temp
 test-data
 support/licenses
 pnpm-lock.yaml
-src/app/tests
+src/app/llm/tests

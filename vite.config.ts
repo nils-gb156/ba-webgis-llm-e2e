@@ -84,7 +84,7 @@ export default defineConfig(({ mode }) => {
             setupFiles: ["testing/global-setup.ts"],
 
             // Generated Playwright tests live here; they must not be run by vitest.
-            exclude: [...configDefaults.exclude, "**/app/tests/**"],
+            exclude: [...configDefaults.exclude, "**/app/llm/tests/**"],
 
             server: {
                 deps: {

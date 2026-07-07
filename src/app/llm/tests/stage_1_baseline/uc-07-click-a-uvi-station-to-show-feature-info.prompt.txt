@@ -1,0 +1,31 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 7: Click a UVI station to show feature info
+
+**Description:** The user clicks on a UVI station marker and checks that the WMS GetFeatureInfo result appears in the info panel.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The info panel is visible.
+- The UV-Index Stations layer is active (visible by default).
+- The map is positioned so at least one UVI station is visible.
+- A known UVI station is located at map coordinates [1188692.84, 6767643.28] (EPSG:3857).
+- No measurement tool is active.
+
+**Steps:**
+
+1. The user clicks on the UVI station marker at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+2. The user waits for the info panel to load the station info.
+
+**Expected result:**
+
+- A WMS GetFeatureInfo request for the UV-Index Stations layer is sent to the DWD geoserver.
+- The info panel displays a 'UV-Index Station' section with feature information from the GetFeatureInfo response.
+
+**Complexity:** hard
+
+Return only the test code.
