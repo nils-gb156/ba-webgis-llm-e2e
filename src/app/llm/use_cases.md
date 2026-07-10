@@ -132,28 +132,28 @@
 
 **Complexity:** hard
 
-## Use Case 7: Click a UVI station to show feature info
+## Use Case 7: Click both point station layers to show feature info
 
-**Description:** The user clicks on a UVI station marker and checks that the WMS GetFeatureInfo result appears in the info panel.
+**Description:** The user clicks on a location where both a UV-Index Station (WMS) and an EUCOS Ground Station (WFS) are located and checks that the feature info for both point layers appears in the info panel.
 
 **Preconditions:**
 
 - The app is loaded successfully.
 - The info panel is visible.
-- The UV-Index Stations layer is active (visible by default).
-- The map is positioned so at least one UVI station is visible.
-- A known UVI station is located at map coordinates [1188692.84, 6767643.28] (EPSG:3857).
+- The UV-Index Stations layer (WMS) is active.
+- The EUCOS Ground Stations layer (WFS) is active.
+- Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28] (EPSG:3857).
 - No measurement tool is active.
 
 **Steps:**
 
-1. The user clicks on the UVI station marker at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
-2. The user waits for the info panel to load the station info.
+1. The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+2. The user waits for the info panel to load the station info for both layers.
 
 **Expected result:**
 
-- A WMS GetFeatureInfo request for the UV-Index Stations layer is sent to the DWD geoserver.
-- The info panel displays a 'UV-Index Station' section with feature information from the GetFeatureInfo response.
+- The info panel displays a 'UV-Index Station' section with feature information.
+- The info panel displays an 'EUCOS Ground Station' section with feature information.
 
 **Complexity:** hard
 
