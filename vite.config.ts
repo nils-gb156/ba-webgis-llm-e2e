@@ -112,6 +112,12 @@ export default defineConfig(({ mode }) => {
                     target: "https://maps.dwd.de",
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/dwd-wms/, "/geoserver/dwd/wms")
+                },
+                // Proxy DWD WFS requests (EUCOS ground stations vector layer) to avoid CORS in dev
+                "/dwd-ows": {
+                    target: "https://maps.dwd.de",
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/dwd-ows/, "/geoserver/dwd/ows")
                 }
             }
         }
