@@ -15,8 +15,7 @@ LM_STUDIO_API_KEY = "lm-studio"
 MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
 MODEL_QUANTIZATION = "FP8"
 TEMPERATURE = 0.6
-MAX_TOKENS = 16384         # thinking tokens count towards this token budget
-# Qwen3 has thinking enabled by default; no explicit parameter is passed.
+MAX_TOKENS = 16384
 
 STAGE = "stage_5_self_improvement_loop"
 MAX_ITERATIONS = 5         # abort criterion: PASS or 5 iterations, whichever comes first

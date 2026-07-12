@@ -10,9 +10,8 @@ LM_STUDIO_BASE_URL = "http://dgx01:8000/v1"
 LM_STUDIO_API_KEY = "lm-studio"
 MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
 MODEL_QUANTIZATION = "FP8"
-TEMPERATURE = 0.0
-MAX_TOKENS = 4096          # documented constant: prevents silent truncation of long tests
-THINKING_ENABLED = False   # explicitly off; Qwen3 defaults to on
+TEMPERATURE = 0.6
+MAX_TOKENS = 16384 
 
 STAGE = "stage_1_baseline"
 
@@ -130,7 +129,6 @@ def call_llm(skill: str, prompt: str) -> str:
             {"role": "system", "content": skill},
             {"role": "user", "content": prompt},
         ],
-        extra_body={"chat_template_kwargs": {"enable_thinking": THINKING_ENABLED}},
     )
     content = response.choices[0].message.content
     if content is None:
