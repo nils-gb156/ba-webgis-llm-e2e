@@ -21,11 +21,25 @@ These conventions are fixed and apply to every test you produce.
 
 ## Locators
 
-- Address elements by user-facing properties: `getByRole`, `getByText`, `getByLabel`.
-- Use `getByTestId` when a test id is available.
+## Locators
+
+- Prefer `getByTestId` whenever a test id is available — test ids are stable
+  and unambiguous.
+- Fall back to user-facing properties (`getByRole`, `getByText`, `getByLabel`)
+  only for elements without a test id. Prefer `getByRole` with an accessible
+  name over `getByText`, as plain text matches are often ambiguous.
 - Do not use CSS selectors or XPath bound to the DOM structure.
 - If an element has no accessible role, label, visible text, or test id, a
   scoped CSS class selector may be used as a last resort.
+- Chakra UI form controls (checkbox, switch, radio) render the real
+  `role`-bearing `<input>` visually hidden underneath a decorative control
+  element (`chakra-checkbox__control` etc.) that intercepts pointer events.
+  Clicking the `getByRole('checkbox' | 'switch' | 'radio')` locator therefore
+  hangs until timeout ("… intercepts pointer events"). Use
+  `click({ force: true })` on the role locator to toggle such a control, and
+  assert the result separately (`toBeChecked()`). Do not switch to
+  `getByText()` for clicking — visible label texts are often ambiguous
+  (headings, list items) and cause strict mode violations.
 
 ## Waiting and assertions
 
