@@ -14,7 +14,7 @@
 1. The user clicks the 'Layer Switcher' button in the toolbar to hide the panel.
 2. The user clicks the 'Layer Switcher' button again to show the panel.
 
-**Expected result:**
+**Expected results:**
 
 - After the first click, the layer switcher panel is no longer visible.
 - After the second click, the layer switcher panel is visible again.
@@ -36,7 +36,7 @@
 1. The user opens the base map selector in the layer switcher.
 2. The user selects 'OpenStreetMap' as the base map.
 
-**Expected result:**
+**Expected results:**
 
 - The OpenStreetMap base map is selected.
 - The Carto Light base map is no longer selected.
@@ -57,7 +57,7 @@
 1. The user clicks the 'Zoom in' button to increase the zoom level.
 2. The user clicks the 'Zoom out' button to decrease the zoom level.
 
-**Expected result:**
+**Expected results:**
 
 - After clicking the 'Zoom in' button, the map zoom level is higher than before.
 - After clicking the 'Zoom out' button, the map zoom level is lower than after zooming in.
@@ -79,7 +79,7 @@
 1. The user clicks the visibility toggle of the UV-Index overlay layer to show it.
 2. The user waits for the map to load the layer tiles.
 
-**Expected result:**
+**Expected results:**
 
 - The UV-Index overlay layer toggle is in the enabled (checked) state.
 - The UV-Index overlay tiles are rendered on the map canvas.
@@ -101,7 +101,7 @@
 1. The user clicks the visibility toggle of the Precipitation overlay layer to show it.
 2. The user views the legend.
 
-**Expected result:**
+**Expected results:**
 
 - The Precipitation overlay layer toggle is in the enabled (checked) state.
 - The legend displays an entry corresponding to the Precipitation layer.
@@ -124,7 +124,7 @@
 1. The user clicks on a position on the map canvas.
 2. The user waits for the info panel to load the forecast.
 
-**Expected result:**
+**Expected results:**
 
 - The clicked position is highlighted on the map.
 - The info panel displays a weather forecast section.
@@ -150,7 +150,7 @@
 1. The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
 2. The user waits for the info panel to load the station info for both layers.
 
-**Expected result:**
+**Expected results:**
 
 - The info panel displays a 'UV-Index Station' section with feature information.
 - The info panel displays an 'EUCOS Ground Station' section with feature information.
@@ -173,7 +173,7 @@
 2. The user clicks several points on the map canvas to draw a line.
 3. The user double-clicks to finish the measurement.
 
-**Expected result:**
+**Expected results:**
 
 - The measurement panel is visible.
 - The measurement panel displays a length value with a unit.
@@ -197,7 +197,7 @@
 3. The user selects the PNG file format.
 4. The user clicks the export/print button.
 
-**Expected result:**
+**Expected results:**
 
 - The printing panel is visible.
 - A PNG file containing the current map view is generated and downloaded.
@@ -228,7 +228,7 @@
 5. The user waits for the map to navigate to the selected location.
 6. The user waits for the info panel to load the forecast.
 
-**Expected result:**
+**Expected results:**
 
 - The Precipitation overlay layer toggle is in the disabled state.
 - The Temperature overlay layer toggle is in the enabled state.
