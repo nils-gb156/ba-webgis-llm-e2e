@@ -117,7 +117,6 @@
 - The app is loaded successfully.
 - The info panel is visible.
 - The map canvas is interactive.
-- No measurement tool is active.
 
 **Steps:**
 
