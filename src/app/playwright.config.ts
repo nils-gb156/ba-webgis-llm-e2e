@@ -30,7 +30,12 @@ export default defineConfig({
     projects: [
         {
             name: "chromium",
-            use: { ...devices["Desktop Chrome"] }
+            use: {
+                ...devices["Desktop Chrome"],
+                // Full HD, kept in sync with VIEWPORT in generate_tests_stage_5.py
+                // so scrape screenshots and failure screenshots share one size.
+                viewport: { width: 1920, height: 1080 }
+            }
         }
     ]
 });

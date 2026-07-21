@@ -1,3 +1,4 @@
+import base64
 import json
 import re
 import subprocess
@@ -15,7 +16,7 @@ LM_STUDIO_API_KEY = "lm-studio"
 MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
 MODEL_QUANTIZATION = "FP8"
 TEMPERATURE = 0.6
-MAX_TOKENS = 16384
+MAX_TOKENS = 64000
 
 STAGE = "stage_5_self_improvement_loop"
 MAX_ITERATIONS = 5         # abort criterion: PASS or 5 iterations, whichever comes first
@@ -33,15 +34,15 @@ BASE_URL = "http://localhost:5173/ba-webgis-llm-e2e/"
 PLAYWRIGHT_CWD = SCRIPT_DIR.parent  # -> src/app (contains package.json + tests)
 PLAYWRIGHT_TIMEOUT_S = 180  # hard timeout per test run (subprocess level)
 
-# Playwright writes per-test artifacts (incl. the failure snapshot written by
-# the fixture) into this directory. Cleared before every run so that only the
-# snapshot of the CURRENT run can be collected.
+# Playwright writes per-test artifacts (incl. failure snapshot + screenshot
+# written by the fixture) into this directory. Cleared before every run so
+# that collected artifacts always belong to the CURRENT run.
 TEST_RESULTS_DIR = PLAYWRIGHT_CWD / "test-results"
 
 # Harness instrumentation: fixture that captures the application state at the
-# point of failure. The import in the EXECUTION COPY of a generated spec is
-# rewritten from '@playwright/test' to this module. The generated spec itself
-# (the file that is evaluated) is never modified.
+# point of failure (text snapshot + screenshot). The import in the EXECUTION
+# COPY of a generated spec is rewritten from '@playwright/test' to this module.
+# The generated spec itself (the file that is evaluated) is never modified.
 # Location on disk: SCRIPT_DIR / "tests" / "failure-snapshot-fixture.ts"
 # Exec specs live in tests/<stage>/<uc-dir>/ -> two levels up.
 FIXTURE_IMPORT = "../../failure-snapshot-fixture"
@@ -54,6 +55,25 @@ MAX_ERROR_CHARS = 3000
 # small and carries the highest correction value); only the aria tree that
 # follows is trimmed to the remaining budget.
 MAX_SNAPSHOT_CHARS = 6000
+
+# Screenshot channel: the model (Qwen3.6, natively multimodal) receives a
+# screenshot of the application as image input — the only channel through
+# which the canvas-rendered map state can reach the model. The initial
+# screenshot accompanies iteration 0; the failure screenshot accompanies
+# every feedback iteration.
+SEND_SCREENSHOTS = True
+
+# Viewport used for scraping / screenshots. Full HD so the model sees the
+# layout at a realistic desktop resolution. Keep this in sync with the
+# `viewport` in playwright.config.ts so scrape and failure screenshots match.
+VIEWPORT = {"width": 1920, "height": 1080}
+
+# The basemap is rendered by OpenLayers onto a <canvas> as tiles arrive over
+# the network. A screenshot taken immediately after the app mounts shows an
+# empty (white) map because no tiles have painted yet. After the DOM is ready
+# we therefore wait for the network to go idle and then allow a short settle
+# time for the tiles to be drawn onto the canvas before capturing.
+MAP_SETTLE_MS = 2000
 
 client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY)
 
@@ -110,18 +130,29 @@ def load_skill(file_path: Path) -> str:
 
 # =========================================================================
 # UI context: automatic snapshot of the initial page state (data-testid +
-# aria tree) plus the map model helper file contents. Failing tests are then
-# executed against the live app and the error output plus a failure-state
-# snapshot are fed back to the model.
+# aria tree) plus the map model helper file contents, plus an initial
+# screenshot. Failing tests are then executed against the live app and the
+# error output, a failure-state snapshot and a failure screenshot are fed
+# back to the model.
 # =========================================================================
-def scrape_app_context(base_url: str) -> str:
+# Scrapes testids + aria tree AND takes an initial screenshot.
+# Returns (context_text, screenshot_png_bytes).
+def scrape_app_context(base_url: str) -> Tuple[str, bytes]:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        page = browser.new_page(viewport=VIEWPORT)
         page.goto(base_url, wait_until="domcontentloaded", timeout=15000)
         page.wait_for_selector("[data-testid]", timeout=10000)  # wait for the mounted app
+        # Let the basemap tiles load and paint onto the canvas so the initial
+        # screenshot actually shows the map instead of an empty white area.
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except Exception:
+            pass  # not fatal — capture whatever has rendered so far
+        page.wait_for_timeout(MAP_SETTLE_MS)
         test_ids = _extract_test_ids(page)
         aria = _aria_snapshot(page)
+        screenshot = page.screenshot()  # initial visual state (PNG bytes)
         browser.close()
 
     sections = []
@@ -130,7 +161,7 @@ def scrape_app_context(base_url: str) -> str:
                         + "\n".join(f"  - {t}" for t in test_ids))
     if aria:
         sections.append("Accessibility tree (roles, names, states):\n" + aria)
-    return "\n\n".join(sections)
+    return "\n\n".join(sections), screenshot
 
 
 # Walks the DOM (including shadow roots) and collects every distinct data-testid value.
@@ -185,12 +216,20 @@ map-model-helpers:
 
 
 # Builds the INITIAL user prompt (iteration 0): identical role to stage 2, plus helpers.
-def build_initial_prompt(use_case: Dict[str, Any], base_url: str, ui_context: str) -> str:
+# If a screenshot accompanies the prompt, the text references it.
+def build_initial_prompt(use_case: Dict[str, Any], base_url: str, ui_context: str,
+                         has_screenshot: bool) -> str:
+    screenshot_note = ""
+    if has_screenshot:
+        screenshot_note = ("\nA screenshot of the application's initial state is "
+                           "attached as an image. Use it to understand the layout "
+                           "and the visual map state.\n")
+
     return f"""\
 Generate a Playwright end-to-end test (TypeScript) for the following use case.
 
 Base URL: {base_url}
-
+{screenshot_note}
 UI context extracted automatically from the running application:
 {ui_context}
 
@@ -201,13 +240,14 @@ Return only the test code."""
 
 
 # Builds the FEEDBACK prompt (iteration >= 1): previous code + trimmed Playwright
-# errors + (if available) the application state captured at the point of failure.
+# errors + (if available) the application state captured at the point of failure
+# (text snapshot; a failure screenshot is attached as image input if available).
 # Stateless per iteration: no conversation history is carried over — the failed
-# code, the error output and the failure snapshot contain everything needed and
+# code, the error output and the failure state contain everything needed and
 # keep the context small.
 def build_feedback_prompt(use_case: Dict[str, Any], base_url: str, ui_context: str,
                           previous_code: str, error_report: str,
-                          failure_snapshot: str) -> str:
+                          failure_snapshot: str, has_screenshot: bool) -> str:
     snapshot_section = ""
     if failure_snapshot.strip():
         snapshot_section = f"""
@@ -216,6 +256,13 @@ Application state at the point of failure (data-testids and accessibility tree
 captured AFTER the test steps that did run — elements listed here may not exist
 in the initial page state):
 {failure_snapshot}"""
+
+    screenshot_note = ""
+    if has_screenshot:
+        screenshot_note = ("\n\nA screenshot of the application at the point of "
+                           "failure is attached as an image. It shows the visual "
+                           "state including the canvas-rendered map, which is not "
+                           "represented in the accessibility tree.")
 
     return f"""\
 The following Playwright end-to-end test (TypeScript) was generated for the use case
@@ -235,7 +282,7 @@ Previous test code (failing):
 ```
 
 Playwright error output:
-{error_report}{snapshot_section}
+{error_report}{snapshot_section}{screenshot_note}
 
 Fix the test so that it correctly verifies the use case and passes.
 Do not weaken or remove assertions just to make the test pass — the test must
@@ -272,15 +319,27 @@ def check_generated_code(ts_code: str) -> List[str]:
     return warnings
 
 
-# Sends the system (skill) + user (prompt) messages to the LLM endpoint and returns the raw text response.
-def call_llm(skill: str, prompt: str) -> str:
+# Sends the system (skill) + user (prompt, optionally with an image) messages
+# to the LLM endpoint and returns the raw text response.
+# screenshot_png: raw PNG bytes attached as image input (multimodal), or None.
+def call_llm(skill: str, prompt: str, screenshot_png: Optional[bytes] = None) -> str:
+    if screenshot_png is not None:
+        b64 = base64.b64encode(screenshot_png).decode("ascii")
+        user_content: Any = [
+            {"type": "text", "text": prompt},
+            {"type": "image_url",
+             "image_url": {"url": f"data:image/png;base64,{b64}"}},
+        ]
+    else:
+        user_content = prompt
+
     response = client.chat.completions.create(
         model=MODEL_NAME,
         temperature=TEMPERATURE,
         max_tokens=MAX_TOKENS,
         messages=[
             {"role": "system", "content": skill},
-            {"role": "user", "content": prompt},
+            {"role": "user", "content": user_content},
         ],
     )
     content = response.choices[0].message.content
@@ -307,8 +366,8 @@ def make_exec_copy(spec: Path) -> Path:
     return exec_spec
 
 
-# Clears the Playwright test-results directory so that a collected failure
-# snapshot always belongs to the CURRENT run.
+# Clears the Playwright test-results directory so that collected failure
+# artifacts always belong to the CURRENT run.
 def clear_test_results() -> None:
     if TEST_RESULTS_DIR.exists():
         shutil.rmtree(TEST_RESULTS_DIR, ignore_errors=True)
@@ -337,14 +396,45 @@ def collect_failure_snapshot() -> str:
     return text[:MAX_SNAPSHOT_CHARS] + "\n[... truncated ...]"
 
 
+# Collects the failure screenshot written by the fixture (if any).
+# Returns the PNG bytes, or None if no screenshot was captured.
+def collect_failure_screenshot() -> Optional[bytes]:
+    if not TEST_RESULTS_DIR.exists():
+        return None
+    candidates = sorted(TEST_RESULTS_DIR.rglob("failure-screenshot.png"),
+                        key=lambda p: p.stat().st_mtime, reverse=True)
+    if not candidates:
+        return None
+    return candidates[0].read_bytes()
+
+
+# Collects the end screenshot written by the fixture on a passing test (if any).
+# Returns the PNG bytes, or None if no screenshot was captured. Used purely for
+# human visual verification of the final state — not fed back to the model.
+def collect_end_screenshot() -> Optional[bytes]:
+    if not TEST_RESULTS_DIR.exists():
+        return None
+    candidates = sorted(TEST_RESULTS_DIR.rglob("end-screenshot.png"),
+                        key=lambda p: p.stat().st_mtime, reverse=True)
+    if not candidates:
+        return None
+    return candidates[0].read_bytes()
+
+
 # =========================================================================
 # Playwright execution and error extraction
 # =========================================================================
 # Runs a single spec file with the JSON reporter; returns (passed, error_report, raw_json).
 def run_playwright_test(spec: Path) -> Tuple[bool, str, str]:
-    npx = shutil.which("npx")
-    if npx is None:
-        raise RuntimeError("npx not found on PATH.")
+    # Use `pnpm exec` rather than `npx`: on this machine npx resolves through an
+    # nvm4w symlink into another user's protected profile and crashes with EPERM
+    # ("Could not determine Node.js install directory") before producing any
+    # reporter output, which would be misreported as a test failure. pnpm runs
+    # from the current user's profile and invokes the locally installed
+    # Playwright binary directly.
+    pnpm = shutil.which("pnpm")
+    if pnpm is None:
+        raise RuntimeError("pnpm not found on PATH.")
     # Playwright treats the positional argument as a regex filter matched against
     # the test file paths (forward slashes, relative to rootDir). Passing an
     # absolute Windows path with backslashes never matches ("No tests found"),
@@ -354,7 +444,7 @@ def run_playwright_test(spec: Path) -> Tuple[bool, str, str]:
         spec_arg = spec.resolve().relative_to(PLAYWRIGHT_CWD.resolve()).as_posix()
     except ValueError:
         spec_arg = spec.as_posix()
-    cmd = [npx, "playwright", "test", spec_arg, "--reporter=json"]
+    cmd = [pnpm, "exec", "playwright", "test", spec_arg, "--reporter=json"]
     try:
         proc = subprocess.run(
             cmd,
@@ -441,7 +531,8 @@ def save_iteration(uc_dir: Path, base: str,
 # =========================================================================
 # Self-improvement loop per use case
 # =========================================================================
-def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str) -> Dict[str, Any]:
+def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str,
+                          initial_screenshot: Optional[bytes]) -> Dict[str, Any]:
     uc_prefix = f"uc-{int(use_case['id']):02d}"
     title_slug = slugify(use_case["title"])
     slug = f"{uc_prefix}-{title_slug}"
@@ -451,18 +542,24 @@ def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str)
     previous_code: Optional[str] = None
     error_report = ""
     failure_snapshot = ""
+    failure_screenshot: Optional[bytes] = None
     passed = False
 
     for iteration in range(MAX_ITERATIONS):
         if iteration == 0:
-            prompt = build_initial_prompt(use_case, BASE_URL, ui_context)
+            screenshot = initial_screenshot if SEND_SCREENSHOTS else None
+            prompt = build_initial_prompt(use_case, BASE_URL, ui_context,
+                                          has_screenshot=screenshot is not None)
         else:
+            screenshot = failure_screenshot if SEND_SCREENSHOTS else None
             prompt = build_feedback_prompt(use_case, BASE_URL, ui_context,
                                            previous_code or "", error_report,
-                                           failure_snapshot)
+                                           failure_snapshot,
+                                           has_screenshot=screenshot is not None)
 
-        print(f"  iter {iteration}: generating...")
-        raw = call_llm(skill, prompt)
+        print(f"  iter {iteration}: generating"
+              f"{' (with screenshot)' if screenshot is not None else ''}...")
+        raw = call_llm(skill, prompt, screenshot_png=screenshot)
         ts_code = extract_typescript_code(raw)
         # File name scheme: uc-<id>-iter-<n>-<title-slug>
         base = f"{uc_prefix}-iter-{iteration}-{title_slug}"
@@ -485,14 +582,34 @@ def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str)
                 print(f"    failure snapshot captured ({len(failure_snapshot)} chars)")
             else:
                 print("    no failure snapshot available (page closed?)")
+
+            failure_screenshot = collect_failure_screenshot()
+            if failure_screenshot:
+                (uc_dir / f"{base}.failure-screenshot.png").write_bytes(
+                    failure_screenshot)
+                print(f"    failure screenshot captured "
+                      f"({len(failure_screenshot)} bytes)")
+            else:
+                print("    no failure screenshot available (page closed?)")
         else:
             failure_snapshot = ""
+            failure_screenshot = None
+            # Save an end screenshot of the passing state for visual review.
+            end_screenshot = collect_end_screenshot()
+            if end_screenshot:
+                (uc_dir / f"{base}.end-screenshot.png").write_bytes(
+                    end_screenshot)
+                print(f"    end screenshot captured "
+                      f"({len(end_screenshot)} bytes)")
+            else:
+                print("    no end screenshot available (page closed?)")
 
         history.append({
             "iteration": iteration,
             "spec": spec.name,
             "passed": passed,
             "failure_snapshot_captured": bool(failure_snapshot),
+            "failure_screenshot_captured": failure_screenshot is not None,
             "error_excerpt": error_report[:500],
         })
         print(f"  iter {iteration}: {'PASS' if passed else 'FAIL'}")
@@ -508,6 +625,7 @@ def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str)
         "passed": passed,
         "iterations_used": len(history),
         "max_iterations": MAX_ITERATIONS,
+        "screenshots_enabled": SEND_SCREENSHOTS,
         "history": history,
     }
     (uc_dir / f"{slug}-loop-summary.json").write_text(
@@ -527,7 +645,7 @@ def main() -> None:
 
     print("Scraping live app for UI context (initial page state)...")
     try:
-        scraped = scrape_app_context(BASE_URL)
+        scraped, initial_screenshot = scrape_app_context(BASE_URL)
     except Exception as exc:
         raise SystemExit(f"Could not scrape app context: {exc}\n"
                          f"Stage 5 requires the running app — aborting.")
@@ -538,14 +656,17 @@ def main() -> None:
     ui_context = build_ui_context(scraped)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUTPUT_DIR / "_stage_5_context.txt").write_text(ui_context, encoding="utf-8")
-    print(f"  Context captured ({len(ui_context)} chars), saved to _stage_5_context.txt")
+    (OUTPUT_DIR / "_stage_5_initial_context.txt").write_text(ui_context, encoding="utf-8")
+    (OUTPUT_DIR / "_stage_5_initial_screenshot.png").write_bytes(initial_screenshot)
+    print(f"  Context captured ({len(ui_context)} chars), saved to _stage_5_initial_context.txt")
+    print(f"  Initial screenshot saved ({len(initial_screenshot)} bytes)")
 
     all_summaries: List[Dict[str, Any]] = []
     for use_case in use_cases:
         print(f"UC {use_case['id']:02d} ({use_case['complexity']}): {use_case['title']}")
         try:
-            summary = run_loop_for_use_case(use_case, skill, ui_context)
+            summary = run_loop_for_use_case(use_case, skill, ui_context,
+                                            initial_screenshot)
             all_summaries.append(summary)
             status = "PASS" if summary["passed"] else "FAIL"
             print(f"  -> {status} after {summary['iterations_used']} iteration(s)")
