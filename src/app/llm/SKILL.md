@@ -21,8 +21,6 @@ These conventions are fixed and apply to every test you produce.
 
 ## Locators
 
-## Locators
-
 - Prefer `getByTestId` whenever a test id is available — test ids are stable
   and unambiguous.
 - Fall back to user-facing properties (`getByRole`, `getByText`, `getByLabel`)
@@ -40,6 +38,23 @@ These conventions are fixed and apply to every test you produce.
   assert the result separately (`toBeChecked()`). Do not switch to
   `getByText()` for clicking — visible label texts are often ambiguous
   (headings, list items) and cause strict mode violations.
+- Accessible names must be unambiguous. When one control's name is a substring
+  of another's (e.g. "Search" vs "Search Address", or a toolbar toggle and a
+  button of the same name inside a dialog), `getByRole(..., { name })` matches
+  several elements and fails with a strict mode violation. Use
+  `{ exact: true }` and/or scope the lookup to the relevant container
+  (`page.getByRole('dialog', { name }).getByRole(...)`).
+- A `data-testid` is NOT an element `id`. Never target it with a CSS id
+  selector such as `page.locator('#some-testid')` — that selector matches
+  nothing and the call hangs until timeout. Always use
+  `getByTestId('some-testid')`. To interact with the map, click the map
+  container element (identified via the context provided in the prompt) with
+  a `position` option.
+- Toolbar toggle buttons may already be in the active state (`aria-pressed="true"`).
+  Clicking such a toggle blindly closes the panel instead of opening it. Treat
+  the desired end state as the source of truth: assert the panel's visibility,
+  and only click the toggle when its current pressed state does not already
+  match the state the use case requires.
 
 ## Waiting and assertions
 
@@ -51,6 +66,13 @@ These conventions are fixed and apply to every test you produce.
   than the DOM), use `expect.poll(() => ...)` instead of a single
   `expect(await ...)`, since the latter evaluates the value only once and
   does not wait for it to settle.
+- `expect.poll(callback)` already awaits the callback's return value. Do NOT
+  chain `.resolves` after it (`expect.poll(...).resolves` is unsupported and
+  throws) — return the value from the callback and assert on it directly.
+- Choose the matcher to fit the polled value: `.toBe` / `.toEqual` for
+  equality, `.toMatch(/regex/)` for a string pattern, `.toContain(x)` only for
+  a substring or array membership. Never pass a regex to `.toContain` — use
+  `.toMatch` instead.
 - Do not use fixed waits (no `waitForTimeout`, no `sleep`).
 - For steps that depend on network responses or page loads, use
   `waitForResponse` / `waitForLoadState`.
@@ -73,3 +95,22 @@ These conventions are fixed and apply to every test you produce.
   Test ids are not assigned automatically; they exist only where set in the application code.
 - Geodata (map tiles, WMS layers, GetFeatureInfo, geocoder requests) load asynchronously
   over the network and appear only after the response has arrived.
+
+## Map state via helper functions (only if provided in the prompt)
+
+If the prompt provides map model helper functions, the following rules apply.
+If no helpers are provided, this section is irrelevant — do not invent or
+import any helper module.
+
+- Map state (active base layer, operational layer visibility, zoom level,
+  center, highlighted coordinate) is not in the DOM. Read it only through the
+  helper functions provided in the prompt.
+- Import the helpers with a single STATIC top-level import using exactly the
+  import path stated in the prompt. Never use a dynamic `await import(...)` —
+  it fails at runtime with "SyntaxError: Unexpected token 'export'". Never
+  guess a different relative path — it fails with "Cannot find module".
+- Every helper returns `undefined` until the map is ready, and reflects the
+  result of a triggering action only after its asynchronous effect has
+  completed. Never assert on a single `await helper(page)`; always wrap the
+  call in `expect.poll(() => helper(page))` so it retries until the value
+  settles.
