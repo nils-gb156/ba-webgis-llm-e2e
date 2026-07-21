@@ -2,7 +2,9 @@
     "permissions": {
         "allow": [
             "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\nilsg\\\\repos\\\\ba-webgis-llm-e2e\\\\node_modules\\\\@open-pioneer\" -Recurse -Name)",
-            "Bash(Select-Object -First 50)"
+            "Bash(Select-Object -First 50)",
+            "Bash(python \"C:/Users/N90CC~1.BEI/AppData/Local/Temp/claude/c--Users-n-beikel-repos-ba-webgis-llm-e2e/d485d9e9-0226-4861-b655-2421df0aa2bd/scratchpad/assemble_phase2.py\")",
+            "Bash(python -c \"import json;d=json.load\\(open\\('_phase2_judge.json',encoding='utf-8'\\)\\);print\\(json.dumps\\(d[0],ensure_ascii=False,indent=2\\)\\);print\\('...total',len\\(d\\),'records'\\)\")"
         ]
     }
 }
