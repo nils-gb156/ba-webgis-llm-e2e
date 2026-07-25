@@ -11,15 +11,16 @@ from playwright.sync_api import sync_playwright, Page
 
 
 # --- Configuration ---
-LM_STUDIO_BASE_URL = "http://dgx01:8000/v1"
-LM_STUDIO_API_KEY = "lm-studio"
+LLM_BASE_URL = "http://dgx01:8000/v1"
+LLM_API_KEY = "lm-studio"  # any non-empty string; vLLM does not validate it
 MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
 MODEL_QUANTIZATION = "FP8"
 TEMPERATURE = 0.6
 MAX_TOKENS = 64 * 1024
 
 STAGE = "stage_5_self_improvement_loop"
-MAX_ITERATIONS = 5         # abort criterion: PASS or 5 iterations, whichever comes first
+MAX_ITERATIONS = 10         # abort criterion: PASS or 10 iterations, whichever comes first
+NUM_RUNS = 2              # number of full passes; each pass -> tests/<stage>/run_NN/
 
 SCRIPT_DIR = Path(__file__).parent
 USE_CASES_FILE = SCRIPT_DIR / "use_cases.md"
@@ -44,8 +45,8 @@ TEST_RESULTS_DIR = PLAYWRIGHT_CWD / "test-results"
 # COPY of a generated spec is rewritten from '@playwright/test' to this module.
 # The generated spec itself (the file that is evaluated) is never modified.
 # Location on disk: SCRIPT_DIR / "tests" / "failure-snapshot-fixture.ts"
-# Exec specs live in tests/<stage>/<uc-dir>/ -> two levels up.
-FIXTURE_IMPORT = "../../failure-snapshot-fixture"
+# Exec specs live in tests/<stage>/run_NN/<uc-dir>/ -> three levels up.
+FIXTURE_IMPORT = "../../../failure-snapshot-fixture"
 
 # Max characters of Playwright error output fed back into the prompt.
 # Keeps the feedback prompt small; full output is always saved to disk.
@@ -75,7 +76,7 @@ VIEWPORT = {"width": 1920, "height": 1080}
 # time for the tiles to be drawn onto the canvas before capturing.
 MAP_SETTLE_MS = 2000
 
-client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY)
+client = OpenAI(base_url=LLM_BASE_URL, api_key=LLM_API_KEY)
 
 
 # Turns a title into a filesystem-safe, lowercase, hyphenated slug.
@@ -200,14 +201,14 @@ def _aria_snapshot(page: Page) -> str:
 # Combines the scraped snapshot with the map model helper file contents.
 def build_ui_context(scraped: str) -> str:
     map_helpers = MAP_HELPERS_FILE.read_text(encoding="utf-8")
-    # Specs live at tests/<stage>/<uc-dir>/, hence three levels up to the helpers file.
+    # Specs live at tests/<stage>/run_NN/<uc-dir>/, hence four levels up to the helpers file.
     return f"""\
 {scraped}
 
 ## Map Model Helper Functions
 
 The following TypeScript helper functions are available and must be imported
-in the test from "../../../map-model-helpers" (relative to the generated test file).
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
 Use them to assert map state that is not accessible through DOM locators.
 
 map-model-helpers:
@@ -291,15 +292,31 @@ Return only the corrected test code."""
 
 
 # Cleans the raw LLM response: strips the <think> block and unwraps ```ts fences.
+# Robust against three observed failure modes:
+#   1. Multiple fenced blocks (explanatory snippet + full test) -> take the LONGEST.
+#   2. Unclosed fence (model stopped mid-output) -> strip the opening fence line.
+#   3. Stray fence lines left in otherwise plain output -> drop fence-only lines.
 def extract_typescript_code(response_text: str) -> str:
     text = response_text.strip()
     # Thinking is on by default for Qwen3; if the endpoint returns the reasoning
     # inline (instead of a separate reasoning_content field), strip it here.
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE).strip()
-    fenced = re.search(r"```(?:typescript|ts)?\s*(.*?)```", text, re.DOTALL | re.IGNORECASE)
-    if fenced:
-        return fenced.group(1).strip()
-    return text
+
+    blocks = re.findall(r"```(?:typescript|ts)?\s*\n?(.*?)```", text,
+                        re.DOTALL | re.IGNORECASE)
+    if blocks:
+        return max(blocks, key=len).strip()
+
+    # Unclosed fence: everything after the opening fence line is the code.
+    unclosed = re.search(r"```(?:typescript|ts)?\s*\n(.*)$", text,
+                         re.DOTALL | re.IGNORECASE)
+    if unclosed:
+        text = unclosed.group(1)
+
+    # Drop any remaining fence-only lines (e.g. a trailing ``` that would
+    # otherwise end up in the spec and cause a compile error).
+    lines = [ln for ln in text.splitlines() if ln.strip() not in ("```", "```typescript", "```ts")]
+    return "\n".join(lines).strip()
 
 
 # Runs cheap sanity checks on the generated code and returns warnings only — never raises.
@@ -469,6 +486,11 @@ def run_playwright_test(spec: Path) -> Tuple[bool, str, str]:
         errors = [fallback.strip() or "Unknown failure (no reporter output)."]
 
     report = "\n\n---\n\n".join(errors)
+    # The exec copy imports the failure-snapshot fixture instead of
+    # '@playwright/test', which leaks the internal module name into stack
+    # traces (e.g. "_failureSnapshotFixture.expect.poll(...)"). Strip it so
+    # the feedback the model sees is free of harness instrumentation.
+    report = report.replace("_failureSnapshotFixture.", "")
     if len(report) > MAX_ERROR_CHARS:
         report = report[:MAX_ERROR_CHARS] + "\n[... truncated ...]"
     return False, report, raw_json
@@ -514,6 +536,32 @@ def _strip_ansi(text: str) -> str:
     return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
+# Coarse error taxonomy for the per-iteration records. Purely descriptive
+# metadata for the evaluation (error-class fix rates, oscillation analysis) —
+# it does NOT influence the loop or the feedback prompt. Order matters:
+# more specific patterns are checked before generic ones.
+def classify_error(report: str) -> str:
+    if not report.strip():
+        return "none"
+    checks = [
+        ("generation_error", ("No tests found", "SyntaxError", "Unexpected token",
+                              "Unterminated", "has already been declared")),
+        ("api_misuse", ("is not a function", 'does not support "resolves"',
+                        "expectedNumber: expected float, got object")),
+        ("selector_ambiguity", ("strict mode violation",)),
+        ("pointer_interception", ("intercepts pointer events",)),
+        ("timeout", ("Test timeout", "exceeded the hard timeout")),
+        ("matcher_type_error", ("Matcher error",)),
+        ("element_not_found", ("element(s) not found",)),
+        ("assertion_fail", ("expect(received)", "expect(locator)",
+                            "Timeout 5000ms exceeded while waiting on the predicate")),
+    ]
+    for label, needles in checks:
+        if any(n in report for n in needles):
+            return label
+    return "other"
+
+
 # =========================================================================
 # Output handling
 # =========================================================================
@@ -528,15 +576,78 @@ def save_iteration(uc_dir: Path, base: str,
     return spec
 
 
+# Appends one compact record per (use case × run) to the aggregate JSONL file.
+# Contains exactly the fields the distribution analysis / judge step needs, so
+# it never has to crawl the 500 per-UC directories.
+def append_all_runs_record(all_runs_path: Path, summary: Dict[str, Any]) -> None:
+    record = {
+        "run": summary["run"],
+        "uc_id": summary["use_case_id"],
+        "complexity": summary["complexity"],
+        "passed": summary["passed"],
+        "iterations_used": summary["iterations_used"],
+        "final_spec": summary["final_spec"],
+        "iterations": [
+            {
+                "iteration": h["iteration"],
+                "passed": h["passed"],
+                "error_type": h.get("error_type", ""),
+                "error_excerpt": h["error_excerpt"],
+            }
+            for h in summary["history"]
+        ],
+    }
+    if summary.get("harness_error"):
+        record["harness_error"] = summary["harness_error"]
+    with all_runs_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+# Rebuilds the aggregate JSONL from all per-UC loop-summary files on disk.
+# Returns the number of records written. Called once at startup so that a
+# resumed session starts from a consistent aggregate (harness-error records
+# from a previous session are intentionally dropped — those cells have no
+# summary file and will simply be retried).
+def rebuild_all_runs_file(all_runs_path: Path) -> int:
+    summaries: List[Dict[str, Any]] = []
+    for summary_file in sorted(OUTPUT_DIR.glob("run_*/*/*-loop-summary.json")):
+        try:
+            summaries.append(json.loads(summary_file.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"  [warn] unreadable summary skipped: {summary_file} ({exc})")
+    summaries.sort(key=lambda s: (s.get("run", ""), s.get("use_case_id", 0)))
+    all_runs_path.write_text("", encoding="utf-8")
+    for s in summaries:
+        append_all_runs_record(all_runs_path, s)
+    return len(summaries)
+
+
 # =========================================================================
 # Self-improvement loop per use case
 # =========================================================================
 def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str,
-                          initial_screenshot: Optional[bytes]) -> Dict[str, Any]:
+                          initial_screenshot: Optional[bytes],
+                          run_id: str, run_dir: Path) -> Dict[str, Any]:
     uc_prefix = f"uc-{int(use_case['id']):02d}"
     title_slug = slugify(use_case["title"])
     slug = f"{uc_prefix}-{title_slug}"
-    uc_dir = OUTPUT_DIR / slug
+    uc_dir = run_dir / slug
+    # Resume support: a completed loop-summary marks this (use case x run)
+    # cell as done. Skip it so an interrupted session (crash, Ctrl+C) can be
+    # continued without regenerating finished cells. The loaded summary is
+    # marked "_resumed" so main() does not append it to the JSONL again (the
+    # aggregate is rebuilt from all summary files at startup).
+    summary_path = uc_dir / f"{slug}-loop-summary.json"
+    if summary_path.exists():
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        summary["_resumed"] = True
+        print("  -> already completed in a previous session, skipping")
+        return summary
+    # Clear the UC directory for THIS run so no artifacts from an earlier,
+    # INCOMPLETE execution linger (crash mid-loop leaves iterations without a
+    # summary). Mandatory to prevent "ghost iterations" in the collected data.
+    if uc_dir.exists():
+        shutil.rmtree(uc_dir, ignore_errors=True)
 
     history: List[Dict[str, Any]] = []
     previous_code: Optional[str] = None
@@ -610,6 +721,7 @@ def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str,
             "passed": passed,
             "failure_snapshot_captured": bool(failure_snapshot),
             "failure_screenshot_captured": failure_screenshot is not None,
+            "error_type": "none" if passed else classify_error(error_report),
             "error_excerpt": error_report[:500],
         })
         print(f"  iter {iteration}: {'PASS' if passed else 'FAIL'}")
@@ -619,6 +731,7 @@ def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str,
         previous_code = ts_code
 
     summary = {
+        "run": run_id,
         "use_case_id": use_case["id"],
         "title": use_case["title"],
         "complexity": use_case["complexity"],
@@ -626,6 +739,7 @@ def run_loop_for_use_case(use_case: Dict[str, Any], skill: str, ui_context: str,
         "iterations_used": len(history),
         "max_iterations": MAX_ITERATIONS,
         "screenshots_enabled": SEND_SCREENSHOTS,
+        "final_spec": history[-1]["spec"] if history else None,
         "history": history,
     }
     (uc_dir / f"{slug}-loop-summary.json").write_text(
@@ -661,21 +775,60 @@ def main() -> None:
     print(f"  Context captured ({len(ui_context)} chars), saved to _stage_5_initial_context.txt")
     print(f"  Initial screenshot saved ({len(initial_screenshot)} bytes)")
 
+    # Compact machine-readable aggregate: one JSON line per (use case × run).
+    # This is the file the plotting / judge step reads directly, without having
+    # to crawl all per-UC directories. Rebuilt at startup from the per-UC
+    # loop-summary files so that resuming an interrupted session never loses
+    # records from completed cells.
+    all_runs_path = OUTPUT_DIR / "_stage_5_all_runs.jsonl"
+    n_existing = rebuild_all_runs_file(all_runs_path)
+    if n_existing:
+        print(f"Resuming: {n_existing} completed (use case x run) cells found, "
+              f"aggregate rebuilt.")
+
     all_summaries: List[Dict[str, Any]] = []
-    for use_case in use_cases:
-        print(f"UC {use_case['id']:02d} ({use_case['complexity']}): {use_case['title']}")
-        try:
-            summary = run_loop_for_use_case(use_case, skill, ui_context,
-                                            initial_screenshot)
-            all_summaries.append(summary)
-            status = "PASS" if summary["passed"] else "FAIL"
-            print(f"  -> {status} after {summary['iterations_used']} iteration(s)")
-        except Exception as exc:
-            print(f"  FAILED: {exc}")
+    for run in range(1, NUM_RUNS + 1):
+        run_id = f"run_{run:02d}"
+        run_dir = OUTPUT_DIR / run_id
+        print(f"=== {run_id} / run_{NUM_RUNS:02d} ===")
+        for use_case in use_cases:
+            print(f"UC {use_case['id']:02d} ({use_case['complexity']}): {use_case['title']}")
+            try:
+                summary = run_loop_for_use_case(use_case, skill, ui_context,
+                                                initial_screenshot, run_id, run_dir)
+                resumed = summary.pop("_resumed", False)
+                all_summaries.append(summary)
+                if not resumed:
+                    append_all_runs_record(all_runs_path, summary)
+                    status = "PASS" if summary["passed"] else "FAIL"
+                    print(f"  -> {status} after {summary['iterations_used']} iteration(s)")
+            except Exception as exc:
+                # Never lose the data point: record the harness failure so the
+                # (use case x run) grid stays complete for the evaluation. No
+                # loop-summary file is written, so a resumed session retries
+                # this cell.
+                print(f"  FAILED (harness): {exc}")
+                fail_summary = {
+                    "run": run_id,
+                    "use_case_id": use_case["id"],
+                    "title": use_case["title"],
+                    "complexity": use_case["complexity"],
+                    "passed": False,
+                    "iterations_used": 0,
+                    "max_iterations": MAX_ITERATIONS,
+                    "screenshots_enabled": SEND_SCREENSHOTS,
+                    "final_spec": None,
+                    "history": [],
+                    "harness_error": str(exc),
+                }
+                all_summaries.append(fail_summary)
+                append_all_runs_record(all_runs_path, fail_summary)
 
     (OUTPUT_DIR / "_stage_5_run_summary.json").write_text(
         json.dumps(all_summaries, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"\nRun summary saved to _stage_5_run_summary.json")
+    print(f"\nRun summary saved to _stage_5_run_summary.json "
+          f"({len(all_summaries)} UC×run records)")
+    print(f"Aggregate saved to {all_runs_path.name}")
 
 
 if __name__ == "__main__":

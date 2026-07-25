@@ -45,7 +45,9 @@ export default defineConfig(({ mode }) => {
             // This makes it easier for vite's dev server to find dependencies,
             // and thereby reduces the number of repeated bundler executions on dev server startup.
             // Adapt the file patterns if your service modules used a different naming scheme.
-            entries: ["**/*.html", "**/services.{ts,js}", "!**/dist/**"]
+            // The app/llm/tests directory holds tens of thousands of generated Playwright
+            // artifacts; excluding it keeps the dependency scan from hanging on startup.
+            entries: ["**/*.html", "**/services.{ts,js}", "!**/dist/**", "!**/app/llm/**"]
         },
         plugins: [
             pioneer({
@@ -105,6 +107,12 @@ export default defineConfig(({ mode }) => {
             // in dev mode press "r" to trigger reload and make changes active
             // See also: https://vitejs.dev/config/server-options.html#server-hmr
             // hmr: false
+
+            // The app/llm/tests directory holds tens of thousands of generated Playwright
+            // artifacts. Ignoring it prevents the file watcher from choking on startup.
+            watch: {
+                ignored: ["**/app/llm/tests/**"]
+            },
 
             proxy: {
                 // Proxy DWD WMS GetFeatureInfo requests to avoid CORS (server sends no Access-Control-Allow-Origin)

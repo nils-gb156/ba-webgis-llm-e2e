@@ -64,7 +64,7 @@ PLAYWRIGHT_CWD = SCRIPT_DIR.parent  # src/app
 STAGE_DIRS = {
     "stage1": "stage_1_baseline",
     "stage2": "stage_2_accessibility_snapshot",
-    "stage3": "stage_3_auto_ui_map",
+    "stage3": "stage_3_generated_ui_map",
     "stage4": "stage_4_manual_ui_map",
 }
 
@@ -90,18 +90,36 @@ def check_app_reachable(url: str, timeout: float = 5.0) -> bool:
 # Statische Truncation-/Degenerations-Heuristik (für GENERATION_ERROR)
 # ---------------------------------------------------------------------------
 
-def scan_for_truncation(path: Path) -> tuple[bool, str]:
+# Erkennt einen doppelten Top-Level-Import aus '@playwright/test' (z.B. weil das
+# Modell den kompletten Testrumpf zweimal ausgegeben hat).
+PW_IMPORT_RE = re.compile(
+    r"import\s*\{[^}]*\btest\b[^}]*\}\s*from\s*['\"]@playwright/test['\"]"
+)
+
+
+def scan_for_truncation(path: Path) -> tuple[bool, str, bool]:
     """Prüft eine .spec.ts-Datei deterministisch auf Anzeichen einer
-    abgeschnittenen/degenerierten LLM-Generierung. Gibt (is_truncated, reason)
-    zurück. Wird nur für Dateien aufgerufen, die Playwright nicht laden konnte.
+    abgeschnittenen/degenerierten LLM-Generierung. Gibt
+    (is_truncated, reason, hard_parse_error) zurück.
+
+    hard_parse_error=True markiert Dateien, die Playwright/Babel GARANTIERT
+    nicht parsen kann (leere Datei, unbalancierte Klammern, doppelte
+    Deklaration). Diese müssen VOR dem ersten Playwright-Lauf ausgeschlossen
+    werden, weil eine einzige nicht parsebare Datei die Collection für das
+    GESAMTE Verzeichnis abbricht (0 Tests). Insbesondere liefert der Report für
+    Babel-Fehler wie "Duplicate declaration 'test'" KEINE location.file, sodass
+    die nachträgliche Ignorier-Retry-Logik sie nicht erfassen kann.
+
+    Die weicheren Signale (offener Testblock, Kommentar-Degeneration) liefern
+    nur is_truncated=True für die Klassifikation, ohne Vorab-Ausschluss.
     """
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError as exc:
-        return True, f"Datei nicht lesbar: {exc}"
+        return True, f"Datei nicht lesbar: {exc}", True
 
     if not text.strip():
-        return True, "Datei ist leer"
+        return True, "Datei ist leer", True
 
     # 1. Klammernbilanz (grobe Heuristik, ignoriert Strings/Kommentare bewusst
     #    nicht separat -- ausreichend robust für die Unterscheidung
@@ -112,14 +130,23 @@ def scan_for_truncation(path: Path) -> tuple[bool, str]:
         return True, (
             f"Unbalancierte Klammern (geschweift: {brace_balance:+d}, "
             f"rund: {paren_balance:+d}) -> Datei wahrscheinlich abgeschnitten"
-        )
+        ), True
 
-    # 2. Datei endet nicht mit einem geschlossenen Test-Block
+    # 2. Doppelter Top-Level-Import aus '@playwright/test' -> Babel bricht mit
+    #    "Duplicate declaration 'test'" ab (ohne location.file im Report).
+    pw_imports = len(PW_IMPORT_RE.findall(text))
+    if pw_imports > 1:
+        return True, (
+            f"{pw_imports}x '@playwright/test'-Import (doppelte Deklaration) "
+            f"-> degenerierte Generierung, nicht parsebar"
+        ), True
+
+    # 3. Datei endet nicht mit einem geschlossenen Test-Block
     stripped = text.rstrip()
     if not stripped.endswith("});"):
-        return True, "Datei endet nicht mit '});' -> letzter Testblock offen"
+        return True, "Datei endet nicht mit '});' -> letzter Testblock offen", False
 
-    # 3. Degenerierte Wiederholungen (z.B. endlose Platzhalter-Kommentare)
+    # 4. Degenerierte Wiederholungen (z.B. endlose Platzhalter-Kommentare)
     lines = [l.strip() for l in text.splitlines() if l.strip()]
     tail = lines[-40:]
     comment_only = [l for l in tail if l.startswith("//") or l.startswith("*")]
@@ -127,9 +154,9 @@ def scan_for_truncation(path: Path) -> tuple[bool, str]:
         return True, (
             f"{len(comment_only)}/{len(tail)} der letzten Zeilen sind reine "
             f"Kommentare -> Verdacht auf Degeneration (Platzhalter-Loop)"
-        )
+        ), False
 
-    return False, ""
+    return False, "", False
 
 
 # ---------------------------------------------------------------------------
@@ -266,7 +293,7 @@ def main():
     group = ap.add_mutually_exclusive_group(required=True)
     group.add_argument("--stage1", action="store_true", help="stage_1_baseline")
     group.add_argument("--stage2", action="store_true", help="stage_2_accessibility_snapshot")
-    group.add_argument("--stage3", action="store_true", help="stage_3_auto_ui_map")
+    group.add_argument("--stage3", action="store_true", help="stage_3_generated_ui_map")
     group.add_argument("--stage4", action="store_true", help="stage_4_manual_ui_map")
     ap.add_argument("--timeout-ms", type=int, default=30000)
     ap.add_argument("--workers", type=int, default=1)
@@ -297,12 +324,25 @@ def main():
         sys.exit(f"[FEHLER] keine .spec.ts-Dateien unter {stage_dir} gefunden")
     print(f"[INFO] {len(spec_files)} Testdateien gefunden unter {stage_dir}")
 
-    # Vorab-Scan aller Dateien auf Truncation (wird nur bei Load-Errors genutzt).
+    # Vorab-Scan aller Dateien auf Truncation. Dateien, die garantiert nicht
+    # parsebar sind (hard_parse_error), werden vor dem ersten Playwright-Lauf
+    # ausgeschlossen: eine einzige nicht ladbare Datei bricht sonst die
+    # Collection für das GESAMTE Verzeichnis ab (0 Tests). Babel-Fehler wie
+    # "Duplicate declaration" liefern zudem keine location.file und sind daher
+    # über die nachträgliche Retry-Logik nicht erfassbar.
     # Key = absoluter norm_path(f), identisch zum späteren Lookup weiter unten.
     truncation_info = {}
+    pre_ignore: list[str] = []  # absolute posix Pfade statisch kaputter Dateien
     for f in spec_files:
-        is_trunc, reason = scan_for_truncation(f)
+        is_trunc, reason, hard = scan_for_truncation(f)
         truncation_info[norm_path(f)] = (is_trunc, reason)
+        if hard:
+            pre_ignore.append(f.resolve().as_posix())
+    if pre_ignore:
+        print(
+            f"[INFO] {len(pre_ignore)} statisch nicht parsebare Datei(en) vorab "
+            f"ausgeschlossen (sonst bricht die Collection für alle Tests ab)."
+        )
 
     # Playwright ausführen
     report_path = out_dir / "_playwright_report.json"
@@ -324,7 +364,7 @@ def main():
     # merged across attempts.
     results_by_file: dict[str, list[dict]] = {}
     load_errors: dict[str, str] = {}
-    broken_ignore: list[str] = []  # absolute posix paths, passed via PW_TEST_IGNORE
+    broken_ignore: list[str] = list(pre_ignore)  # absolute posix paths, passed via PW_TEST_IGNORE
     report: dict = {}
 
     max_attempts = len(spec_files) + 1
@@ -407,6 +447,7 @@ def main():
 
         test_key = find_matching_key(results_by_file, f)
         load_key = find_matching_key(load_errors, f)
+        is_trunc, trunc_reason = truncation_info.get(norm_path(f), (False, ""))
 
         if test_key is not None:
             # Datei wurde ausgeführt; ggf. mehrere Ergebnisse (Retries) ->
@@ -419,15 +460,15 @@ def main():
             row["duration_s"] = res["duration_s"]
             row["error_summary"] = res["message"][:500]
             row["needs_review"] = needs_review
+        elif is_trunc:
+            # Statisch als abgeschnitten/degeneriert erkannt (vorab ignoriert
+            # ODER von Playwright nicht ladbar) -> Generierungsfehler.
+            row["exec_category"] = "GENERATION_ERROR"
+            row["error_summary"] = trunc_reason
         elif load_key is not None:
-            # Datei konnte nicht geladen werden -> GENERATION_ERROR vs COMPILE_ERROR
-            is_trunc, reason = truncation_info.get(norm_path(f), (False, ""))
-            if is_trunc:
-                row["exec_category"] = "GENERATION_ERROR"
-                row["error_summary"] = reason
-            else:
-                row["exec_category"] = "COMPILE_ERROR"
-                row["error_summary"] = load_errors[load_key][:500]
+            # Ladefehler OHNE Truncation-Signal -> echter Compile-/Syntaxfehler.
+            row["exec_category"] = "COMPILE_ERROR"
+            row["error_summary"] = load_errors[load_key][:500]
         else:
             # Weder ausgeführt noch als Load-Error erfasst -> vermutlich vom
             # äußeren Prozess-Guard abgeschnitten

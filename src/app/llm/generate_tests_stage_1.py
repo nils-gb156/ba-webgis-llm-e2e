@@ -14,6 +14,7 @@ TEMPERATURE = 0.6
 MAX_TOKENS = 64 * 1024
 
 STAGE = "stage_1_baseline"
+NUM_RUNS = 50  # number of full generation passes; each pass -> tests/<stage>/run_NN/
 
 SCRIPT_DIR = Path(__file__).parent
 USE_CASES_FILE = SCRIPT_DIR / "use_cases.md"
@@ -136,34 +137,42 @@ def call_llm(skill: str, prompt: str) -> str:
     return content
 
 
-# Writes the .spec.ts, .prompt.txt, and .raw.txt files for one use case to the stage output directory.
-def save_outputs(output_dir: Path, use_case: Dict[str, Any],
+# Writes the .spec.ts, .prompt.txt, and .raw.txt files for one use case into the given run directory.
+def save_outputs(run_dir: Path, use_case: Dict[str, Any],
                  ts_code: str, prompt: str, raw: str) -> Path:
-    output_dir.mkdir(parents=True, exist_ok=True)
+    run_dir.mkdir(parents=True, exist_ok=True)
     slug = f"uc-{int(use_case['id']):02d}-{slugify(use_case['title'])}"
 
-    spec = output_dir / f"{slug}.spec.ts"
+    spec = run_dir / f"{slug}.spec.ts"
     spec.write_text(ts_code + "\n", encoding="utf-8")
-    (output_dir / f"{slug}.prompt.txt").write_text(prompt, encoding="utf-8")
-    (output_dir / f"{slug}.raw.txt").write_text(raw, encoding="utf-8")  # unedited model response
+    (run_dir / f"{slug}.prompt.txt").write_text(prompt, encoding="utf-8")
+    (run_dir / f"{slug}.raw.txt").write_text(raw, encoding="utf-8")  # unedited model response
     return spec
 
 
-# Main loop: for each use case, build the prompt, call the LLM, extract code, save outputs, print warnings.
-def generate_tests(use_cases: List[Dict[str, Any]], skill: str) -> None:
+# Generates every use case once into a single run directory (tests/<stage>/run_NN/).
+def generate_run(use_cases: List[Dict[str, Any]], skill: str, run_dir: Path) -> None:
     for use_case in use_cases:
         uc_id = use_case.get("id")
         try:
-            print(f"UC {uc_id:02d} ({use_case.get('complexity')}): {use_case['title']}")
+            print(f"  UC {uc_id:02d} ({use_case.get('complexity')}): {use_case['title']}")
             prompt = build_prompt(use_case, BASE_URL)
             raw = call_llm(skill, prompt)
             ts_code = extract_typescript_code(raw)
-            spec = save_outputs(OUTPUT_DIR, use_case, ts_code, prompt, raw)
+            spec = save_outputs(run_dir, use_case, ts_code, prompt, raw)
             for w in check_generated_code(ts_code):
-                print(f"  WARNING: {w}")
-            print(f"  -> {spec}")
+                print(f"    WARNING: {w}")
+            print(f"    -> {spec}")
         except Exception as exc:
-            print(f"  FAILED: {exc}")
+            print(f"    FAILED: {exc}")
+
+
+# Main loop: repeat the full generation NUM_RUNS times, one run_NN/ directory per pass.
+def generate_tests(use_cases: List[Dict[str, Any]], skill: str) -> None:
+    for run in range(1, NUM_RUNS + 1):
+        run_dir = OUTPUT_DIR / f"run_{run:02d}"
+        print(f"=== Run {run:02d}/{NUM_RUNS} -> {run_dir} ===")
+        generate_run(use_cases, skill, run_dir)
 
 
 # Entry point: load use cases and skill, then run the generation loop for Stage 1.
