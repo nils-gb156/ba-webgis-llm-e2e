@@ -40,6 +40,14 @@ Erzeugt:
 Voraussetzung: Demo-App läuft unter der erwarteten URL. Wird vor dem
 Playwright-Lauf per HTTP-Check geprüft; bei Nichterreichbarkeit bricht
 das Skript ab (startet die App NICHT selbst).
+
+Reklassifikation ohne erneuten Lauf:
+    python run_stage_eval.py --stage1 --reclassify
+
+    Liest nur den bereits vorhandenen tests/<stage>/_playwright_report.json
+    ein und schreibt tests/<stage>/_phase1_results.csv anhand der aktuellen
+    Klassifikationsregeln neu. Kein Playwright-Lauf, kein App-Check ->
+    sekundenschneller Cluster->Regel->Reklassifizieren-Loop.
 """
 
 import argparse
@@ -288,64 +296,25 @@ def norm_path(p: str) -> str:
 # Hauptablauf
 # ---------------------------------------------------------------------------
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    group = ap.add_mutually_exclusive_group(required=True)
-    group.add_argument("--stage1", action="store_true", help="stage_1_baseline")
-    group.add_argument("--stage2", action="store_true", help="stage_2_accessibility_snapshot")
-    group.add_argument("--stage3", action="store_true", help="stage_3_generated_ui_map")
-    group.add_argument("--stage4", action="store_true", help="stage_4_manual_ui_map")
-    ap.add_argument("--timeout-ms", type=int, default=30000)
-    ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--app-url", default=APP_URL)
-    ap.add_argument("--skip-app-check", action="store_true")
-    args = ap.parse_args()
+def run_playwright(
+    args,
+    spec_files: list[Path],
+    stage_dir: Path,
+    out_dir: Path,
+    cwd: Path,
+    report_path: Path,
+    pre_ignore: list[str],
+    results_by_file: dict[str, list[dict]],
+    load_errors: dict[str, str],
+) -> None:
+    """Führt Playwright (iterativ) aus und befüllt results_by_file/load_errors.
 
-    if args.stage1:
-        stage_name = STAGE_DIRS["stage1"]
-    elif args.stage2:
-        stage_name = STAGE_DIRS["stage2"]
-    elif args.stage3:
-        stage_name = STAGE_DIRS["stage3"]
-    else:
-        stage_name = STAGE_DIRS["stage4"]
-
-    stage_dir = SCRIPT_DIR / "tests" / stage_name
-    out_dir = stage_dir  # Ergebnisse liegen direkt im Stage-Ordner
-    out_dir.mkdir(parents=True, exist_ok=True)
-    cwd = PLAYWRIGHT_CWD
-
-    if not args.skip_app_check:
-        if not check_app_reachable(args.app_url):
-            sys.exit(1)
-
-    spec_files = sorted(stage_dir.rglob("*.spec.ts"))
-    if not spec_files:
-        sys.exit(f"[FEHLER] keine .spec.ts-Dateien unter {stage_dir} gefunden")
-    print(f"[INFO] {len(spec_files)} Testdateien gefunden unter {stage_dir}")
-
-    # Vorab-Scan aller Dateien auf Truncation. Dateien, die garantiert nicht
-    # parsebar sind (hard_parse_error), werden vor dem ersten Playwright-Lauf
-    # ausgeschlossen: eine einzige nicht ladbare Datei bricht sonst die
-    # Collection für das GESAMTE Verzeichnis ab (0 Tests). Babel-Fehler wie
-    # "Duplicate declaration" liefern zudem keine location.file und sind daher
-    # über die nachträgliche Retry-Logik nicht erfassbar.
-    # Key = absoluter norm_path(f), identisch zum späteren Lookup weiter unten.
-    truncation_info = {}
-    pre_ignore: list[str] = []  # absolute posix Pfade statisch kaputter Dateien
-    for f in spec_files:
-        is_trunc, reason, hard = scan_for_truncation(f)
-        truncation_info[norm_path(f)] = (is_trunc, reason)
-        if hard:
-            pre_ignore.append(f.resolve().as_posix())
-    if pre_ignore:
-        print(
-            f"[INFO] {len(pre_ignore)} statisch nicht parsebare Datei(en) vorab "
-            f"ausgeschlossen (sonst bricht die Collection für alle Tests ab)."
-        )
-
-    # Playwright ausführen
-    report_path = out_dir / "_playwright_report.json"
+    A single un-parseable spec file makes Playwright abort collection for the
+    WHOLE directory (0 tests executed). We therefore run iteratively: after
+    each attempt we add any file that failed to parse to an ignore list and
+    re-run, until no new broken file surfaces. Results and load-errors are
+    merged across attempts.
+    """
     base_env = os.environ.copy()
     base_env["PLAYWRIGHT_JSON_OUTPUT_NAME"] = str(report_path)
 
@@ -357,15 +326,7 @@ def main():
 
     outer_guard_s = max(300, len(spec_files) * 40)
 
-    # A single un-parseable spec file makes Playwright abort collection for the
-    # WHOLE directory (0 tests executed). We therefore run iteratively: after
-    # each attempt we add any file that failed to parse to an ignore list and
-    # re-run, until no new broken file surfaces. Results and load-errors are
-    # merged across attempts.
-    results_by_file: dict[str, list[dict]] = {}
-    load_errors: dict[str, str] = {}
     broken_ignore: list[str] = list(pre_ignore)  # absolute posix paths, passed via PW_TEST_IGNORE
-    report: dict = {}
 
     max_attempts = len(spec_files) + 1
     for attempt in range(1, max_attempts + 1):
@@ -417,6 +378,103 @@ def main():
         print(
             f"[INFO] {len(attempt_load_errors)} nicht parsebare Datei(en) erkannt, "
             f"werden ausgeschlossen und Lauf wird wiederholt."
+        )
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    group = ap.add_mutually_exclusive_group(required=True)
+    group.add_argument("--stage1", action="store_true", help="stage_1_baseline")
+    group.add_argument("--stage2", action="store_true", help="stage_2_accessibility_snapshot")
+    group.add_argument("--stage3", action="store_true", help="stage_3_generated_ui_map")
+    group.add_argument("--stage4", action="store_true", help="stage_4_manual_ui_map")
+    ap.add_argument("--timeout-ms", type=int, default=30000)
+    ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--app-url", default=APP_URL)
+    ap.add_argument("--skip-app-check", action="store_true")
+    ap.add_argument(
+        "--reclassify",
+        action="store_true",
+        help=(
+            "Playwright NICHT ausführen. Stattdessen den bereits vorhandenen "
+            "_playwright_report.json einlesen und nur die Klassifikation + CSV "
+            "neu erzeugen (schneller Cluster->Regel->Reklassifizieren-Loop)."
+        ),
+    )
+    args = ap.parse_args()
+
+    if args.stage1:
+        stage_name = STAGE_DIRS["stage1"]
+    elif args.stage2:
+        stage_name = STAGE_DIRS["stage2"]
+    elif args.stage3:
+        stage_name = STAGE_DIRS["stage3"]
+    else:
+        stage_name = STAGE_DIRS["stage4"]
+
+    stage_dir = SCRIPT_DIR / "tests" / stage_name
+    out_dir = stage_dir  # Ergebnisse liegen direkt im Stage-Ordner
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cwd = PLAYWRIGHT_CWD
+
+    if not args.skip_app_check and not args.reclassify:
+        if not check_app_reachable(args.app_url):
+            sys.exit(1)
+
+    spec_files = sorted(stage_dir.rglob("*.spec.ts"))
+    if not spec_files:
+        sys.exit(f"[FEHLER] keine .spec.ts-Dateien unter {stage_dir} gefunden")
+    print(f"[INFO] {len(spec_files)} Testdateien gefunden unter {stage_dir}")
+
+    # Vorab-Scan aller Dateien auf Truncation. Dateien, die garantiert nicht
+    # parsebar sind (hard_parse_error), werden vor dem ersten Playwright-Lauf
+    # ausgeschlossen: eine einzige nicht ladbare Datei bricht sonst die
+    # Collection für das GESAMTE Verzeichnis ab (0 Tests). Babel-Fehler wie
+    # "Duplicate declaration" liefern zudem keine location.file und sind daher
+    # über die nachträgliche Retry-Logik nicht erfassbar.
+    # Key = absoluter norm_path(f), identisch zum späteren Lookup weiter unten.
+    truncation_info = {}
+    pre_ignore: list[str] = []  # absolute posix Pfade statisch kaputter Dateien
+    for f in spec_files:
+        is_trunc, reason, hard = scan_for_truncation(f)
+        truncation_info[norm_path(f)] = (is_trunc, reason)
+        if hard:
+            pre_ignore.append(f.resolve().as_posix())
+    if pre_ignore and not args.reclassify:
+        print(
+            f"[INFO] {len(pre_ignore)} statisch nicht parsebare Datei(en) vorab "
+            f"ausgeschlossen (sonst bricht die Collection für alle Tests ab)."
+        )
+
+    report_path = out_dir / "_playwright_report.json"
+
+    results_by_file: dict[str, list[dict]] = {}
+    load_errors: dict[str, str] = {}
+
+    if args.reclassify:
+        # Kein Playwright-Lauf: vorhandenen Report einlesen und nur neu
+        # klassifizieren. Ermöglicht einen sekundenschnellen
+        # Cluster->Regel->Reklassifizieren-Loop ohne stundenlange Re-Runs.
+        if not report_path.exists():
+            sys.exit(
+                f"[FEHLER] --reclassify: Kein Report gefunden unter {report_path}. "
+                f"Zuerst einen vollständigen Lauf ohne --reclassify ausführen."
+            )
+        print(f"[INFO] --reclassify: lese vorhandenen Report {report_path}")
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        results_by_file.update(collect_test_results(report))
+        load_errors.update(collect_load_errors(report))
+    else:
+        run_playwright(
+            args=args,
+            spec_files=spec_files,
+            stage_dir=stage_dir,
+            out_dir=out_dir,
+            cwd=cwd,
+            report_path=report_path,
+            pre_ignore=pre_ignore,
+            results_by_file=results_by_file,
+            load_errors=load_errors,
         )
 
     # Alle bekannten Report-Pfade normalisieren für robustes Matching
