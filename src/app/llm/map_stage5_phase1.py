@@ -12,7 +12,7 @@ plot_stage.py unverändert funktionieren.
 
 Klassifikationslogik: identisch zu Stufen 1-4 — die Funktionen
 classify_runtime_result() und scan_for_truncation() werden direkt aus
-run_stage_eval.py importiert (KEINE Kopie, keine Abweichung).
+run_phase1_eval.py importiert (KEINE Kopie, keine Abweichung).
 
 Nutzung (aus src/app/llm/ heraus):
     python map_stage5_phase1.py
@@ -32,7 +32,7 @@ import sys
 from pathlib import Path
 
 # Identische Klassifikationslogik wie Stufen 1-4 (gleiche Datei, gleicher Ordner)
-from run_stage_eval import classify_runtime_result, scan_for_truncation
+from app.llm.run_phase1_eval import classify_runtime_result, scan_for_truncation
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 STAGE_NAME = "stage_5_self_improvement_loop"

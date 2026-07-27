@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_stage_eval.py — Phase 1: deterministische Ausführung & Klassifikation
+run_phase1_eval.py — Phase 1: deterministische Ausführung & Klassifikation
 LLM-generierter Playwright-Tests.
 
 Für alle 4 Stages identisch verwendbar. Klassifikationslogik entspricht
@@ -38,10 +38,10 @@ Liegt in src/app/llm/ (neben generate_tests_stage_X.py) und löst alle
 Pfade relativ zu SCRIPT_DIR auf, analog zu den Generierungsskripten.
 
 Nutzung (aus src/app/llm/ heraus):
-    python run_stage_eval.py --stage1
-    python run_stage_eval.py --stage2
-    python run_stage_eval.py --stage3
-    python run_stage_eval.py --stage4
+    python run_phase1_eval.py --stage1
+    python run_phase1_eval.py --stage2
+    python run_phase1_eval.py --stage3
+    python run_phase1_eval.py --stage4
 
 Erzeugt:
     tests/<stage>/_phase1_results.csv
@@ -52,7 +52,7 @@ Playwright-Lauf per HTTP-Check geprüft; bei Nichterreichbarkeit bricht
 das Skript ab (startet die App NICHT selbst).
 
 Reklassifikation ohne erneuten Lauf:
-    python run_stage_eval.py --stage1 --reclassify
+    python run_phase1_eval.py --stage1 --reclassify
 
     Liest nur den bereits vorhandenen tests/<stage>/_playwright_report.json
     ein und schreibt tests/<stage>/_phase1_results.csv anhand der aktuellen
@@ -223,12 +223,16 @@ def classify_runtime_result(status: str, message: str) -> tuple[str, bool]:
     # eine nicht existierende Methode auf (z.B. page.mouse.dblClick,
     # locator.waitForElementState, requestPromise.status()), verwendet eine
     # undefinierte Referenz (window.* im Node-Scope statt in page.evaluate ->
-    # ReferenceError), übergibt einem Matcher ein falsches Argument
+    # ReferenceError), destrukturiert einen undefinierten/nicht iterierbaren
+    # Wert ("is not iterable"), übergibt einem Matcher ein falsches Argument
     # (toHaveCount({ gt: 0 }) statt einer Zahl -> "_expect: expected...") oder
     # kombiniert einen unzulässigen Matcher (expect.poll(...).toBeVisible()).
     # Laufzeit-Fehler bzw. sofortiger API-Fehler VOR einer inhaltlichen
     # Assertion.
-    if re.search(r"is not a function|Cannot read propert(?:y|ies)|ReferenceError", msg):
+    if re.search(
+        r"is not a function|is not iterable|Cannot read propert(?:y|ies)|ReferenceError",
+        msg,
+    ):
         return "INFRA_FAIL", False
     if re.search(r"_expect:\s*expected", msg):
         return "INFRA_FAIL", False
