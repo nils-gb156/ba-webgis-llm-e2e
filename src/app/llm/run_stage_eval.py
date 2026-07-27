@@ -10,15 +10,25 @@ der in summary.md (Stage 1 Pilot) dokumentierten Methodik:
 - GENERATION_ERROR  : Quelldatei syntaktisch nicht valide/abgeschnitten
                        (Testblock nicht geschlossen, unbalancierte Klammern,
                        degenerierte Wiederholungen) -> Ursache in .raw.txt
-- COMPILE_ERROR     : TS-/Syntaxfehler, Datei aber NICHT als abgeschnitten
-                       erkannt (z.B. echter Tippfehler des Modells)
+- COMPILE_ERROR     : TS-/Syntaxfehler oder nicht auflösbarer Import
+                       ("Cannot find module"), Datei aber NICHT als
+                       abgeschnitten erkannt (z.B. echter Tippfehler des
+                       Modells oder importierter, nie angelegter Helper)
 - INFRA_FAIL        : Fehler beim Lokalisieren/Bedienen eines Elements vor
                        einer inhaltlichen Assertion (element(s) not found,
                        strict-mode violation, Action-Timeout, page.evaluate/
                        waitForFunction-Laufzeitfehler, web-first-Assertion
-                       die nur an einem nie aufgelösten Selektor scheitert)
-- ASSERTION_FAIL    : Element/Wert wurde aufgelöst, Matcher-Erwartung
-                       schlug fehl (konkreter "Received:"-Wert vorhanden)
+                       die nur an einem nie aufgelösten Selektor scheitert,
+                       page.waitForResponse/Request/Event-Timeout auf ein nie
+                       eingetretenes Ereignis, geschlossene Seite/Browser durch
+                       äußeren Timeout, sowie Test-Code-Defekte durch
+                       halluzinierte Playwright-API ("is not a function",
+                       unzulässiger Matcher wie expect.poll(...).toBeVisible()))
+- ASSERTION_FAIL    : Element/Wert wurde aufgelöst, Matcher-Erwartung schlug
+                       fehl (konkreter "Received:"/"Received string:"/
+                       "Received has value/type:"-Wert vorhanden) oder eine
+                       gepollte Assertion wurde nie erfüllt ("waiting on the
+                       predicate")
 - TIMEOUT           : äußerer Prozess-Guard griff (Playwright selbst hängt)
 
 Uneindeutige Fälle werden mit needs_review=true markiert und sollten
@@ -183,6 +193,24 @@ def classify_runtime_result(status: str, message: str) -> tuple[str, bool]:
     if status == "interrupted":
         return "TIMEOUT", False
 
+    # Umgebungs-/Setup-Fehler VOR jeglichem Testinhalt: der Browser lässt sich
+    # nicht starten oder die Seite kann nicht eingerichtet werden
+    # (browserType.launch-Timeout, browserContext.newPage-Timeout, "while
+    # setting up page"). Reines Infrastruktur-/Umgebungsproblem, unabhängig vom
+    # generierten Test.
+    if re.search(
+        r'browserType\.launch|browserContext\.newPage|while setting up "page"',
+        msg,
+    ):
+        return "INFRA_FAIL", False
+
+    # Fehlender Modul-/Helper-Import (z.B. das Modell importiert einen nie
+    # angelegten Testhelfer). Playwright meldet dies als Testfehler
+    # ("Cannot find module ..."), nicht als Load-Error mit location.file.
+    # Die Datei ist syntaktisch valide, aber nicht auflösbar -> Compile-Fehler.
+    if re.search(r"Cannot find module", msg):
+        return "COMPILE_ERROR", False
+
     # strict-mode violation -> mehrdeutiger Selektor, nie eindeutig aufgelöst
     if "strict mode violation" in msg:
         return "INFRA_FAIL", False
@@ -191,20 +219,73 @@ def classify_runtime_result(status: str, message: str) -> tuple[str, bool]:
     if re.search(r"element\(s\) not found", msg, re.IGNORECASE):
         return "INFRA_FAIL", False
 
+    # Test-Code-Defekt: halluzinierte/ungültige Playwright-API. Das Modell ruft
+    # eine nicht existierende Methode auf (z.B. page.mouse.dblClick,
+    # locator.waitForElementState, requestPromise.status()), verwendet eine
+    # undefinierte Referenz (window.* im Node-Scope statt in page.evaluate ->
+    # ReferenceError), übergibt einem Matcher ein falsches Argument
+    # (toHaveCount({ gt: 0 }) statt einer Zahl -> "_expect: expected...") oder
+    # kombiniert einen unzulässigen Matcher (expect.poll(...).toBeVisible()).
+    # Laufzeit-Fehler bzw. sofortiger API-Fehler VOR einer inhaltlichen
+    # Assertion.
+    if re.search(r"is not a function|Cannot read propert(?:y|ies)|ReferenceError", msg):
+        return "INFRA_FAIL", False
+    if re.search(r"_expect:\s*expected", msg):
+        return "INFRA_FAIL", False
+    if re.search(r'does not support "[^"]+" matcher', msg):
+        return "INFRA_FAIL", False
+
+    # Modell-eigener Guard-Wurf: der Test wirft in einem selbst geschriebenen
+    # if/else einen Error, weil ein erwartetes Element/eine Option nicht
+    # gefunden wurde (z.B. `throw new Error('Could not find OpenStreetMap
+    # option')`). Der Abbruch erfolgt an einer manuell geworfenen Fehlerstelle
+    # VOR einer inhaltlichen Playwright-Assertion -> Element nicht lokalisiert.
+    if re.search(r">\s*\d+\s*\|.*throw new Error", msg):
+        return "INFRA_FAIL", False
+
+    # Ein asynchroner Playwright-Aufruf war beim Testende noch offen
+    # ("locator.count: Test ended." u.\u00e4.) -- typischerweise fehlendes await
+    # oder ein vorheriger Abbruch. Kein aufgel\u00f6ster Wert -> Infrastruktur.
+    if re.search(r":\s*Test ended\.", msg):
+        return "INFRA_FAIL", False
+
     # page.evaluate / waitForFunction Laufzeitfehler
     if re.search(r"page\.evaluate|waitForFunction", msg) and "Error" in msg:
         return "INFRA_FAIL", False
 
-    # Web-first-Assertion: unterscheide "nie aufgelöst" vs "aufgelöst, aber
-    # falscher Zustand" über das Vorhandensein einer konkreten Received-Zeile
+    # Warten auf ein Netzwerk-/Download-/Response-Ereignis, das nie eintrat
+    # (page.waitForResponse/waitForRequest/waitForEvent laufen in den Timeout).
+    # Es wurde kein Selektor/Wert aufgelöst -> Infrastruktur, keine Assertion.
+    if re.search(r"page\.(waitForResponse|waitForRequest|waitForEvent):", msg):
+        return "INFRA_FAIL", False
+
+    # Der äußere Test-Timeout hat Seite/Browser geschlossen, bevor die
+    # Assertion einen konkreten Wert erhalten konnte ("Target page, context or
+    # browser has been closed"). Kein aufgelöster Wert -> keine echte Assertion.
+    if "Target page, context or browser has been closed" in msg:
+        return "INFRA_FAIL", False
+
+    # Web-first-/Poll-Assertion: unterscheide "nie aufgelöst" vs. "aufgelöst,
+    # aber falscher Zustand" über das Vorhandensein einer konkreten Received-
+    # Zeile. Neben "Received:" werden auch die Varianten "Received string:",
+    # "Received has value:" und "Received has type:" erkannt (Matcher wie
+    # toContain/toBeGreaterThan liefern einen konkreten, aber falschen Wert).
     has_received_value = bool(
-        re.search(r"Received:\s*\S", msg) and not re.search(
-            r"Received:\s*<?element\(s\)? not found>?", msg, re.IGNORECASE
+        re.search(r"Received[^\n:]*:\s*\S", msg)
+        and not re.search(
+            r"Received[^\n]*element\(s\)? not found", msg, re.IGNORECASE
         )
     )
     resolved_marker = "locator resolved to" in msg or has_received_value
 
     if resolved_marker:
+        return "ASSERTION_FAIL", False
+
+    # expect.poll(...) bzw. expect(async () => ...): die gepollte Assertion
+    # wurde innerhalb des Timeouts nie erfüllt ("Timeout ... while waiting on
+    # the predicate"). Das Prädikat lief (der Wert wurde wiederholt gelesen),
+    # die Matcher-Erwartung schlug fehl -> inhaltliche Assertion.
+    if "waiting on the predicate" in msg:
         return "ASSERTION_FAIL", False
 
     # Timeout beim Warten auf einen Selektor/eine Aktion (Klick/Check/Fill),
