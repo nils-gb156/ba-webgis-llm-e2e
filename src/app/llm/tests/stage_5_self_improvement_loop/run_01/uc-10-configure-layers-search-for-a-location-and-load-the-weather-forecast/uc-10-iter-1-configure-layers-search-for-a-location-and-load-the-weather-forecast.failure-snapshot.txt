@@ -1,0 +1,254 @@
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-clear-button
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - precipitation-legend
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation" [checked]
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature"
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Precipitation (mm)" [level=1]
+    - paragraph: "0"
+    - paragraph: "50"
+    - paragraph: "100"
+    - paragraph: "150"
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Münster, DE"
+- paragraph: Sat, Jul 25, 11:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 21.4 °C
+- paragraph: Humidity
+- paragraph: 59 %
+- paragraph: Wind direction
+- paragraph: 244°
+- paragraph: Wind speed
+- paragraph: 2.48 m/s
+- separator
+- paragraph: Sat, Jul 25, 02:00 PM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 23.79 °C
+- paragraph: Humidity
+- paragraph: 49 %
+- paragraph: Wind direction
+- paragraph: 264°
+- paragraph: Wind speed
+- paragraph: 3.15 m/s
+- separator
+- paragraph: Sat, Jul 25, 05:00 PM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 28.06 °C
+- paragraph: Humidity
+- paragraph: 28 %
+- paragraph: Wind direction
+- paragraph: 258°
+- paragraph: Wind speed
+- paragraph: 4.04 m/s
+- separator
+- paragraph: Sat, Jul 25, 08:00 PM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 25.21 °C
+- paragraph: Humidity
+- paragraph: 36 %
+- paragraph: Wind direction
+- paragraph: 324°
+- paragraph: Wind speed
+- paragraph: 4.35 m/s
+- separator
+- paragraph: Sat, Jul 25, 11:00 PM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 19.49 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 351°
+- paragraph: Wind speed
+- paragraph: 1.65 m/s
+- separator
+- paragraph: Sun, Jul 26, 02:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 18.1 °C
+- paragraph: Humidity
+- paragraph: 60 %
+- paragraph: Wind direction
+- paragraph: 225°
+- paragraph: Wind speed
+- paragraph: 1.84 m/s
+- separator
+- paragraph: Sun, Jul 26, 05:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 17.46 °C
+- paragraph: Humidity
+- paragraph: 62 %
+- paragraph: Wind direction
+- paragraph: 226°
+- paragraph: Wind speed
+- paragraph: 3.47 m/s
+- separator
+- paragraph: Sun, Jul 26, 08:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 20.21 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 237°
+- paragraph: Wind speed
+- paragraph: 5.6 m/s
+- separator
+- paragraph: Sun, Jul 26, 11:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 21.81 °C
+- paragraph: Humidity
+- paragraph: 51 %
+- paragraph: Wind direction
+- paragraph: 259°
+- paragraph: Wind speed
+- paragraph: 6.36 m/s
+- separator
+- paragraph: Sun, Jul 26, 02:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 20.65 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 261°
+- paragraph: Wind speed
+- paragraph: 5.77 m/s
+- separator
+- paragraph: Sun, Jul 26, 05:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 19.15 °C
+- paragraph: Humidity
+- paragraph: 67 %
+- paragraph: Wind direction
+- paragraph: 275°
+- paragraph: Wind speed
+- paragraph: 6.15 m/s
+- separator
+- paragraph: Sun, Jul 26, 08:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 17.75 °C
+- paragraph: Humidity
+- paragraph: 81 %
+- paragraph: Wind direction
+- paragraph: 259°
+- paragraph: Wind speed
+- paragraph: 6.32 m/s
+- separator
+- paragraph: Sun, Jul 26, 11:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 14.56 °C
+- paragraph: Humidity
+- paragraph: 91 %
+- paragraph: Wind direction
+- paragraph: 257°
+- paragraph: Wind speed
+- paragraph: 4.8 m/s
+- separator
+- paragraph: Mon, Jul 27, 02:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 14.47 °C
+- paragraph: Humidity
+- paragraph: 93 %
+- paragraph: Wind direction
+- paragraph: 268°
+- paragraph: Wind speed
+- paragraph: 5.4 m/s
+- separator
+- paragraph: Mon, Jul 27, 05:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 14.34 °C
+- paragraph: Humidity
+- paragraph: 96 %
+- paragraph: Wind direction
+- paragraph: 274°
+- paragraph: Wind speed
+- paragraph: 4.36 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 AM
+- paragraph: light rain
+- paragraph: T
+[... truncated ...]

@@ -1,0 +1,31 @@
+{
+  "run": "run_36",
+  "use_case_id": 9,
+  "title": "Print the current map view as a PNG",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog').getByRole('radio', { name: 'PNG' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog').getByRole('radio', { name: 'PNG' })\n\n\n  25 |   // We look for a radio group or list with 'PNG' as an option.\n  26 |   const pngOption = page.getByRole('dialog').getByRole('radio', { name: 'PNG' });\n> 27 |   await expect(pngOption).toBeV"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_44/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UC7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6682,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"UV-Index Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00 AMscattered cloudsTemperature24.43 Â°CHumidity42 %Wind direction191Â°Wind speed3.04 m/sSat, Jul 25, 02:00 PMscattered cloudsTemperature28.82 Â°CHumidity32 %Wind direction239Â°Wind speed3.06 m/sSat, Jul 25, 05:00 PMclear skyTemperature30.72 Â°CHumidity28 %Wind direction238Â°Wind speed2.39 m/sSat, Jul 25, 08:00 PMclear skyTemperature25.8 Â°CHumidity46 %Wind direction214Â°Wind speed1.43 m/sSat, Jul 25, 11:00 PMclear skyTemperature19.82 Â°CHumidity55 %Wind direction27Â°Wind speed1.82 m/sSun, Jul 26, 02:00 AMclear skyTemperature16.96 Â°CHumidity62 %Wind direction120Â°Wind speed1.05 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature15.28 Â°CHumidity65 %Wind direction118Â°Wind speed0.55 m/sSun, Jul 26, 08:00 AMbroken cloudsTemperature21.02 Â°CHumidity57 %Wind direction170Â°Wind speed1.15 m/sSun, Jul 26, 11:00 AMscattered cloudsTemperature27.98 Â°CHumidity42 %Wind direction228Â°Wind speed3.85 m/sSun, Jul 26, 02:00 PMscattered cloudsTemperature30.63 Â°CHumidity29 %Wind direction243Â°Wind speed6.65 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature27.58 Â°CHumidity24 %Wind direction250Â°Wind speed6.06 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature17.86 Â°CHumidity64 %Wind direction304Â°Wind speed4.4 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.63 Â°CHumidity90 %Wind direction255Â°Wind speed1.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.6 Â°CHumidity93 %Wind direction240Â°Wind speed2.77 m/sMon, Jul 27, 05:00 AMlight rainTemperature14.88 Â°CHumidity96 %Wind direction275Â°Wind speed3 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.32 Â°CHumidity90 %Wind direction320Â°Wind speed3.56 m/sMon, Jul 27, 11:00 AMbroken cloudsTemperature18.74 Â°CHumidity60 %Wind direction316Â°Wind speed4.65 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature22.12 Â°CHumidity45 %Wind direction299Â°Wind speed4.55 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.86 Â°CHumidity54 %Wind direction307Â°Wind speed2.75 m/sMon, Jul 27, 08:00 PMbroken cloudsTemperature18.51 Â°CHumidity65 %Wind direction317Â°Wind speed0.57 m/sMon, Jul 27, 11:00 PMscattered cloudsTemperature14.29 Â°CHumidity76 %Wind direction2Â°Wind speed0.47 m/s\"\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"UV-Index Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00 AMscattered cloudsTemperature24.43 Â°CHumidity42 %Wind direction191Â°Wind speed3.04 m/sSat, Jul 25, 02:00 PMscattered cloudsTemperature28.82 Â°CHumidity32 %Wind direction239Â°Wind speed3.06 m/sSat, Jul 25, 05:00 PMclear skyTemperature30.72 Â°CHumidity28 %Wind direction238Â°Wind speed2.39 m/sSat, Jul 25, 08:00 PMclear skyTemperature25.8 Â°CHumidity46 %Wind direction214Â°Wind speed1.43 m/sSat, Jul 25, 11:00 PMclear skyTemperature19.82 Â°CHumidity55 %Wind direction27Â°Wind speed1.82 m/sSun, Jul 26, 02:00 AMclear skyTemperature16.96 Â°CHumidity62 %Wind direction120Â°Wind speed1.05 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature15.28 Â°CHumidity65 %Wind direction118Â°Wind speed0.55 m/sSun, Jul 26, 08:00 AMbroken cloudsTemperature21.02 Â°CHumidity57 %Wind direction170Â°Wind speed1.15 m/sSun, Jul 26, 11:00 AMscattered cloudsTemperature27.98 Â°CHumidity42 %Wind direction228Â°Wind speed3.85 m/sSun, Jul 26, 02:00 PMscattered cloudsTemperature30.63 Â°CHumidity29 %Wind direction243Â°Wind speed6.65 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature27.58 Â°CHumidity24 %Wind direction250Â°Wind speed6.06 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature17.86 Â°CHumidity64 %Wind direction304Â°Wind speed4.4 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.63 Â°CHumidity90 %Wind direction255Â°Wind speed1.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.6 Â°CHumidity93 %Wind direction240Â°Wind speed2.77 m/sMon, Jul 27, 05:00 AMlight rainTemperature14.88 Â°CHumidity96 %Wind direction275Â°Wind speed3 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.32 Â°CHumidity90 %Wind direction320Â°Wind speed3.56 m/sMon, Jul 27, 11:00 AMbroken cloudsTemperature18.74 Â°CHumidity60 %Wind direction316Â°Wind speed4.65 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature22.12 Â°CHumidity45 %Wind direction299Â°Wind speed4.55 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.86 Â°CHumidity54 %Wind direction307Â°Wind speed2.75 m/sMon, Jul 27, 08:00 PMbroken cloudsTemperature18.51 Â°CHumidity65 %Wind direction317Â°Wind speed0.57 m/sMon, Jul 27, 11:00 PMscattered cloudsTemperature14.29 Â°CHumidity76 %Wind direction2Â°Wind speed0.47 m/s\"\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:74:73",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 73,
+                      "line": 74
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 72 |\u001b[39m   \u001b[90m// To avoid strict mode violations and ensure we are checking the right element,\u001b[39m\n \u001b[90m 73 |\u001b[39m   \u001b[90m// we can use getByTestId('info-panel') and then check its text content.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 74 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'info-panel'\u001b[39m)\u001b[33m.\u001b[39mtextContent())\u001b[33m.\u001b[39mtoContain(\u001b[32m'UV-Index Station'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 75 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'info-panel'\u001b[39m)\u001b[33m.\u001b[39mtextContent())\u001b[33m.\u001b[39mtoContain(\u001b[32m'EUCOS Ground Station'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 76 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 77 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 73,
+                        "line": 74
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"UV-Index Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00 AMscattered cloudsTemperature24.43 Â°CHumidity42 %Wind direction191Â°Wind speed3.04 m/sSat, Jul 25, 02:00 PMscattered cloudsTemperature28.82 Â°CHumidity32 %Wind direction239Â°Wind speed3.06 m/sSat, Jul 25, 05:00 PMclear skyTemperature30.72 Â°CHumidity28 %Wind direction238Â°Wind speed2.39 m/sSat, Jul 25, 08:00 PMclear skyTemperature25.8 Â°CHumidity46 %Wind direction214Â°Wind speed1.43 m/sSat, Jul 25, 11:00 PMclear skyTemperature19.82 Â°CHumidity55 %Wind direction27Â°Wind speed1.82 m/sSun, Jul 26, 02:00 AMclear skyTemperature16.96 Â°CHumidity62 %Wind direction120Â°Wind speed1.05 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature15.28 Â°CHumidity65 %Wind direction118Â°Wind speed0.55 m/sSun, Jul 26, 08:00 AMbroken cloudsTemperature21.02 Â°CHumidity57 %Wind direction170Â°Wind speed1.15 m/sSun, Jul 26, 11:00 AMscattered cloudsTemperature27.98 Â°CHumidity42 %Wind direction228Â°Wind speed3.85 m/sSun, Jul 26, 02:00 PMscattered cloudsTemperature30.63 Â°CHumidity29 %Wind direction243Â°Wind speed6.65 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature27.58 Â°CHumidity24 %Wind direction250Â°Wind speed6.06 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature17.86 Â°CHumidity64 %Wind direction304Â°Wind speed4.4 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.63 Â°CHumidity90 %Wind direction255Â°Wind speed1.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.6 Â°CHumidity93 %Wind direction240Â°Wind speed2.77 m/sMon, Jul 27, 05:00 AMlight rainTemperature14.88 Â°CHumidity96 %Wind direction275Â°Wind speed3 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.32 Â°CHumidity90 %Wind direction320Â°Wind speed3.56 m/sMon, Jul 27, 11:00 AMbroken cloudsTemperature18.74 Â°CHumidity60 %Wind direction316Â°Wind speed4.65 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature22.12 Â°CHumidity45 %Wind direction299Â°Wind speed4.55 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.86 Â°CHumidity54 %Wind direction307Â°Wind speed2.75 m/sMon, Jul 27, 08:00 PMbroken cloudsTemperature18.51 Â°CHumidity65 %Wind direction317Â°Wind speed0.57 m/sMon, Jul 27, 11:00 PMscattered cloudsTemperature14.29 Â°CHumidity76 %Wind direction2Â°Wind speed0.47 m/s\"\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  72 |   // To avoid strict mode violations and ensure we are checking the right element,\n  73 |   // we can use getByTestId('info-panel') and then check its text content.\n> 74 |   await expect.poll(() => page.getByTestId('info-panel').textContent()).toContain('UV-Index Station');\n     |                                                                         ^\n  75 |   await expect.poll(() => page.getByTestId('info-panel').textContent()).toContain('EUCOS Ground Station');\n  76 | });\n  77 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:74:73"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T23:15:13.846Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-b996b-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 73,
+                    "line": 74
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f97eb3c246495b12f73d-7c0372d04c614ccc9cb4",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_44/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T23:15:13.151Z",
+    "duration": 8604.18,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

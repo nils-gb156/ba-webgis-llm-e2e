@@ -1,0 +1,103 @@
+{
+  "run": "run_22",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('region')\nExpected substring: \"Measurement\"\nError: strict mode violation: getByRole('region') resolved to 4 elements:\n    1) <div role=\"region\" class=\"css-1t6a5h8\" data-testid=\"footer\" aria-label=\"Footer Bar\">â€¦</div> aka getByTestId('footer')\n    2) <div role=\"region\" class=\"css-ch8qbg\">â€¦</div> aka getByText('50 kmCurrent scale: 1 to')\n    3) <div role=\"region\" aria-label=\"Scale\" class=\"scale-viewer\" data-testid=\"scale"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"InformationWeather ForecastClick on the map to load a forecast.\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n    14 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\n       - unexpected value \"InformationWeather Foreca"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - unexpected valu"
+    }
+  ]
+}

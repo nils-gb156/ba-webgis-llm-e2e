@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, getMapCenter } from '../../../../map-model-helpers';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and stable before interacting
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect.poll(() => getMapCenter(page)).toBeDefined();
+
+  // Step 1: Activate the measurement tool
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByRole('region', { name: /Measurement/i });
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2 & 3: Draw a line by clicking points on the map, then double-click to finish
+  const mapContainer = page.getByTestId('map-container');
+
+  // Get current map center to click relative to it
+  const center = await getMapCenter(page);
+  expect(center).toBeDefined();
+  const [cx, cy] = center!;
+
+  // Helper to click map at offset from center
+  const clickMap = async (dx: number, dy: number) => {
+    // Use page coordinates. We need to get the map element's bounding box
+    // to convert relative offsets to absolute coordinates.
+    const box = await mapContainer.boundingBox();
+    expect(box).toBeDefined();
+    await page.mouse.click(box!.x + cx + dx, box!.y + cy + dy);
+  };
+
+  // Click a few points to draw a line
+  await clickMap(-50, -50);
+  await clickMap(50, -50);
+  await clickMap(50, 50);
+
+  // Double-click to finish
+  await clickMap(-50, 50);
+  // Playwright's mouse.move/click doesn't directly support double-click easily with offsets.
+  // We'll use page.dblclick on a specific locator if possible, or simulate.
+  // Since we need to dblclick on the map canvas at a specific spot:
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).toBeDefined();
+  await page.dblclick(mapContainer, {
+    position: {
+      x: mapBox!.x + cx - 50,
+      y: mapBox!.y + cy + 50,
+    },
+  });
+
+  // Step 4: Verify the measurement result is displayed
+  // The measurement panel should now show a length value.
+  // We look for text that resembles a measurement (e.g., "km", "m") inside the measurement panel.
+  await expect.poll(() => measurementPanel.textContent()).toMatch(/\d+(\.\d+)?\s*(km|m)/i);
+});

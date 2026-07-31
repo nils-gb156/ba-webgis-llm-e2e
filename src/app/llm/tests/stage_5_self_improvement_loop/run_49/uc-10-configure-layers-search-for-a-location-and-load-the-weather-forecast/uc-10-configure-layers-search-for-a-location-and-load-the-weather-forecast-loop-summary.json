@@ -1,0 +1,67 @@
+{
+  "run": "run_01",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 6,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByRole('checkbox', { name: 'Temperature' })\n    - locator resolved to <input checked value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_m_:input\" aria-labelledby=\"checkbox:_r_m_:label\"/>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('option', { name: /MÃ¼nster/ }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('option', { name: /MÃ¼nster/ }).first()\n\n\n  30 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n  31 |   const firstResult = geocoderPanel.getByRole('option', { name: /MÃ¼nster/ }"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('option').first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('option').first()\n\n\n  30 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n  31 |   const firstResult = geocoderPanel.getByRole('option').first();\n> 32 |   await expect(firstResult).toBeVisible();\n     "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator:  getByRole('checkbox', { name: 'Precipitation' })\nExpected: not checked\nReceived: checked\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByRole('checkbox', { name: 'Precipitation' })\n    14 Ã— locator resolved to <input checked value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_j_:input\" aria-labelledby=\"checkbox:_r_j_:label\"/>\n       - unexpected value \"checked\"\n\n\n  44 |   // "
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByTestId('info-panel').getByTestId('weather-forecast-section').getByRole('listitem')\nExpected: 24\nReceived: 0\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByTestId('weather-forecast-section').getByRole('listitem')\n    14 Ã— locator resolved to 0 elements\n       - unexpected value \"0\"\n\n\n  52 |   // We expect at least 24 forecast items (e.g., hours).\n  53 |   c"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

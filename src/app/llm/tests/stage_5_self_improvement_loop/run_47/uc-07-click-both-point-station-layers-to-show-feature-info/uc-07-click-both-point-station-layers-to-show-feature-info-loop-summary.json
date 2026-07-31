@@ -1,0 +1,85 @@
+{
+  "run": "run_47",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 8,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('UV-Index Station')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText('UV-Index Station')\n\n\n  32 |   // The info panel should display sections for both \"UV-Index Station\" and \"EUCOS Ground Station\"\n  33 |   const infoPanel = page.getByTestId('info-panel');\n> 34 |   await expect(infoPanel.g"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: `expect.poll()` does not support \"resolves\" matcher.\n\n  32 |   // The info panel should display sections for both \"UV-Index Station\" and \"EUCOS Ground Station\"\n  33 |   const infoPanel = page.getByTestId('info-panel');\n> 34 |   await expect.poll(() => infoPanel.getByText('UV-Index Station').isVisible()).resolves.toBe(true);\n     |                                                                                         ^\n  35 |   await expect.poll(() => infoPanel.getByText('EUCOS Ground Sta"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |\n  35 |   // Wait for the UV-Index Station section to appear\n> 36 |   await expect.poll(() => infoPanel.getByText('UV-Index Station').isVisible()).toBe(true);\n     |                                                                                ^\n  37 |\n  38 |   // Wait for the EUCOS Ground Station section to appear\n  39 |   await"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |\n  35 |   // Wait for the UV-Index Station section to appear\n> 36 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station', level: 2 }).isVisible()).toBe(true);\n     |                                                                                                               ^\n  37 |\n  38 |   // Wait"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  36 |   await expect.poll(() =>\n  37 |     infoPanel.getByRole('heading', { name: 'UV-Index Station', level: 2 }).isVisible()\n> 38 |   ).toBe(true);\n     |     ^\n  39 |\n  40 |   // Wait for the EUCOS Ground Station section to appear\n  41 |   await expect.poll(() =>\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stag"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  36 |   await expect.poll(() =>\n  37 |     infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 38 |   ).toBe(true);\n     |     ^\n  39 |\n  40 |   // Wait for the EUCOS Ground Station section to appear\n  41 |   await expect.poll(() =>\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\s"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  56 |   await expect.poll(() =>\n  57 |     infoPanel.getByText('UV-Index Station', { exact: false }).isVisible()\n> 58 |   ).toBe(true);\n     |     ^\n  59 |\n  60 |   // Wait for the EUCOS Ground Station section to appear\n  61 |   await expect.poll(() =>\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_impr"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

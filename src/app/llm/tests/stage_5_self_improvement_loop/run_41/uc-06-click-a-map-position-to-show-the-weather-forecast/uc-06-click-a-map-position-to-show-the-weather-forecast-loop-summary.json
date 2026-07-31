@@ -1,0 +1,40 @@
+{
+  "run": "run_41",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByTestId('weather-forecast-section').locator('li')\nExpected: 24\nReceived: 0\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 5000ms\n  - waiting for getByTestId('weather-forecast-section').locator('li')\n    14 Ã— locator resolved to 0 elements\n       - unexpected value \"0\"\n\n\n  21 |   // Assert that the forecast contains 24 entries\n  22 |   const forecastEntries = weatherForecastSection.locator('li');\n> 23 |   await"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\n  26 |   // Assert that the clicked position is highlighted on the map\n  27 |   const highlightedCoordinate = await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n> 28 |   expect(highlightedCoordinate).toBeDefined();\n     |                                 ^\n  29 |\n  30 |   // Assert that the temperature layer is rendered (as per preconditions)\n  31 |   const isTemperatureRendered = await expect.poll(() => isLayerRendere"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

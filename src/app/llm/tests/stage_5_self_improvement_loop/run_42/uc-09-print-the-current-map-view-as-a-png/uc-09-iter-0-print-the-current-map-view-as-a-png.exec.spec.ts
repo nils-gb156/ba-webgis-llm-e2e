@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and at least one operational layer to be rendered
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // 1. The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // The printing panel is visible.
+  await expect(page.getByRole('dialog', { name: /Print/ })).toBeVisible();
+
+  // 2. The user enters a title for the printout.
+  const titleInput = page.getByRole('textbox', { name: 'Title' });
+  await titleInput.fill('Test Printout');
+
+  // 3. The user selects the PNG file format.
+  const pngRadio = page.getByRole('radio', { name: 'PNG' });
+  await pngRadio.click();
+
+  // 4. The user clicks the export/print button.
+  // Register the download listener before triggering the action.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Print' }).click(),
+  ]);
+
+  // A PNG file containing the current map view is generated and downloaded.
+  expect(download.suggestedFilename()).toMatch(/\.png$/);
+
+  // Clean up the downloaded file
+  await download.delete();
+});

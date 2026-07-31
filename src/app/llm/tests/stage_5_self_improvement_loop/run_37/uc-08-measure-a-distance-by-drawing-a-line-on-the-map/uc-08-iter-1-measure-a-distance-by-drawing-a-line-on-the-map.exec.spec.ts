@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter } from '../../../../map-model-helpers';
+
+test('8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready
+  await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+  // Step 1: Click the Measurement button to open the measurement panel
+  // The measurement toggle is not pressed initially, so clicking it opens the panel.
+  await page.getByRole('button', { name: 'Measurement' }).click();
+
+  // Verify the measurement panel is visible
+  // The measurement panel is rendered as a dialog with the role "dialog" and name "Measurement"
+  await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();
+
+  // Get the map center to click around it for drawing the line
+  const center = await getMapCenter(page);
+  expect(center).toBeDefined();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // We will click 3 points to form a simple line segment
+  const mapContainer = page.getByTestId('map-container');
+
+  // Calculate click positions relative to the map container
+  // Point 1: slightly up-left from center
+  const point1 = { x: Math.floor(center![0] - 50), y: Math.floor(center![1] - 50) };
+  // Point 2: slightly down-right from center
+  const point2 = { x: Math.floor(center![0] + 50), y: Math.floor(center![1] + 50) };
+
+  // Click the first point
+  await mapContainer.click({ position: { x: point1.x, y: point1.y } });
+
+  // Click the second point
+  await mapContainer.click({ position: { x: point2.x, y: point2.y } });
+
+  // Step 3: Double-click to finish the measurement
+  // Playwright's click({ clickCount: 2 }) is the standard way to simulate a double-click
+  // We double-click on the second point to finish the line
+  await mapContainer.click({ position: { x: point2.x, y: point2.y }, clickCount: 2 });
+
+  // Expected results:
+  // 1. The measurement panel is visible (already checked, but let's ensure it's still there)
+  await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();
+
+  // 2. The measurement panel displays a length value with a unit.
+  // The result is typically displayed in the measurement panel.
+  // We'll look for text that matches a number followed by a unit like "m", "km", "mi", etc.
+  const measurementPanel = page.getByRole('dialog', { name: 'Measurement' });
+
+  // Wait for the measurement result to appear. It might take a moment for the calculation to complete.
+  await expect.poll(async () => {
+    const text = await measurementPanel.textContent();
+    return text;
+  }).toMatch(/\d+(\.\d+)?\s*(m|km|mi|ft|in|cm|mm|nm|yd)/i);
+});

@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map\\uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_04/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7477,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('checkbox', { name: 'UV-Index' }).first()\nExpected: checked\nReceived: unchecked\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('checkbox', { name: 'UV-Index' }).first()\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <input value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_d_:input\" aria-labelledby=\"checkbox:_r_d_:label\"/>\u001b[22m\n\u001b[2m       - unexpected value \"unchecked\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('checkbox', { name: 'UV-Index' }).first()\nExpected: checked\nReceived: unchecked\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('checkbox', { name: 'UV-Index' }).first()\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <input value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_d_:input\" aria-labelledby=\"checkbox:_r_d_:label\"/>\u001b[22m\n\u001b[2m       - unexpected value \"unchecked\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map\\uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts:24:33",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map\\uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts",
+                      "column": 33,
+                      "line": 24
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 22 |\u001b[39m   \u001b[90m// 2. Wait for the map to load the layer tiles.\u001b[39m\n \u001b[90m 23 |\u001b[39m   \u001b[90m// Assert the checkbox state is now checked.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 24 |\u001b[39m   \u001b[36mawait\u001b[39m expect(uvIndexCheckbox)\u001b[33m.\u001b[39mtoBeChecked()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 25 |\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[90m// Assert the UV-Index layer is actually rendered on the map canvas.\u001b[39m\n \u001b[90m 27 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m isLayerRendered(page\u001b[33m,\u001b[39m \u001b[32m'UV-Index'\u001b[39m))\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map\\uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts",
+                        "column": 33,
+                        "line": 24
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('checkbox', { name: 'UV-Index' }).first()\nExpected: checked\nReceived: unchecked\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('checkbox', { name: 'UV-Index' }).first()\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <input value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_d_:input\" aria-labelledby=\"checkbox:_r_d_:label\"/>\u001b[22m\n\u001b[2m       - unexpected value \"unchecked\"\u001b[22m\n\n\n  22 |   // 2. Wait for the map to load the layer tiles.\n  23 |   // Assert the checkbox state is now checked.\n> 24 |   await expect(uvIndexCheckbox).toBeChecked();\n     |                                 ^\n  25 |\n  26 |   // Assert the UV-Index layer is actually rendered on the map canvas.\n  27 |   await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map\\uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts:24:33"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T10:28:35.637Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-d13de-y-it-is-rendered-on-the-map-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map\\uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts",
+                    "column": 33,
+                    "line": 24
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "73ec173472da979d9ca5-3beeb29f0d338edae984",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_04/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-3-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T10:28:35.122Z",
+    "duration": 9201.704,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

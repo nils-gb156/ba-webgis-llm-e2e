@@ -1,0 +1,74 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "SyntaxError: c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_36\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts: Identifier 'layerSwitcherToggle' has already been declared. (97:8)\n\n\u001b[0m \u001b[90m  95 |\u001b[39m\n \u001b[90m  96 |\u001b[39m   \u001b[90m// Close Layer Switcher if open\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  97 |\u001b[39m   \u001b[36mconst\u001b[39m layerSwitcherToggle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'layer-switcher-toggle'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  98 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mgetAttribute(\u001b[32m'aria-pressed'\u001b[39m) \u001b[33m===\u001b[39m \u001b[32m'true'\u001b[39m) {\n \u001b[90m  99 |\u001b[39m     \u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 100 |\u001b[39m   }\u001b[0m",
+      "stack": "SyntaxError: c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_36\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts: Identifier 'layerSwitcherToggle' has already been declared. (97:8)\n\n\u001b[0m \u001b[90m  95 |\u001b[39m\n \u001b[90m  96 |\u001b[39m   \u001b[90m// Close Layer Switcher if open\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  97 |\u001b[39m   \u001b[36mconst\u001b[39m layerSwitcherToggle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'layer-switcher-toggle'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  98 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mgetAttribute(\u001b[32m'aria-pressed'\u001b[39m) \u001b[33m===\u001b[39m \u001b[32m'true'\u001b[39m) {\n \u001b[90m  99 |\u001b[39m     \u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 100 |\u001b[39m   }\u001b[0m",
+      "location": {
+        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_36\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+        "line": 97,
+        "column": 8
+      },
+      "snippet": "\u001b[90m   at \u001b[39mllm\\tests\\stage_5_self_improvement_loop\\run_36\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:97\n\n\u001b[0m \u001b[90m  95 |\u001b[39m\n \u001b[90m  96 |\u001b[39m   \u001b[90m// Close Layer Switcher if open\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  97 |\u001b[39m   \u001b[36mconst\u001b[39m layerSwitcherToggle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'layer-switcher-toggle'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  98 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mgetAttribute(\u001b[32m'aria-pressed'\u001b[39m) \u001b[33m===\u001b[39m \u001b[32m'true'\u001b[39m) {\n \u001b[90m  99 |\u001b[39m     \u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 100 |\u001b[39m   }\u001b[0m"
+    },
+    {
+      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
+      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
+    }
+  ],
+  "stats": {
+    "startTime": "2026-07-24T20:30:03.788Z",
+    "duration": 227.53799999999995,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "run": "run_17",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByTestId('measurement-toggle')\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByTestId('measurement-toggle')\n\n\n   9 |   // Preconditions: info panel visible, measurement tool inactive\n  10 |   await expect(page.getByTestId(\"info-panel\")).toBeVisible();\n> 11 |   await expect(page.getByTestId(\"measurement-toggle\")).not.toBeChecked();\n     |       "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByTestId('measurement-toggle')\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByTestId('measurement-toggle')\n\n\n  12 |   // The measurement toggle is a Chakra button, not a checkbox/radio.\n  13 |   // Check that it is not in the pressed (active) state.\n> 14 |   await expect(page.getByTestId(\"measurement-toggle\")).not.toBeChecked();\n     |        "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeAttached() failed\n\nLocator:  getByRole('button', { name: 'Measurement' })\nExpected: not attached\nReceived: attached\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeAttached\" with timeout 5000ms\n  - waiting for getByRole('button', { name: 'Measurement' })\n    14 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-part=\"trigger\" data-state=\"closed\" data-scope=\"tooltip\" aria-pressed=\"false\" data-ownedby=\"_r_u_\" aria-label=\"Measurement\" id=\"tooltip:_r_u_:trigge"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  25 |   await expect.poll(() =>\n  26 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 27 |   ).toBeGreaterThan(0);\n     |     ^\n  28 |\n  29 |   await expect.poll(() =>\n  30 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  25 |   await expect.poll(() =>\n  26 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 27 |   ).toBeGreaterThan(0);\n     |     ^\n  28 |\n  29 |   await expect.poll(() =>\n  30 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  25 |   await expect.poll(() =>\n  26 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 27 |   ).toBeGreaterThan(0);\n     |     ^\n  28 |\n  29 |   await expect.poll(() =>\n  30 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  26 |   await expect.poll(() =>\n  27 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 28 |   ).toBeGreaterThan(0);\n     |     ^\n  29 |\n  30 |   await expect.poll(() =>\n  31 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  26 |   await expect.poll(() =>\n  27 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 28 |   ).toBeGreaterThan(0);\n     |     ^\n  29 |\n  30 |   await expect.poll(() =>\n  31 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  26 |   await expect.poll(() =>\n  27 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 28 |   ).toBeGreaterThan(0);\n     |     ^\n  29 |\n  30 |   await expect.poll(() =>\n  31 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  26 |   await expect.poll(() =>\n  27 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 28 |   ).toBeGreaterThan(0);\n     |     ^\n  29 |\n  30 |   await expect.poll(() =>\n  31 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()\n   "
+    }
+  ]
+}

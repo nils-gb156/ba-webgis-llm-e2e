@@ -1,0 +1,103 @@
+{
+  "run": "run_44",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: `expect.poll()` does not support \"resolves\" matcher.\n\n  11 |\n  12 |   // Precondition: UV-Index Stations layer is active\n> 13 |   await expect.poll(() => page.getByTestId('uvi-stations-legend').isVisible()).resolves.toBe(true);\n     |                                                                                         ^\n  14 |\n  15 |   // Precondition: EUCOS Ground Stations layer is active\n  16 |   await expect.poll(() => page.getByTestId('eucos-stations-legend').isVisible()).resolves."
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByTestId('measurement-toggle')\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByTestId('measurement-toggle')\n\n\n  17 |\n  18 |   // Precondition: No measurement tool is active\n> 19 |   await expect(page.getByTestId('measurement-toggle')).not.toBeChecked();\n     |                                                            ^\n  20 |\n  21 |   // Step "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Too many arguments. If you need to pass more than 1 argument to the function wrap them in an object.\n\n  29 |   // relative to the map canvas to click on them.\n  30 |   // We use page.evaluate to do the conversion inside the browser context where the map model is available.\n> 31 |   const pixelCoords = await page.evaluate(\n     |                                  ^\n  32 |     async (targetX, targetY) => {\n  33 |       const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;\n"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index\"\nReceived string:    \"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00 AMscatt"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Kloster VeÃŸra, DESat, Jul 25, 02:00 AMbroken cloudsTemperature11.62 Â°CHumidity70 %Wind direction73Â°Wind speed1.19 m/sSat, Jul 25, 05:00 AMbroken cloudsTemperature11.44 Â°CHumidity71 %Wind direction121Â°Wind speed1.26 m/sSat, Jul 25, 08:00 AMscattered cloudsTemperature15.19 Â°CHumidity62 %Wind direction156Â°Wind speed1.56 m/sSat, Jul 25, 11:00"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n\n\n  67 |   await expect(\n  68 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }),\n"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n\n\n  67 |   await expect(\n  68 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }),\n"
+    }
+  ]
+}

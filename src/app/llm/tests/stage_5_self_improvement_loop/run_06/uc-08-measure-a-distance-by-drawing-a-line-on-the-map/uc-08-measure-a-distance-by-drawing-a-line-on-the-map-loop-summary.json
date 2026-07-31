@@ -1,0 +1,103 @@
+{
+  "run": "run_06",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('Measurement')\nExpected: visible\nError: strict mode violation: getByText('Measurement') resolved to 3 elements:\n    1) <h1 id=\"_r_0_\" class=\"chakra-heading css-1suuwx3\">Measurement</h1> aka getByRole('heading', { name: 'Measurement' })\n    2) <p class=\"css-cdgtm1\">Click in the map to start a measurement.</p> aka getByText('Click in the map to start a')\n    3) <button type=\"button\" class=\"chakra-button measurement-delete-button css-1"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: Cannot read properties of undefined (reading '0')\n\n  21 |\n  22 |   // Click the first point.\n> 23 |   await page.getByTestId('map-container').click({ position: { x: center[0] - 100, y: center[1] - 100 } });\n     |                                                                        ^\n  24 |   // Click the second point.\n  25 |   await page.getByTestId('map-container').click({ position: { x: center[0] + 100, y: center[1] - 100 } });\n  26 |   // Click the third point.\n    at c:\\Users\\n"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: Cannot read properties of undefined (reading '0')\n\n  21 |\n  22 |   // Click the first point.\n> 23 |   await page.getByTestId('map-container').click({ position: { x: center[0] - 100, y: center[1] - 100 } });\n     |                                                                        ^\n  24 |   // Click the second point.\n  25 |   await page.getByTestId('map-container').click({ position: { x: center[0] + 100, y: center[1] - 100 } });\n  26 |   // Click the third point.\n    at c:\\Users\\n"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: Cannot read properties of undefined (reading '0')\n\n  24 |\n  25 |   // Click the first point.\n> 26 |   await page.getByTestId('map-container').click({ position: { x: center[0] - 100, y: center[1] - 100 } });\n     |                                                                        ^\n  27 |   // Click the second point.\n  28 |   await page.getByTestId('map-container').click({ position: { x: center[0] + 100, y: center[1] - 100 } });\n  29 |   // Click the third point.\n    at c:\\Users\\n"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n\n\n  20 |\n  21 |   // Verify the measurement panel is visible.\n> 22 |   await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();\n     |                                                                  "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"Measurement\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  38 |   // The measurement panel displays a length value with a unit.\n  39 |   // Wait for the measurement result to appear and contain a number and a unit (e.g., \"km\").\n> 40 |   await expect.poll(() => page.getByRole('heading', { name: 'Measurement' }).locator('..').textContent()).toMatch(/\\d+(\\.\\d+)?\\s*(m"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   // The dialog contains the measurement result.\n  40 |   const measurementDialog = page.getByRole('dialog', { name: 'Measurement' });\n> 41 |   await expect.poll(() => measurementDialog.textContent()).toMatch(/\\d+(\\.\\d+)?\\s*(m|"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  38 |   // The dialog contains the measurement result.\n  39 |   const measurementPanel = page.getByTestId('measurement-panel');\n> 40 |   await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/);\n "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  38 |   // The dialog contains the measurement result.\n  39 |   const measurementPanel = page.getByTestId('measurement-panel');\n> 40 |   await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/);\n "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  37 |   // The measurement panel displays a length value with a unit.\n  38 |   const measurementPanel = page.getByTestId('measurement-panel');\n> 39 |   await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\.\\d+)?\\s*(m"
+    }
+  ]
+}

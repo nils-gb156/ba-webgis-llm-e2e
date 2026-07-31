@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_01/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 2: Switch the base map from Carto Light to OpenStreetMap",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 5321,
+                  "error": {
+                    "message": "ReferenceError: getMapZoomLevel is not defined",
+                    "stack": "ReferenceError: getMapZoomLevel is not defined\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:38:29\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:38:5",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                      "column": 29,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m     \u001b[90m// or center, but the title change is the primary indicator.\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[90m// Let's also verify that the map is still responsive and has a valid zoom level.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m     \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getMapZoomLevel(page))\u001b[33m.\u001b[39mtoBeDefined()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                        "column": 29,
+                        "line": 38
+                      },
+                      "message": "ReferenceError: getMapZoomLevel is not defined\n\n  36 |     // or center, but the title change is the primary indicator.\n  37 |     // Let's also verify that the map is still responsive and has a valid zoom level.\n> 38 |     await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n     |                             ^\n  39 | });\n  40 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:38:29\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:38:5"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T09:26:02.217Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-b7eb0-arto-Light-to-OpenStreetMap-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                    "column": 29,
+                    "line": 38
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "ab5639137c2e6889e549-5b3533744fdc8736cac7",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_01/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T09:26:01.224Z",
+    "duration": 8126.115,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

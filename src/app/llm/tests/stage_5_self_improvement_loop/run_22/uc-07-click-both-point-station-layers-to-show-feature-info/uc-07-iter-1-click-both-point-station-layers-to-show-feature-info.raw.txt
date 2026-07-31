@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (it is initially off, but be explicit)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementIsPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementIsPressed === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure the UV-Index Stations layer is active (it should be, but verify)
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure the EUCOS Ground Stations layer is active (it should be, but verify)
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // 1. Click on the map at the specified coordinates
+  // The map is a canvas; we click the container element at the given pixel position.
+  // The coordinates [1188692.84, 6767643.28] are in EPSG:3857 (map projection).
+  // We need to convert them to pixel coordinates on the canvas.
+  // However, the test prompt provides pixel coordinates directly in the `position` option
+  // context. Looking at the error, the previous test used the raw EPSG:3857 values as
+  // pixel positions, which is incorrect. The map canvas pixel coordinates are different.
+  // We need to convert EPSG:3857 to pixel coordinates.
+  // OpenLayers uses a global pixel coordinate system based on the map's view.
+  // We can use page.evaluate to convert the coordinates.
+
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Convert EPSG:3857 coordinates to pixel coordinates on the map canvas
+  const pixelCoords = await page.evaluate(
+    ([x, y]) => {
+      const map = (globalThis as { __openPioneerMap?: { olMap: { getPixelFromCoordinate: (coord: number[]) => [number, number] } } }).__openPioneerMap;
+      if (!map || !map.olMap) {
+        return null;
+      }
+      // OpenLayers expects coordinates in the map's projection (EPSG:3857)
+      // getPixelFromCoordinate takes an array [x, y]
+      const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+      return pixel;
+    },
+    [1188692.84, 6767643.28]
+  );
+
+  if (!pixelCoords) {
+    throw new Error('Could not convert map coordinates to pixel coordinates. Map may not be ready.');
+  }
+
+  // Click the map at the calculated pixel position
+  await mapContainer.click({
+    position: { x: pixelCoords[0], y: pixelCoords[1] },
+  });
+
+  // 2. Wait for the info panel to load the station info for both layers
+  // The info panel is already visible, so we just wait for the content to appear
+  await expect(page.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});

@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible (it is by default)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure no measurement tool is active (it is by default)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates where both station layers overlap
+  // The coordinates [1188692.84, 6767643.28] are in EPSG:3857.
+  // We need to convert these to pixel coordinates on the map canvas.
+  // Since we don't have a direct conversion helper, we'll use the map-container's
+  // bounding box and approximate the position. However, a more reliable approach
+  // for Playwright is to use the map's internal state if possible, or to find
+  // the feature on the map.
+  // Given the complexity of coordinate conversion without a helper, and the fact
+  // that the previous test used hardcoded pixel coordinates which failed,
+  // we need to be more careful.
+  // The screenshot shows a pin at a specific location. The test expects feature info
+  // for both UV-Index and EUCOS stations at that location.
+  // The previous test failed because the click didn't trigger the feature info.
+  // This could be due to incorrect pixel coordinates or the layers not being rendered
+  // at that specific point.
+  // Let's assume the pixel coordinates from the previous test (600, 300) were
+  // incorrect. We need to find the correct pixel coordinates.
+  // A better approach might be to use the map's coordinate system if we can
+  // get the map's view and convert the EPSG:3857 coordinates to pixel coordinates.
+  // However, the map-model-helpers don't provide a direct conversion function.
+  // We can use page.evaluate to get the map's view and convert the coordinates.
+
+  // Let's try to get the map's view and convert the coordinates to pixel coordinates
+  const pixelCoords = await page.evaluate(
+    async ([x, y]: [number, number]) => {
+      const map = (globalThis as { __openPioneerMap?: { olMap?: { getView: () => { getResolution: () => number; getCenter: () => [number, number]; getZoom: () => number } } } }).__openPioneerMap?.olMap?.getView();
+      if (!map) {
+        return null;
+      }
+      const center = map.getCenter();
+      const resolution = map.getResolution();
+      const zoom = map.getZoom();
+      // Get the map container's dimensions
+      const mapContainer = document.querySelector('[data-testid="map-container"]') as HTMLElement;
+      if (!mapContainer) {
+        return null;
+      }
+      const width = mapContainer.offsetWidth;
+      const height = mapContainer.offsetHeight;
+      // Convert EPSG:3857 coordinates to pixel coordinates
+      // This is a simplified conversion and may not be accurate for all projections
+      // We'll use the map's view to get the resolution and center
+      // and then calculate the pixel coordinates
+      const pixelX = (x - center[0]) / resolution + width / 2;
+      const pixelY = -(y - center[1]) / resolution + height / 2;
+      return [pixelX, pixelY];
+    },
+    [1188692.84, 6767643.28]
+  );
+
+  if (!pixelCoords) {
+    throw new Error('Failed to get pixel coordinates for the map click');
+  }
+
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: pixelCoords[0], y: pixelCoords[1] } });
+
+  // Wait for the info panel to load the station info for both layers
+  // We use expect.poll to wait for the feature info to appear
+  await expect.poll(async () => {
+    const infoPanel = page.getByTestId('info-panel');
+    const hasUVIStation = await infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible();
+    const hasEUCOSStation = await infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible();
+    return { hasUVIStation, hasEUCOSStation };
+  }).toEqual({ hasUVIStation: true, hasEUCOSStation: true });
+
+  // Verify that the info panel displays a 'UV-Index Station' section with feature information
+  await expect(page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })).toBeVisible();
+
+  // Verify that the info panel displays an 'EUCOS Ground Station' section with feature information
+  await expect(page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true })).toBeVisible();
+});

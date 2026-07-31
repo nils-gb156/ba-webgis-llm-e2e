@@ -1,0 +1,135 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_24/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3490,
+                  "error": {
+                    "message": "Error: page.evaluate: ReferenceError: page is not defined\n    at eval (eval at evaluate (:302:30), <anonymous>:9:17)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+                    "stack": "Error: page.evaluate: ReferenceError: page is not defined\n    at eval (eval at evaluate (:302:30), <anonymous>:9:17)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (eval at evaluate (:302:30), <anonymous>:9:17)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:26:14",
+                    "location": {
+                      "file": "eval at evaluate (:302:30), <anonymous>",
+                      "column": 17,
+                      "line": 9
+                    }
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "eval at evaluate (:302:30), <anonymous>",
+                        "column": 17,
+                        "line": 9
+                      },
+                      "message": "Error: page.evaluate: ReferenceError: page is not defined\n    at eval (eval at evaluate (:302:30), <anonymous>:9:17)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (eval at evaluate (:302:30), <anonymous>:9:17)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:26:14"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T16:45:05.416Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-a88b6-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "eval at evaluate (:302:30), <anonymous>",
+                    "column": 17,
+                    "line": 9
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "60d9493390073b3d293d-60d35073d4d7ddff8ce1",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_24/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T16:45:04.774Z",
+    "duration": 5322.652,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

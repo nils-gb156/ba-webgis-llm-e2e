@@ -1,0 +1,23 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // The layer switcher is already visible.
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer.
+  // There are two checkboxes with similar names ("UV-Index Stations" and "UV-Index").
+  // We need to target the "UV-Index" checkbox inside the "Operational layers" list.
+  const operationalLayersList = page.getByRole('list', { name: 'Operational layers' });
+  const uvIndexCheckbox = operationalLayersList.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  await uvIndexCheckbox.click({ force: true });
+
+  // Verify the toggle is in the enabled (checked) state.
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // Step 3: Verify the UV-Index overlay tiles are rendered on the map canvas.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

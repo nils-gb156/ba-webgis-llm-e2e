@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Precondition: at least one base map and one overlay layer are visible
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // 1. The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+    const printButton = page.getByTestId('print-toggle');
+    await printButton.click();
+
+    // The printing panel is visible.
+    await expect(page.getByRole('dialog', { name: 'Print Map' })).toBeVisible();
+
+    // 2. The user enters a title for the printout.
+    const titleInput = page.getByRole('textbox', { name: 'Title' });
+    await titleInput.fill('Test Printout');
+
+    // 3. The user selects the PNG file format.
+    // Chakra radio group: we need to click the hidden input directly via force: true.
+    await page.getByRole('radio', { name: 'PNG' }).click({ force: true });
+
+    // 4. The user clicks the export/print button.
+    // We set up the download listener before triggering the action.
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.getByRole('button', { name: 'Print' }).click(),
+    ]);
+
+    // The printed image shows the visible base map and overlay layers as well as the scale bar.
+    // We verify this by checking the downloaded file is a valid PNG and has a reasonable file size.
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename).toMatch(/\.png$/);
+
+    const path = await download.path();
+    if (path) {
+        const fs = require('fs');
+        const stats = fs.statSync(path);
+        // A reasonable PNG should be at least 10KB
+        expect(stats.size).toBeGreaterThan(10000);
+    }
+});

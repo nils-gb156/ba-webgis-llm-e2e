@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from "@playwright/test";
+import { getHighlightedCoordinate } from "../../../../map-model-helpers";
+
+test("Use Case 7: Click both point station layers to show feature info", async ({ page }) => {
+  await page.goto("http://localhost:5173/ba-webgis-llm-e2e/");
+
+  // Preconditions: info panel visible, measurement tool inactive
+  await expect(page.getByTestId("info-panel")).toBeVisible();
+  await expect(page.getByTestId("measurement-toggle")).not.toBeChecked();
+
+  // Step 1: Click on the map at the specified coordinates
+  const mapContainer = page.getByTestId("map-container");
+  await mapContainer.click({
+    position: { x: 100, y: 100 },
+  });
+
+  // Wait for the map to process the click and update the highlight
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Step 2: Wait for the info panel to load feature info for both layers
+  await expect.poll(() => page.getByText("UV-Index Station").count()).toBeGreaterThan(0);
+  await expect.poll(() => page.getByText("EUCOS Ground Station").count()).toBeGreaterThan(0);
+
+  // Expected results: verify both sections are displayed in the info panel
+  const infoPanel = page.getByTestId("info-panel");
+  await expect(infoPanel.getByText("UV-Index Station")).toBeVisible();
+  await expect(infoPanel.getByText("EUCOS Ground Station")).toBeVisible();
+});

@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Activate the measurement tool
+  // The button is "Measurement" — ensure it is not already pressed before clicking.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isPressed !== 'true') {
+    await measurementToggle.click();
+  }
+
+  // Wait for the measurement panel/dialog to appear
+  await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // Use force: true because the canvas is an OL <canvas> element that may
+  // intercept pointer events.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 100, y: 100 }, force: true });
+  await mapContainer.click({ position: { x: 200, y: 200 }, force: true });
+  await mapContainer.click({ position: { x: 300, y: 150 }, force: true });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 300, y: 150 }, force: true });
+
+  // Step 4: Verify the measurement panel is visible (dialog)
+  await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();
+
+  // Step 5: Verify the measurement panel displays a length value with a unit.
+  // The dialog contains the measurement result as text like "123.45 m".
+  // Use expect.poll because the value appears asynchronously after the
+  // double-click finishes rendering.
+  await expect
+    .poll(async () => {
+      const dialog = page.getByRole('dialog', { name: 'Measurement' });
+      const text = await dialog.textContent();
+      return text;
+    })
+    .toMatch(/\d+\.?\d*\s*(m|km|mi|ft)/i);
+});

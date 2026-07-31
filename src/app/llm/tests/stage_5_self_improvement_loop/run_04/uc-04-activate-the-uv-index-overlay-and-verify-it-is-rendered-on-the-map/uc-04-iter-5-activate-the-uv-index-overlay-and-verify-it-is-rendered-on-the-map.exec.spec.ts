@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({
+  page,
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to be ready and the map to render initially.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // 1. Click the visibility toggle of the UV-Index overlay layer to show it.
+  // The checkbox is labelled "UV-Index" in the accessibility tree.
+  // It is visually hidden under a Chakra control, so we use force: true.
+  // Scope the lookup to the layer list to avoid ambiguity with "UV-Index Stations".
+  const layerList = page.getByRole('list', { name: 'Operational layers' });
+  const uvIndexCheckbox = layerList.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  await uvIndexCheckbox.click({ force: true });
+
+  // 2. Wait for the map to load the layer tiles.
+  // Assert the checkbox state is now checked.
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Assert the UV-Index layer is actually rendered on the map canvas.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Click the 'Measurement' button in the toolbar
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    await measurementToggle.click();
+
+    // Verify the measurement panel is visible
+    await expect(page.getByTestId('map-controls-panel')).toBeVisible();
+    await expect(page.getByText('Measurement')).toBeVisible();
+
+    // 2. Click several points on the map canvas to draw a line
+    // Get the initial center of the map to click around
+    const center = await expect.poll(() => getMapCenter(page)).resolves.toBeDefined();
+    const [centerX, centerY] = center!;
+
+    // Click first point near center
+    await page.getByTestId('map-container').click({
+        position: { x: centerX, y: centerY },
+    });
+
+    // Click second point slightly offset
+    await page.getByTestId('map-container').click({
+        position: { x: centerX + 100, y: centerY - 50 },
+    });
+
+    // Click third point further offset
+    await page.getByTestId('map-container').click({
+        position: { x: centerX + 150, y: centerY + 100 },
+    });
+
+    // 3. Double-click to finish the measurement
+    await page.getByTestId('map-container').dblclick({
+        position: { x: centerX + 150, y: centerY + 100 },
+    });
+
+    // Wait for the measurement result to settle
+    await page.waitForTimeout(500);
+
+    // Expected results:
+    // - The measurement panel is visible (already checked above)
+    // - The measurement panel displays a length value with a unit
+    const measurementPanel = page.getByTestId('map-controls-panel');
+    await expect(measurementPanel).toBeVisible();
+
+    // The measurement result usually appears as text like "123.45 km" or "123.45 m"
+    // We check if there's any text that matches a number followed by a unit
+    const measurementText = measurementPanel.locator('text=/\\d+\\.?\\d*\\s*(km|m|mi|ft)/');
+    await expect(measurementText).toBeVisible();
+});

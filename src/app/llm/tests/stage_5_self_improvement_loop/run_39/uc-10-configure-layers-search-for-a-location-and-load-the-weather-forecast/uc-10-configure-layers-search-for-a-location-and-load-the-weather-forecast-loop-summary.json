@@ -1,0 +1,58 @@
+{
+  "run": "run_39",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 5,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  24 |   // Step 4: Wait for the result list to appear and select the first result.\n  25 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n> 26 |   await expect(geocoderPanel.locator('li')).toHaveCount({ gt: 0 });\n     |                                             ^\n  27 |   await geocoderPanel.getByRole('option', { name: 'MÃ¼nster' }).first().click();\n  28 |\n  29 |   // Step 5: Wait for the map to navigate to the se"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  29 |   await expect(geocoderPanel).toBeVisible();\n  30 |   // The geocoder panel contains the results; wait until it has items.\n> 31 |   await expect(geocoderPanel.getByRole('option')).toHaveCount({ gt: 0 });\n     |                                                   ^\n  32 |   // Click the first result (MÃ¼nster, North Rhine-Westphalia, Germany).\n  33 |   await geocoderPanel.getByRole('option').first().click();\n  34 |\n    at c:"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('option').first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('option').first()\n\n\n  30 |   // The geocoder panel contains the results; wait until it has items.\n  31 |   // Use toBeVisible() on the first option to ensure at least one result is rendered.\n> 32 |   await expect(g"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByTestId('weather-forecast-section').locator('li')\nExpected: 24\nReceived: 0\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 5000ms\n  - waiting for getByTestId('weather-forecast-section').locator('li')\n    14 Ã— locator resolved to 0 elements\n       - unexpected value \"0\"\n\n\n  42 |   // The expected result is that the info panel displays a weather forecast section with 24 entries.\n  43 |   // We assert that the sec"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

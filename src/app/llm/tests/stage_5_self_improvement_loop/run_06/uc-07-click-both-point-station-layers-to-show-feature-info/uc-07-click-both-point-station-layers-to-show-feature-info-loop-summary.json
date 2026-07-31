@@ -1,0 +1,76 @@
+{
+  "run": "run_06",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 7,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('UV-Index Station')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText('UV-Index Station')\n\n\n  33 |\n  34 |     // Verify that the info panel displays a 'UV-Index Station' section\n> 35 |     await expect(infoPanel.getByText('UV-Index Station')).toBeVisible();\n     |                          "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: [1188692.84, 6767643.28]\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |     // Wait for the info panel to load the station info for both layers\n  34 |     // Poll for the highlight marker to appear at the clicked coordinates\n> 35 |     await expect.poll(() => getHighlightedCoordinate(page)).toEqual([1188692.84, 6767643.28]);\n     |                                                "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  78 |     // Wait for the info panel to load the station info for both layers\n  79 |     // Poll for the info panel to contain the expected headings\n> 80 |     await expect.poll(() => infoPanel.getByText('UV-Index Station').isVisible()).toBe(true);\n     |                                                                                  "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: page.evaluate: TypeError: Cannot read properties of null (reading '0')\n    at eval (eval at evaluate (:302:30), <anonymous>:10:18)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (eval at evaluate (:302:30), <anonymous>:10:18)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Map model not available or coordinate conversion failed\n\n  45 |\n  46 |     if (!pixelCoords) {\n> 47 |         throw new Error('Map model not available or coordinate conversion failed');\n     |               ^\n  48 |     }\n  49 |\n  50 |     // Click on the map at the calculated pixel position\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "generation_error",
+      "error_excerpt": "SyntaxError: Unexpected token 'export'\n\n   7 |\n   8 |     // Wait for the required layers to be rendered on the map\n>  9 |     const { isLayerRendered } = await import('../../../../map-model-helpers');\n     |                                 ^\n  10 |     await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);\n  11 |     await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);\n  12 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tes"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

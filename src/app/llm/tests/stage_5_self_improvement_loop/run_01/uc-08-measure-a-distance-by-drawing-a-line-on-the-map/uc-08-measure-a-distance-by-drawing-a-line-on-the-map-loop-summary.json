@@ -1,0 +1,67 @@
+{
+  "run": "run_01",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 6,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  77 |     // Check for a length value with a unit (e.g., \"100 m\", \"1.5 km\")\n  78 |     // The panel might contain text like \"Distance: 123 m\" or just \"123 m\"\n> 79 |     await expect.poll(() => measurementPanel.textContent()).toMatch("
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  47 |     // Check for a length value with a unit (e.g., \"100 m\", \"1.5 km\")\n  48 |     // The panel content changes after the measurement is completed\n> 49 |     await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\."
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  47 |     // Check for a length value with a unit (e.g., \"100 m\", \"1.5 km\")\n  48 |     // The panel content changes after the measurement is completed\n> 49 |     await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\."
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  43 |     // Check for a length value with a unit (e.g., \"100 m\", \"1.5 km\")\n  44 |     // The panel content changes after the measurement is completed\n> 45 |     await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\."
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  38 |     // Check for a length value with a unit (e.g., \"100 m\", \"1.5 km\")\n  39 |     // The panel content changes after the measurement is completed\n> 40 |     await expect.poll(() => measurementPanel.textContent()).toMatch(/\\d+(\\."
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

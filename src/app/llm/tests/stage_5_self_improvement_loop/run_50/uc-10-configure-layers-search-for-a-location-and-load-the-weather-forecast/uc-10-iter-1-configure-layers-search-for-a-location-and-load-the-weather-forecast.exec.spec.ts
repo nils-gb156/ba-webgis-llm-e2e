@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Hide the Temperature overlay layer
+  // Chakra UI checkboxes intercept pointer events on the visual control, so we use force: true
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // 2. Show the Precipitation overlay layer
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Verify layer states via map model
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // 3. Search for a location using the geocoder
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // 4. Wait for the result list to appear and select the first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  // Wait for the first list item (result) to be visible
+  await expect(geocoderPanel.getByRole('option').first()).toBeVisible();
+  await geocoderPanel.getByRole('option').first().click();
+
+  // 5. Wait for the map to navigate to the selected location
+  // We check if the map center has changed from the initial extent or if a highlight appears.
+  // Since we don't know the exact coordinates of Münster, we check that the map center is no longer undefined
+  // and that the map has moved (we can't easily assert the exact new center without knowing it beforehand,
+  // but we can assert that the map is no longer in its initial state by checking if a highlight exists
+  // or if the center has changed significantly. A simpler check is to wait for the info panel to update).
+  // Let's wait for the info panel to show a forecast, which implies navigation.
+  await expect(page.getByTestId('info-panel')).toContainText('Weather Forecast');
+
+  // 6. Wait for the info panel to load the forecast with 24 entries
+  // The forecast section should have 24 entries. We can count the items in the forecast section.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  // We expect the section to be visible and contain 24 entries.
+  // The entries are likely list items or similar. Let's assume they are list items for now.
+  await expect.poll(() => weatherForecastSection.getByRole('listitem').count()).toBe(24);
+});

@@ -1,0 +1,40 @@
+{
+  "run": "run_31",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByText('MÃ¼nster')\nExpected: visible\nError: strict mode violation: getByTestId('geocoder-panel').getByText('MÃ¼nster') resolved to 2 elements:\n    1) <p class=\"css-l0zmib\">MÃ¼nster, North Rhine-Westphalia, Germany</p> aka getByText('MÃ¼nster, North Rhine-')\n    2) <p class=\"css-l0zmib\">MÃ¼nster, Rain (Schwaben), Landkreis Donau-Ries, Bâ€¦</p> aka getByText('MÃ¼nster, Rain (Schwaben),')\n\nCall log:\n  - Expect \"t"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeVisible() failed\n\nLocator:  getByTestId('geocoder-panel')\nExpected: not visible\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel')\n    13 Ã— locator resolved to <div class=\"css-11ujcvz\" aria-label=\"Geocoder\" data-testid=\"geocoder-panel\">â€¦</div>\n       - unexpected value \"visible\"\n\n\n  36 |     // 5. Wait for the map to navigate to the selected location.\n  37 |     // The geoc"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

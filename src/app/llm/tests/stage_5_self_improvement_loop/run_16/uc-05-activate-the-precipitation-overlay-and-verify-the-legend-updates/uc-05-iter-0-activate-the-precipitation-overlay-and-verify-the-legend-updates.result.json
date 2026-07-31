@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_16/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 5: Activate the Precipitation overlay and verify the legend updates",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7580,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('legend').getByText('Precipitation', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('legend').getByText('Precipitation', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts:23:70",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+                      "column": 70,
+                      "line": 23
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 21 |\u001b[39m     \u001b[90m// Step 2: View the legend and verify it displays an entry corresponding to the Precipitation layer.\u001b[39m\n \u001b[90m 22 |\u001b[39m     \u001b[36mconst\u001b[39m legend \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'legend'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 23 |\u001b[39m     \u001b[36mawait\u001b[39m expect(legend\u001b[33m.\u001b[39mgetByText(\u001b[32m'Precipitation'\u001b[39m\u001b[33m,\u001b[39m { exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 24 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 25 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+                        "column": 70,
+                        "line": 23
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('legend').getByText('Precipitation', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })\u001b[22m\n\n\n  21 |     // Step 2: View the legend and verify it displays an entry corresponding to the Precipitation layer.\n  22 |     const legend = page.getByTestId('legend');\n> 23 |     await expect(legend.getByText('Precipitation', { exact: true })).toBeVisible();\n     |                                                                      ^\n  24 | });\n  25 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts:23:70"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T14:13:10.674Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-d368b-d-verify-the-legend-updates-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+                    "column": 70,
+                    "line": 23
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "4f1e071e5f8f650bcb35-a5ecfed87b8309872429",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_16/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T14:13:10.102Z",
+    "duration": 9378.843,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

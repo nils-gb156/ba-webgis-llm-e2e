@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and get its center for clicking
+  await expect.poll(() => getMapCenter(page)).toBeTruthy();
+  const center = await getMapCenter(page);
+  if (!center) {
+    throw new Error('Map center is not available');
+  }
+
+  // Step 1: Activate the measurement tool
+  await page.getByRole('button', { name: 'Measurement' }).click();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // The first click activates the tool and places the first point
+  await page.getByTestId('map-container').click({ position: { x: 100, y: 100 } });
+  await page.getByTestId('map-container').click({ position: { x: 200, y: 200 } });
+  await page.getByTestId('map-container').click({ position: { x: 300, y: 150 } });
+
+  // Step 3: Double-click to finish the measurement
+  await page.getByTestId('map-container').dblclick({ position: { x: 300, y: 150 } });
+
+  // Step 4: Verify the measurement panel is visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Step 5: Verify the measurement panel displays a length value with a unit
+  // The info panel contains the measurement result. We look for text that matches a number followed by a unit.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect.poll(() => infoPanel.locator('text=/\\d+\\.?\\d*\\s*(m|km|mi|ft)/i').first().textContent()).toMatch(/\d+\.?\d*\s*(m|km|mi|ft)/i);
+});

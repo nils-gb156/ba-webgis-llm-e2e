@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC-07: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // --- Preconditions ---
+
+    // Ensure both station layers are rendered
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    // Ensure measurement tool is NOT active (it may be toggled on by default)
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (measurementPressed === 'true') {
+        await measurementToggle.click({ force: true });
+    }
+
+    // Ensure Info Panel is visible
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const infoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (infoPanelPressed !== 'true') {
+        await infoPanelToggle.click({ force: true });
+    }
+
+    const infoPanel = page.getByTestId('info-panel');
+    await expect(infoPanel).toBeVisible();
+
+    // --- Steps ---
+
+    // 1. Click at the specified map coordinates [1188692.84, 6767643.28]
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: 1188692.84, y: 6767643.28 }
+    });
+
+    // 2. Wait for the info panel to load the station info for both layers.
+    //    We use expect.poll to wait for the expected content to appear.
+    await expect.poll(() => infoPanel.getByText('UV-Index Station').isVisible()).toBe(true);
+    await expect.poll(() => infoPanel.getByText('EUCOS Ground Station').isVisible()).toBe(true);
+
+    // --- Expected Results ---
+
+    // The info panel displays a 'UV-Index Station' section with feature information.
+    // The info panel displays an 'EUCOS Ground Station' section with feature information.
+    // The above expect.poll assertions already confirm the sections are visible.
+    // We can further assert that the sections are actually visible (not just in the DOM).
+    await expect(infoPanel.getByText('UV-Index Station')).toBeVisible();
+    await expect(infoPanel.getByText('EUCOS Ground Station')).toBeVisible();
+});

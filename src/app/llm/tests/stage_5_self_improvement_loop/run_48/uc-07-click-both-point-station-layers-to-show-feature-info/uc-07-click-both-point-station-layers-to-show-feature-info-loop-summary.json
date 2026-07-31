@@ -1,0 +1,31 @@
+{
+  "run": "run_48",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Array [\n-   1188692.84,\n-   6767643.28,\n+   1188680.5996360078,\n+   6767655.517313842,\n  ]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  40 |   \n  41 |   // Wait for the highlight to appear at the clicked location\n> 42 |   await expect.poll(() => getHighlightedCoordinate(page)).toEqual([targetX, targetY]);\n     |                                                           ^\n  43 "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

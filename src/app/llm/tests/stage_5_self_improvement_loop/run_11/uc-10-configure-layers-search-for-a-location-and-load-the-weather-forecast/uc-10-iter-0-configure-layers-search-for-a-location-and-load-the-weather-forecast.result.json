@@ -1,0 +1,128 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_11\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_11/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 10: Configure layers, search for a location and load the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 30268,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_11\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                        "column": 31,
+                        "line": 11
+                      },
+                      "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('checkbox', { name: 'Temperature' })\u001b[22m\n\u001b[2m    - locator resolved to <input checked value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_m_:input\" aria-labelledby=\"checkbox:_r_m_:label\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 Ã— waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dir=\"ltr\" aria-hidden=\"true\" data-part=\"control\" data-state=\"checked\" data-scope=\"checkbox\" id=\"checkbox:_r_m_:control\" class=\"chakra-checkbox__control css-16983vm\">â€¦</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 Ã— waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dir=\"ltr\" aria-hidden=\"true\" data-part=\"control\" data-state=\"checked\" data-scope=\"checkbox\" id=\"checkbox:_r_m_:control\" class=\"chakra-checkbox__control css-16983vm\">â€¦</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    53 Ã— waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div dir=\"ltr\" aria-hidden=\"true\" data-part=\"control\" data-state=\"checked\" data-scope=\"checkbox\" id=\"checkbox:_r_m_:control\" class=\"chakra-checkbox__control css-16983vm\">â€¦</div> intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n   9 |     // 1. Hide the Temperature overlay layer.\n  10 |     const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });\n> 11 |     await temperatureCheckbox.click();\n     |                               ^\n  12 |     await expect(temperatureCheckbox).not.toBeChecked();\n  13 |     await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);\n  14 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_11\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:11:31"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T12:50:49.786Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-c6335-d-load-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "e302bbc096b6033d3e12-b40f24a95a0962202358",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_11/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T12:50:49.162Z",
+    "duration": 33188.662000000004,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

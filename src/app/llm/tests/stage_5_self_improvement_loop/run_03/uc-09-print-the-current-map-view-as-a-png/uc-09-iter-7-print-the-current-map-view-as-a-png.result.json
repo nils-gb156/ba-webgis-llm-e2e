@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_03\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_03/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 9: Print the current map view as a PNG",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3553,
+                  "error": {
+                    "message": "Error: locator.click: Element is not visible\nCall log:\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })\u001b[22m\n\u001b[2m    - locator resolved to <option value=\"png\">PNG</option>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n",
+                    "stack": "Error: locator.click: Element is not visible\nCall log:\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })\u001b[22m\n\u001b[2m    - locator resolved to <option value=\"png\">PNG</option>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_03\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts:34:94",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_03\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts",
+                      "column": 94,
+                      "line": 34
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 32 |\u001b[39m   \u001b[90m// The option is inside the dialog. Use exact name to avoid ambiguity.\u001b[39m\n \u001b[90m 33 |\u001b[39m   \u001b[90m// The option element itself may not be clickable, so we use force: true.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 34 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'dialog'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Print Map'\u001b[39m })\u001b[33m.\u001b[39mgetByRole(\u001b[32m'option'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'PNG'\u001b[39m })\u001b[33m.\u001b[39mclick({ force\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 35 |\u001b[39m\n \u001b[90m 36 |\u001b[39m   \u001b[90m// Verify the combobox now shows PNG\u001b[39m\n \u001b[90m 37 |\u001b[39m   \u001b[36mawait\u001b[39m expect(formatCombobox)\u001b[33m.\u001b[39mtoHaveValue(\u001b[32m'png'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_03\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts",
+                        "column": 94,
+                        "line": 34
+                      },
+                      "message": "Error: locator.click: Element is not visible\nCall log:\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })\u001b[22m\n\u001b[2m    - locator resolved to <option value=\"png\">PNG</option>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\n\n  32 |   // The option is inside the dialog. Use exact name to avoid ambiguity.\n  33 |   // The option element itself may not be clickable, so we use force: true.\n> 34 |   await page.getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' }).click({ force: true });\n     |                                                                                              ^\n  35 |\n  36 |   // Verify the combobox now shows PNG\n  37 |   await expect(formatCombobox).toHaveValue('png');\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_03\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts:34:94"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T10:21:35.352Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-27c0b-e-current-map-view-as-a-PNG-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_03\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts",
+                    "column": 94,
+                    "line": 34
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b5332cab3c7bc940cf41-bfad889957eadaced76a",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_03/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-7-print-the-current-map-view-as-a-png.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T10:21:34.804Z",
+    "duration": 5288.703,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

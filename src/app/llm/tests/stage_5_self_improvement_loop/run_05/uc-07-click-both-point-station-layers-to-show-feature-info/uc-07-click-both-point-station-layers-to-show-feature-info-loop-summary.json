@@ -1,0 +1,103 @@
+{
+  "run": "run_05",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByRole('button', { name: 'Measurement' })\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByRole('button', { name: 'Measurement' })\n\n\n  18 |     // We still assert it to be safe.\n  19 |     const measurementToggle = page.getByRole('button', { name: 'Measurement' });\n> 20 |     await expect(measurementToggle).not.toBeChecked();\n     |             "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - waiting for locator('canvas')\n\n\n  26 |     // The map is rendered on a canvas inside the map-container. We click directly on the canvas element.\n  27 |     const mapCanvas = page.locator('canvas');\n> 28 |     await mapCanvas.cli"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |     //    The info panel should now display sections for both 'UV-Index Station' and 'EUCOS Ground Station'.\n  35 |     //    We use expect.poll to wait for the content to appear asynchronously.\n> 36 |     await expect.poll(() => infoPanel.getByText('UV-Index Station').isVisible()).toBe(true);\n     |                              "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     //    We use expect.poll to wait for the content to appear asynchronously.\n  36 |     //    We look for headings or text that identifies the station sections.\n> 37 |     await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station', level: 2 }).isVisible()).toBe(true);\n     |                               "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     //    We use expect.poll to wait for the content to appear asynchronously.\n  36 |     //    We look for headings or text that identifies the station sections.\n> 37 |     await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station', level: 2 }).isVisible()).toBe(true);\n     |                               "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Map model is not available or coordinates could not be converted to pixels.\n\n   96 |\n   97 |     if (!pixelCoords) {\n>  98 |         throw new Error('Map model is not available or coordinates could not be converted to pixels.');\n      |               ^\n   99 |     }\n  100 |\n  101 |     const [pixelX, pixelY] = pixelCoords;\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_05\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Map model is not available or coordinates could not be converted to pixels.\n\n  49 |\n  50 |     if (!pixelCoords) {\n> 51 |         throw new Error('Map model is not available or coordinates could not be converted to pixels.');\n     |               ^\n  52 |     }\n  53 |\n  54 |     const [pixelX, pixelY] = pixelCoords;\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_05\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: pixelCoords is not iterable\n\n  54 |     }\n  55 |\n> 56 |     const [pixelX, pixelY] = pixelCoords;\n     |                              ^\n  57 |\n  58 |     // Click on the map at the calculated pixel coordinates\n  59 |     await mapContainer.click({\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_05\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.exec.spec.ts"
+    }
+  ]
+}

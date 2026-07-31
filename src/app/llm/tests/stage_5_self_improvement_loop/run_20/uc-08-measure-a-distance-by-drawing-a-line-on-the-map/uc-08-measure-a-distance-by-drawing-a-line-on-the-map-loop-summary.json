@@ -1,0 +1,103 @@
+{
+  "run": "run_20",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |   // The value is inside the map-controls-panel, look for text matching a number followed by a unit\n  31 |   const measurementPanel = page.getByTestId('map-controls-panel');\n> 32 |   await expect.poll(() => measurementPanel.locator('text=/\\\\d+(\\\\.\\\\d+)?\\\\s*(m|km)/').count()).toBeGreaterThan(0);\n     |                                           "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  26 |   // The measurement panel displays a length value with a unit\n  27 |   const measurementPanel = page.getByRole('dialog', { name: 'Measurement' });\n> 28 |   await expect.poll(() => measurementPanel.locator('text=/\\\\d+(\\\\.\\\\d+)?\\\\s*(m|km)/').count()).toBeGreaterThan(0);\n     |                                                                     "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: `expect.poll()` does not support \"toBeVisible\" matcher.\n\n  26 |   const measurementPanel = page.getByRole('dialog', { name: 'Measurement' });\n  27 |   // Wait for the measurement result to appear (the panel initially says \"Click in the map to start...\")\n> 28 |   await expect.poll(() => measurementPanel.getByText(/(\\d+(\\.\\d+)?)\\s*(m|km)/)).toBeVisible();\n     |                                                                                 ^\n  29 | });\n  30 |\n    at c:\\Users\\n.beikel\\repos"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  25 |   // The measurement panel displays a length value with a unit\n  26 |   // Use toBe with a regex to match the measurement text content directly\n> 27 |   await expect.poll(() => page.getByTestId('measurement-panel').textContent()).t"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  29 |   await expect.poll(() =>\n  30 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()\n> 31 |   ).toMatch(/(\\d+(\\.\\d+)?)\\s*(m|km)/);\n     |     ^\n  32 | });\n  33 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  29 |   await expect.poll(() =>\n  30 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()\n> 31 |   ).toMatch(/(\\d+(\\.\\d+)?)\\s*(m|km)/);\n     |     ^\n  32 | });\n  33 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |   await expect.poll(() =>\n  32 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()\n> 33 |   ).toMatch(/(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/);\n     |     ^\n  34 | });\n  35 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  42 |   await expect.poll(() =>\n  43 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()\n> 44 |   ).toMatch(/(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/);\n     |     ^\n  45 | });\n  46 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  40 |   await expect.poll(() =>\n  41 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()\n> 42 |   ).toMatch(/(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/);\n     |     ^\n  43 | });\n  44 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  40 |   await expect.poll(() =>\n  41 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()\n> 42 |   ).toMatch(/(\\d+(\\.\\d+)?)\\s*(m|km|mi|ft)/);\n     |     ^\n  43 | });\n  44 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    }
+  ]
+}

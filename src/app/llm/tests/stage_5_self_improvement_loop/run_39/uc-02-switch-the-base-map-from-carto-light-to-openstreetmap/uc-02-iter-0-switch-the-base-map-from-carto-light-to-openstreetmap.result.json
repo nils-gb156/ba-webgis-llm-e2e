@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_39/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UC2: Switch the base map from Carto Light to OpenStreetMap",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3543,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('combobox', { name: 'Basemaps' })\nExpected: \u001b[32m\"Carto Light\"\u001b[39m\nError: Not an input element\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Basemaps' })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('combobox', { name: 'Basemaps' })\nExpected: \u001b[32m\"Carto Light\"\u001b[39m\nError: Not an input element\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Basemaps' })\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:11:66",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                      "column": 66,
+                      "line": 11
+                    },
+                    "snippet": "\u001b[0m \u001b[90m  9 |\u001b[39m   \u001b[90m// Preconditions: Carto Light is active by default, layer switcher is visible\u001b[39m\n \u001b[90m 10 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'combobox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Basemaps'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 11 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'combobox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Basemaps'\u001b[39m }))\u001b[33m.\u001b[39mtoHaveValue(\u001b[32m'Carto Light'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 12 |\u001b[39m\n \u001b[90m 13 |\u001b[39m   \u001b[90m// Step 1: The user opens the base map selector in the layer switcher.\u001b[39m\n \u001b[90m 14 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'combobox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Basemaps'\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                        "column": 66,
+                        "line": 11
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('combobox', { name: 'Basemaps' })\nExpected: \u001b[32m\"Carto Light\"\u001b[39m\nError: Not an input element\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Basemaps' })\u001b[22m\n\n\n   9 |   // Preconditions: Carto Light is active by default, layer switcher is visible\n  10 |   await expect(page.getByRole('combobox', { name: 'Basemaps' })).toBeVisible();\n> 11 |   await expect(page.getByRole('combobox', { name: 'Basemaps' })).toHaveValue('Carto Light');\n     |                                                                  ^\n  12 |\n  13 |   // Step 1: The user opens the base map selector in the layer switcher.\n  14 |   await page.getByRole('combobox', { name: 'Basemaps' }).click();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:11:66"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T21:34:28.680Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-1626e-arto-Light-to-OpenStreetMap-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                    "column": 66,
+                    "line": 11
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "97a46362a09439e1a2b1-841fa106376764c46cf1",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_39/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T21:34:28.001Z",
+    "duration": 5462.023,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

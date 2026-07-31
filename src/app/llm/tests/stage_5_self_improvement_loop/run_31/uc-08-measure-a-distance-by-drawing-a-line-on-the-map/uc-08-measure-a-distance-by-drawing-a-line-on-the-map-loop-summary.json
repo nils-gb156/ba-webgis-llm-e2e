@@ -1,0 +1,103 @@
+{
+  "run": "run_31",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  49 |         // Look for a pattern like \"1.23 km\" or \"1234 m\"\n  50 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 51 |     }).toBeTruthy();\n     |        ^\n  52 | });\n  53 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  51 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  52 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 53 |     }).toBeTruthy();\n     |        ^\n  54 | });\n  55 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-2-measure-"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-4-measure-"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-6-measure-"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-7-measure-"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-8-measure-"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: null\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  50 |         // Look for a pattern like \"422.18 km\" or \"1234 m\"\n  51 |         return panelText?.match(/\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i);\n> 52 |     }).toBeTruthy();\n     |        ^\n  53 | });\n  54 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_31\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-9-measure-"
+    }
+  ]
+}

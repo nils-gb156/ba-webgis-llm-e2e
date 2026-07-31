@@ -1,0 +1,22 @@
+{
+  "run": "run_09",
+  "use_case_id": 2,
+  "title": "Switch the base map from Carto Light to OpenStreetMap",
+  "complexity": "easy",
+  "passed": true,
+  "iterations_used": 1,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

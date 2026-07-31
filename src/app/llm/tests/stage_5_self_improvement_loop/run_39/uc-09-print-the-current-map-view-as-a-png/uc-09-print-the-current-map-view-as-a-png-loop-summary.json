@@ -1,0 +1,103 @@
+{
+  "run": "run_39",
+  "use_case_id": 9,
+  "title": "Print the current map view as a PNG",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-09-iter-9-print-the-current-map-view-as-a-png.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('option', { name: 'PNG' })\n    14 Ã— locator resolved to <option value=\"png\">PNG</option>\n       - unexpected value \"hidden\"\n\n\n  27 |\n  28 |   // Wait for the options to appear and click PNG\n> 29 |   await expect(page.getByRole('option', { name: 'PNG' })).toBeVisible();\n   "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('option', { name: 'PNG' })\n    14 Ã— locator resolved to <option value=\"png\">PNG</option>\n       - unexpected value \"hidden\"\n\n\n  29 |   // Use force: true because Chakra UI renders the actual <option> elements visually hidden\n  30 |   // and the decorative control element i"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('option', { name: 'PNG' })\n    14 Ã— locator resolved to <option value=\"png\">PNG</option>\n       - unexpected value \"hidden\"\n\n\n  26 |   // and the decorative control element intercepts pointer events.\n  27 |   const pngOption = page.getByRole('option', { name: 'PNG' });\n> 2"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-09-iter-3-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('option', { name: 'PNG' })\n    14 Ã— locator resolved to <option value=\"png\">PNG</option>\n       - unexpected value \"hidden\"\n\n\n  26 |   // and the decorative control element intercepts pointer events.\n  27 |   const pngOption = page.getByRole('option', { name: 'PNG' });\n> 2"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-09-iter-4-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('option', { name: 'PNG' })\n    14 Ã— locator resolved to <option value=\"png\">PNG</option>\n       - unexpected value \"hidden\"\n\n\n  26 |   // and the decorative control element intercepts pointer events.\n  27 |   const pngOption = page.getByRole('option', { name: 'PNG' });\n> 2"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-09-iter-5-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('option', { name: 'PNG' })\n    13 Ã— locator resolved to <option value=\"png\">PNG</option>\n       - unexpected value \"hidden\"\n\n\n  26 |   // and the decorative control element intercepts pointer events.\n  27 |   const pngOption = page.getByRole('option', { name: 'PNG' });\n> 2"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-09-iter-6-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Error: locator.click: Element is not visible\nCall log:\n  - waiting for getByRole('option', { name: 'PNG' })\n    - locator resolved to <option value=\"png\">PNG</option>\n  - attempting click action\n    - scrolling into view if needed\n\n\n  26 |   // and the decorative control element intercepts pointer events.\n  27 |   const pngOption = page.getByRole('option', { name: 'PNG' });\n> 28 |   await pngOption.click({ force: true });\n     |                   ^\n  29 |\n  30 |   // Verify the combobox now show"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-09-iter-7-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.click: Element is not visible\nCall log:\n  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })\n    - locator resolved to <option value=\"png\">PNG</option>\n  - attempting click action\n    - scrolling into view if needed\n\n\n  28 |   const dialog = page.getByRole('dialog', { name: 'Print Map' });\n  29 |   const pngOption = dialog.getByRole('option', { name: 'PNG' });\n> 30 |   await pngOption.click({ force: true });\n     |                   ^\n  3"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-09-iter-8-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.click: Element is not visible\nCall log:\n  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })\n    - locator resolved to <option value=\"png\">PNG</option>\n  - attempting click action\n    - scrolling into view if needed\n\n\n  28 |   const dialog = page.getByRole('dialog', { name: 'Print Map' });\n  29 |   const pngOption = dialog.getByRole('option', { name: 'PNG' });\n> 30 |   await pngOption.click({ force: true });\n     |                   ^\n  3"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-09-iter-9-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.click: Element is not visible\nCall log:\n  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })\n    - locator resolved to <option value=\"png\">PNG</option>\n  - attempting click action\n    - scrolling into view if needed\n\n\n  27 |   const dialog = page.getByRole('dialog', { name: 'Print Map' });\n  28 |   const pngOption = dialog.getByRole('option', { name: 'PNG' });\n> 29 |   await pngOption.click({ force: true });\n     |                   ^\n  3"
+    }
+  ]
+}

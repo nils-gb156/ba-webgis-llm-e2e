@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and operational layers to be ready.
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  await expect(page.getByTestId('map-controls-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click a first point.
+  await mapContainer.click({ position: { x: 400, y: 300 } });
+  // Click a second point.
+  await mapContainer.click({ position: { x: 500, y: 300 } });
+  // Click a third point.
+  await mapContainer.click({ position: { x: 600, y: 300 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 600, y: 300 } });
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+  await expect(page.getByTestId('map-controls-panel')).toBeVisible();
+
+  // The measurement result is typically shown inside the map-controls-panel.
+  // It should contain a number and a unit (e.g. "km", "m", "mi").
+  const measurementPanel = page.getByTestId('map-controls-panel');
+  await expect.poll(() => measurementPanel.textContent()).toMatch(/\d+(\.\d+)?\s+(km|m|mi|ft)/i);
+});

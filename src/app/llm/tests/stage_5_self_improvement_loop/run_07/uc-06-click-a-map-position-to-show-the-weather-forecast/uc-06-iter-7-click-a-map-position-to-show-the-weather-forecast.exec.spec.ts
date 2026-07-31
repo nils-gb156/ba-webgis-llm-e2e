@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is open by default)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure the map is ready and the Temperature layer is rendered
+  // (the forecast service likely requires an operational layer to be active)
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Click on a position on the map canvas.
+  // Using the center of the visible map area to ensure a click on land/visible area.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 500, y: 300 } });
+
+  // Wait for the highlighted coordinate to appear on the map
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Wait for the weather forecast section to appear and display actual data.
+  // The section is visible by default but shows an error message initially.
+  // We assert that the error message disappears and the "Weather Forecast" heading
+  // appears with its content.
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  
+  // Wait for the error message to disappear
+  await expect.poll(async () => {
+    const errorText = await forecastSection.getByText('Fehler beim Laden der Wetterdaten', { exact: false }).first().innerText().catch(() => '');
+    return errorText;
+  }).toBe('');
+
+  // Wait for the forecast heading to be present in the section
+  await expect(forecastSection.getByRole('heading', { name: 'Weather Forecast' })).toBeVisible();
+
+  // The use case states "The forecast contains 24 entries".
+  // We verify this by counting the list items within the forecast section.
+  // The entries are typically rendered as <li> elements inside a list structure.
+  await expect.poll(async () => {
+    const count = await forecastSection.locator('li').count();
+    return count;
+  }).toBe(24);
+});

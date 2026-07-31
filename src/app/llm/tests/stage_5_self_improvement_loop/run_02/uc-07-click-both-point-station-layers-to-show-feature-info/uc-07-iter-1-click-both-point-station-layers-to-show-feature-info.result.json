@@ -1,0 +1,74 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "SyntaxError: c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts: Unexpected token, expected \";\" (28:44)\n\n\u001b[0m \u001b[90m 26 |\u001b[39m     \u001b[90m// Calculate pixel position from map coordinates\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mconst\u001b[39m pixelPosition \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(({ mapContainerSelector\u001b[33m,\u001b[39m x\u001b[33m,\u001b[39m y }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 28 |\u001b[39m         \u001b[36mconst\u001b[39m map \u001b[33m=\u001b[39m (globalThis \u001b[36mas\u001b[39m { __open \u001b[33mPioneerMap\u001b[39m\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m { olMap\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m { getView\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m { getCenter\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m [number\u001b[33m,\u001b[39m number]\u001b[33m;\u001b[39m getZoom\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m number }\u001b[33m;\u001b[39m getPixelFromCoordinate\u001b[33m:\u001b[39m (coord\u001b[33m:\u001b[39m [number\u001b[33m,\u001b[39m number]) \u001b[33m=>\u001b[39m [number\u001b[33m,\u001b[39m number] } } })\u001b[33m.\u001b[39m__openPioneerMap\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 29 |\u001b[39m         \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mmap\u001b[33m?\u001b[39m\u001b[33m.\u001b[39molMap) \u001b[36mreturn\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 30 |\u001b[39m         \u001b[36mconst\u001b[39m view \u001b[33m=\u001b[39m map\u001b[33m.\u001b[39molMap\u001b[33m.\u001b[39mgetView()\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m         \u001b[36mconst\u001b[39m center \u001b[33m=\u001b[39m view\u001b[33m.\u001b[39mgetCenter()\u001b[33m;\u001b[39m\u001b[0m",
+      "stack": "SyntaxError: c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts: Unexpected token, expected \";\" (28:44)\n\n\u001b[0m \u001b[90m 26 |\u001b[39m     \u001b[90m// Calculate pixel position from map coordinates\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mconst\u001b[39m pixelPosition \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(({ mapContainerSelector\u001b[33m,\u001b[39m x\u001b[33m,\u001b[39m y }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 28 |\u001b[39m         \u001b[36mconst\u001b[39m map \u001b[33m=\u001b[39m (globalThis \u001b[36mas\u001b[39m { __open \u001b[33mPioneerMap\u001b[39m\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m { olMap\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m { getView\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m { getCenter\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m [number\u001b[33m,\u001b[39m number]\u001b[33m;\u001b[39m getZoom\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m number }\u001b[33m;\u001b[39m getPixelFromCoordinate\u001b[33m:\u001b[39m (coord\u001b[33m:\u001b[39m [number\u001b[33m,\u001b[39m number]) \u001b[33m=>\u001b[39m [number\u001b[33m,\u001b[39m number] } } })\u001b[33m.\u001b[39m__openPioneerMap\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 29 |\u001b[39m         \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mmap\u001b[33m?\u001b[39m\u001b[33m.\u001b[39molMap) \u001b[36mreturn\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 30 |\u001b[39m         \u001b[36mconst\u001b[39m view \u001b[33m=\u001b[39m map\u001b[33m.\u001b[39molMap\u001b[33m.\u001b[39mgetView()\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m         \u001b[36mconst\u001b[39m center \u001b[33m=\u001b[39m view\u001b[33m.\u001b[39mgetCenter()\u001b[33m;\u001b[39m\u001b[0m",
+      "location": {
+        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+        "line": 28,
+        "column": 44
+      },
+      "snippet": "\u001b[90m   at \u001b[39mllm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:28\n\n\u001b[0m \u001b[90m 26 |\u001b[39m     \u001b[90m// Calculate pixel position from map coordinates\u001b[39m\n \u001b[90m 27 |\u001b[39m     \u001b[36mconst\u001b[39m pixelPosition \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(({ mapContainerSelector\u001b[33m,\u001b[39m x\u001b[33m,\u001b[39m y }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 28 |\u001b[39m         \u001b[36mconst\u001b[39m map \u001b[33m=\u001b[39m (globalThis \u001b[36mas\u001b[39m { __open \u001b[33mPioneerMap\u001b[39m\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m { olMap\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m { getView\u001b[33m?\u001b[39m\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m { getCenter\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m [number\u001b[33m,\u001b[39m number]\u001b[33m;\u001b[39m getZoom\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m number }\u001b[33m;\u001b[39m getPixelFromCoordinate\u001b[33m:\u001b[39m (coord\u001b[33m:\u001b[39m [number\u001b[33m,\u001b[39m number]) \u001b[33m=>\u001b[39m [number\u001b[33m,\u001b[39m number] } } })\u001b[33m.\u001b[39m__openPioneerMap\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 29 |\u001b[39m         \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mmap\u001b[33m?\u001b[39m\u001b[33m.\u001b[39molMap) \u001b[36mreturn\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 30 |\u001b[39m         \u001b[36mconst\u001b[39m view \u001b[33m=\u001b[39m map\u001b[33m.\u001b[39molMap\u001b[33m.\u001b[39mgetView()\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m         \u001b[36mconst\u001b[39m center \u001b[33m=\u001b[39m view\u001b[33m.\u001b[39mgetCenter()\u001b[33m;\u001b[39m\u001b[0m"
+    },
+    {
+      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
+      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
+    }
+  ],
+  "stats": {
+    "startTime": "2026-07-25T07:36:20.258Z",
+    "duration": 356.17600000000004,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

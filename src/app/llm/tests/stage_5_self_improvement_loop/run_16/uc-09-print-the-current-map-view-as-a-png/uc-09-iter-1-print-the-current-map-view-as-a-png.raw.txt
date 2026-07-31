@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be rendered
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  // The print-toggle has data-testid "print-toggle".
+  const printToggle = page.getByTestId('print-toggle');
+  // Ensure the print panel is open. If it's already pressed, the panel is already open.
+  const isPrintPressed = await printToggle.getAttribute('aria-pressed');
+  if (isPrintPressed !== 'true') {
+    await printToggle.click();
+  }
+
+  // Verify the printing panel is visible
+  const printPanel = page.getByRole('dialog', { name: 'Print Map' });
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  await printPanel.getByRole('textbox', { name: 'Title' }).fill('E2E Test Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // The format is a combobox with options "PNG" and "PDF".
+  await printPanel.getByRole('combobox', { name: 'File format' }).selectOption('PNG');
+
+  // Step 4: The user clicks the export/print button.
+  // We start listening for the download before clicking the button.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printPanel.getByRole('button', { name: 'Export map' }).click(),
+  ]);
+
+  // Verify that a PNG file was downloaded
+  expect(download.suggestedFilename()).toMatch(/\.png$/);
+});

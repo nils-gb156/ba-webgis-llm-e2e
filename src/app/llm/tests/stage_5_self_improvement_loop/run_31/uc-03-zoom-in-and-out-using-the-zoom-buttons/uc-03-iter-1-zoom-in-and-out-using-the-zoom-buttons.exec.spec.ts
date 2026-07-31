@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and capture the initial zoom level
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  const initialZoom = await getMapZoomLevel(page);
+  expect(initialZoom).toBeDefined();
+
+  // Step 1: Click the 'Zoom in' button
+  await page.getByRole('button', { name: 'Zoom in map' }).click();
+
+  // Verify zoom level increased
+  await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);
+
+  // Step 2: Click the 'Zoom out' button
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Verify zoom level decreased (but not necessarily back to initial, just lower than after zoom in)
+  const zoomAfterOut = await expect.poll(() => getMapZoomLevel(page)).resolves.toBeLessThan(initialZoom! + 2);
+  // Since we can't easily compare to the "after zoom in" value directly in a single assertion,
+  // we assert that the final zoom is less than the initial zoom plus a small buffer,
+  // effectively ensuring it went down. A more robust check is to ensure it's less than
+  // what it was after zooming in. Let's capture the zoom after in, then after out.
+  // However, to keep it simple and follow the poll pattern:
+  // We know initialZoom was X. After zoom in, it's > X. After zoom out, it should be < (zoom after in).
+  // Since we can't easily get "zoom after in" in the second poll, let's just assert it's less than
+  // a reasonable upper bound, or re-structure.
+  // Better approach: Capture zoom after in, then assert zoom after out is less than that captured value.
+
+  // Let's rewrite to capture intermediate state properly.
+  const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).resolves.toBeGreaterThan(initialZoom!);
+  // The above poll returns the value that satisfied the condition.
+  // Wait, `expect.poll` returns the value that passed the assertion.
+  // So `zoomAfterIn` will be the zoom level that was > initialZoom.
+  
+  // Now click zoom out
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Assert that the new zoom is less than the zoom we had after zooming in.
+  await expect.poll(() => getMapZoomLevel(page)).toBeLessThan(zoomAfterIn);
+});

@@ -1,0 +1,103 @@
+{
+  "run": "run_34",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  15 |     await infoPanelToggle.click({ force: true });\n  16 |   }\n> 17 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  18 |\n  19 |   // Precondition: Ensure measurement tool is NOT active\n  20 |   const measurementToggle = p"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  14 |   await infoPanelToggle.click({ force: true });\n  15 |   const infoPanel = page.getByTestId('info-panel');\n> 16 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  17 |\n  18 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  13 |   await infoPanelToggle.click({ force: true });\n  14 |   const infoPanel = page.getByTestId('info-panel');\n> 15 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  16 |\n  17 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  13 |   await infoPanelToggle.click({ force: true });\n  14 |   const infoPanel = page.getByTestId('info-panel');\n> 15 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  16 |\n  17 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  13 |   await infoPanelToggle.click({ force: true });\n  14 |   const infoPanel = page.getByTestId('info-panel');\n> 15 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  16 |\n  17 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  13 |   await infoPanelToggle.click({ force: true });\n  14 |   const infoPanel = page.getByTestId('info-panel');\n> 15 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  16 |\n  17 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  13 |   await infoPanelToggle.click({ force: true });\n  14 |   const infoPanel = page.getByTestId('info-panel');\n> 15 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  16 |\n  17 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  14 |   await infoPanelToggle.click({ force: true });\n  15 |   const infoPanel = page.getByTestId('info-panel');\n> 16 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  17 |\n  18 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  14 |   await infoPanelToggle.click({ force: true });\n  15 |   const infoPanel = page.getByTestId('info-panel');\n> 16 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  17 |\n  18 |   // Precondition: Ensure measurement tool is N"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  14 |   await infoPanelToggle.click({ force: true });\n  15 |   const infoPanel = page.getByTestId('info-panel');\n> 16 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  17 |\n  18 |   // Precondition: Ensure measurement tool is N"
+    }
+  ]
+}

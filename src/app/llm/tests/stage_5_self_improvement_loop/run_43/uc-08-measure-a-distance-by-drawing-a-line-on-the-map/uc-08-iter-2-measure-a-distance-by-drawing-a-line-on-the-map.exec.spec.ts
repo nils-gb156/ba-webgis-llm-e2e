@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Activate measurement tool
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Wait for the measurement panel to appear
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Click several points on the map to draw a line
+  // The map container intercepts pointer events, so we need to use force: true
+  // when clicking on map elements that are visually hidden or covered.
+  // However, for the map canvas itself, we click directly on the map-container
+  // with a position. The issue in the previous test was that the map might not
+  // be fully ready or the canvas wasn't the direct target.
+  // We'll use the map-container test id and click at specific positions.
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click first point (top-left area of the map)
+  await mapContainer.click({
+    position: { x: 300, y: 200 },
+  });
+
+  // Click second point (middle area)
+  await mapContainer.click({
+    position: { x: 500, y: 400 },
+  });
+
+  // Click third point (bottom-right area)
+  await mapContainer.click({
+    position: { x: 700, y: 600 },
+  });
+
+  // 3. Double-click to finish the measurement
+  await mapContainer.dblclick({
+    position: { x: 700, y: 600 },
+  });
+
+  // Expected results: measurement panel visible and displays length
+  // The panel should already be visible, but we assert again to be sure
+  await expect(measurementPanel).toBeVisible();
+
+  // Check that a length value with a unit is displayed
+  // The panel should contain text like "Length: X km" or "X m"
+  // We look for a paragraph or text that matches the pattern
+  const measurementText = measurementPanel.locator('text=/Length: \\d+\\s*(km|m|mi|ft)/i');
+  await expect(measurementText).toBeVisible();
+});

@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Preconditions: info panel visible, both station layers active
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (it intercepts map clicks)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressed === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Step 1: Click at the specified coordinates on the map canvas
+  await page.getByTestId('map-container').click({
+    position: { x: 1188692.84, y: 6767643.28 },
+  });
+
+  // Step 2: Wait for the info panel to load feature info for both layers
+  await expect.poll(() =>
+    page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station' }).isVisible(),
+  ).toBe(true);
+
+  await expect.poll(() =>
+    page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station' }).isVisible(),
+  ).toBe(true);
+
+  // Verify that a highlight marker was placed at the clicked location
+  await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(() => (globalThis as { __openPioneerMap?: { highlights?: { getHighlights: () => unknown[] } } }).__openPioneerMap?.highlights?.getHighlights?.()?.length)).toBe(1);
+});

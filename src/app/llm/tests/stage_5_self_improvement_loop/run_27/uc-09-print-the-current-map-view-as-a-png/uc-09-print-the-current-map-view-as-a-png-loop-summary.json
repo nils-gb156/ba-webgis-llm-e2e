@@ -1,0 +1,40 @@
+{
+  "run": "run_27",
+  "use_case_id": 9,
+  "title": "Print the current map view as a PNG",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: page.waitForEvent: Test timeout of 30000ms exceeded.\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================\n\n  15 |     // Step 4: Set up download listener before triggering the action\n  16 |     const [download] = await Promise.all([\n> 17 |         page.waitForEvent('download'),\n     |              ^\n  18 |         page.getByRole('button', { name: 'Print"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /test-printout\\.png$/i\nReceived string:  \"Test Printout.png\"\n\n  35 |\n  36 |     // Verify the file was downloaded and has the correct suggested filename\n> 37 |     expect(download.suggestedFilename()).toMatch(/test-printout\\.png$/i);\n     |                                          ^\n  38 | });\n  39 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_27\\uc-09-print-the-current-map-view-"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "run": "run_26",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  18 |\n  19 |     // Check that the clicked position is highlighted on the map\n> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  21 |\n  22 |     // Check that the info panel displays a weather forecast section\n  23 |     await expect(page.getByTestId(\"weather-forecast-se"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  18 |\n  19 |     // Check that the clicked position is highlighted on the map\n> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  21 |\n  22 |     // Check that the info panel displays a weather forecast section\n  23 |     await expect(page.getByTestId(\"weather-forecast-se"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByTestId('weather-forecast-section').locator('.forecast-entry')\nExpected: 24\nReceived: 0\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 5000ms\n  - waiting for getByTestId('weather-forecast-section').locator('.forecast-entry')\n    13 Ã— locator resolved to 0 elements\n       - unexpected value \"0\"\n\n\n  28 |     const forecastSection = page.getByTestId(\"weather-forecast-section\");\n  29 |     const forecastEntries = "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "run": "run_39",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 5,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - waiting for getByTestId('map-container').locator('canvas')\n\n\n  12 |   // The map renders on a canvas inside the map-container; use the canvas element directly\n  13 |   // with the EPSG:3857 coordinat"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for locator('canvas').first()\n    - locator resolved to <canvas width=\"1920\" height=\"1039\"></canvas>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <canvas width=\"1920\" height=\"1039\"></canvas> from <div class=\"highlight-la"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: `expect.poll()` does not support \"resolves\" matcher.\n\n  13 |   await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n  14 |   await expect.poll(() => getMapCenter(page)).toBeDefined();\n> 15 |   await expect.poll(() => page.evaluate(() => getMapZoomLevel())).resolves.toBeDefined();\n     |                                                                            ^\n  16 |   await expect.poll(() => page.evaluate(() => getMapCenter())).resolves.toBeDefined();\n  17 |   \n  18 |   // Wai"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

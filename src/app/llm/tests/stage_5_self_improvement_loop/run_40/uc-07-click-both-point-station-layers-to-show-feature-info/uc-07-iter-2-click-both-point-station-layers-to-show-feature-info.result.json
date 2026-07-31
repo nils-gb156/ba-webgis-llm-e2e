@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_40/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6648,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"hasEcosHeading\": true,\u001b[39m\n\u001b[31m+   \"hasEcosHeading\": false,\u001b[39m\n\u001b[2m    \"hasUviHeading\": true,\u001b[22m\n\u001b[2m  }\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"hasEcosHeading\": true,\u001b[39m\n\u001b[31m+   \"hasEcosHeading\": false,\u001b[39m\n\u001b[2m    \"hasUviHeading\": true,\u001b[22m\n\u001b[2m  }\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:50:6",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 6,
+                      "line": 50
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 48 |\u001b[39m     \u001b[36mconst\u001b[39m hasEcosHeading \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m infoPanel\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'EUCOS Ground Station'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39misVisible()\u001b[33m.\u001b[39m\u001b[36mcatch\u001b[39m(() \u001b[33m=>\u001b[39m \u001b[36mfalse\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 49 |\u001b[39m     \u001b[36mreturn\u001b[39m { hasUviHeading\u001b[33m,\u001b[39m hasEcosHeading }\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 50 |\u001b[39m   })\u001b[33m.\u001b[39mtoEqual({ hasUviHeading\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m\u001b[33m,\u001b[39m hasEcosHeading\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 51 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 6,
+                        "line": 50
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 1\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"hasEcosHeading\": true,\u001b[39m\n\u001b[31m+   \"hasEcosHeading\": false,\u001b[39m\n\u001b[2m    \"hasUviHeading\": true,\u001b[22m\n\u001b[2m  }\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  48 |     const hasEcosHeading = await infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible().catch(() => false);\n  49 |     return { hasUviHeading, hasEcosHeading };\n> 50 |   }).toEqual({ hasUviHeading: true, hasEcosHeading: true });\n     |      ^\n  51 | });\n  52 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:50:6"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T22:01:02.251Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-81f7c-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 6,
+                    "line": 50
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "d42b10b5a8f861a09ba4-c132b933024b69d16383",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_40/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T22:01:01.574Z",
+    "duration": 8561.761999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

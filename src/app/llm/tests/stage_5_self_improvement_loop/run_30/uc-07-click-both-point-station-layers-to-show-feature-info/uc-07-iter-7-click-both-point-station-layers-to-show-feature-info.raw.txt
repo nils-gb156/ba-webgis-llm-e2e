@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Verify preconditions: info panel is visible and layers are rendered
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'UV-Index Stations' })).toBeChecked();
+
+    // Ensure the map is ready and zoomed in enough to see individual station markers
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(4);
+
+    // Click on the map at the specified coordinates where both station types overlap.
+    const x = 1188692.84;
+    const y = 6767643.28;
+    await page.getByTestId('map-container').click({ position: { x, y }, force: true });
+
+    // Wait for the feature info to load in the info panel for both station types.
+    // The info panel content is loaded asynchronously via WMS/WFS requests.
+    // Use expect.poll to wait for the async feature info content to settle.
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        const uviHeading = infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true });
+        const eucosHeading = infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true });
+        const uviVisible = await uviHeading.isVisible();
+        const eucosVisible = await eucosHeading.isVisible();
+        return { uvi: uviVisible, eucos: eucosVisible };
+    }).toEqual({ uvi: true, eucos: true });
+});

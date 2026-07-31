@@ -1,0 +1,128 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_02/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UC8: Measure a distance by drawing a line on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 30284,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                        "column": 14,
+                        "line": 47
+                      },
+                      "message": "Error: page.dblclick: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#map-container')\u001b[22m\n\n\n  45 |   const centerX = mapBox!.x + mapBox!.width / 2;\n  46 |   const centerY = mapBox!.y + mapBox!.height / 2;\n> 47 |   await page.dblclick('#map-container', {\n     |              ^\n  48 |     position: {\n  49 |       x: centerX - 50,\n  50 |       y: centerY + 50,\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:47:14"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-25T07:37:46.209Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-909fe-y-drawing-a-line-on-the-map-chromium\\error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a8363619c7a6392a219d-4ff3b32a76789c93142c",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_02/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-25T07:37:45.390Z",
+    "duration": 33388.774,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

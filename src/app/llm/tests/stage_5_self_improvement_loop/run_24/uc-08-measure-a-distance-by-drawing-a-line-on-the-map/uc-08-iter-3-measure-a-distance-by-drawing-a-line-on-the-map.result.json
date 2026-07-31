@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_24/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 8: Measure a distance by drawing a line on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3650,
+                  "error": {
+                    "message": "Error: locator.click: Error: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 3 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n    3) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(2)\n\nCall log:\n\u001b[2m  - waiting for getByTestId('map-container').locator('canvas')\u001b[22m\n",
+                    "stack": "Error: locator.click: Error: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 3 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n    3) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(2)\n\nCall log:\n\u001b[2m  - waiting for getByTestId('map-container').locator('canvas')\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:27:21",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                      "column": 21,
+                      "line": 27
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 25 |\u001b[39m\n \u001b[90m 26 |\u001b[39m     \u001b[90m// Click points at different positions on the map canvas\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27 |\u001b[39m     \u001b[36mawait\u001b[39m mapCanvas\u001b[33m.\u001b[39mclick({ position\u001b[33m:\u001b[39m { x\u001b[33m:\u001b[39m \u001b[35m300\u001b[39m\u001b[33m,\u001b[39m y\u001b[33m:\u001b[39m \u001b[35m300\u001b[39m } })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m mapCanvas\u001b[33m.\u001b[39mclick({ position\u001b[33m:\u001b[39m { x\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m\u001b[33m,\u001b[39m y\u001b[33m:\u001b[39m \u001b[35m200\u001b[39m } })\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[36mawait\u001b[39m mapCanvas\u001b[33m.\u001b[39mclick({ position\u001b[33m:\u001b[39m { x\u001b[33m:\u001b[39m \u001b[35m700\u001b[39m\u001b[33m,\u001b[39m y\u001b[33m:\u001b[39m \u001b[35m300\u001b[39m } })\u001b[33m;\u001b[39m\n \u001b[90m 30 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                        "column": 21,
+                        "line": 27
+                      },
+                      "message": "Error: locator.click: Error: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 3 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n    3) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(2)\n\nCall log:\n\u001b[2m  - waiting for getByTestId('map-container').locator('canvas')\u001b[22m\n\n\n  25 |\n  26 |     // Click points at different positions on the map canvas\n> 27 |     await mapCanvas.click({ position: { x: 300, y: 300 } });\n     |                     ^\n  28 |     await mapCanvas.click({ position: { x: 500, y: 200 } });\n  29 |     await mapCanvas.click({ position: { x: 700, y: 300 } });\n  30 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:27:21"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T16:49:51.130Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-5bc9b-y-drawing-a-line-on-the-map-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                    "column": 21,
+                    "line": 27
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "aa5f045cb6586daef031-d595b51872c9c65b7cc3",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_24/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T16:49:50.510Z",
+    "duration": 5485.325,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "run": "run_13",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('#map-container')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for locator('#map-container')\n\n\n   9 |\n  10 |   // Wait for the map to be ready before interacting\n> 11 |   await expect(page.locator('#map-container')).toBeVisible();\n     |                                                ^\n  12 |\n  13 |   // 1. Activate the measurement tool\n  14 |   const"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\n\n\n  30 |   // 5. Assert that the measurement panel displays a length value with a unit\n  31 |   const measurementText = page.getByTestId('info-panel').getByText(/(\\d+(\\.\\d+)?)\\"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\n\n\n  35 |   // We use a regex that matches common units.\n  36 |   const measurementText = page.getByRole('dialog', { name: 'Measurement' })"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\n\n\n  35 |   // We use a regex that matches common units.\n  36 |   const measurementText = page.getByRole('dialog', { name: 'Measurement' })"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\n\n\n  33 |   // The measurement result is shown as a paragraph containing a number and unit.\n  34 |   const measurementText = page.getByTestId('measurement').getByText(/(\\d+(\\."
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/)\n\n\n  34 |   // The dialog has a data-testid of \"measurement\"\n  35 |   const measurementText = page.getByTestId('measurement').getByText(/(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/);\n> 36 |"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement').getByRole('paragraph', { name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/ })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByRole('paragraph', { name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/ })\n\n\n  35 |     name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/,\n  36 |   });\n> 37 |   await expect(measurementText).toBeVisible();\n     |    "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement').getByRole('paragraph', { name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/ })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByRole('paragraph', { name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/ })\n\n\n  38 |     name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/,\n  39 |   });\n> 40 |   await expect(measurementText).toBeVisible();\n     |    "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement').getByRole('paragraph', { name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/ })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByRole('paragraph', { name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/ })\n\n\n  38 |     name: /(\\d+(\\.\\d+)?)\\s*(km|m|mi|ft)/,\n  39 |   });\n> 40 |   await expect(measurementText).toBeVisible();\n     |    "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeVisible() failed\n\nLocator:  getByTestId('measurement').getByRole('paragraph')\nExpected: not visible\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByRole('paragraph')\n    14 Ã— locator resolved to <p class=\"css-cdgtm1\">Click in the map to start a measurement.</p>\n       - unexpected value \"visible\"\n\n\n  38 |   // so we need to wait for the paragraph to change to the measure"
+    }
+  ]
+}

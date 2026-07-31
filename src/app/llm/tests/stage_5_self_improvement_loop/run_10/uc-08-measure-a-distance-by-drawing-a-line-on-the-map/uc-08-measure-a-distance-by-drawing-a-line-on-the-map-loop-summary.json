@@ -1,0 +1,103 @@
+{
+  "run": "run_10",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  35 |       .count()\n> 36 |   ).toBeGreaterThan(0);\n     |     ^\n  37 | });\n  38 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  35 |       .count()\n> 36 |   ).toBeGreaterThan(0);\n     |     ^\n  37 | });\n  38 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  32 |       .count()\n> 33 |   ).toBeGreaterThan(0);\n     |     ^\n  34 | });\n  35 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  32 |       .count()\n> 33 |   ).toBeGreaterThan(0);\n     |     ^\n  34 | });\n  35 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  32 |       .count()\n> 33 |   ).toBeGreaterThan(0);\n     |     ^\n  34 | });\n  35 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  32 |       .count()\n> 33 |   ).toBeGreaterThan(0);\n     |     ^\n  34 | });\n  35 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  31 |       .count()\n> 32 |   ).toBeGreaterThan(0);\n     |     ^\n  33 | });\n  34 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  32 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  33 |       .count()\n> 34 |   ).toBeGreaterThan(0);\n     |     ^\n  35 | });\n  36 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |       .locator('text=/\\\\d+\\\\s*(m|km|mi|ft)/i')\n  35 |       .count()\n> 36 |   ).toBeGreaterThan(0);\n     |     ^\n  37 | });\n  38 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the"
+    }
+  ]
+}

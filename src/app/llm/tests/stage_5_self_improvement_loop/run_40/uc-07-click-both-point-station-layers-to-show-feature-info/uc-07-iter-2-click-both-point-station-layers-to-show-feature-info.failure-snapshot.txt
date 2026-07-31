@@ -1,0 +1,252 @@
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-station-info
+  - uvi-station-section
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Darlingerode, DE"
+- paragraph: Sat, Jul 25, 02:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 12.15 °C
+- paragraph: Humidity
+- paragraph: 64 %
+- paragraph: Wind direction
+- paragraph: 196°
+- paragraph: Wind speed
+- paragraph: 1.26 m/s
+- separator
+- paragraph: Sat, Jul 25, 05:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 10.92 °C
+- paragraph: Humidity
+- paragraph: 71 %
+- paragraph: Wind direction
+- paragraph: 200°
+- paragraph: Wind speed
+- paragraph: 1.53 m/s
+- separator
+- paragraph: Sat, Jul 25, 08:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 15.57 °C
+- paragraph: Humidity
+- paragraph: 58 %
+- paragraph: Wind direction
+- paragraph: 210°
+- paragraph: Wind speed
+- paragraph: 1.12 m/s
+- separator
+- paragraph: Sat, Jul 25, 11:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 21.85 °C
+- paragraph: Humidity
+- paragraph: 44 %
+- paragraph: Wind direction
+- paragraph: 248°
+- paragraph: Wind speed
+- paragraph: 2.34 m/s
+- separator
+- paragraph: Sat, Jul 25, 02:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 25.83 °C
+- paragraph: Humidity
+- paragraph: 42 %
+- paragraph: Wind direction
+- paragraph: 247°
+- paragraph: Wind speed
+- paragraph: 3.52 m/s
+- separator
+- paragraph: Sat, Jul 25, 05:00 PM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 26.35 °C
+- paragraph: Humidity
+- paragraph: 40 %
+- paragraph: Wind direction
+- paragraph: 262°
+- paragraph: Wind speed
+- paragraph: 2.87 m/s
+- separator
+- paragraph: Sat, Jul 25, 08:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 23.16 °C
+- paragraph: Humidity
+- paragraph: 60 %
+- paragraph: Wind direction
+- paragraph: 296°
+- paragraph: Wind speed
+- paragraph: 1.51 m/s
+- separator
+- paragraph: Sat, Jul 25, 11:00 PM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 18.35 °C
+- paragraph: Humidity
+- paragraph: 65 %
+- paragraph: Wind direction
+- paragraph: 189°
+- paragraph: Wind speed
+- paragraph: 1.01 m/s
+- separator
+- paragraph: Sun, Jul 26, 02:00 AM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 14.73 °C
+- paragraph: Humidity
+- paragraph: 70 %
+- paragraph: Wind direction
+- paragraph: 251°
+- paragraph: Wind speed
+- paragraph: 1.64 m/s
+- separator
+- paragraph: Sun, Jul 26, 05:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 13.3 °C
+- paragraph: Humidity
+- paragraph: 76 %
+- paragraph: Wind direction
+- paragraph: 244°
+- paragraph: Wind speed
+- paragraph: 1.65 m/s
+- separator
+- paragraph: Sun, Jul 26, 08:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 18.18 °C
+- paragraph: Humidity
+- paragraph: 62 %
+- paragraph: Wind direction
+- paragraph: 236°
+- paragraph: Wind speed
+- paragraph: 1.63 m/s
+- separator
+- paragraph: Sun, Jul 26, 11:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 23.45 °C
+- paragraph: Humidity
+- paragraph: 44 %
+- paragraph: Wind direction
+- paragraph: 244°
+- paragraph: Wind speed
+- paragraph: 3.74 m/s
+- separator
+- paragraph: Sun, Jul 26, 02:00 PM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 22.11 °C
+- paragraph: Humidity
+- paragraph: 50 %
+- paragraph: Wind direction
+- paragraph: 307°
+- paragraph: Wind speed
+- paragraph: 4.03 m/s
+- separator
+- paragraph: Sun, Jul 26, 05:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 14.02 °C
+- paragraph: Humidity
+- paragraph: 92 %
+- paragraph: Wind direction
+- paragraph: 246°
+- paragraph: Wind speed
+- paragraph: 4.55 m/s
+- separator
+- paragraph: Sun, Jul 26, 08:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- parag
+[... truncated ...]

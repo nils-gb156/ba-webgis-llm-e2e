@@ -1,0 +1,415 @@
+The following Playwright end-to-end test (TypeScript) was generated for the use case
+below, but it FAILED when executed against the live application.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context extracted automatically from the running application (initial page state):
+data-testid attributes found in the app:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree (roles, names, states):
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 7: Click both point station layers to show feature info
+
+**Description:** The user clicks on a location where both a UV-Index Station (WMS) and an EUCOS Ground Station (WFS) are located and checks that the feature info for both point layers appears in the info panel.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The info panel is visible.
+- The UV-Index Stations layer (WMS) is active.
+- The EUCOS Ground Stations layer (WFS) is active.
+- Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28] (EPSG:3857).
+- No measurement tool is active.
+
+**Steps:**
+
+1. The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+2. The user waits for the info panel to load the station info for both layers.
+
+**Expected results:**
+
+- The info panel displays a 'UV-Index Station' section with feature information.
+- The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+**Complexity:** hard
+
+Previous test code (failing):
+```typescript
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Preconditions: Ensure measurement tool is not active
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure info panel is visible (it should be by default, but assert to be sure)
+  await expect(page.getByRole('heading', { name: 'Information', exact: true })).toBeVisible();
+
+  // Close Layer Switcher if open
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  if (await layerSwitcherToggle.getAttribute('aria-pressed') === 'true') {
+    await layerSwitcherToggle.click();
+  }
+
+  // Close Legend if open
+  const legendToggle = page.getByTestId('legend-toggle');
+  if (await legendToggle.getAttribute('aria-pressed') === 'true') {
+    await legendToggle.click();
+  }
+
+  // Step 1: Click at the specified map coordinates
+  // The coordinates are in EPSG:3857 (map projection). The map canvas is rendered via OpenLayers,
+  // so we need to click on the map-container element. We use the data-testid for the container
+  // and click at the center of the visible map area, since the coordinates provided are map
+  // coordinates, not pixel coordinates. However, the previous attempt used these map coordinates
+  // directly as pixel positions, which is incorrect.
+  // The prompt says: "To interact with the map, click the map container element ... with a position option."
+  // This implies the position is in the coordinate system of the map container's internal coordinate space,
+  // which for OpenLayers is typically the map projection (EPSG:3857) if the canvas is sized to the map view.
+  // But wait, the error says "<html lang='en'>…</html> intercepts pointer events". This is a known issue
+  // when an overlay or another element covers the map container. The screenshot shows the Layer Switcher
+  // and Legend are open on the left, and the Info Panel is open on the top right. These might be
+  // intercepting clicks if they are positioned absolutely over the map.
+  // However, the click is on the map-container, which should be behind the side panels if they are
+  // positioned correctly. The error suggests the html element is intercepting, which is strange.
+  // Let's try clicking on the map-container with force: true, as the map canvas might have a transparent
+  // overlay or the pointer events are being intercepted by the Chakra UI components.
+  // Actually, the error log says "waiting for element to be visible, enabled and stable" and then
+  // "<html lang='en'>…</html> intercepts pointer events". This often happens when the element is
+  // covered by a full-page overlay or when the element is not in the viewport.
+  // The screenshot shows the map is visible. The Layer Switcher and Legend are on the left, and
+  // the Info Panel is on the top right. The click position [1188692.84, 6767643.28] is in EPSG:3857.
+  // We need to convert this to pixel coordinates relative to the map container to click on the canvas.
+  // Playwright's click with position expects pixel coordinates relative to the element's top-left corner.
+  // The map model helpers can help us get the center and zoom, but we don't have a direct conversion
+  // from map coordinates to pixel coordinates.
+  // However, the prompt says: "click the map container element ... with a position option".
+  // This implies we should use the map coordinates directly as the position. This is only possible if the map container's coordinate system
+  // matches the pixel coordinate system, which is not typical for OpenLayers.
+  // Let's re-read the prompt: "click the map container element ... with a position option".
+  // The previous test used `page.locator('[data-testid="map-container"]').click({ position: { x: clickX, y: clickY } })`.
+  // This failed. The error is "intercepts pointer events".
+  // The screenshot shows the map is visible. The Layer Switcher and Legend are on the left.
+  // The Info Panel is on the top right. The click position [1188692.84, 6767643.28] is in EPSG:3857.
+  // This coordinate is in Central Europe (Germany/Poland area). The map is zoomed out to show a large area.
+  // The pixel coordinates for this map position would be somewhere in the middle of the map container.
+  // The issue is that we are using map coordinates as pixel coordinates, which is wrong.
+  // We need to convert the map coordinates to pixel coordinates.
+  // We can use the map model helpers to get the center and zoom, and then calculate the pixel coordinates.
+  // But we don't have a helper for that.
+  // Alternatively, we can use the `page.locator('[data-testid="map-container"]')` and click on it
+  // with a position that is a percentage or a fixed pixel value that corresponds to the map coordinates.
+  // This is not reliable.
+  // The best approach is to use the map model to get the current view and then calculate the pixel coordinates.
+  // But we don't have a helper for that.
+  // Let's try a different approach: use the `page.locator('[data-testid="map-container"]')` and click on it
+  // with a position that is the center of the map container. This might not be the correct map coordinates,
+  // but it's a starting point.
+  // Actually, the prompt says: "click the map container element ... with a position option".
+  // This implies we should use the map coordinates directly. This is only possible if the map container
+  // is sized to the map view and the coordinates are in the same coordinate system.
+  // This is not typical for OpenLayers.
+  // Let's try to click on the map container with force: true and see if it works.
+  // The error is "intercepts pointer events". This suggests that the element is covered by another element.
+  // The screenshot shows the Layer Switcher and Legend are on the left, and the Info Panel is on the top right.
+  // These might be covering the map container.
+  // Let's try to close the Layer Switcher and Legend before clicking on the map.
+  // The Layer Switcher toggle is `page.getByTestId('layer-switcher-toggle')`.
+  // The Legend toggle is `page.getByTestId('legend-toggle')`.
+  // We can click these to close them.
+  // But the prompt says: "The info panel is visible." and "The UV-Index Stations layer (WMS) is active."
+  // and "The EUCOS Ground Stations layer (WFS) is active."
+  // It doesn't say the Layer Switcher and Legend are closed.
+  // The screenshot shows they are open.
+  // Let's try to close them before clicking on the map.
+
+  // Close Layer Switcher if open
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  if (await layerSwitcherToggle.getAttribute('aria-pressed') === 'true') {
+    await layerSwitcherToggle.click();
+  }
+
+  // Close Legend if open
+  const legendToggle = page.getByTestId('legend-toggle');
+  if (await legendToggle.getAttribute('aria-pressed') === 'true') {
+    await legendToggle.click();
+  }
+
+  // Now click on the map container
+  const clickX = 1188692.84;
+  const clickY = 6767643.28;
+  await page.getByTestId('map-container').click({
+    position: { x: clickX, y: clickY },
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // We wait for the highlights to appear, indicating the map interaction completed
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Expected results: Verify feature info sections are displayed
+  await expect(page.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});
+```
+
+Playwright error output:
+SyntaxError: c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_36\uc-07-click-both-point-station-layers-to-show-feature-info\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts: Identifier 'layerSwitcherToggle' has already been declared. (97:8)
+
+   95 |
+   96 |   // Close Layer Switcher if open
+>  97 |   const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+      |         ^
+   98 |   if (await layerSwitcherToggle.getAttribute('aria-pressed') === 'true') {
+   99 |     await layerSwitcherToggle.click();
+  100 |   }
+
+---
+
+Error: No tests found.
+Make sure that arguments are regular expressions matching test files.
+You may need to escape symbols like "$" or "*" and quote the arguments.
+
+Fix the test so that it correctly verifies the use case and passes.
+Do not weaken or remove assertions just to make the test pass — the test must
+still verify the behaviour described in the use case.
+Return only the corrected test code.

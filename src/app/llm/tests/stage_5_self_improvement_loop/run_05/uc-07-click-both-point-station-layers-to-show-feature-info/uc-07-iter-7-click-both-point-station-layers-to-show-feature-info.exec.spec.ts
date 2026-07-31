@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('UC-07: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // --- Preconditions ---
+
+    // Ensure Info Panel is visible.
+    // The info-panel-toggle is [pressed] in the initial state, so we do not need to click it.
+    // We just wait for the panel to be visible.
+    const infoPanel = page.getByTestId('info-panel');
+    await expect(infoPanel).toBeVisible();
+
+    // Ensure both station layers are active (checked).
+    // The accessibility tree shows both checkboxes are [checked].
+    const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+    const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+    await expect(eucosCheckbox).toBeChecked();
+    await expect(uviCheckbox).toBeChecked();
+
+    // --- Steps ---
+
+    // 1. Click at the specified map coordinates [1188692.84, 6767643.28]
+    // The map is rendered on a canvas inside the map-container. We click directly on the map container.
+    // Note: The coordinates provided are in EPSG:3857 (meters), but Playwright's click()
+    // uses pixel coordinates relative to the element. Since we don't have a helper to
+    // convert EPSG:3857 to pixel coordinates, we must rely on the fact that the use case
+    // description provides the exact pixel coordinates where the stations are located.
+    // However, the prompt says "map coordinates [1188692.84, 6767643.28] (EPSG:3857)".
+    // This is a common pitfall. The previous test failed because it tried to use these
+    // meter values as pixel offsets, which is incorrect.
+    //
+    // Since we cannot convert EPSG:3857 to pixel coordinates without a helper, and no
+    // such helper is provided in the map-model-helpers, we must assume the test needs
+    // to click on the map in a way that triggers the feature info for both layers.
+    //
+    // Looking at the screenshot, the map shows many stations. The coordinates [1188692.84, 6767643.28]
+    // are in the Baltic Sea region (near Denmark/Germany). The screenshot shows the map centered
+    // on Central Europe. The click might need to be on a specific visible point.
+    //
+    // Since we cannot programmatically determine the pixel coordinates from EPSG:3857 without
+    // a conversion helper, and the previous test used these values as pixel offsets (which is
+    // wrong), we need a different approach.
+    //
+    // However, the use case says "The user clicks at map coordinates ...". In a real test,
+    // we would need to convert these coordinates to pixel coordinates. Since no conversion
+    // helper is provided, we might need to use the map model helpers to find a suitable
+    // location or assume that the test should click on a known location.
+    //
+    // Let's re-read the map-model-helpers. They provide:
+    // - getActiveBaseLayerTitle
+    // - isLayerRendered
+    // - getMapZoomLevel
+    // - getMapCenter
+    // - getHighlightedCoordinate
+    //
+    // None of these help with converting EPSG:3857 to pixel coordinates.
+    //
+    // Since the test must pass and verify the use case, and we cannot convert coordinates,
+    // we must assume that the click position is not critical as long as it triggers the
+    // feature info for both layers. However, the use case specifies exact coordinates.
+    //
+    // Alternative approach: Use the map model to get the current center and zoom, then
+    // calculate the pixel coordinates. But this is complex and error-prone.
+    //
+    // Given the constraints, let's try a different strategy: Click on the map in a
+    // region where we know both layers are active and visible. The screenshot shows
+    // many stations in Central Europe. Let's click on a point that is likely to have
+    // both stations.
+    //
+    // However, this is not reliable. The correct approach is to use the provided
+    // coordinates and convert them to pixel coordinates. Since we don't have a helper
+    // for this, we must use the map model to get the view transform.
+    //
+    // Let's use page.evaluate to get the pixel coordinates from the EPSG:3857 coordinates.
+    // We can use the OpenLayers map's getPixelFromCoordinate method.
+
+    const mapContainer = page.getByTestId('map-container');
+    const clickX = 1188692.84;
+    const clickY = 6767643.28;
+
+    // Convert EPSG:3857 coordinates to pixel coordinates
+    const pixelCoords = await page.evaluate(
+        ({ x, y }) => {
+            const map = (globalThis as { __openPioneerMap?: { olMap: { getPixelFromCoordinate: (coord: number[]) => [number, number] } } }).__openPioneerMap;
+            if (!map || !map.olMap) {
+                return null;
+            }
+            const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+            return pixel;
+        },
+        { x: clickX, y: clickY }
+    );
+
+    if (!pixelCoords) {
+        throw new Error('Map model is not available or coordinates could not be converted to pixels.');
+    }
+
+    const [pixelX, pixelY] = pixelCoords;
+
+    // Click on the map at the calculated pixel coordinates
+    await mapContainer.click({
+        position: { x: pixelX, y: pixelY },
+        force: true
+    });
+
+    // 2. Wait for the info panel to load the station info for both layers.
+    //    The info panel should now display sections for both 'UV-Index Station' and 'EUCOS Ground Station'.
+    //    We use expect.poll to wait for the content to appear asynchronously.
+    //    We look for headings or text that identifies the station sections.
+    //    Note: The headings in the info panel are likely "UV-Index Station" and "EUCOS Ground Station".
+    //    We need to find these headings in the info panel.
+    await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);
+    await expect.poll(() => infoPanel.getByRole('heading', { name: 'EUCOS Ground Station' }).isVisible()).toBe(true);
+
+    // --- Expected Results ---
+
+    // The info panel displays a 'UV-Index Station' section with feature information.
+    // The info panel displays an 'EUCOS Ground Station' section with feature information.
+    // The above expect.poll assertions already confirm the sections are visible.
+    await expect(infoPanel.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+    await expect(infoPanel.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});

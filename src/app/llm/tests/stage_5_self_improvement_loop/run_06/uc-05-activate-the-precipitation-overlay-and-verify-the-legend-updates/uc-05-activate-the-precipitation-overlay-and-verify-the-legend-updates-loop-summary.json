@@ -1,0 +1,22 @@
+{
+  "run": "run_06",
+  "use_case_id": 5,
+  "title": "Activate the Precipitation overlay and verify the legend updates",
+  "complexity": "medium",
+  "passed": true,
+  "iterations_used": 1,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "run": "run_18",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for locator('#map-container')\n\n\n  20 |\n  21 |     // Click the map at the specified coordinates [1188692.84, 6767643.28].\n> 22 |     await page.locator('#map-container').click({\n     |                                          ^\n  23 |         position: { x: 1188692.84, y: 6767643.28 },\n  24 |     });\n  25 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 32 |     ).toBeTruthy();\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\t"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 32 |     ).toBeTruthy();\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\t"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 32 |     ).toBeTruthy();\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\t"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 32 |     ).toBeTruthy();\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()\n    at c:\\"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 32 |     ).toBeTruthy();\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()\n    at c:\\"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()\n> 32 |     ).toBeTruthy();\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()\n    at c:\\"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |     await expect.poll(() =>\n  31 |         page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 32 |     ).toBeGreaterThan(0);\n     |       ^\n  33 |\n  34 |     await expect.poll(() =>\n  35 |         page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: tru"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |     await expect.poll(() =>\n  32 |         page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()\n> 33 |     ).toBeGreaterThan(0);\n     |       ^\n  34 |\n  35 |     await expect.poll(() =>\n  36 |         page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: tru"
+    }
+  ]
+}

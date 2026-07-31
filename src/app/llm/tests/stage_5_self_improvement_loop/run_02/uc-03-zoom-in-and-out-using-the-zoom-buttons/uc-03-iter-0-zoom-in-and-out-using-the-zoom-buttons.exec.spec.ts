@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and get the initial zoom level
+  const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 1: Click the 'Zoom in' button to increase the zoom level
+  await page.getByRole('button', { name: 'Zoom in map' }).click();
+
+  // Verify the zoom level is higher than before
+  await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);
+
+  // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Verify the zoom level is lower than after zooming in (i.e., lower than the zoomed-in level)
+  // Since we zoomed in once and then out once, it should be back to or near the initial zoom level.
+  // The requirement is that the final zoom is lower than the zoomed-in zoom.
+  const zoomedInZoom = initialZoom + 1; // Assuming standard zoom increment of 1
+  await expect.poll(() => getMapZoomLevel(page)).toBeLessThan(zoomedInZoom);
+});

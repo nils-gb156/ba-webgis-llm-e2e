@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_34/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 9717,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:15:27",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 27,
+                      "line": 15
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 13 |\u001b[39m   \u001b[36mawait\u001b[39m infoPanelToggle\u001b[33m.\u001b[39mclick({ force\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 14 |\u001b[39m   \u001b[36mconst\u001b[39m infoPanel \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'info-panel'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m   \u001b[36mawait\u001b[39m expect(infoPanel)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m\n \u001b[90m 17 |\u001b[39m   \u001b[90m// Precondition: Ensure measurement tool is NOT active.\u001b[39m\n \u001b[90m 18 |\u001b[39m   \u001b[90m// From the initial accessibility tree, the \"Measurement\" button is not pressed.\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 27,
+                        "line": 15
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\n\n  13 |   await infoPanelToggle.click({ force: true });\n  14 |   const infoPanel = page.getByTestId('info-panel');\n> 15 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  16 |\n  17 |   // Precondition: Ensure measurement tool is NOT active.\n  18 |   // From the initial accessibility tree, the \"Measurement\" button is not pressed.\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:15:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T19:54:51.229Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-33e74-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 27,
+                    "line": 15
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9e36c7644d896abd5c1c-46da092db5acaee483bc",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_34/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T19:54:50.085Z",
+    "duration": 13817.868999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

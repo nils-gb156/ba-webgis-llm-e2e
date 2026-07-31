@@ -1,0 +1,25 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (it intercepts map clicks)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates using the data-testid
+  // The map container is a canvas, so we use force: true to bypass pointer event interception
+  await page.getByTestId('map-container').click({
+    position: { x: 1188692.84, y: 6767643.28 },
+    force: true,
+  });
+
+  // Wait for the info panel to load feature information for both layers
+  await expect(page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+  await expect(page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});

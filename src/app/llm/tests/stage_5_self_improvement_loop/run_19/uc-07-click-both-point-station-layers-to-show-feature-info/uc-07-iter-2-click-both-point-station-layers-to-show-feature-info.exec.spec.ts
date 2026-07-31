@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure the info panel is visible
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+
+    // If the info panel is not currently visible (pressed state), open it
+    const isInfoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (isInfoPanelPressed === 'false') {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    // Ensure no measurement tool is active
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementPressed === 'true') {
+        await measurementToggle.click();
+    }
+
+    // Click on the map at the specified coordinates to trigger feature info.
+    // The map canvas is rendered with OpenLayers on a <canvas> element.
+    // We click on the map-container div at the specified pixel position.
+    // Note: The coordinates provided in the use case are in EPSG:3857 (map projection),
+    // but the `position` option for `click()` expects pixel coordinates relative to the element.
+    // However, the use case explicitly states the coordinates are [1188692.84, 6767643.28] (EPSG:3857).
+    // The previous test failed because it tried to use these map projection coordinates as pixel coordinates,
+    // which are way outside the viewport, resulting in no click being registered on the map features.
+    // The screenshot shows the map view. We need to find the pixel coordinates corresponding to the map coordinates.
+    // Since we don't have a helper to convert map coords to pixel coords, we will rely on the fact that
+    // the use case says "Both a UVI station and an EUCOS ground station are located at map coordinates...".
+    // The screenshot shows the map. We can try to click on a location that visually corresponds to the description.
+    // However, a more robust way is to use the map model helper to get the center or zoom, but we don't have a direct pixel converter.
+    // Let's re-examine the error. The error was `getHighlightedCoordinate` returned `undefined`. This means the click didn't register on any feature.
+    // The previous test used `position: { x: 1188692.84, y: 6767643.28 }`. These are clearly map coordinates, not pixel coordinates.
+    // Playwright's `position` is in pixels.
+    // We need to convert the EPSG:3857 coordinates to pixel coordinates relative to the map container.
+    // We can do this by using `page.evaluate` to get the map's pixel position for the given map coordinates.
+
+    const mapContainer = page.getByTestId('map-container');
+
+    // Convert EPSG:3857 coordinates to pixel coordinates relative to the map container
+    const pixelCoords = await page.evaluate(
+        async ({ x, y }) => {
+            // Wait for the map model to be available
+            const mapModel = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            if (!mapModel) {
+                return null;
+            }
+            const olMap = mapModel.olMap;
+            const view = olMap.getView();
+            // Convert map coordinates to pixel coordinates
+            const pixel = olMap.getPixelFromCoordinate([x, y]);
+            // Get the bounding rect of the map container to get its position on the page
+            const rect = document.getElementById('map-container')?.getBoundingClientRect();
+            if (!rect) {
+                return null;
+            }
+            // The position for click() is relative to the element.
+            // So we need the pixel coordinates relative to the top-left of the map container.
+            // `olMap.getPixelFromCoordinate` returns pixels relative to the map's viewport origin.
+            // This should be directly usable as the `position` for `click()` on the map container element.
+            return { x: pixel[0], y: pixel[1] };
+        },
+        { x: 1188692.84, y: 6767643.28 }
+    );
+
+    if (!pixelCoords) {
+        throw new Error('Could not determine pixel coordinates from map model.');
+    }
+
+    // Click on the map at the calculated pixel position
+    await mapContainer.click({
+        position: pixelCoords,
+        force: true,
+    });
+
+    // Wait for the info panel to load the station info for both layers
+    // We wait for the info panel to contain the expected headings.
+    // The info panel should update with the feature info for the clicked location.
+    await expect(
+        infoPanel.getByRole('heading', { name: 'UV-Index Station' })
+    ).toBeVisible({ timeout: 10000 });
+
+    await expect(
+        infoPanel.getByRole('heading', { name: 'EUCOS Ground Station' })
+    ).toBeVisible({ timeout: 10000 });
+});

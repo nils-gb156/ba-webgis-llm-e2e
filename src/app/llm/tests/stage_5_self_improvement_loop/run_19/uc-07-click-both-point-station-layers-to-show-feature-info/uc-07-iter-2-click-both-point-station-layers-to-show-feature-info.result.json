@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_19\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_19/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3972,
+                  "error": {
+                    "message": "Error: Could not determine pixel coordinates from map model.",
+                    "stack": "Error: Could not determine pixel coordinates from map model.\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_19\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:74:15",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_19\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 15,
+                      "line": 74
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 72 |\u001b[39m\n \u001b[90m 73 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mpixelCoords) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 74 |\u001b[39m         \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m'Could not determine pixel coordinates from map model.'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 75 |\u001b[39m     }\n \u001b[90m 76 |\u001b[39m\n \u001b[90m 77 |\u001b[39m     \u001b[90m// Click on the map at the calculated pixel position\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_19\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 15,
+                        "line": 74
+                      },
+                      "message": "Error: Could not determine pixel coordinates from map model.\n\n  72 |\n  73 |     if (!pixelCoords) {\n> 74 |         throw new Error('Could not determine pixel coordinates from map model.');\n     |               ^\n  75 |     }\n  76 |\n  77 |     // Click on the map at the calculated pixel position\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_19\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:74:15"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T15:10:03.093Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-310e4-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_19\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 15,
+                    "line": 74
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f4362ae76b0d8401b01a-39cfbb8ffc2c63efc918",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_19/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T15:10:02.497Z",
+    "duration": 5794.202,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

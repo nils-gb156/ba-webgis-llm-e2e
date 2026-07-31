@@ -1,0 +1,623 @@
+The following Playwright end-to-end test (TypeScript) was generated for the use case
+below, but it FAILED when executed against the live application.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context extracted automatically from the running application (initial page state):
+data-testid attributes found in the app:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree (roles, names, states):
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 7: Click both point station layers to show feature info
+
+**Description:** The user clicks on a location where both a UV-Index Station (WMS) and an EUCOS Ground Station (WFS) are located and checks that the feature info for both point layers appears in the info panel.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The info panel is visible.
+- The UV-Index Stations layer (WMS) is active.
+- The EUCOS Ground Stations layer (WFS) is active.
+- Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28] (EPSG:3857).
+- No measurement tool is active.
+
+**Steps:**
+
+1. The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+2. The user waits for the info panel to load the station info for both layers.
+
+**Expected results:**
+
+- The info panel displays a 'UV-Index Station' section with feature information.
+- The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+**Complexity:** hard
+
+Previous test code (failing):
+```typescript
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify preconditions: both station layers are rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is NOT active (it should already be off per preconditions,
+  // but assert to be safe)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Click on the map at the specified coordinates
+  const mapContainer = page.getByTestId('map-container');
+  // The map canvas intercepts pointer events, so we need to force the click.
+  // The coordinates given are in EPSG:3857, which are not valid DOM pixel positions.
+  // We must convert them to pixel coordinates relative to the map container.
+  // However, Playwright's click({ position }) expects pixel coordinates relative to the
+  // element's top-left corner. The application likely handles the conversion internally
+  // when using a custom click method, but since we are using Playwright's native click,
+  // we need to be careful.
+  // Looking at the screenshot, the coordinates [1188692.84, 6767643.28] are in EPSG:3857.
+  // These are very large numbers, clearly not pixel coordinates.
+  // The previous test failed because it tried to use these large numbers as pixel positions.
+  // We need to find the correct pixel coordinates on the map canvas.
+  // Since we don't have a helper to convert EPSG:3857 to pixel coordinates, we must rely
+  // on the map's internal state or find the stations visually.
+  // However, the use case explicitly states the coordinates. This suggests the application
+  // might have a way to handle this, or we need to calculate the pixel position.
+  // Let's assume the map container's top-left is (0,0) and we need to convert.
+  // Without a conversion helper, this is tricky. Let's try to click at the center of the map
+  // and hope the stations are there, or use a different approach.
+  // Actually, the use case says "Click at map coordinates [1188692.84, 6767643.28]".
+  // This implies the application should handle this. But Playwright's click() doesn't.
+  // We might need to use page.mouse.click() with calculated pixel coordinates.
+  // Let's try to get the map's viewport and calculate the position.
+  // This is complex. Let's try a simpler approach: click on the map and see if we can
+  // get the info panel to show. If not, we might need to adjust.
+  // Given the complexity, let's try to click at a position that is likely to be near
+  // the stations. From the screenshot, the stations are scattered.
+  // Let's try to click at the center of the visible map area.
+  // We can get the map's center and zoom level from the helpers.
+  const center = await page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    return map?.olMap.getView().getCenter();
+  });
+  const zoom = await page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    return map?.olMap.getView().getZoom();
+  });
+  // This is getting too complex. Let's try to click at the center of the map container.
+  const mapBox = await mapContainer.boundingBox();
+  if (mapBox) {
+    await page.mouse.click(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+  } else {
+    // Fallback: click at the center of the viewport
+    await page.mouse.click(page.viewportSize!.width / 2, page.viewportSize!.height / 2);
+  }
+
+  // Wait for the info panel to load feature info for both layers
+  await expect.poll(() => page.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()).toBeTruthy();
+  await expect.poll(() => page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()).toBeTruthy();
+});
+```
+
+Playwright error output:
+Error: expect(received).toBeTruthy()
+
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  67 |
+  68 |   // Wait for the info panel to load feature info for both layers
+> 69 |   await expect.poll(() => page.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()).toBeTruthy();
+     |                                                                                                             ^
+  70 |   await expect.poll(() => page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()).toBeTruthy();
+  71 | });
+  72 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_35\uc-07-click-both-point-station-layers-to-show-feature-info\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:69:109
+
+Application state at the point of failure (data-testids and accessibility tree
+captured AFTER the test steps that did run — elements listed here may not exist
+in the initial page state):
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Niederdorla, DE"
+- paragraph: Fri, Jul 24, 11:00 PM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 17.04 °C
+- paragraph: Humidity
+- paragraph: 64 %
+- paragraph: Wind direction
+- paragraph: 94°
+- paragraph: Wind speed
+- paragraph: 1.15 m/s
+- separator
+- paragraph: Sat, Jul 25, 02:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 16.25 °C
+- paragraph: Humidity
+- paragraph: 67 %
+- paragraph: Wind direction
+- paragraph: 91°
+- paragraph: Wind speed
+- paragraph: 0.91 m/s
+- separator
+- paragraph: Sat, Jul 25, 05:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 14.19 °C
+- paragraph: Humidity
+- paragraph: 73 %
+- paragraph: Wind direction
+- paragraph: 198°
+- paragraph: Wind speed
+- paragraph: 0.76 m/s
+- separator
+- paragraph: Sat, Jul 25, 08:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 18.45 °C
+- paragraph: Humidity
+- paragraph: 58 %
+- paragraph: Wind direction
+- paragraph: 222°
+- paragraph: Wind speed
+- paragraph: 1.49 m/s
+- separator
+- paragraph: Sat, Jul 25, 11:00 AM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 25.15 °C
+- paragraph: Humidity
+- paragraph: 38 %
+- paragraph: Wind direction
+- paragraph: 237°
+- paragraph: Wind speed
+- paragraph: 3.44 m/s
+- separator
+- paragraph: Sat, Jul 25, 02:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 29.08 °C
+- paragraph: Humidity
+- paragraph: 30 %
+- paragraph: Wind direction
+- paragraph: 260°
+- paragraph: Wind speed
+- paragraph: 3.63 m/s
+- separator
+- paragraph: Sat, Jul 25, 05:00 PM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 30.78 °C
+- paragraph: Humidity
+- paragraph: 26 %
+- paragraph: Wind direction
+- paragraph: 255°
+- paragraph: Wind speed
+- paragraph: 4.59 m/s
+- separator
+- paragraph: Sat, Jul 25, 08:00 PM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 27.44 °C
+- paragraph: Humidity
+- paragraph: 48 %
+- paragraph: Wind direction
+- paragraph: 338°
+- paragraph: Wind speed
+- paragraph: 4.34 m/s
+- separator
+- paragraph: Sat, Jul 25, 11:00 PM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 20.76 °C
+- paragraph: Humidity
+- paragraph: 65 %
+- paragraph: Wind direction
+- paragraph: 171°
+- paragraph: Wind speed
+- paragraph: 1.31 m/s
+- separator
+- paragraph: Sun, Jul 26, 02:00 AM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 18.36 °C
+- paragraph: Humidity
+- paragraph: 71 %
+- paragraph: Wind direction
+- paragraph: 255°
+- paragraph: Wind speed
+- paragraph: 1.61 m/s
+- separator
+- paragraph: Sun, Jul 26, 05:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 16.76 °C
+- paragraph: Humidity
+- paragraph: 76 %
+- paragraph: Wind direction
+- paragraph: 244°
+- paragraph: Wind speed
+- paragraph: 1.89 m/s
+- separator
+- paragraph: Sun, Jul 26, 08:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 21.79 °C
+- paragraph: Humidity
+- paragraph: 58 %
+- paragraph: Wind direction
+- paragraph: 252°
+- paragraph: Wind speed
+- paragraph: 2.16 m/s
+- separator
+- paragraph: Sun, Jul 26, 11:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 27.16 °C
+- paragraph: Humidity
+- paragraph: 37 %
+- paragraph: Wind direction
+- paragraph: 247°
+- paragraph: Wind speed
+- paragraph: 5.28 m/s
+- separator
+- paragraph: Sun, Jul 26, 02:00 PM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 28.64 °C
+- paragraph: Humidity
+- paragraph: 24 %
+- paragraph: Wind direction
+- paragraph: 254°
+- paragraph: Wind speed
+- paragraph: 6.98 m/s
+- separator
+- paragraph: Sun, Jul 26, 05:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 16.63 °C
+- paragraph: Humidity
+- paragraph: 90 %
+- pa
+[... truncated ...]
+
+A screenshot of the application at the point of failure is attached as an image. It shows the visual state including the canvas-rendered map, which is not represented in the accessibility tree.
+
+Fix the test so that it correctly verifies the use case and passes.
+Do not weaken or remove assertions just to make the test pass — the test must
+still verify the behaviour described in the use case.
+Return only the corrected test code.

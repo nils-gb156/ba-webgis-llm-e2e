@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide the Temperature overlay layer
+    // The layer switcher is initially open and the Temperature checkbox is checked.
+    await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+    // Step 2: Show the Precipitation overlay layer
+    // The Precipitation checkbox is initially unchecked.
+    await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+    // Verify layer visibility via map model helpers
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for a place using the geocoder
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Select the first result
+    // The geocoder panel is a dialog/listbox; wait for it to be visible
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    await expect(geocoderPanel).toBeVisible();
+
+    // Select the first result item using its specific test id
+    await page.getByTestId('geocoder-result-item-0').click();
+
+    // Step 5: Wait for the info panel to load the forecast
+    // The forecast section should appear with 24 entries
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Verify that the forecast section contains 24 entries
+    const forecastEntries = weatherForecastSection.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

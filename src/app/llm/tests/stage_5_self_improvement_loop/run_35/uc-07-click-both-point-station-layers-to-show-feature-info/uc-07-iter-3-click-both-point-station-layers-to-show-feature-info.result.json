@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_35\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_35/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UC7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7489,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mundefined\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mundefined\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_35\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:31:59",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_35\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 59,
+                      "line": 31
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 29 |\u001b[39m   \u001b[90m// Wait for the info panel to load feature info for both layers.\u001b[39m\n \u001b[90m 30 |\u001b[39m   \u001b[90m// Poll for the highlighted coordinate to settle (confirming the map click was processed)\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 31 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getHighlightedCoordinate(page))\u001b[33m.\u001b[39mtoBeTruthy()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 32 |\u001b[39m\n \u001b[90m 33 |\u001b[39m   \u001b[90m// The info panel headings use the layer titles (e.g. \"UV-Index Stations\")\u001b[39m\n \u001b[90m 34 |\u001b[39m   \u001b[90m// Scope to the info panel to avoid ambiguity.\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_35\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 59,
+                        "line": 31
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mundefined\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  29 |   // Wait for the info panel to load feature info for both layers.\n  30 |   // Poll for the highlighted coordinate to settle (confirming the map click was processed)\n> 31 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                           ^\n  32 |\n  33 |   // The info panel headings use the layer titles (e.g. \"UV-Index Stations\")\n  34 |   // Scope to the info panel to avoid ambiguity.\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_35\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:31:59"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T20:15:18.044Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-af500-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_35\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 59,
+                    "line": 31
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "c9f8deccfc53374366c8-fc0d391fd7e5878e3404",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_35/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T20:15:17.367Z",
+    "duration": 9351.125,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

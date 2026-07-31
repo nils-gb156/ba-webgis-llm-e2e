@@ -1,0 +1,103 @@
+{
+  "run": "run_29",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  23 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 items.\n  24 |   const forecastSection = page.getByTestId('weather-forecast-section');\n> 25 |   await expect.poll(() => forecastSection.locator('li').count()).toBe(24);\n     |                                                                  ^\n  26 |\n  27"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  21 |   const forecastSection = page.getByTestId('weather-forecast-section');\n> 22 |   await expect.poll(() => forecastSection.locator('li').count()).toBe(24);\n     |                                                                  ^\n  23 |"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  21 |   const forecastSection = page.getByTestId('weather-forecast-section');\n> 22 |   await expect.poll(() => forecastSection.locator('li').count()).toBe(24);\n     |                                                                  ^\n  23 |"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  21 |   const forecastSection = page.getByTestId('weather-forecast-section');\n> 22 |   await expect.poll(() => forecastSection.locator('li').count()).toBe(24);\n     |                                                                  ^\n  23 |"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |\n  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n> 22 |   await expect.poll(() => forecastSection.locator('li').count()).toBe(24);\n     |                                                                  ^\n  23 |\n  24 |   // The clicked position is highlighted on the map.\n  25 |   aw"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-06-iter-5-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  22 |   // The forecast entries are rendered as div elements with the \"forecast-entry\" class.\n> 23 |   await expect.poll(() => forecastSection.locator('[class*=\"forecast-entry\"]').count()).toBe(24);\n     |                                   "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-06-iter-6-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  22 |   // The forecast entries are rendered as div elements with the \"forecast-entry\" class.\n> 23 |   await expect.poll(() => forecastSection.locator('[class*=\"forecast-entry\"]').count()).toBe(24);\n     |                                   "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-06-iter-7-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  22 |   // The forecast entries are rendered as div elements with the \"forecast-entry\" class.\n> 23 |   await expect.poll(() => forecastSection.locator('[class*=\"forecast-entry\"]').count()).toBe(24);\n     |                                   "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-06-iter-8-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  22 |   // The forecast entries are rendered as div elements with the \"forecast-entry\" class.\n> 23 |   await expect.poll(() => forecastSection.locator('[class*=\"forecast-entry\"]').count()).toBe(24);\n     |                                   "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.\n  22 |   // The forecast entries are rendered as div elements with the \"forecast-entry\" class.\n> 23 |   await expect.poll(() => forecastSection.locator('[class*=\"forecast-entry\"]').count()).toBe(24);\n     |                                   "
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_20/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 10: Configure layers, search for a location and load the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7643,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('option', { name: 'MÃ¼nster' }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('option', { name: 'MÃ¼nster' }).first()\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('option', { name: 'MÃ¼nster' }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('option', { name: 'MÃ¼nster' }).first()\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:30:31",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                      "column": 31,
+                      "line": 30
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[90m// 4. Select the first result from the geocoder panel\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[36mconst\u001b[39m firstResult \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'option'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'MÃ¼nster'\u001b[39m })\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m expect(firstResult)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m     \u001b[36mawait\u001b[39m firstResult\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 32 |\u001b[39m\n \u001b[90m 33 |\u001b[39m     \u001b[90m// 5. Wait for the map to navigate to the selected location\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                        "column": 31,
+                        "line": 30
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('option', { name: 'MÃ¼nster' }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('option', { name: 'MÃ¼nster' }).first()\u001b[22m\n\n\n  28 |     // 4. Select the first result from the geocoder panel\n  29 |     const firstResult = page.getByRole('option', { name: 'MÃ¼nster' }).first();\n> 30 |     await expect(firstResult).toBeVisible();\n     |                               ^\n  31 |     await firstResult.click();\n  32 |\n  33 |     // 5. Wait for the map to navigate to the selected location\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:30:31"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T15:54:16.905Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-f7e8a-d-load-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                    "column": 31,
+                    "line": 30
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "4b3c8c47959690755467-8cc95b9bedd34c85db76",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_20/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T15:54:16.273Z",
+    "duration": 10821.117,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

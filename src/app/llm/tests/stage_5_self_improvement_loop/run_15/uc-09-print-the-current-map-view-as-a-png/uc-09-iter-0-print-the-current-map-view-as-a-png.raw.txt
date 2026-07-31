@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and at least one overlay to be rendered
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Step 1: Open the printing panel
+  await page.getByTestId('print-toggle').click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByRole('dialog', { name: /Print/i })).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // The title input is usually labeled "Title" or similar in the print dialog
+  await page.getByRole('textbox', { name: 'Title' }).fill('Test Map Printout');
+
+  // Step 3: Select the PNG file format
+  // We look for a radio group or list with format options
+  const formatRadio = page.getByRole('radio', { name: 'PNG' });
+  if (await formatRadio.isChecked()) {
+    // Already selected, no action needed
+  } else {
+    await formatRadio.click();
+  }
+
+  // Step 4: Trigger the export/print
+  // The button is usually labeled "Export" or "Print" inside the dialog
+  const exportButton = page.getByRole('button', { name: /Export|Print/i });
+  await expect(exportButton).toBeEnabled();
+
+  // Wait for the download to start
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click(),
+  ]);
+
+  // Verify the download happened and has a plausible PNG filename
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

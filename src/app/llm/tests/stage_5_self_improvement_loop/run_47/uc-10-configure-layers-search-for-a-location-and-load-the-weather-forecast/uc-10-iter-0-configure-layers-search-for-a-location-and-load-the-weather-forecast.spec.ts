@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide the Temperature overlay layer
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Step 2: Show the Precipitation overlay layer
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+    await expect(precipitationToggle).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for a location using the geocoder
+    const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search' });
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for the result list to appear and select the first result
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    await expect(geocoderPanel).toBeVisible();
+    await geocoderPanel.getByRole('option', { name: 'Münster' }).first().click();
+
+    // Step 5: Wait for the map to navigate to the selected location
+    // The map center changes to the coordinates of the selected place.
+    // We poll the map center to confirm navigation.
+    const initialCenter = await page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: { olMap: { getView: () => { getCenter: () => number[] } } } }).__openPioneerMap;
+        return map?.olMap.getView().getCenter();
+    });
+    await expect.poll(async () => {
+        const map = (globalThis as { __openPioneerMap?: { olMap: { getView: () => { getCenter: () => number[] } } } }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2 ? center : undefined;
+    }).not.toEqual(initialCenter);
+
+    // Step 6: Wait for the info panel to load the forecast
+    // The info panel should update with weather forecast data.
+    const infoPanel = page.getByTestId('info-panel');
+    await expect(infoPanel).toBeVisible();
+    
+    // Wait for the weather forecast section to have 24 entries
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+    
+    // Count the number of forecast entries (typically list items or similar structure)
+    // We poll to wait for the forecast data to load and render
+    await expect.poll(async () => {
+        const entries = await weatherForecastSection.locator('[class*="forecast-entry"], [class*="item"]').count();
+        return entries;
+    }).toBeGreaterThanOrEqual(24);
+});

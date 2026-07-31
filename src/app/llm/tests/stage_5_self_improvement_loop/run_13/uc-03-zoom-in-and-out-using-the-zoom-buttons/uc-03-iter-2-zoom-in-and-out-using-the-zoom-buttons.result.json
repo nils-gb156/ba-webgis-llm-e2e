@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_13\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_13/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 3: Zoom in and out using the zoom buttons",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7427,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[1mMatcher error\u001b[22m: \u001b[32mexpected\u001b[39m value must be a number or bigint\n\nExpected has value: \u001b[32mundefined\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[1mMatcher error\u001b[22m: \u001b[32mexpected\u001b[39m value must be a number or bigint\n\nExpected has value: \u001b[32mundefined\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_13\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts:17:72",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_13\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+                      "column": 72,
+                      "line": 17
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 15 |\u001b[39m\n \u001b[90m 16 |\u001b[39m   \u001b[90m// Assert that the zoom level increased\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 17 |\u001b[39m   \u001b[36mconst\u001b[39m zoomedInLevel \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getMapZoomLevel(page))\u001b[33m.\u001b[39mtoBeGreaterThan(initialZoom)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 18 |\u001b[39m\n \u001b[90m 19 |\u001b[39m   \u001b[90m// Step 2: Click the 'Zoom out' button\u001b[39m\n \u001b[90m 20 |\u001b[39m   \u001b[36mconst\u001b[39m zoomOutButton \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Zoom out map'\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_13\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+                        "column": 72,
+                        "line": 17
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[1mMatcher error\u001b[22m: \u001b[32mexpected\u001b[39m value must be a number or bigint\n\nExpected has value: \u001b[32mundefined\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  15 |\n  16 |   // Assert that the zoom level increased\n> 17 |   const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);\n     |                                                                        ^\n  18 |\n  19 |   // Step 2: Click the 'Zoom out' button\n  20 |   const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_13\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts:17:72"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T13:11:29.566Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-e29b3--out-using-the-zoom-buttons-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_13\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+                    "column": 72,
+                    "line": 17
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "09f4f74abbc50d2164b5-08fdbc875718fec7c17e",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_13/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T13:11:29.018Z",
+    "duration": 9187.694,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

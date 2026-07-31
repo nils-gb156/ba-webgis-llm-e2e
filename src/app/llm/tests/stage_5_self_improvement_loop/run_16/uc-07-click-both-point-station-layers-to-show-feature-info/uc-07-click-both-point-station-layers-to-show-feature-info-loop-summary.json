@@ -1,0 +1,76 @@
+{
+  "run": "run_16",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 7,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByTestId('measurement-toggle')\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByTestId('measurement-toggle')\n\n\n   9 |   // Verify preconditions: info panel is visible, measurement tool is inactive\n  10 |   await expect(page.getByTestId('info-panel')).toBeVisible();\n> 11 |   await expect(page.getByTestId('measurement-toggle')).not.toBeChecked();\n"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByTestId('measurement-toggle')\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByTestId('measurement-toggle')\n\n\n  11 |   // Measurement-toggle is a Chakra button with role=\"button\" and aria-pressed, not a checkbox.\n  12 |   // Assert that it is not in the pressed state.\n> 13 |   await expect(page.getByTestId('measurement-toggle')).not.toBeChecked"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeAttached() failed\n\nLocator:  getByTestId('measurement-toggle')\nExpected: not attached\nReceived: attached\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeAttached\" with timeout 5000ms\n  - waiting for getByTestId('measurement-toggle')\n    14 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-part=\"trigger\" data-state=\"closed\" data-scope=\"tooltip\" aria-pressed=\"false\" data-ownedby=\"_r_u_\" aria-label=\"Measurement\" id=\"tooltip:_r_u_:trigger\" data-testid=\"measur"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - waiting for getByTestId('map-container').locator('canvas')\n\n\n  20 |   // Locate the canvas element within the map container and click it.\n  21 |   const mapCanvas = page.getByTestId('map-container')."
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container').locator('canvas').first()\n    - locator resolved to <canvas width=\"1920\" height=\"1039\"></canvas>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> intercepts pointer"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

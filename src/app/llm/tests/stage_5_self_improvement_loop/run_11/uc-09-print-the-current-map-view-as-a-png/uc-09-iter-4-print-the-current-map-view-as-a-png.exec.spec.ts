@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready
+  await page.waitForSelector('[data-testid="map-container"]');
+
+  // Step 1: Open the printing panel
+  await page.getByTestId('print-toggle').click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByRole('dialog', { name: 'Print Map' })).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  await page.getByLabel('Title').fill('Test Printout');
+
+  // Step 3: Select the PNG file format
+  // The accessibility tree shows a combobox "File format" with options PNG and PDF.
+  await page.getByRole('combobox', { name: 'File format' }).selectOption('PNG');
+
+  // Step 4: Click the export/print button
+  // Wait for the download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export map' }).click();
+
+  // Assert that a download occurred
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

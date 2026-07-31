@@ -1,0 +1,103 @@
+{
+  "run": "run_09",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: center is not iterable\n\n  13 |   const center = await expect.poll(() => getMapCenter(page));\n  14 |   expect(center).toBeDefined();\n> 15 |   const [cx, cy] = center!;\n     |                    ^\n  16 |\n  17 |   await page.getByTestId('map-container').click({ position: { x: cx - 50, y: cy - 50 } });\n  18 |   await page.getByTestId('map-container').click({ position: { x: cx + 50, y: cy + 50 } });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m)/\nReceived string:  \"MeasurementÂ·\nClick in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  24 |   // Expected results: measurement panel is visible and displays a length value with a unit.\n  25 |   await expect(page.getByTestId('measurement-panel')).toBeVisible();\n> 26 |   await expect.poll(() => page.getByTestId('meas"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m)/\nReceived string:  \"Click in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  24 |   // Expected results: measurement panel is visible and displays a length value with a unit.\n  25 |   await expect(page.getByTestId('measurement-panel')).toBeVisible();\n> 26 |   await expect.poll(() => page.getByTestId('measurement').inne"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m)/\nReceived string:  \"Click in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  24 |   // Expected results: measurement panel is visible and displays a length value with a unit.\n  25 |   await expect(page.getByTestId('measurement-panel')).toBeVisible();\n> 26 |   await expect.poll(() => page.getByTestId('measurement').inne"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('measurement')\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m)/\nReceived string:  \"Click in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByTestId('measurement')\n    14 Ã— locator resolved to <div class=\"measurement\" data-testid=\"measurement\">â€¦</div>\n       - unexpected value \"Click in the map to start a measureme"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected value: /[\\d.]+\\s*(km|m)/\nReceived array: []\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  26 |     // The measurement result is shown in a tooltip on the map, not inside the panel.\n  27 |     // After finishing, a tooltip with the total distance appears.\n> 28 |     await expect.poll(() => page.locator('tooltip').allTextContents()).toContain(/[\\d.]+\\s*(km|m)/);\n     |                                         "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected value: /[\\d.]+\\s*(km|m)/\nReceived array: [\"150.49 km\", \"0 m\", \"Double click to end the measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  28 |     // After finishing, a tooltip with the total distance appears.\n  29 |     // The tooltip role is 'tooltip' and accessible name contains the distance value.\n> 30 |     await expect.poll(() => page.getByRole('tooltip').allTextContents()).toContain(/[\\d.]+"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected value: /[\\d.]+\\s*(km|m)/\nReceived array: [\"150.49 km\", \"0 m\", \"Double click to end the measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  28 |     // After finishing, a tooltip with the total distance appears.\n  29 |     // The tooltip role is 'tooltip' and accessible name contains the distance value.\n> 30 |     await expect.poll(() => page.getByRole('tooltip').allTextContents()).toContain(/[\\d.]+"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected value: /[\\d.]+\\s*(km|m)/\nReceived array: [\"150.49 km\", \"0 m\", \"Double click to end the measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  28 |     // After finishing, a tooltip with the total distance appears.\n  29 |     // The tooltip role is 'tooltip' and accessible name contains the distance value.\n> 30 |     await expect.poll(() => page.getByRole('tooltip').allTextContents()).toContain(/[\\d.]+"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('tooltip', { name: /[\\d.]+\\s*(km|m)/ })\nExpected: visible\nError: strict mode violation: getByRole('tooltip', { name: /[\\d.]+\\s*(km|m)/ }) resolved to 2 elements:\n    1) <div role=\"tooltip\" class=\"measurement-tooltip measurement-finished-tooltip\">â€¦</div> aka getByRole('tooltip', { name: 'km' })\n    2) <div role=\"tooltip\" class=\"map-overlay measurement-tooltip measurement-active-tooltip printing-hide\">â€¦</div> aka getByRole('toolti"
+    }
+  ]
+}

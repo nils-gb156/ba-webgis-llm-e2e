@@ -1,0 +1,31 @@
+{
+  "run": "run_26",
+  "use_case_id": 9,
+  "title": "Print the current map view as a PNG",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: /Export|Print|Download/i }) resolved to 2 elements:\n    1) <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_v_\" aria-label=\"Print Map\" data-testid=\"print-toggle\" id=\"tooltip:_r_v_:trigger\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button> aka getByTestId('print-toggle')"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

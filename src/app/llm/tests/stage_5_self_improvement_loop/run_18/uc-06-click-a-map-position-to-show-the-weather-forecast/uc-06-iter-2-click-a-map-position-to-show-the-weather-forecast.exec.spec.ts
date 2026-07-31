@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is visible by default in the initial state)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas to trigger the forecast loading
+  await page.getByTestId('map-container').click({ position: { x: 400, y: 300 } });
+
+  // Wait for the forecast to load and display in the info panel
+  await expect(page.getByText('Weather Forecast')).toBeVisible();
+
+  // Verify that the clicked position is highlighted on the map
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Verify that the info panel displays a weather forecast section
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Verify that the forecast contains 24 entries
+  // The forecast entries are rendered as child elements within the weather-forecast-section.
+  // We count them by evaluating the number of direct children in the browser context.
+  await expect.poll(async () => {
+    const section = page.getByTestId('weather-forecast-section');
+    await expect(section).toBeVisible();
+    return section.locator('> *').count();
+  }).toBe(24);
+});

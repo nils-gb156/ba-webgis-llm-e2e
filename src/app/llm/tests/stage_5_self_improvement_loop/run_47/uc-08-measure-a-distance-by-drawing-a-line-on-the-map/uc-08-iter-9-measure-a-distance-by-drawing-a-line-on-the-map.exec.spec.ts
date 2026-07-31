@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Activate the measurement tool.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  // The toggle button is already in the pressed state when the panel is open,
+  // but initially it is not pressed. We click it to ensure the panel opens.
+  await measurementToggle.click({ force: true });
+
+  // Verify the measurement panel (dialog) is visible.
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement' });
+  await expect(measurementDialog).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line.
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click the first point near the center.
+  await mapContainer.click({ position: { x: 400, y: 300 }, force: true });
+  // Click the second point offset from the first.
+  await mapContainer.click({ position: { x: 500, y: 300 }, force: true });
+  // Click the third point offset from the second.
+  await mapContainer.click({ position: { x: 500, y: 400 }, force: true });
+
+  // 3. Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 500, y: 400 }, force: true });
+
+  // Expected results: The measurement panel displays a length value with a unit.
+  // The dialog text updates to show the result after the measurement is finished.
+  // The value is inside a paragraph within the dialog.
+  await expect.poll(() =>
+    measurementDialog.getByRole('paragraph').allTextContents()
+  ).toContainEqual(expect.stringMatching(/\d+(\.\d+)?\s*(m|km)/));
+});

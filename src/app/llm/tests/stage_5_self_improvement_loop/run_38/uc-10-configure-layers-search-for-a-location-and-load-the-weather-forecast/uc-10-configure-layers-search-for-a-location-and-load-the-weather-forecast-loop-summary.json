@@ -1,0 +1,103 @@
+{
+  "run": "run_38",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByRole('option').first()\n\n\n  21 |\n  22 |     // Step 4: Select the first result\n> 23 |     await page.getByRole('option').first().click();\n     |                                            ^\n  24 |\n  25 |     // Step 5: Wait for the map to navigate to the selected location\n  26 |     // The map center should have changed from the initial extent.\n    at c:\\Users\\n.beikel\\re"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |         const center = getMapCenter(page);\n  34 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 35 |     }).toBe(true);\n     |        ^\n  36 |\n  37 |     // Step 6: Wait for the info panel to load the forecast.\n  38 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |         const center = getMapCenter(page);\n  32 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 33 |     }).toBe(true);\n     |        ^\n  34 |\n  35 |     // Step 6: Wait for the info panel to load the forecast.\n  36 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |         const center = getMapCenter(page);\n  32 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 33 |     }).toBe(true);\n     |        ^\n  34 |\n  35 |     // Step 6: Wait for the info panel to load the forecast.\n  36 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |         const center = getMapCenter(page);\n  32 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 33 |     }).toBe(true);\n     |        ^\n  34 |\n  35 |     // Step 6: Wait for the info panel to load the forecast.\n  36 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |         const center = getMapCenter(page);\n  32 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 33 |     }).toBe(true);\n     |        ^\n  34 |\n  35 |     // Step 6: Wait for the info panel to load the forecast.\n  36 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |         const center = getMapCenter(page);\n  32 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 33 |     }).toBe(true);\n     |        ^\n  34 |\n  35 |     // Step 6: Wait for the info panel to load the forecast.\n  36 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-10-iter-7-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  31 |         const center = getMapCenter(page);\n  32 |         return center !== undefined && (Math.abs(center[0]) > 1000000 || Math.abs(center[1]) > 1000000);\n> 33 |     }).toBe(true);\n     |        ^\n  34 |\n  35 |     // Step 6: Wait for the info panel to load the forecast.\n  36 |     // The expected result states \"24 entries\".\n    "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-10-iter-8-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  52 |         // and y coordinate is in the range (approx 6.5M)\n  53 |         return center[0] > 600000 && center[0] < 750000 && center[1] > 6500000 && center[1] < 6700000;\n> 54 |     }).toBe(true);\n     |        ^\n  55 |\n  56 |     // Step 6: Wait for the info panel to load the forecast.\n  57 |     // The expected result states \"24 e"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  52 |         // and y coordinate is in the range (approx 6.5M)\n  53 |         return center[0] > 600000 && center[0] < 750000 && center[1] > 6500000 && center[1] < 6700000;\n> 54 |     }).toBe(true);\n     |        ^\n  55 |\n  56 |     // Step 6: Wait for the info panel to load the forecast.\n  57 |     // The expected result states \"24 e"
+    }
+  ]
+}

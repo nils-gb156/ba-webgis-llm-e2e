@@ -1,0 +1,85 @@
+{
+  "run": "run_41",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 8,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Attempting to serialize unexpected value at position \"centerX.not.toBe\": (...args) => callMatcherAsStep(matcherName, info, actual, matcher, args, promise)\n\n  35 |   // Helper to convert map coordinates to page coordinates\n  36 |   const mapToPageCoords = async (mapX: number, mapY: number) => {\n> 37 |     return page.evaluate(\n     |                 ^\n  38 |       ({ mapX, mapY, centerX, centerY, width, height, zoom }) => {\n  39 |         // Assuming the map is centered and fills the conta"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/^[0-9.,]+\\s*(km|m|mi|ft)$/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/^[0-9.,]+\\s*(km|m|mi|ft)$/)\n\n\n  42 |   // We look for a text pattern like \"123.45 km\" or \"123.45 m\" inside the measurement panel\n  43 |   const measurementResultText = meas"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/^[0-9.,]+\\s*(km|m|mi|ft)$/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/^[0-9.,]+\\s*(km|m|mi|ft)$/)\n\n\n  42 |   // We look for a text pattern like \"123.45 km\" or \"123.45 m\" inside the measurement panel\n  43 |   const measurementResultText = measurementPanel.getByText(/"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('tooltip', { name: /[\\d.,]+\\s*(km|m|mi|ft)/i })\nExpected: visible\nError: strict mode violation: getByRole('tooltip', { name: /[\\d.,]+\\s*(km|m|mi|ft)/i }) resolved to 2 elements:\n    1) <div role=\"tooltip\" class=\"measurement-tooltip measurement-finished-tooltip\">â€¦</div> aka getByRole('tooltip', { name: 'km' })\n    2) <div role=\"tooltip\" class=\"map-overlay measurement-tooltip measurement-active-tooltip printing-hide\">â€¦</div> aka g"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('tooltip', { name: /^[\\d.,]+\\s*(km|m|mi|ft)$/i })\nExpected: visible\nError: strict mode violation: getByRole('tooltip', { name: /^[\\d.,]+\\s*(km|m|mi|ft)$/i }) resolved to 2 elements:\n    1) <div role=\"tooltip\" class=\"measurement-tooltip measurement-finished-tooltip\">â€¦</div> aka getByRole('tooltip', { name: 'km' })\n    2) <div role=\"tooltip\" class=\"map-overlay measurement-tooltip measurement-active-tooltip printing-hide\">â€¦</div> a"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByRole('tooltip', { name: /^[\\d.,]+\\s*km$/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByRole('tooltip', { name: /^[\\d.,]+\\s*km$/i })\n\n\n  43 |   // The finished tooltip contains the actual distance (e.g. \"570.51 km\").\n  44 |   const finishedMeasurementTooltip = measurementPanel.g"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByRole('tooltip', { name: /^[\\d.,]+\\s*km$/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByRole('tooltip', { name: /^[\\d.,]+\\s*km$/i })\n\n\n  43 |   // The finished tooltip contains the actual distance (e.g. \"570.51 km\").\n  44 |   const finishedMeasurementTooltip = measurementPanel.g"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

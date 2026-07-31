@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Activate the measurement tool
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2 & 3: Draw a line by clicking points on the map, then double-click to finish
+  const mapContainer = page.getByTestId('map-container');
+
+  // Helper to click map at offset from center
+  const clickMap = async (dx: number, dy: number) => {
+    const box = await mapContainer.boundingBox();
+    expect(box).toBeDefined();
+    const centerX = box!.x + box!.width / 2;
+    const centerY = box!.y + box!.height / 2;
+    await page.mouse.click(centerX + dx, centerY + dy);
+  };
+
+  // Click a few points to draw a line
+  await clickMap(-50, -50);
+  await clickMap(50, -50);
+  await clickMap(50, 50);
+
+  // Double-click to finish
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).toBeDefined();
+  const centerX = mapBox!.x + mapBox!.width / 2;
+  const centerY = mapBox!.y + mapBox!.height / 2;
+  await page.mouse.dblclick(centerX - 50, centerY + 50);
+
+  // Step 4: Verify the measurement result is displayed in the panel
+  // The panel contains a paragraph with the measurement result (e.g., "229.83 km")
+  await expect.poll(() => measurementPanel.textContent()).toMatch(/\d+(\.\d+)?\s*(km|m)/i);
+});

@@ -1,0 +1,49 @@
+{
+  "run": "run_48",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByRole('checkbox', { name: 'Temperature' })\n    - locator resolved to <input checked value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_m_:input\" aria-labelledby=\"checkbox:_r_m_:label\"/>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('geocoder-panel').getByRole('option', { name: /MÃ¼nster/ }).first()\n\n\n  34 |   // Select the first result from the list\n  35 |   const firstResult = geocoderPanel.getByRole('option', { name: /MÃ¼nster/ }).first();\n> 36 |   await firstResult.click();\n     |                     ^\n  37 |\n  38 |   // Step 5: Wait for the map to navigate to the selected location\n  39 |"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('geocoder-panel').getByRole('option', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' }).first()\n\n\n  35 |   // The first result is \"MÃ¼nster, North Rhine-Westphalia, Germany\"\n  36 |   const firstResult = geocoderPanel.getByRole('option', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' }).first();\n> 37 |   await firstResult.click();\n     |                  "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

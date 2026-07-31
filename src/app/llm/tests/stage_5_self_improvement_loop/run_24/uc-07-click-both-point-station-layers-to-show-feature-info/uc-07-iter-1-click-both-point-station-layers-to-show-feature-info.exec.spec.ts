@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Preconditions: info panel visible, both station layers active
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (it intercepts map clicks)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressed === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Step 1: Click at the specified coordinates on the map canvas
+  // The map canvas is the map-container element; we click it at the given
+  // position.  The coordinates [1188692.84, 6767643.28] are in EPSG:3857,
+  // but Playwright's `position` option expects pixel offsets from the top-left
+  // of the element.  We use `page.mouse.move` + `page.mouse.click` instead
+  // because the map-container is an overlay that may intercept pointer events
+  // and Playwright's click with position can hang.
+  // However, we need to convert EPSG:3857 to pixel coordinates.  Since the
+  // helper exposes the OL map, we can do the conversion inside page.evaluate.
+  await page.evaluate(
+    async ({ x, y }) => {
+      const map = (globalThis as { __openPioneerMap?: { olMap?: { getView: () => { getCenter: () => number[]; getZoom: () => number }; getPixelFromCoordinate: (coord: number[]) => number[] } } }).__openPioneerMap;
+      if (!map?.olMap) return;
+      const view = map.olMap.getView();
+      const center = view.getCenter();
+      const zoom = view.getZoom();
+      const resolution = view.getResolutionForZoom(zoom);
+      // Convert EPSG:3857 coordinate to pixel relative to map center
+      const pixelX = (x - center![0]) / resolution + (await page.locator('[data-testid="map-container"]').boundingBox()).width! / 2;
+      const pixelY = (y - center![1]) / resolution + (await page.locator('[data-testid="map-container"]').boundingBox()).height! / 2;
+      // Actually, simpler: use OL's getPixelFromCoordinate
+      const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+      // Click at that pixel relative to the map container
+      const box = (await page.locator('[data-testid="map-container"]').boundingBox())!;
+      await page.mouse.click(box.x + pixel[0], box.y + pixel[1]);
+    },
+    { x: 1188692.84, y: 6767643.28 },
+  );
+
+  // Step 2: Wait for the info panel to load feature info for both layers
+  await expect.poll(() =>
+    page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible(),
+  ).toBe(true);
+
+  await expect.poll(() =>
+    page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible(),
+  ).toBe(true);
+
+  // Verify that a highlight marker was placed at the clicked location
+  await expect.poll(() => getHighlightedCoordinate(page)).toEqual([1188692.84, 6767643.28]);
+});

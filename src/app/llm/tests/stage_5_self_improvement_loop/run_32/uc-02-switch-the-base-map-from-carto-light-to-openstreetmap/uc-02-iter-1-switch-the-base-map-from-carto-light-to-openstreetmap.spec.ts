@@ -1,0 +1,22 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify initial state: Carto Light is active
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // The layer switcher is already visible.
+  // The "Basemaps" combobox is a custom Chakra UI component (not a native <select>).
+  // Open the dropdown by clicking the trigger button.
+  await page.getByRole('combobox', { name: 'Basemaps' }).click();
+
+  // Select 'OpenStreetMap' from the listbox options.
+  await page.getByRole('option', { name: 'OpenStreetMap' }).click();
+
+  // Verify the base map has switched to OpenStreetMap
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

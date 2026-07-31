@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and zoom level to be defined.
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 4 (preemptive): Register for the download before triggering the action.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+    page.getByRole('button', { name: 'Print Map' }).click(),
+  ]);
+
+  // Step 2: Enter a title for the printout.
+  // The title input is inside the printing dialog/panel.
+  await page.getByRole('dialog', { name: 'Print Map' }).getByLabel('Title').fill('My Map Printout');
+
+  // Step 3: Select the PNG file format.
+  // The format is typically a radio group or combobox inside the print dialog.
+  // Based on common patterns, we look for a radio button or option labeled "PNG".
+  await page.getByRole('dialog', { name: 'Print Map' }).getByRole('radio', { name: 'PNG' }).check();
+
+  // Step 4: Click the export/print button.
+  await page.getByRole('dialog', { name: 'Print Map' }).getByRole('button', { name: 'Export' }).click();
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  await download.cancel(); // We just want to verify it happened, not save the file.
+  expect(await download.suggestedFilename()).toMatch(/\.png$/);
+});

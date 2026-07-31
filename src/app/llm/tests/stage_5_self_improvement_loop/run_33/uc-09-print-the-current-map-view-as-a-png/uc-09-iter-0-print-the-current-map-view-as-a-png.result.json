@@ -1,0 +1,144 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_33/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "9: Print the current map view as a PNG",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6477,
+                  "error": {
+                    "message": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: /Print|Export|Download/ }) resolved to 2 elements:\n    1) <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_v_\" aria-label=\"Print Map\" data-testid=\"print-toggle\" id=\"tooltip:_r_v_:trigger\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button> aka getByTestId('print-toggle')\n    2) <button type=\"submit\" class=\"chakra-button printing-export-button css-10si0hy\">Export map</button> aka getByRole('button', { name: 'Export map' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Print|Export|Download/ })\u001b[22m\n",
+                    "stack": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: /Print|Export|Download/ }) resolved to 2 elements:\n    1) <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_v_\" aria-label=\"Print Map\" data-testid=\"print-toggle\" id=\"tooltip:_r_v_:trigger\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button> aka getByTestId('print-toggle')\n    2) <button type=\"submit\" class=\"chakra-button printing-export-button css-10si0hy\">Export map</button> aka getByRole('button', { name: 'Export map' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Print|Export|Download/ })\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts:32:69",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                      "column": 69,
+                      "line": 32
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 30 |\u001b[39m   \u001b[90m// Step 4: Click the export/print button\u001b[39m\n \u001b[90m 31 |\u001b[39m   \u001b[36mconst\u001b[39m downloadPromise \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForEvent(\u001b[32m'download'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 32 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/Print|Export|Download/\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 33 |\u001b[39m\n \u001b[90m 34 |\u001b[39m   \u001b[36mconst\u001b[39m download \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m downloadPromise\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m   \u001b[36mconst\u001b[39m suggestedFilename \u001b[33m=\u001b[39m download\u001b[33m.\u001b[39msuggestedFilename()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                        "column": 69,
+                        "line": 32
+                      },
+                      "message": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: /Print|Export|Download/ }) resolved to 2 elements:\n    1) <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_v_\" aria-label=\"Print Map\" data-testid=\"print-toggle\" id=\"tooltip:_r_v_:trigger\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button> aka getByTestId('print-toggle')\n    2) <button type=\"submit\" class=\"chakra-button printing-export-button css-10si0hy\">Export map</button> aka getByRole('button', { name: 'Export map' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Print|Export|Download/ })\u001b[22m\n\n\n  30 |   // Step 4: Click the export/print button\n  31 |   const downloadPromise = page.waitForEvent('download');\n> 32 |   await page.getByRole('button', { name: /Print|Export|Download/ }).click();\n     |                                                                     ^\n  33 |\n  34 |   const download = await downloadPromise;\n  35 |   const suggestedFilename = download.suggestedFilename();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts:32:69"
+                    },
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                        "column": 32,
+                        "line": 31
+                      },
+                      "message": "Error: page.waitForEvent: Test ended.\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================\n\n  29 |\n  30 |   // Step 4: Click the export/print button\n> 31 |   const downloadPromise = page.waitForEvent('download');\n     |                                ^\n  32 |   await page.getByRole('button', { name: /Print|Export|Download/ }).click();\n  33 |\n  34 |   const download = await downloadPromise;\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts:31:32"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T19:41:49.209Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-91c6e-e-current-map-view-as-a-PNG-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_33\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                    "column": 69,
+                    "line": 32
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "8f173ec185d540da58e2-257fb2bfe24b56eb8667",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_33/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T19:41:48.067Z",
+    "duration": 9509.244999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

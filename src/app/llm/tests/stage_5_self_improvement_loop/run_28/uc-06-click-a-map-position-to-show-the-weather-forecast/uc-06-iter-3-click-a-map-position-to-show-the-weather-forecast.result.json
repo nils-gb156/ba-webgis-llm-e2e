@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_28\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 6: Click a map position to show the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7597,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeAttached\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Info Panel Switcher' })\nExpected: not attached\nReceived: attached\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toBeAttached\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Info Panel Switcher' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-part=\"trigger\" data-state=\"closed\" data-scope=\"tooltip\" aria-pressed=\"false\" data-ownedby=\"_r_12_\" id=\"tooltip:_r_12_:trigger\" data-testid=\"info-panel-toggle\" aria-label=\"Info Panel Switcher\" class=\"chakra-button chakra-tooltip__trigger tool-button css-19u3ixl\">â€¦</button>\u001b[22m\n\u001b[2m       - unexpected value \"attached\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeAttached\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Info Panel Switcher' })\nExpected: not attached\nReceived: attached\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toBeAttached\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Info Panel Switcher' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-part=\"trigger\" data-state=\"closed\" data-scope=\"tooltip\" aria-pressed=\"false\" data-ownedby=\"_r_12_\" id=\"tooltip:_r_12_:trigger\" data-testid=\"info-panel-toggle\" aria-label=\"Info Panel Switcher\" class=\"chakra-button chakra-tooltip__trigger tool-button css-19u3ixl\">â€¦</button>\u001b[22m\n\u001b[2m       - unexpected value \"attached\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_28\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:12:39",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_28\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                      "column": 39,
+                      "line": 12
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 10 |\u001b[39m     \u001b[36mconst\u001b[39m infoPanelToggle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Info Panel Switcher'\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m     \u001b[36mawait\u001b[39m infoPanelToggle\u001b[33m.\u001b[39mclick({ force\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m     \u001b[36mawait\u001b[39m expect(infoPanelToggle)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoBeAttached()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m     \u001b[36mawait\u001b[39m infoPanelToggle\u001b[33m.\u001b[39mclick({ force\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 14 |\u001b[39m     \u001b[36mawait\u001b[39m expect(infoPanelToggle)\u001b[33m.\u001b[39mtoBeAttached()\u001b[33m;\u001b[39m\n \u001b[90m 15 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_28\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                        "column": 39,
+                        "line": 12
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeAttached\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Info Panel Switcher' })\nExpected: not attached\nReceived: attached\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toBeAttached\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Info Panel Switcher' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-part=\"trigger\" data-state=\"closed\" data-scope=\"tooltip\" aria-pressed=\"false\" data-ownedby=\"_r_12_\" id=\"tooltip:_r_12_:trigger\" data-testid=\"info-panel-toggle\" aria-label=\"Info Panel Switcher\" class=\"chakra-button chakra-tooltip__trigger tool-button css-19u3ixl\">â€¦</button>\u001b[22m\n\u001b[2m       - unexpected value \"attached\"\u001b[22m\n\n\n  10 |     const infoPanelToggle = page.getByRole('button', { name: 'Info Panel Switcher' });\n  11 |     await infoPanelToggle.click({ force: true });\n> 12 |     await expect(infoPanelToggle).not.toBeAttached();\n     |                                       ^\n  13 |     await infoPanelToggle.click({ force: true });\n  14 |     await expect(infoPanelToggle).toBeAttached();\n  15 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_28\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:12:39"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T18:06:14.199Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-de4f4-o-show-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_28\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                    "column": 39,
+                    "line": 12
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "970e453f8518ecce51c9-3eccd4d73ff9dda76d1b",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T18:06:13.548Z",
+    "duration": 9449.923999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

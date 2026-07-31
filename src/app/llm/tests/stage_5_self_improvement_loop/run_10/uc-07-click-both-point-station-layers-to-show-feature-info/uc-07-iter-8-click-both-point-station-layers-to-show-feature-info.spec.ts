@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure the info panel is visible.
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Ensure both station layers are active.
+    const ecosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+    const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+    await expect(ecosCheckbox).toBeChecked();
+    await expect(uviCheckbox).toBeChecked();
+
+    // Ensure no measurement tool is active.
+    const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+    if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+        await measurementToggle.click();
+    }
+
+    // Convert EPSG:3857 coordinates to pixel position on the map canvas.
+    const epsg3857X = 1188692.84;
+    const epsg3857Y = 6767643.28;
+
+    const pixelPosition = await page.evaluate(
+        ({ x, y }) => {
+            const map = (globalThis as { __openPioneerMap?: { olMap: { getPixelFromCoordinate: (coord: [number, number]) => [number, number] } } }).__openPioneerMap;
+            if (!map) return null;
+            const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+            return pixel;
+        },
+        { x: epsg3857X, y: epsg3857Y }
+    );
+
+    expect(pixelPosition).not.toBeNull();
+
+    // Click the map at the converted pixel position.
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({ position: { x: pixelPosition![0], y: pixelPosition![1] }, force: true });
+
+    // Wait for the info panel to load the station info for both layers.
+    // The info panel displays sections with headings for each layer's feature info.
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        const ecosHeading = infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true });
+        const uviHeading = infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true });
+        return {
+            hasEcos: await ecosHeading.isVisible(),
+            hasUvi: await uviHeading.isVisible()
+        };
+    }).toEqual({ hasEcos: true, hasUvi: true });
+});

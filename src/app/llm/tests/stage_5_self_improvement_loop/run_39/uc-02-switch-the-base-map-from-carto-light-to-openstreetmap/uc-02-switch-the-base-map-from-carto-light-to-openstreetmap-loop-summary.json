@@ -1,0 +1,31 @@
+{
+  "run": "run_39",
+  "use_case_id": 2,
+  "title": "Switch the base map from Carto Light to OpenStreetMap",
+  "complexity": "easy",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator: getByRole('combobox', { name: 'Basemaps' })\nExpected: \"Carto Light\"\nError: Not an input element\n\nCall log:\n  - Expect \"toHaveValue\" with timeout 5000ms\n  - waiting for getByRole('combobox', { name: 'Basemaps' })\n\n\n   9 |   // Preconditions: Carto Light is active by default, layer switcher is visible\n  10 |   await expect(page.getByRole('combobox', { name: 'Basemaps' })).toBeVisible();\n> 11 |   await expect(page.getByRole('combobox', {"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

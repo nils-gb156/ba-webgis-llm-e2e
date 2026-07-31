@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure the info panel is visible.
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Step 1: Click at the specified map coordinates.
+    // The map is rendered on a <canvas> inside the map-container. Direct pointer events
+    // on the container are intercepted by the canvas element. Use force: true to bypass.
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({ position: { x: 1188692.84, y: 6767643.28 }, force: true });
+
+    // Step 2: Wait for the info panel to load the station info for both layers.
+    // Use expect.poll because the feature info loads asynchronously via network requests.
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        // Use exact text matching to avoid ambiguity with other headings or text.
+        const hasUvi = await infoPanel.getByText('UV-Index Station', { exact: true }).isVisible();
+        const hasEcos = await infoPanel.getByText('EUCOS Ground Station', { exact: true }).isVisible();
+        return { hasUvi, hasEcos };
+    }).toEqual({ hasUvi: true, hasEcos: true });
+});

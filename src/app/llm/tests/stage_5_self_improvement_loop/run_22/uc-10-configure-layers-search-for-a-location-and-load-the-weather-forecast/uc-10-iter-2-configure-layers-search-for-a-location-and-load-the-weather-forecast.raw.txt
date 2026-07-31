@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+
+  // Step 3: Wait for layer state to settle
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 4: Search for 'Münster' using the geocoder
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search' });
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 5: Wait for the geocoder panel to appear and select the first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+
+  // The first result is typically the most relevant match
+  const firstResult = geocoderPanel.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 6: Wait for the map to navigate to the selected location
+  // The map model helper provides the highlighted coordinate which indicates navigation
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Step 7: Wait for the info panel to load the forecast
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+  
+  // The forecast should display 24 entries (one for each hour)
+  // Based on the accessibility tree and screenshot, entries have the 'weather-forecast-entry' test id
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

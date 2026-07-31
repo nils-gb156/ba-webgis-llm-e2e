@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and get the center for drawing relative to
+  await expect.poll(() => getMapCenter(page)).toBeDefined();
+
+  // 1. Activate the measurement tool
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // 2. Draw a line by clicking several points on the map
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click the first point near the center of the map
+  await mapContainer.click({ position: { x: 500, y: 300 } });
+
+  // Click the second point to extend the line
+  await mapContainer.click({ position: { x: 600, y: 400 } });
+
+  // 3. Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 700, y: 500 } });
+
+  // Wait for the measurement result to appear in the info panel
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel.getByText(/length/i, { ignoreCase: true })).toBeVisible();
+
+  // Verify that the measurement panel displays a length value with a unit
+  await expect(infoPanel.getByText(/\d+(\.\d+)?\s*(km|m|mi|ft)/i)).toBeVisible();
+
+  // Verify that a highlight marker was placed at the last clicked point
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+});

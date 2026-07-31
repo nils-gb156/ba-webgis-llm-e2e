@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Hide Temperature layer
+    await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+    await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+
+    // 2. Show Precipitation layer
+    await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+    await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+
+    // Verify layer state via map model
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // 3. Search for a location
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // 4. Wait for results and select the first one
+    // The geocoder panel appears with a list of results.
+    // The results are rendered as list items with paragraphs containing the result text.
+    // We use the specific test-id for the first result item to be unambiguous.
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // 5. Wait for map to navigate (zoom level changes from the default ~3 to a higher value for a city)
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(6);
+
+    // 6. Wait for the info panel to load the forecast with 24 entries
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // The forecast entries are rendered inside the weather-forecast-section.
+    // We expect at least 24 entries (typically 24 hourly slots).
+    const entries = weatherForecastSection.locator('[data-testid="forecast-entry"]');
+    await expect(entries).toHaveCount(24);
+});

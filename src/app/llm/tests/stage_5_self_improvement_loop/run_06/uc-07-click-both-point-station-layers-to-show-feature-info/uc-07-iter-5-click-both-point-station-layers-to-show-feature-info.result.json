@@ -1,0 +1,140 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_06/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3695,
+                  "error": {
+                    "message": "SyntaxError: Unexpected token 'export'",
+                    "stack": "SyntaxError: Unexpected token 'export'\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:9:33",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 33,
+                      "line": 9
+                    },
+                    "snippet": "\u001b[0m \u001b[90m  7 |\u001b[39m\n \u001b[90m  8 |\u001b[39m     \u001b[90m// Wait for the required layers to be rendered on the map\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  9 |\u001b[39m     \u001b[36mconst\u001b[39m { isLayerRendered } \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m \u001b[36mimport\u001b[39m(\u001b[32m'../../../../map-model-helpers'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 10 |\u001b[39m     \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m isLayerRendered(page\u001b[33m,\u001b[39m \u001b[32m'EUCOS Ground Stations'\u001b[39m))\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m     \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m isLayerRendered(page\u001b[33m,\u001b[39m \u001b[32m'UV-Index Stations'\u001b[39m))\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 12 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 33,
+                        "line": 9
+                      },
+                      "message": "SyntaxError: Unexpected token 'export'\n\n   7 |\n   8 |     // Wait for the required layers to be rendered on the map\n>  9 |     const { isLayerRendered } = await import('../../../../map-model-helpers');\n     |                                 ^\n  10 |     await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);\n  11 |     await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);\n  12 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:9:33"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "text": "(node:18384) Warning: Failed to load the ES module: file:///c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/map-model-helpers.ts. Make sure to set \"type\": \"module\" in the nearest package.json file or use the .mjs extension.\n"
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-07-24T11:02:49.093Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-32c27-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_06\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 33,
+                    "line": 9
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b363bc2ff1dc754b84b5-49cecf00c6c1b1894614",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_06/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T11:02:48.543Z",
+    "duration": 5448.976,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

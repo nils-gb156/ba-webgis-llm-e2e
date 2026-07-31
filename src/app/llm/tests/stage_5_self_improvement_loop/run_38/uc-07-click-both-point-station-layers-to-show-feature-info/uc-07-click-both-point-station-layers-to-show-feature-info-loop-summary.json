@@ -1,0 +1,103 @@
+{
+  "run": "run_38",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The GetFeatureInfo response may take a moment to arrive and render.\n  22 |   // Wait until the map shows a highlight marker, confirming the click was processed.\n> 23 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                           ^\n  24 |\n  25 |   // Wait for the info panel to load fea"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The GetFeatureInfo response may take a moment to arrive and render.\n  22 |   // Wait until the map shows a highlight marker, confirming the click was processed.\n> 23 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                           ^\n  24 |\n  25 |   // Wait for the info panel to load fea"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  21 |   // The GetFeatureInfo response may take a moment to arrive and render.\n  22 |   // Wait until the map shows a highlight marker, confirming the click was processed.\n> 23 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                           ^\n  24 |\n  25 |   // Wait for the info panel to load fea"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n    14 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\n       - unexpected value \"InformationWeather Forecas"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // Wait for the info panel to load feature information.\n  21 |   const infoPanel = page.getByTestId('info-panel');\n> 22 |   await expect.poll(() => infoPanel.getByText('UV-Index Station').isVisible()).toBeTruthy();\n     |                                                                                ^\n  23 |   await expect.poll(() => infoPanel.getByText('EUCOS Groun"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // Wait for the info panel to load feature information.\n  21 |   const infoPanel = page.getByTestId('info-panel');\n> 22 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);\n     |                                                                                         "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // Wait for the info panel to load feature information.\n  21 |   const infoPanel = page.getByTestId('info-panel');\n> 22 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);\n     |                                                                                         "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // Wait for the info panel to load feature information.\n  21 |   const infoPanel = page.getByTestId('info-panel');\n> 22 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);\n     |                                                                                         "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // Wait for the info panel to load feature information.\n  21 |   const infoPanel = page.getByTestId('info-panel');\n> 22 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);\n     |                                                                                         "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   // Wait for the info panel to load feature information.\n  21 |   const infoPanel = page.getByTestId('info-panel');\n> 22 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()).toBe(true);\n     |                                                                            "
+    }
+  ]
+}

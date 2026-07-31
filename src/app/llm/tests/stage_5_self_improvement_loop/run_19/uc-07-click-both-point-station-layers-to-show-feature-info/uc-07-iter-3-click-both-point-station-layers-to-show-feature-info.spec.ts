@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure the info panel is visible
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+
+    // If the info panel is not currently visible (pressed state), open it
+    const isInfoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (isInfoPanelPressed === 'false') {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    // Ensure no measurement tool is active
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementPressed === 'true') {
+        await measurementToggle.click();
+    }
+
+    // Click on the map at the specified coordinates to trigger feature info.
+    // The map canvas is rendered with OpenLayers on a <canvas> element.
+    // We click on the map-container div at the specified pixel position.
+    const mapContainer = page.getByTestId('map-container');
+
+    // Convert EPSG:3857 coordinates to pixel coordinates relative to the map container
+    const pixelCoords = await page.evaluate(
+        ({ x, y }) => {
+            const mapModel = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            if (!mapModel) {
+                return null;
+            }
+            const olMap = mapModel.olMap;
+            const view = olMap.getView();
+            // Convert map coordinates to pixel coordinates
+            const pixel = olMap.getPixelFromCoordinate([x, y]);
+            return { x: pixel[0], y: pixel[1] };
+        },
+        { x: 1188692.84, y: 6767643.28 }
+    );
+
+    if (!pixelCoords) {
+        throw new Error('Could not determine pixel coordinates from map model.');
+    }
+
+    // Click on the map at the calculated pixel position
+    await mapContainer.click({
+        position: pixelCoords,
+        force: true,
+    });
+
+    // Wait for the info panel to load the station info for both layers.
+    // We wait for the info panel to contain the expected headings.
+    await expect(
+        infoPanel.getByRole('heading', { name: 'UV-Index Station' })
+    ).toBeVisible({ timeout: 10000 });
+
+    await expect(
+        infoPanel.getByRole('heading', { name: 'EUCOS Ground Station' })
+    ).toBeVisible({ timeout: 10000 });
+});

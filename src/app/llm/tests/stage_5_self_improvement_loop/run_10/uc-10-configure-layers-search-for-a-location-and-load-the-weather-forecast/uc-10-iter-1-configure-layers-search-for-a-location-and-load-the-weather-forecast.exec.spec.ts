@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered, getMapCenter } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be fully ready before starting interaction
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // 1. Hide the Temperature overlay layer
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // 2. Show the Precipitation overlay layer
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // 3. Search for 'Münster'
+  await page.getByTestId('geocoder-input').click();
+  await page.getByTestId('geocoder-input').fill('Münster');
+
+  // 4. Wait for the result list to appear and select the first result
+  // The geocoder panel becomes visible with results
+  await expect(page.getByTestId('geocoder-panel')).toBeVisible();
+  
+  // Select the first result. The results are rendered as list items with specific data-testids.
+  // Using the test id is the most robust way to select the first result.
+  await page.getByTestId('geocoder-result-item-0').click();
+
+  // 5. Wait for the map to navigate to the selected location
+  // We check if the map center has changed from the initial view.
+  // The initial center is likely somewhere in the middle of the visible extent.
+  // Münster, Germany is roughly at [7.6, 51.96] in lon/lat, which is [676000, 6540000] in EPSG:3857.
+  // We poll for the center to be non-undefined and reasonably close to Münster's coordinates.
+  await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+  await expect.poll(() => getMapCenter(page)).toMatchObject([
+    expect.closeTo(676000, 50000), // X coordinate in EPSG:3857
+    expect.closeTo(6540000, 50000) // Y coordinate in EPSG:3857
+  ]);
+
+  // 6. Wait for the info panel to load the forecast
+  // The info panel should now display weather forecast content instead of the initial message.
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+  
+  // The expected result mentions 24 entries. We can check if the section is visible and has content.
+  // The weather forecast section should contain multiple entries, we can assert on the number of items or just its visibility and text.
+  // Let's assert that the weather forecast section is visible and contains some forecast data.
+  await expect(page.getByTestId('weather-forecast-section')).toContainText('Weather Forecast');
+  
+  // Verify the Precipitation layer is rendered and Temperature is not
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+});

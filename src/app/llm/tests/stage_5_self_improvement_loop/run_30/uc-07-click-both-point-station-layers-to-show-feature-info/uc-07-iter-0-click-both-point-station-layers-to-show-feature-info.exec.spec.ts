@@ -1,0 +1,22 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Verify preconditions: layers are rendered and info panel is visible
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    // Click on the map at the specified coordinates where both station types overlap
+    const x = 1188692.84;
+    const y = 6767643.28;
+    await page.locator('#map-container').click({ position: { x, y } });
+
+    // Wait for the feature info to load in the info panel
+    await expect.poll(() => page.getByTestId('info-panel').getByText('UV-Index Station').isVisible()).toBe(true);
+    await expect.poll(() => page.getByTestId('info-panel').getByText('EUCOS Ground Station').isVisible()).toBe(true);
+});

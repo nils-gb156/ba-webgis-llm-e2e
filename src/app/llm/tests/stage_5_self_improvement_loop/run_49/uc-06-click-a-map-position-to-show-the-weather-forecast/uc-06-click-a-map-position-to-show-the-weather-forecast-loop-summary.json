@@ -1,0 +1,103 @@
+{
+  "run": "run_01",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Wait for the clicked position to be highlighted on the map.\n> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  20 |\n  21 |     // Wait for the weather forecast section to appear and contain 24 entries.\n  22 |     const weatherForecastSection = page.ge"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Wait for the clicked position to be highlighted on the map.\n> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  20 |\n  21 |     // Wait for the weather forecast section to appear and contain 24 entries.\n  22 |     const weatherForecastSection = page.ge"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Wait for the clicked position to be highlighted on the map.\n> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  20 |\n  21 |     // Wait for the weather forecast section to appear and contain 24 entries.\n  22 |     const weatherForecastSection = page.ge"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Wait for the clicked position to be highlighted on the map.\n> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  20 |\n  21 |     // Wait for the weather forecast section to appear and contain 24 entries.\n  22 |     const weatherForecastSection = page.ge"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Wait for the clicked position to be highlighted on the map.\n> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  20 |\n  21 |     // Wait for the weather forecast section to appear and contain 24 entries.\n  22 |     const weatherForecastSection = page.ge"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-06-iter-5-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Wait for the clicked position to be highlighted on the map.\n> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  20 |\n  21 |     // Wait for the weather forecast section to appear and contain 24 entries.\n  22 |     const weatherForecastSection = page.ge"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-06-iter-6-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  18 |     // Wait for the clicked position to be highlighted on the map.\n  19 |     // The helper returns undefined until the map is ready and a highlight exists.\n> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  21 |\n  22 |     // Wait for the weather forecast section "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-06-iter-7-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  18 |     // Wait for the clicked position to be highlighted on the map.\n  19 |     // The helper returns undefined until the map is ready and a highlight exists.\n> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  21 |\n  22 |     // Wait for the weather forecast section "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-06-iter-8-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  18 |     // Wait for the clicked position to be highlighted on the map.\n  19 |     // The helper returns undefined until the map is ready and a highlight exists.\n> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  21 |\n  22 |     // Wait for the weather forecast section "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  18 |     // Wait for the clicked position to be highlighted on the map.\n  19 |     // The helper returns undefined until the map is ready and a highlight exists.\n> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  21 |\n  22 |     // Wait for the weather forecast section "
+    }
+  ]
+}

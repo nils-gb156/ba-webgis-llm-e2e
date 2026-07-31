@@ -1,0 +1,103 @@
+{
+  "run": "run_43",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('map-container').locator('canvas')\nExpected: visible\nError: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('map-container').locator('canvas'"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEucos\": true,\n-   \"hasUvi\": true,\n+   \"hasEucos\": false,\n+   \"hasUvi\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  94 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  95 |     };\n> 96 |   }).toEqual({\n     |      ^\n  97 |     hasUvi: true,\n  98 |     hasEucos: true,\n  99 |   });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-l"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEucos\": true,\n-   \"hasUvi\": true,\n+   \"hasEucos\": false,\n+   \"hasUvi\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  89 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  90 |     };\n> 91 |   }).toEqual({\n     |      ^\n  92 |     hasUvi: true,\n  93 |     hasEucos: true,\n  94 |   });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-l"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container').locator('canvas').first()\n    - locator resolved to <canvas width=\"1920\" height=\"1039\"></canvas>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> intercepts pointer"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEucos\": true,\n-   \"hasUvi\": true,\n+   \"hasEucos\": false,\n+   \"hasUvi\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  35 |     };\n> 36 |   }).toEqual({\n     |      ^\n  37 |     hasUvi: true,\n  38 |     hasEucos: true,\n  39 |   });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-l"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEucos\": true,\n-   \"hasUvi\": true,\n+   \"hasEucos\": false,\n+   \"hasUvi\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  35 |     };\n> 36 |   }).toEqual({\n     |      ^\n  37 |     hasUvi: true,\n  38 |     hasEucos: true,\n  39 |   });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-l"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', level: 2 })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', level: 2 })\n\n\n  31 |   await expect(\n  32 |     infoPanel.getByRole('heading', { name: 'UV-Index Station', level: 2 })\n> 33 |   ).toBeVisible();\n     "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"ecusVisible\": true,\n-   \"uviVisible\": true,\n+   \"ecusVisible\": false,\n+   \"uviVisible\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  37 |     const ecusVisible = await ecusHeading.isVisible();\n  38 |     return { uviVisible, ecusVisible };\n> 39 |   }).toEqual({ uviVisible: true, ecusVisible: true });\n     |      ^\n  40 | });\n  41 |\n    at c:\\Users\\n.be"
+    }
+  ]
+}

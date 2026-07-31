@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapCenter } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Hide the Temperature overlay layer
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+
+    // 2. Show the Precipitation overlay layer
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+
+    // Verify layer visibility changes
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // 3. Search for a location using the geocoder
+    const geocoderInput = page.getByPlaceholder('Search for a place');
+    await geocoderInput.fill('Münster');
+
+    // 4. Select the first result from the geocoder panel
+    // The results are rendered as list items with paragraph text, not as ARIA options.
+    // Use the test-id on the result container and scope the lookup to avoid ambiguity.
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const firstResult = geocoderPanel.getByRole('listitem').first();
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // 5. Wait for the map to navigate to the selected location
+    // The map navigation happens asynchronously. We verify the map center has
+    // moved from the initial broad view to a more focused area.
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        return currentCenter && (currentCenter[0] !== initialCenter![0] || currentCenter[1] !== initialCenter![1]);
+    }).toBe(true);
+
+    // 6. Wait for the info panel to load the forecast
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Expected result: Info panel displays a weather forecast section with 24 entries.
+    // We expect 24 forecast items inside the weather-forecast-section.
+    const forecastEntries = weatherForecastSection.getByRole('listitem');
+    await expect(forecastEntries).toHaveCount(24);
+});

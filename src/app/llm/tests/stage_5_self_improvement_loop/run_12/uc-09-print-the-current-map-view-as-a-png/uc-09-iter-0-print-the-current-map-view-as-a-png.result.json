@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_12\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_12/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 9: Print the current map view as a PNG",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3510,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('print-toggle')\nExpected: checked\nError: Not a checkbox or radio button\n\nCall log:\n\u001b[2m  - Expect \"toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('print-toggle')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('print-toggle')\nExpected: checked\nError: Not a checkbox or radio button\n\nCall log:\n\u001b[2m  - Expect \"toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('print-toggle')\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_12\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts:19:29",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_12\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                      "column": 29,
+                      "line": 19
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 17 |\u001b[39m\n \u001b[90m 18 |\u001b[39m   \u001b[90m// Expected: The printing panel is visible\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 19 |\u001b[39m   \u001b[36mawait\u001b[39m expect(printToggle)\u001b[33m.\u001b[39mtoBeChecked()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 20 |\u001b[39m\n \u001b[90m 21 |\u001b[39m   \u001b[90m// Step 2: Enter a title for the printout\u001b[39m\n \u001b[90m 22 |\u001b[39m   \u001b[90m// We locate the title input by its label within the printing dialog/panel\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_12\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                        "column": 29,
+                        "line": 19
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('print-toggle')\nExpected: checked\nError: Not a checkbox or radio button\n\nCall log:\n\u001b[2m  - Expect \"toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('print-toggle')\u001b[22m\n\n\n  17 |\n  18 |   // Expected: The printing panel is visible\n> 19 |   await expect(printToggle).toBeChecked();\n     |                             ^\n  20 |\n  21 |   // Step 2: Enter a title for the printout\n  22 |   // We locate the title input by its label within the printing dialog/panel\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_12\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts:19:29"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T13:08:33.159Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-b363a-e-current-map-view-as-a-PNG-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_12\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+                    "column": 29,
+                    "line": 19
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "6aed31984721e0a4d799-d9ee9e249e729888bf0d",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_12/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T13:08:32.596Z",
+    "duration": 5321.621,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

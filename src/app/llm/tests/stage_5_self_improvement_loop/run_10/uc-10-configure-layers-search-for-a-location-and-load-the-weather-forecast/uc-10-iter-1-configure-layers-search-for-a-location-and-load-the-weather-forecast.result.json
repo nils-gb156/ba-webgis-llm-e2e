@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_10/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 10: Configure layers, search for a location and load the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 9526,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatchObject\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[32m-   NumberCloseTo 676000 (50000 digits),\u001b[39m\n\u001b[32m-   NumberCloseTo 6540000 (50000 digits),\u001b[39m\n\u001b[31m+   848832.0342310311,\u001b[39m\n\u001b[31m+   6793349.636132425,\u001b[39m\n\u001b[2m  ]\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatchObject\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[32m-   NumberCloseTo 676000 (50000 digits),\u001b[39m\n\u001b[32m-   NumberCloseTo 6540000 (50000 digits),\u001b[39m\n\u001b[31m+   848832.0342310311,\u001b[39m\n\u001b[31m+   6793349.636132425,\u001b[39m\n\u001b[2m  ]\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:37:47",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                      "column": 47,
+                      "line": 37
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 35 |\u001b[39m   \u001b[90m// We poll for the center to be non-undefined and reasonably close to MÃ¼nster's coordinates.\u001b[39m\n \u001b[90m 36 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getMapCenter(page))\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoBeUndefined()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 37 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getMapCenter(page))\u001b[33m.\u001b[39mtoMatchObject([\n \u001b[90m    |\u001b[39m                                               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 38 |\u001b[39m     expect\u001b[33m.\u001b[39mcloseTo(\u001b[35m676000\u001b[39m\u001b[33m,\u001b[39m \u001b[35m50000\u001b[39m)\u001b[33m,\u001b[39m \u001b[90m// X coordinate in EPSG:3857\u001b[39m\n \u001b[90m 39 |\u001b[39m     expect\u001b[33m.\u001b[39mcloseTo(\u001b[35m6540000\u001b[39m\u001b[33m,\u001b[39m \u001b[35m50000\u001b[39m) \u001b[90m// Y coordinate in EPSG:3857\u001b[39m\n \u001b[90m 40 |\u001b[39m   ])\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                        "column": 47,
+                        "line": 37
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatchObject\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Array [\u001b[22m\n\u001b[32m-   NumberCloseTo 676000 (50000 digits),\u001b[39m\n\u001b[32m-   NumberCloseTo 6540000 (50000 digits),\u001b[39m\n\u001b[31m+   848832.0342310311,\u001b[39m\n\u001b[31m+   6793349.636132425,\u001b[39m\n\u001b[2m  ]\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |   // We poll for the center to be non-undefined and reasonably close to MÃ¼nster's coordinates.\n  36 |   await expect.poll(() => getMapCenter(page)).not.toBeUndefined();\n> 37 |   await expect.poll(() => getMapCenter(page)).toMatchObject([\n     |                                               ^\n  38 |     expect.closeTo(676000, 50000), // X coordinate in EPSG:3857\n  39 |     expect.closeTo(6540000, 50000) // Y coordinate in EPSG:3857\n  40 |   ]);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:37:47"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T12:30:40.088Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-3e63f-d-load-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_10\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                    "column": 47,
+                    "line": 37
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "ab1d813accdd24ded9d1-dfa5241560003941ba87",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_10/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T12:30:39.541Z",
+    "duration": 12382.311,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

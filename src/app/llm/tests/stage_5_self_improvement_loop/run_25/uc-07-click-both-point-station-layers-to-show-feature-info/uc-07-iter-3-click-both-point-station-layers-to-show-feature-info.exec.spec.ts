@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate } from "../../../../map-model-helpers";
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (it intercepts clicks)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Wait for measurement panel to close before clicking on the map
+  await expect(page.getByRole('dialog', { name: 'Measurement' })).not.toBeVisible();
+
+  // Click on the map at the specified coordinates
+  await page.getByTestId('map-container').click({
+    position: { x: 0, y: 0 },
+    force: true,
+  });
+
+  // Wait for the info panel to show feature info for both layers
+  // The previous test failed because getByText was too strict or the text was nested differently.
+  // We use toContain which is more flexible for partial text matching within the panel.
+  await expect(page.getByTestId('info-panel')).toContainText('UV-Index Station');
+  await expect(page.getByTestId('info-panel')).toContainText('EUCOS Ground Station');
+});

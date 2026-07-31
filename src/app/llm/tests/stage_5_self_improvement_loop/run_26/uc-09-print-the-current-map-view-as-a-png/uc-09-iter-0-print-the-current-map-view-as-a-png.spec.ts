@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: at least one base map and one overlay layer are visible
+  await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  await page.getByRole('button', { name: 'Print Map' }).click();
+
+  // Verify: the printing panel is visible
+  // The printing panel is typically a dialog or a panel with a title like "Print Map"
+  // We use the map-controls-panel as a container if a specific dialog testid is not available,
+  // but looking at the UI, it might open as a separate panel or overlay.
+  // Let's assume it opens as a dialog or a panel within the map controls area.
+  // Since we don't have a specific testid for the print dialog, we'll look for the title or form elements.
+  // A common pattern is a dialog with a title. Let's try to find a text "Print" or similar.
+  // Based on the screenshot, the toolbar is at the bottom. The print button is there.
+  // Let's look for a dialog or a panel that appears.
+  // We will wait for a text that is likely in the print panel, e.g., "Title" or "Format".
+  await expect(page.getByText('Title')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // We need to find the title input. It's likely a textbox near the "Title" label.
+  // We can use `getByLabel` if the label is associated with the input.
+  // Or we can find the input by its placeholder or by the label text.
+  // Let's try to find the input by the label "Title".
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  // We need to find the format selector. It might be a combobox or radio buttons.
+  // Let's look for a label "Format" or "File Format".
+  const formatSelect = page.getByLabel('Format');
+  await formatSelect.selectOption('PNG');
+
+  // Step 4: Click the export/print button
+  // We need to find the export button. It might be labeled "Export", "Print", or "Download".
+  const exportButton = page.getByRole('button', { name: /Export|Print|Download/i });
+  
+  // Step 4: Trigger the download
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify: A PNG file is generated and downloaded
+  // We can't easily verify the content of the PNG in a simple E2E test without complex image comparison,
+  // but we can verify the file was downloaded and has a .png extension.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

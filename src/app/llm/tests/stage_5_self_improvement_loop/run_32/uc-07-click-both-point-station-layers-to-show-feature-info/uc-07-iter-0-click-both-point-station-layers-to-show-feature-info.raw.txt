@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Verify preconditions: info panel is visible, layers are active, map is ready
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+    await expect(page.getByTestId('eucos-stations-legend')).toBeVisible();
+    await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+    await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    // Ensure no measurement tool is active
+    const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive === 'true') {
+        await measurementToggle.click();
+    }
+
+    // Click on the map at the specified coordinates
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: {
+            x: 1188692.84,
+            y: 6767643.28,
+        },
+    });
+
+    // Wait for the info panel to load the station info for both layers
+    await expect.poll(() => page.getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);
+    await expect.poll(() => page.getByRole('heading', { name: 'EUCOS Ground Station' }).isVisible()).toBe(true);
+});

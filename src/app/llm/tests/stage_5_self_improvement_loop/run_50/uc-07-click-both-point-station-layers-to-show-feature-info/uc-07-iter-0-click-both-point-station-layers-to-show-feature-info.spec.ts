@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: info panel is visible (already visible on initial load)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Precondition: UV-Index Stations layer is active/rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Precondition: EUCOS Ground Stations layer is active/rendered
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Precondition: No measurement tool is active (already in default state)
+  // The measurement toggle is not pressed.
+
+  // Step 1: Click at map coordinates [1188692.84, 6767643.28] (EPSG:3857)
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 },
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers.
+  // Expected results:
+  // - The info panel displays a 'UV-Index Station' section with feature information.
+  // - The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+  // Wait for the info panel to show UV-Index Station content
+  await expect(page.getByTestId('info-panel').getByText('UV-Index Station')).toBeVisible();
+
+  // Wait for the info panel to show EUCOS Ground Station content
+  await expect(page.getByTestId('info-panel').getByText('EUCOS Ground Station')).toBeVisible();
+});

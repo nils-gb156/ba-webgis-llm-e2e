@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+
+  // Step 3: Wait for layer state to settle
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 4: Search for 'Münster' using the geocoder
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search' });
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 5: Wait for the geocoder panel to appear and select the first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+
+  // The first result is typically the most relevant match
+  const firstResult = geocoderPanel.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 6: Wait for the map to navigate (center should change from the initial extent)
+  // Initial extent center is roughly [4650000, 5800000] in EPSG:3857
+  await expect.poll(async () => {
+    const center = await page.evaluate(() => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      if (!map) return undefined;
+      const c = map.olMap.getView().getCenter();
+      return c && c.length >= 2 ? [c[0], c[1]] : undefined;
+    });
+    // If center is undefined or still near the initial extent, return undefined to retry
+    if (!center) return undefined;
+    // Münster is roughly at x=4650000, y=5900000. We check if it's moved significantly.
+    return center[0] > 4500000 && center[0] < 4800000 && center[1] > 5850000 && center[1] < 5950000;
+  }).toBe(true);
+
+  // Step 7: Wait for the info panel to load the forecast
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+  
+  // The forecast should display 24 entries (one for each hour)
+  // We can count the number of forecast items or check for the presence of the forecast section
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+  
+  // Count the number of forecast entries (assuming each entry has a specific role or structure)
+  // Based on the screenshot, it looks like a list of hourly forecasts.
+  // Let's assume each hour has a distinct element, e.g., a div or a list item.
+  // We'll count the number of elements that look like forecast entries.
+  // A common pattern is to have a container with multiple child elements.
+  // Let's try to count the number of hour indicators or forecast cards.
+  // Since the exact structure isn't provided, we'll count the number of elements that are likely forecast entries.
+  // We'll assume each forecast entry has a role of 'article' or 'listitem' or similar.
+  // For now, let's just wait for the section to be visible and have some content.
+  const forecastEntries = weatherForecastSection.locator('div').filter({ hasText: /^\d{2}:\d{2}$/ });
+  await expect(forecastEntries).toHaveCount(24);
+});

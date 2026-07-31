@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_16/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 3: Zoom in and out using the zoom buttons",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3559,
+                  "error": {
+                    "message": "TypeError: _failureSnapshotFixture.expect.poll(...).toBeNumber is not a function",
+                    "stack": "TypeError: _failureSnapshotFixture.expect.poll(...).toBeNumber is not a function\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts:10:70",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+                      "column": 70,
+                      "line": 10
+                    },
+                    "snippet": "\u001b[0m \u001b[90m  8 |\u001b[39m\n \u001b[90m  9 |\u001b[39m   \u001b[90m// Wait for the map to be ready and capture the initial zoom level\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 10 |\u001b[39m   \u001b[36mconst\u001b[39m initialZoom \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getMapZoomLevel(page))\u001b[33m.\u001b[39mtoBeNumber()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 11 |\u001b[39m\n \u001b[90m 12 |\u001b[39m   \u001b[90m// Step 1: Click the 'Zoom in' button\u001b[39m\n \u001b[90m 13 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Zoom in map'\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+                        "column": 70,
+                        "line": 10
+                      },
+                      "message": "TypeError: _failureSnapshotFixture.expect.poll(...).toBeNumber is not a function\n\n   8 |\n   9 |   // Wait for the map to be ready and capture the initial zoom level\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   // Step 1: Click the 'Zoom in' button\n  13 |   await page.getByRole('button', { name: 'Zoom in map' }).click();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts:10:70"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T14:11:18.787Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-fc44f--out-using-the-zoom-buttons-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_16\\uc-03-zoom-in-and-out-using-the-zoom-buttons\\uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+                    "column": 70,
+                    "line": 10
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "863f1f55798d085d5313-9dcbfb11f1ccb7437a20",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_16/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T14:11:18.200Z",
+    "duration": 5356.775,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

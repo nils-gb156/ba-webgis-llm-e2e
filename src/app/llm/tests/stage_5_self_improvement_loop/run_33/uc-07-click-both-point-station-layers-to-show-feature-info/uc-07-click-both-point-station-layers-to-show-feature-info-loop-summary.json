@@ -1,0 +1,103 @@
+{
+  "run": "run_33",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for locator('#map-container')\n\n\n  15 |\n  16 |   // Step 1: Click at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.\n> 17 |   await page.locator('#map-container').click({\n     |                                        ^\n  18 |     position: { x: 1188692.84, y: 6767643.28 },\n  19 |   });\n  20 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\test"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - waiting for locator('canvas')\n\n\n  10 |   // The map canvas is an <canvas> element inside the map-container.\n  11 |   // We target the canvas directly to avoid the intercepting overlay.\n> 12 |   await page.locator('canvas').click"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for locator('map-container canvas')\n\n\n  11 |   // The map canvas is the topmost element inside map-container; clicking it directly\n  12 |   // avoids the \"intercepts pointer events\" problem caused by sibling DOM elements.\n> 13 |   await page.locator('map-container canvas').click({\n     |                                              ^\n  14 |     position: { x: 1188692.84, y: 67676"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for locator('#map-container canvas')\n\n\n  10 |   // The map canvas is the topmost element inside map-container; clicking it directly\n  11 |   // avoids the \"intercepts pointer events\" problem caused by sibling DOM elements.\n> 12 |   await page.locator('#map-container canvas').click({\n     |                                               ^\n  13 |     position: { x: 1188692.84, y: 67"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: getByTestId('map-container').locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - waiting for getByTestId('map-container').locator('canvas')\n\n\n  10 |   // Use getByTestId('map-container') to locate the map container, then click at the\n  11 |   // specified pixel position on the ca"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container').locator('canvas').first()\n    - locator resolved to <canvas width=\"1920\" height=\"1039\"></canvas>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> intercepts pointer"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   await expect.poll(() =>\n  21 |     page.getByTestId('info-panel').textContent(),\n> 22 |   ).toContain('UV-Index Station');\n     |     ^\n  23 |   await expect.poll(() =>\n  24 |     page.getByTestId('info-panel').textContent(),\n  25 |   ).toCo"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |   await expect.poll(() =>\n  21 |     page.getByTestId('info-panel').textContent(),\n> 22 |   ).toContain('UV-Index Station');\n     |     ^\n  23 |   await expect.poll(() =>\n  24 |     page.getByTestId('info-panel').textContent(),\n  25 |   ).toCo"
+    }
+  ]
+}

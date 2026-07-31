@@ -1,0 +1,103 @@
+{
+  "run": "run_20",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 "
+    }
+  ]
+}

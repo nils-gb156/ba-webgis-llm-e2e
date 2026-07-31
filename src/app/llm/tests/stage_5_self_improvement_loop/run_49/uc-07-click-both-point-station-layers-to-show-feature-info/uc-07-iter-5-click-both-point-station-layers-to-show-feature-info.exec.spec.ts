@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('UC07: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure measurement tool is inactive (click the toggle if active)
+    const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+    if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+        await measurementToggle.click();
+    }
+
+    // Click the map at the specified coordinates using the test id.
+    // The coordinates [1188692.84, 6767643.28] are in EPSG:3857 (map projection).
+    // The map canvas renders pixels, so we must convert to pixel offsets relative
+    // to the map container. We use page.evaluate to compute the pixel position
+    // from the map projection coordinates.
+    const clickPosition = await page.evaluate(async () => {
+        const map = (globalThis as { __openPioneerMap?: { olMap: { getView: () => { getCenter: () => [number, number]; getZoom: () => number }; getSize: () => [number, number] } } }).__openPioneerMap;
+        if (!map) return null;
+
+        const targetX = 1188692.84;
+        const targetY = 6767643.28;
+
+        const view = map.olMap.getView();
+        const center = view.getCenter();
+        const zoom = view.getZoom();
+        const size = map.olMap.getSize();
+
+        if (!center || !size || size[0] === 0 || size[1] === 0) return null;
+
+        // Get the resolution (meters per pixel) at the current zoom
+        const resolution = view.getResolutionForZoom(zoom);
+
+        // Calculate pixel offset from center
+        const pixelOffsetX = (targetX - center[0]) / resolution;
+        const pixelOffsetY = (center[1] - targetY) / resolution; // Y is inverted
+
+        // Calculate absolute pixel position within the map container
+        const x = size[0] / 2 + pixelOffsetX;
+        const y = size[1] / 2 + pixelOffsetY;
+
+        return { x, y };
+    });
+
+    if (!clickPosition) {
+        throw new Error('Could not determine click position on the map');
+    }
+
+    await page.getByTestId('map-container').click({
+        position: clickPosition,
+        force: true,
+    });
+
+    // Wait for the info panel to show feature information for both layers.
+    // The info panel content is loaded asynchronously after the map click.
+    const infoPanel = page.getByTestId('info-panel');
+
+    // Use expect.poll to wait for the async content to settle
+    await expect.poll(async () => {
+        const hasUvi = await infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible();
+        const hasEucos = await infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible();
+        return { hasUvi, hasEucos };
+    }).toEqual({ hasUvi: true, hasEucos: true });
+});

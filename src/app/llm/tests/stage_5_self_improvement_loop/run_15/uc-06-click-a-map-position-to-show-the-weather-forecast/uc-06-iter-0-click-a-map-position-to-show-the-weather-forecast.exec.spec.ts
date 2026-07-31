@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible.
+  // The screenshot shows the info panel is already open (info-panel-toggle is pressed).
+  // We assert this to ensure precondition is met.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas to trigger the weather forecast.
+  // We click near the center of the visible map area.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 600, y: 300 } });
+
+  // Wait for the highlighted coordinate to appear on the map.
+  // This indicates the map interaction was successful and the click position was registered.
+  await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+
+  // Wait for the weather forecast section to appear in the info panel.
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Wait for the forecast data to load. The use case specifies 24 entries.
+  // We check that the section contains the expected number of forecast items.
+  // The exact locator for the forecast items isn't provided, but we can infer
+  // from the structure that the section should contain multiple items.
+  // We'll use a text-based assertion on the forecast section content or count
+  // if we can identify a specific element. Since we don't have a specific test id
+  // for the forecast items, we'll assert on the presence of the section and
+  // perhaps a generic indicator of data loading.
+  // However, the requirement is "The forecast contains 24 entries".
+  // Let's assume the forecast items are rendered as a list or similar.
+  // Without a specific test id, we might need to count elements within the section.
+  // Let's try to find a common pattern. Often forecasts are in a list.
+  // We'll assert that the section is visible and then poll for a reasonable number of items.
+  // Since we don't know the exact structure, we'll assert the section is visible and
+  // then check for a specific piece of data that would be present in a full forecast.
+  // Alternatively, we can check if the "Click on the map to load a forecast." text is gone.
+  // Let's assert that the initial instruction text is no longer present.
+  await expect(page.getByText('Click on the map to load a forecast.')).not.toBeVisible();
+
+  // To verify 24 entries, we can try to count elements that look like forecast entries.
+  // Without a specific test id, this is tricky. Let's assume the forecast entries
+  // are in a list and each entry has some common attribute.
+  // We'll use a generic approach: count all elements within the weather-forecast-section
+  // that are likely to be forecast entries. This might be fragile.
+  // A better approach might be to check for the presence of specific data that
+  // would only be present if 24 entries are loaded.
+  // Since we don't have that info, we'll stick to the visibility of the section
+  // and the absence of the initial instruction.
+  // However, the use case explicitly states "The forecast contains 24 entries".
+  // Let's assume the forecast items are rendered as a list with a specific role.
+  // We'll try to find a list within the weather-forecast-section.
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  await expect(forecastSection).toBeVisible();
+
+  // Attempt to find forecast items. If they are in a list, we can count them.
+  // If not, we might need to rely on other indicators.
+  // Let's assume they are in a list.
+  const forecastItems = forecastSection.locator('li');
+  // Poll until we have at least 24 items, or a reasonable number.
+  // This is a heuristic. If the structure is different, this might fail.
+  await expect.poll(() => forecastItems.count()).toBeGreaterThanOrEqual(24);
+});

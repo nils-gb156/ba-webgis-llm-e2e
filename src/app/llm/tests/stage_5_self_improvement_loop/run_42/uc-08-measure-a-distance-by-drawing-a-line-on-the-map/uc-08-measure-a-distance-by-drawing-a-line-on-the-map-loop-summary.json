@@ -1,0 +1,103 @@
+{
+  "run": "run_42",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('region', { name: 'Measurement' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('region', { name: 'Measurement' })\n\n\n  11 |\n  12 |   // Wait for the measurement panel to become visible\n> 13 |   await expect(page.getByRole('region', { name: 'Measurement' })).toBeVisible();\n     |                                                          "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  36 |   await expect.poll(() =>\n  37 |     measurementPanel.locator('text=/[\\\\d,.]+\\\\s*(km|m|mi|ft)/').first().isVisible()\n> 38 |   ).toBe(true);\n     |     ^\n  39 | });\n  40 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  32 |   await expect.poll(() =>\n  33 |     measurementPanel.locator('text=/[\\\\d,.]+\\\\s*(km|m|mi|ft)/').first().isVisible()\n> 34 |   ).toBe(true);\n     |     ^\n  35 | });\n  36 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  32 |   await expect.poll(() =>\n  33 |     measurementPanel.locator('text=/[\\\\d,.]+\\\\s*(km|m|mi|ft)/').first().isVisible()\n> 34 |   ).toBe(true);\n     |     ^\n  35 | });\n  36 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  32 |   await expect.poll(() =>\n  33 |     measurementPanel.locator('text=/[\\\\d,.]+\\\\s*(km|m|mi|ft)/').first().isVisible()\n> 34 |   ).toBe(true);\n     |     ^\n  35 | });\n  36 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |   await expect.poll(() =>\n  34 |     measurementPanel.locator('text=/[\\\\d,.]+\\\\s*(km|m|mi|ft)/').first().isVisible()\n> 35 |   ).toBe(true);\n     |     ^\n  36 | });\n  37 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  32 |   await expect.poll(() =>\n  33 |     measurementPanel.getByText(/[\\d,.]+\\s*(km|m|mi|ft)/).first().isVisible()\n> 34 |   ).toBe(true);\n     |     ^\n  35 | });\n  36 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-ite"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |   await expect.poll(() =>\n  34 |     measurementPanel.getByText(/[\\d,.]+\\s*(km|m|mi|ft)/).first().isVisible()\n> 35 |   ).toBe(true);\n     |     ^\n  36 | });\n  37 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-ite"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |   await expect.poll(() =>\n  34 |     measurementPanel.getByText(/[\\d,.]+\\s*(km|m|mi|ft)/).first().isVisible()\n> 35 |   ).toBe(true);\n     |     ^\n  36 | });\n  37 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-ite"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  34 |   await expect.poll(() =>\n  35 |     measurementPanel.locator('text=/\\\\d+\\\\.?\\\\d*\\\\s*(km|m|mi|ft)/').first().isVisible()\n> 36 |   ).toBe(true);\n     |     ^\n  37 | });\n  38 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_42\\uc-08-measure-a-distance-by-drawing-a-line-on-the-ma"
+    }
+  ]
+}

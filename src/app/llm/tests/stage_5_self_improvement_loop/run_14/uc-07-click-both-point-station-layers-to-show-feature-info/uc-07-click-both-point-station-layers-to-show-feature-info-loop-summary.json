@@ -1,0 +1,103 @@
+{
+  "run": "run_14",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEUCOSStation\": true,\n-   \"hasUVIStation\": true,\n+   \"hasEUCOSStation\": false,\n+   \"hasUVIStation\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  28 |     const hasEUCOSStation = await infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible();\n  29 |     return { hasUVIStation, hasEUCOSStation };\n> 30 |   }).toEqual({ h"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEUCOSStation\": true,\n-   \"hasUVIStation\": true,\n+   \"hasEUCOSStation\": false,\n+   \"hasUVIStation\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  27 |     const hasEUCOSStation = await infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible();\n  28 |     return { hasUVIStation, hasEUCOSStation };\n> 29 |   }).toEqual({ h"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEUCOSStation\": true,\n-   \"hasUVIStation\": true,\n+   \"hasEUCOSStation\": false,\n+   \"hasUVIStation\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  28 |     const hasEUCOSStation = await infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible();\n  29 |     return { hasUVIStation, hasEUCOSStation };\n> 30 |   }).toEqual({ h"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Failed to get pixel coordinates for the map click\n\n  67 |\n  68 |   if (!pixelCoords) {\n> 69 |     throw new Error('Failed to get pixel coordinates for the map click');\n     |           ^\n  70 |   }\n  71 |\n  72 |   const mapContainer = page.getByTestId('map-container');\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_14\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-layers-to-show-feature"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Failed to get pixel coordinates for the map click\n\n  49 |\n  50 |   if (!pixelCoords) {\n> 51 |     throw new Error('Failed to get pixel coordinates for the map click');\n     |           ^\n  52 |   }\n  53 |\n  54 |   const mapContainer = page.getByTestId('map-container');\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_14\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-4-click-both-point-station-layers-to-show-feature"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('map-container')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</html> interce"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: [1188692.84, 6767643.28]\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  32 |   // Use the highlight coordinate to confirm the click was received by the map,\n  33 |   // then assert on the info panel headings.\n> 34 |   await expect.poll(() => getHighlightedCoordinate(page)).toEqual([1188692.84, 6767643.28]);\n     |                                                           ^\n  35 |\n  3"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n\n\n  33 |   await expect(\n  34 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n>"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n\n\n  27 |   await expect(\n  28 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n>"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n\n\n  27 |   await expect(\n  28 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })\n>"
+    }
+  ]
+}

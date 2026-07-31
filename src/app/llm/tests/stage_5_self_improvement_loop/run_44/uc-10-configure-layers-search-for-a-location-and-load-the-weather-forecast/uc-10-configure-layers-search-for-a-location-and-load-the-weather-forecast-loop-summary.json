@@ -1,0 +1,49 @@
+{
+  "run": "run_44",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  28 |     // Step 4: Wait for the result list to appear and select the first result\n  29 |     const geocoderPanel = page.getByTestId('geocoder-panel');\n> 30 |     await expect(geocoderPanel.getByRole('option')).toHaveCount({ gt: 0 });\n     |                                                     ^\n  31 |     await geocoderPanel.getByRole('option').first().click();\n  32 |\n  33 |     // Step 5: Wait for the map to navigate to the s"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('option')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('option')\n\n\n  28 |     // Step 4: Wait for the result list to appear and select the first result\n  29 |     const geocoderPanel = page.getByTestId('geocoder-panel');\n> 30 |     await expect(geocoderPanel.getByRole('option'"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  48 |     // The expected result mentions 24 entries. We can check for the presence of the section and some content.\n  49 |     // Since the exact number might vary or the loading might be asynchronous, we check for the section visibility and that it's not just a placeholder.\n> 50 |     await expect(forecastSection.getByRole('listitem')).toHaveCount({ gt: 0 });\n     |                                                         ^\n  "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

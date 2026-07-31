@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Activate the measurement tool
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    await measurementToggle.click({ force: true });
+
+    // Wait for the measurement panel/dialog to appear
+    const measurementPanel = page.getByTestId('measurement-panel');
+    await expect(measurementPanel).toBeVisible();
+
+    // 2. Click several points on the map canvas to draw a line.
+    // Use the map container for clicking, as the map is a canvas.
+    const mapContainer = page.getByTestId('map-container');
+
+    // Click point 1
+    await mapContainer.click({
+        position: { x: 400, y: 300 },
+        clickCount: 1,
+    });
+
+    // Click point 2 (offset from point 1)
+    await mapContainer.click({
+        position: { x: 500, y: 400 },
+        clickCount: 1,
+    });
+
+    // Click point 3 (offset further)
+    await mapContainer.click({
+        position: { x: 600, y: 350 },
+        clickCount: 1,
+    });
+
+    // 3. Double-click to finish the measurement
+    await mapContainer.dblclick({
+        position: { x: 600, y: 350 },
+    });
+
+    // Wait for the measurement result to appear in the measurement panel
+    // The measurement panel displays a length value with a unit
+    // The previous test failed because it looked for a `data-testid="measurement"` element,
+    // which does not exist. Instead, the result is inside the dialog, often as text
+    // or within a tooltip. We can assert on the dialog content.
+    // The dialog heading is "Measurement".
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement' });
+    
+    // Wait for the measurement to be complete and a value to appear.
+    // The result might appear as text like "83.81 km" or in a tooltip.
+    // Let's try to find any text matching a distance pattern within the dialog or nearby.
+    // A robust way is to look for the measurement value which typically appears in the dialog.
+    // Based on the screenshot, the value "83.81 km" appears near the measurement line, possibly in a tooltip or label.
+    // However, the dialog also usually updates. Let's try to find the value in the dialog first.
+    // If not, we can check for the presence of a measurement result text anywhere on the page that matches the pattern.
+    
+    // Let's try to find the measurement value text within the measurement panel/dialog.
+    // The dialog contains "Mode", "Distance", "Area", "Delete measurements".
+    // After finishing, it should show the result.
+    // Let's poll for a text matching the distance pattern inside the dialog.
+    await expect.poll(async () => {
+        const dialogText = await measurementDialog.textContent();
+        return dialogText;
+    }).toMatch(/(\d+(\.\d+)?)\s*(km|m|mi|ft)/i, { timeout: 10000 });
+
+    // Additionally, we can check that the measurement panel is still visible
+    await expect(measurementPanel).toBeVisible();
+});

@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_41/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3531,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Measurement' })\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n\u001b[2m  - Expect \"not toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Measurement' })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Measurement' })\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n\u001b[2m  - Expect \"not toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Measurement' })\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:19:73",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 73,
+                      "line": 19
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 17 |\u001b[39m\n \u001b[90m 18 |\u001b[39m     \u001b[90m// Precondition: No measurement tool is active\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 19 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Measurement'\u001b[39m }))\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoBeChecked()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 20 |\u001b[39m\n \u001b[90m 21 |\u001b[39m     \u001b[90m// Precondition: Layers are actually rendered on the map\u001b[39m\n \u001b[90m 22 |\u001b[39m     \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m isLayerRendered(page\u001b[33m,\u001b[39m \u001b[32m'UV-Index Stations'\u001b[39m))\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 73,
+                        "line": 19
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeChecked\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Measurement' })\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n\u001b[2m  - Expect \"not toBeChecked\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Measurement' })\u001b[22m\n\n\n  17 |\n  18 |     // Precondition: No measurement tool is active\n> 19 |     await expect(page.getByRole('button', { name: 'Measurement' })).not.toBeChecked();\n     |                                                                         ^\n  20 |\n  21 |     // Precondition: Layers are actually rendered on the map\n  22 |     await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:19:73"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T22:10:30.991Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-21bca-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 73,
+                    "line": 19
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "d332b4ccc611857a3be8-c8a9425a9f556b877ff1",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_41/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T22:10:30.329Z",
+    "duration": 5446.513,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

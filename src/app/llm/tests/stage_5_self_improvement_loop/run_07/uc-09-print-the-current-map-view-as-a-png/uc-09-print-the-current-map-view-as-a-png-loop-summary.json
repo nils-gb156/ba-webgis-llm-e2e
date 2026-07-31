@@ -1,0 +1,40 @@
+{
+  "run": "run_07",
+  "use_case_id": 9,
+  "title": "Print the current map view as a PNG",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "ReferenceError: getActiveBaseLayerTitle is not defined\n\n   9 |\n  10 |   // Precondition: At least one base map and one overlay layer are visible\n> 11 |   await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();\n     |                           ^\n  12 |   await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);\n  13 |\n  14 |   // Step 1: Open the printing panel\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-0"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.check: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByRole('radio', { name: 'PNG' })\n\n\n  22 |\n  23 |   // Step 3: Select the PNG file format\n> 24 |   await page.getByRole('radio', { name: 'PNG' }).check();\n     |                                                  ^\n  25 |\n  26 |   // Step 4: Trigger the export/print action\n  27 |   // Register download listener before the action\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

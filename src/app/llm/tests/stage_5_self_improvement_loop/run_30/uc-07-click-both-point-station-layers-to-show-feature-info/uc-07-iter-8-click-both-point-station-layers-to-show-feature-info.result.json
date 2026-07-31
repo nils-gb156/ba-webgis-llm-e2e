@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_30\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_30/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7462,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"eucos\": true,\u001b[39m\n\u001b[32m-   \"uvi\": true,\u001b[39m\n\u001b[31m+   \"eucos\": false,\u001b[39m\n\u001b[31m+   \"uvi\": false,\u001b[39m\n\u001b[2m  }\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"eucos\": true,\u001b[39m\n\u001b[32m-   \"uvi\": true,\u001b[39m\n\u001b[31m+   \"eucos\": false,\u001b[39m\n\u001b[31m+   \"uvi\": false,\u001b[39m\n\u001b[2m  }\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_30\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:32:8",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_30\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 8,
+                      "line": 32
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 30 |\u001b[39m         \u001b[36mconst\u001b[39m eucosVisible \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m eucosHeading\u001b[33m.\u001b[39misVisible()\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m         \u001b[36mreturn\u001b[39m { uvi\u001b[33m:\u001b[39m uviVisible\u001b[33m,\u001b[39m eucos\u001b[33m:\u001b[39m eucosVisible }\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 32 |\u001b[39m     })\u001b[33m.\u001b[39mtoEqual({ uvi\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m\u001b[33m,\u001b[39m eucos\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 33 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 34 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_30\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 8,
+                        "line": 32
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 2\u001b[39m\n\u001b[31m+ Received  + 2\u001b[39m\n\n\u001b[2m  Object {\u001b[22m\n\u001b[32m-   \"eucos\": true,\u001b[39m\n\u001b[32m-   \"uvi\": true,\u001b[39m\n\u001b[31m+   \"eucos\": false,\u001b[39m\n\u001b[31m+   \"uvi\": false,\u001b[39m\n\u001b[2m  }\u001b[22m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  30 |         const eucosVisible = await eucosHeading.isVisible();\n  31 |         return { uvi: uviVisible, eucos: eucosVisible };\n> 32 |     }).toEqual({ uvi: true, eucos: true });\n     |        ^\n  33 | });\n  34 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_30\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:32:8"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T18:54:54.217Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-56825-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_30\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 8,
+                    "line": 32
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "70ef696d194e5bd1d258-55250efda104e1b8d57f",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_30/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T18:54:53.563Z",
+    "duration": 9326.837,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

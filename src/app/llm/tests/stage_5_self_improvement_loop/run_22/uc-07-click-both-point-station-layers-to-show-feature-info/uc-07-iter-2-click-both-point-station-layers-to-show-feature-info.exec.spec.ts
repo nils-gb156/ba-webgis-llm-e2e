@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (it is initially off, but be explicit)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementIsPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementIsPressed === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure the UV-Index Stations layer is active
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure the EUCOS Ground Stations layer is active
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Wait for the map to be ready by polling the center coordinate
+  await expect.poll(() => page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: { olMap: { getView: () => { getCenter: () => number[] } } } }).__openPioneerMap;
+    return map?.olMap?.getView()?.getCenter();
+  })).toBeDefined();
+
+  // Convert EPSG:3857 coordinates to pixel coordinates on the map canvas
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  const pixelCoords = await page.evaluate(
+    ([x, y]) => {
+      const map = (globalThis as { __openPioneerMap?: { olMap: { getPixelFromCoordinate: (coord: number[]) => [number, number] } } }).__openPioneerMap;
+      if (!map || !map.olMap) {
+        return null;
+      }
+      const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+      return pixel;
+    },
+    [1188692.84, 6767643.28]
+  );
+
+  if (!pixelCoords) {
+    throw new Error('Could not convert map coordinates to pixel coordinates. Map may not be ready.');
+  }
+
+  // Click the map at the calculated pixel position
+  await mapContainer.click({
+    position: { x: pixelCoords[0], y: pixelCoords[1] },
+  });
+
+  // Wait for the info panel to load the station info for both layers
+  await expect(page.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});

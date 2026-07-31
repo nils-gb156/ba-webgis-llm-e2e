@@ -1,0 +1,76 @@
+{
+  "run": "run_29",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 7,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"Layer Switcher\nBasemaps\nCarto LightÂ·\nOperational layersÂ·\nEUCOS Ground Stations\nUV-Index Stations\nClouds\nPrecipitation\nTemperature\nUV-Index\nLegend\nEUCOS Ground StationsÂ·\nType 0Â·\nType 1Â·\nType 2Â·\nType 3Â·\nUV-Index Stations\nTemperature (Â°C)Â·\n-65 - -55Â·\n-55 - -45Â·\n-45 - -40Â·\n-40 - -30Â·\n-30 - -20Â·\n-20 - -10Â·\n-10 - 0Â·\n0 - 10Â·\n10 - 20Â·\n20 - 25Â·\n25 - 30\"\n\nCall Log:\n- Timeout 5000ms ex"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementÂ·\nClick in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |     const text = await panel.innerText();\n  34 |     return text;\n> 35 |   }).toMatch(/[\\d.]+\\s*(km|m|mi|ft)/);\n     |      ^\n  36 | });\n  37 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementÂ·\nClick in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |     const text = await panel.innerText();\n  34 |     return text;\n> 35 |   }).toMatch(/[\\d.]+\\s*(km|m|mi|ft)/);\n     |      ^\n  36 | });\n  37 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementÂ·\nClick in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  44 |     const text = await panel.innerText();\n  45 |     return text;\n> 46 |   }).toMatch(/[\\d.]+\\s*(km|m|mi|ft)/);\n     |      ^\n  47 | });\n  48 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementÂ·\nClick in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     const text = await panel.innerText();\n  42 |     return text;\n> 43 |   }).toMatch(/[\\d.]+\\s*(km|m|mi|ft)/);\n     |      ^\n  44 | });\n  45 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.]+\\s*(km|m|mi|ft)/\nReceived string:  \"MeasurementÂ·\nClick in the map to start a measurement.Â·\nMode\nDistance\nArea\nDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     const text = await panel.innerText();\n  42 |     return text;\n> 43 |   }).toMatch(/[\\d.]+\\s*(km|m|mi|ft)/);\n     |      ^\n  44 | });\n  45 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

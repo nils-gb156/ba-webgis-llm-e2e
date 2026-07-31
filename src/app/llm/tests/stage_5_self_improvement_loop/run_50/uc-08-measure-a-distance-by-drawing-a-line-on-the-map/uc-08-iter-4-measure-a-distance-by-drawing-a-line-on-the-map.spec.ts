@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user clicks the 'Measurement' button in the toolbar to open the measurement panel.
+  await page.getByTestId('measurement-toggle').click();
+
+  // Assert: The measurement panel is visible.
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: The user clicks several points on the map canvas to draw a line.
+  // Use the data-testid for the map container and click with position offsets.
+  const mapContainer = page.getByTestId('map-container');
+  const center = await mapContainer.boundingBox();
+  test.fail(!center, 'map-container bounding box should be available');
+
+  // Click three points to create a simple multi-segment line.
+  // Use fixed pixel offsets from the center of the visible map area.
+  const clickPoints = [
+    { x: Math.round(center!.width / 2), y: Math.round(center!.height / 2) },
+    { x: Math.round(center!.width / 2) + 150, y: Math.round(center!.height / 2) + 150 },
+    { x: Math.round(center!.width / 2) + 300, y: Math.round(center!.height / 2) + 50 },
+  ];
+
+  for (const point of clickPoints) {
+    await mapContainer.click({ position: point });
+  }
+
+  // Step 3: The user double-clicks to finish the measurement.
+  // Double-click on the last point to end the measurement.
+  await mapContainer.dblclick({ position: clickPoints[clickPoints.length - 1] });
+
+  // Assert: The measurement panel displays a length value with a unit.
+  // The measurement result is shown in the dialog as a paragraph.
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement' });
+  await expect.poll(() =>
+    measurementDialog.getByRole('paragraph').allTextContents()
+  ).toMatch(/[\d.,]+\s*km/i);
+});

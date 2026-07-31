@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate } from "../../../../map-model-helpers";
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Activate the measurement tool
+  await page.getByRole('button', { name: 'Measurement' }).click();
+
+  // 2. Click several points on the map canvas to draw a line
+  // Use the center of the map as a reference to click distinct points
+  const center = await getMapCenter(page);
+  expect(center).toBeDefined();
+  const mapContainer = page.getByTestId('map-container');
+
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+  await mapContainer.click({ position: { x: 400, y: 400 } });
+
+  // 3. Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 400, y: 400 } });
+
+  // Expected results
+  // The measurement panel is visible (it is part of the map-controls-panel)
+  await expect(page.getByTestId('map-controls-panel')).toBeVisible();
+
+  // The measurement panel displays a length value with a unit
+  // The value is inside the map-controls-panel, look for text matching a number followed by a unit
+  const measurementPanel = page.getByTestId('map-controls-panel');
+  await expect.poll(() => measurementPanel.locator('text=/\\d+(\\.\\d+)?\\s*(m|km)/').count()).toBeGreaterThan(0);
+});

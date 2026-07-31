@@ -1,0 +1,484 @@
+The following Playwright end-to-end test (TypeScript) was generated for the use case
+below, but it FAILED when executed against the live application.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context extracted automatically from the running application (initial page state):
+data-testid attributes found in the app:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree (roles, names, states):
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 7: Click both point station layers to show feature info
+
+**Description:** The user clicks on a location where both a UV-Index Station (WMS) and an EUCOS Ground Station (WFS) are located and checks that the feature info for both point layers appears in the info panel.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The info panel is visible.
+- The UV-Index Stations layer (WMS) is active.
+- The EUCOS Ground Stations layer (WFS) is active.
+- Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28] (EPSG:3857).
+- No measurement tool is active.
+
+**Steps:**
+
+1. The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+2. The user waits for the info panel to load the station info for both layers.
+
+**Expected results:**
+
+- The info panel displays a 'UV-Index Station' section with feature information.
+- The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+**Complexity:** hard
+
+Previous test code (failing):
+```typescript
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure info panel is visible.
+  // From the initial accessibility tree, the "Info Panel Switcher" button is NOT pressed,
+  // so the info panel is initially hidden. Click the toggle to open it.
+  const infoPanelToggle = page.getByRole('button', { name: 'Info Panel Switcher' });
+  await infoPanelToggle.click({ force: true });
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Precondition: Ensure measurement tool is NOT active.
+  // From the initial accessibility tree, the "Measurement" button is not pressed.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Precondition: Ensure UV-Index Stations and EUCOS Ground Stations are active.
+  // From the initial accessibility tree, both checkboxes are already checked.
+  // We assert their state to be safe, but no action is needed.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  await expect(uvIndexCheckbox).toBeChecked();
+  await expect(eucosCheckbox).toBeChecked();
+
+  // Step 1: Click at the specified map coordinates [1188692.84, 6767643.28] (EPSG:3857).
+  // We need to convert these coordinates to pixel positions on the map canvas.
+  // Since we don't have a direct conversion helper, we'll use the map container's bounding box
+  // and assume the map is centered appropriately or use a known good position.
+  // However, the prompt provides the exact coordinates and expects us to click there.
+  // A more robust way in Playwright for canvas elements is to use the map's internal state
+  // if available, but here we are instructed to click on the map container with a position.
+  // Let's try to click on the map container. The exact pixel position might vary, but the
+  // use case specifies coordinates. We will use the map's current view to calculate the position.
+  // Since we can't easily calculate pixel from EPSG:3857 without knowing the map's current zoom/center,
+  // we will rely on the fact that the coordinates are within the viewport.
+  // A better approach for canvas is to use page.mouse.move and page.mouse.click with coordinates
+  // relative to the canvas element. Let's get the bounding box of the map container.
+  const mapContainer = page.getByTestId('map-container');
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box not found');
+  }
+
+  // The coordinates [1188692.84, 6767643.28] are in EPSG:3857.
+  // We need to convert these to pixel coordinates on the canvas.
+  // This requires knowing the map's current center and zoom level.
+  // Let's assume the map is centered near Berlin (as per the screenshot) and the coordinates
+  // are within the visible area. We will click at a relative position that should correspond
+  // to the given coordinates. Since we can't precisely calculate without the map model,
+  // we will use a heuristic: click near the center of the map and hope the coordinates
+  // are close enough, or use the map model to get the center and calculate.
+  // However, the prompt says to use `position` option on the map container.
+  // This implies we should click at specific pixel coordinates.
+  // Since we don't have a direct conversion, we will use the map model to get the center
+  // and then calculate the position. But the map model helpers are for reading state, not for conversion.
+  // Let's try a different approach: use the map's internal click event by dispatching a click event
+  // on the canvas element with the correct coordinates. But Playwright's `click` with `position`
+  // is the recommended way.
+  // We will assume that the coordinates [1188692.84, 6767643.28] are within the viewport and
+  // click at a position that is likely to be close. If the test fails, we might need to adjust.
+  // For now, let's click at the center of the map container as a placeholder.
+  // A better approach is to use the map model to get the current center and zoom, and then
+  // calculate the pixel position. But we don't have a conversion function.
+  // Let's try to click at a position that is likely to be near the given coordinates.
+  // We will click at the center of the map container.
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+  await mapContainer.click({ position: { x: centerX, y: centerY } });
+
+  // Step 2: Wait for the info panel to load the station info for both layers.
+  // We expect to see sections for both UV-Index Station and EUCOS Ground Station.
+  // First, wait for a highlight to appear, indicating the click was processed.
+  await expect.poll(() => page.getByTestId('info-panel').locator('text=UV-Index Station').isVisible()).toBeTruthy();
+  await expect.poll(() => page.getByTestId('info-panel').locator('text=EUCOS Ground Station').isVisible()).toBeTruthy();
+
+  // Wait for and verify the UV-Index Station info section
+  await expect(page.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+
+  // Wait for and verify the EUCOS Ground Station info section
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});
+```
+
+Playwright error output:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for getByTestId('info-panel')
+
+
+  13 |   await infoPanelToggle.click({ force: true });
+  14 |   const infoPanel = page.getByTestId('info-panel');
+> 15 |   await expect(infoPanel).toBeVisible();
+     |                           ^
+  16 |
+  17 |   // Precondition: Ensure measurement tool is NOT active.
+  18 |   // From the initial accessibility tree, the "Measurement" button is not pressed.
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_34\uc-07-click-both-point-station-layers-to-show-feature-info\uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:15:27
+
+Application state at the point of failure (data-testids and accessibility tree
+captured AFTER the test steps that did run — elements listed here may not exist
+in the initial page state):
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher"
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+A screenshot of the application at the point of failure is attached as an image. It shows the visual state including the canvas-rendered map, which is not represented in the accessibility tree.
+
+Fix the test so that it correctly verifies the use case and passes.
+Do not weaken or remove assertions just to make the test pass — the test must
+still verify the behaviour described in the use case.
+Return only the corrected test code.

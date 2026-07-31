@@ -1,0 +1,103 @@
+{
+  "run": "run_17",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n   8 |\n   9 |   // Wait for the map to be ready and initially rendered\n> 10 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();\n     |                                                           ^\n  11 |\n  12 |   // 1. Activate the measurement tool\n  13 |   await page.getByTestId('measurement-toggle').click({ force: true });\n    at c:\\Users\\n.beikel"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').locator('text=/\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|ft)/i')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').locator('text=/\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|ft)/i')\n\n\n  36 |   // The result is usually in a format like \"123.45 km\" or \"123.45 m\"\n  37 |   const measurementResult = infoPanel.locator('text=/\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').locator('text=/\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|ft)/i')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').locator('text=/\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|ft)/i')\n\n\n  38 |   // The result is usually in a format like \"123.45 km\" or \"123.45 m\"\n  39 |   const measurementResult = measurementPanel.locator('text=/\\\\d+"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByRole('paragraph', { name: /\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|ft)/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByRole('paragraph', { name: /\\\\d+\\\\.?\\\\d*\\\\s+(km|m|mi|ft)/i })\n\n\n  36 |   // The result is usually in a format like \"83.81 km\" or \"123.45 m\"\n  37 |   const measurementResult = m"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByRole('paragraph', { name: /83\\.81 km/ })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByRole('paragraph', { name: /83\\.81 km/ })\n\n\n  37 |   // Using a regex to match the measurement result text\n  38 |   const measurementResult = measurementPanel.getByRole('paragraph', { name: /83\\.8"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d.]+ (km|m|cm|mm)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d.]+ (km|m|cm|mm)/)\n\n\n  37 |   // Using a regex to match the measurement result text\n  38 |   const measurementResult = measurementPanel.getByText(/[\\d.]+ (km|m|cm|mm)/);\n> 39 "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d.]+ (km|m|cm|mm)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d.]+ (km|m|cm|mm)/)\n\n\n  37 |   // Using a regex to match the measurement result text\n  38 |   const measurementResult = measurementPanel.getByText(/[\\d.]+ (km|m|cm|mm)/);\n> 39 |   await expect(measure"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d.]+ (km|m|cm|mm)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d.]+ (km|m|cm|mm)/)\n\n\n  37 |   // Using a regex to match the measurement result text\n  38 |   const measurementResult = measurementPanel.getByText(/[\\d.]+ (km|m|cm|mm)/);\n> 39 |   await expect(measure"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d.]+ (km|m|cm|mm)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d.]+ (km|m|cm|mm)/)\n\n\n  37 |   // Using a regex to match the measurement result text\n  38 |   const measurementResult = measurementPanel.getByText(/[\\d.]+ (km|m|cm|mm)/);\n> 39 "
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d.]+ (km|m|cm|mm)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d.]+ (km|m|cm|mm)/)\n\n\n  37 |   // Using a regex to match the measurement result text\n  38 |   const measurementResult = measurementPanel.getByText(/[\\d.]+ (km|m|cm|mm)/);\n> 39 |   await expect(measure"
+    }
+  ]
+}

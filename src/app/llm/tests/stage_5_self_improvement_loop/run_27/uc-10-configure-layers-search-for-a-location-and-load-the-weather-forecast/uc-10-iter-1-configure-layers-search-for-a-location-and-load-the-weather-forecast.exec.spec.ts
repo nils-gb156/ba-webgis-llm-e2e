@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer.
+  // The layer switcher is open. The Temperature checkbox is checked.
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // Verify Temperature is no longer rendered on the map.
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  // Step 2: Show the Precipitation overlay layer.
+  // The Precipitation checkbox is unchecked.
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Verify Precipitation is now rendered on the map.
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 3: Search for a place using the geocoder.
+  await page.getByRole('textbox', { name: 'Geocoder search' }).fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  // The geocoder panel appears with search results.
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+
+  // Select the first result (e.g., "Münster, Germany").
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location.
+  // The map should pan to Münster. We verify this by checking the map center
+  // moves to the approximate coordinates of Münster (EPSG:3857).
+  // Münster is approximately at x: 4050000, y: 5950000.
+  await expect.poll(() => getMapCenter(page)).toMatchObject([expect.closeTo(4050000, 50000), expect.closeTo(5950000, 50000)]);
+
+  // Step 6: Wait for the info panel to load the forecast.
+  // The info panel should now display the weather forecast section.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Verify that the forecast contains 24 entries.
+  // The forecast entries are typically rendered as a list or grid of items.
+  // We count the number of forecast items in the weather-forecast-section.
+  const forecastEntryCount = await weatherForecastSection.locator('li, div[class*="forecast-item"], div[class*="entry"]').count();
+  expect(forecastEntryCount).toBe(24);
+});

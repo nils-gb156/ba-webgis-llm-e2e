@@ -1,0 +1,31 @@
+{
+  "run": "run_01",
+  "use_case_id": 2,
+  "title": "Switch the base map from Carto Light to OpenStreetMap",
+  "complexity": "easy",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "ReferenceError: getMapZoomLevel is not defined\n\n  36 |     // or center, but the title change is the primary indicator.\n  37 |     // Let's also verify that the map is still responsive and has a valid zoom level.\n> 38 |     await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n     |                             ^\n  39 | });\n  40 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-02-switch-the-base-map-from-carto-light-to-openstree"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

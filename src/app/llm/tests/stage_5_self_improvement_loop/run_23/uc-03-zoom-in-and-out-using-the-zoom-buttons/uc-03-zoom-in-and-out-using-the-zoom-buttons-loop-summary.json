@@ -1,0 +1,103 @@
+{
+  "run": "run_23",
+  "use_case_id": 3,
+  "title": "Zoom in and out using the zoom buttons",
+  "complexity": "easy",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\n  10 |   // Capture the initial zoom level\n  11 |   const initialZoom = await getMapZoomLevel(page);\n> 12 |   expect(initialZoom).toBeDefined();\n     |                       ^\n  13 |\n  14 |   // Step 1: Click the 'Zoom in' button\n  15 |   await page.getByRole('button', { name: 'Zoom in map' }).click();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-03-zoom-in-and-out-using-the-"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-03-iter-1-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  15 |\n  16 |   // Wait for zoom level to change and verify it increased\n> 17 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);\n     |                                                  ^\n  18 |\n  19 |   // Capture zoom level after zooming in\n  20 |   const zoom"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  15 |\n  16 |   // Wait for zoom level to change and verify it increased\n> 17 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);\n     |                                                                      ^\n  18 |\n  19 |   // Step 2: Click t"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-03-iter-3-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  15 |\n  16 |   // Wait for zoom level to change and verify it increased\n> 17 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);\n     |                                                  ^\n  18 |\n  19 |   // Step 2: Click the 'Zoom out' button\n  20 |   await page"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-03-iter-4-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  15 |\n  16 |   // Wait for zoom level to change and verify it increased\n> 17 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);\n     |                                                  ^\n  18 |\n  19 |   // Step 2: Click the 'Zoom out' button\n  20 |   await page"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-03-iter-5-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   9 |\n  10 |   // Wait for the map to be ready and capture the initial zoom level\n> 11 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  12 |\n  13 |   // Step 1: Click the 'Zoom in' button\n  14 |   await page.getByTestId('zoom-in-button').click();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_sel"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   9 |\n  10 |   // Wait for the map to be ready and capture the initial zoom level\n> 11 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  12 |\n  13 |   // Step 1: Click the 'Zoom in' button\n  14 |   await page.getByTestId('zoom-in-button').click();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_sel"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-03-iter-7-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  15 |\n  16 |   // Wait for zoom level to change and verify it increased\n> 17 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);\n     |                                                  ^\n  18 |\n  19 |   // Step 2: Click the 'Zoom out' button\n  20 |   await page."
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-03-iter-8-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"number\"\nReceived: \"undefined\"\n\n  10 |   // Wait for the map to be ready and capture the initial zoom level\n  11 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n> 12 |   expect(typeof initialZoom).toBe('number');\n     |                              ^\n  13 |\n  14 |   // Step 1: Click the 'Zoom in' button\n  15 |   await page.getByTestId('zoom-in-button').click();\n    at c:\\Users\\n.beikel\\r"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"number\"\nReceived: \"undefined\"\n\n  10 |   // Wait for the map to be ready and capture the initial zoom level\n  11 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n> 12 |   expect(typeof initialZoom).toBe('number');\n     |                              ^\n  13 |\n  14 |   // Step 1: Click the 'Zoom in' button\n  15 |   await page.getByTestId('zoom-in-button').click();\n    at c:\\Users\\n.beikel\\r"
+    }
+  ]
+}

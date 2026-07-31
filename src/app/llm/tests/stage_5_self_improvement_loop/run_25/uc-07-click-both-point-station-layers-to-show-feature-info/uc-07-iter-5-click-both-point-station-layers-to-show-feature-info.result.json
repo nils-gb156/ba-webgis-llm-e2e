@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_25\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_25/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7512,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \u001b[32m\"UV-Index Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMovercast cloudsTemperature13.89 Â°CHumidity81 %Wind direction243Â°Wind speed6.37 m/sSat, Jul 25, 08:00 AMovercast cloudsTemperature16.12 Â°CHumidity80 %Wind direction237Â°Wind speed7.96 m/sSat, Jul 25, 11:00 AMovercast cloudsTemperature19.22 Â°CHumidity67 %Wind direction243Â°Wind speed6.94 m/sSat, Jul 25, 02:00 PMbroken cloudsTemperature19.97 Â°CHumidity76 %Wind direction268Â°Wind speed10.49 m/sSat, Jul 25, 05:00 PMbroken cloudsTemperature19.99 Â°CHumidity78 %Wind direction287Â°Wind speed8.07 m/sSat, Jul 25, 08:00 PMlight rainTemperature18.09 Â°CHumidity82 %Wind direction256Â°Wind speed8.43 m/sSat, Jul 25, 11:00 PMovercast cloudsTemperature17.21 Â°CHumidity77 %Wind direction259Â°Wind speed8.15 m/sSun, Jul 26, 02:00 AMbroken cloudsTemperature15.9 Â°CHumidity80 %Wind direction272Â°Wind speed8.27 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature13.39 Â°CHumidity81 %Wind direction253Â°Wind speed5.67 m/sSun, Jul 26, 08:00 AMlight rainTemperature15.27 Â°CHumidity91 %Wind direction249Â°Wind speed2.87 m/sSun, Jul 26, 11:00 AMlight rainTemperature15.68 Â°CHumidity89 %Wind direction266Â°Wind speed3.72 m/sSun, Jul 26, 02:00 PMovercast cloudsTemperature16.17 Â°CHumidity85 %Wind direction287Â°Wind speed10.24 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature16.72 Â°CHumidity82 %Wind direction301Â°Wind speed8.07 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature15.42 Â°CHumidity87 %Wind direction351Â°Wind speed5.36 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.07 Â°CHumidity83 %Wind direction354Â°Wind speed1.13 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.57 Â°CHumidity85 %Wind direction288Â°Wind speed8.01 m/sMon, Jul 27, 05:00 AMscattered cloudsTemperature14.99 Â°CHumidity81 %Wind direction294Â°Wind speed10.58 m/sMon, Jul 27, 08:00 AMscattered cloudsTemperature14.87 Â°CHumidity79 %Wind direction296Â°Wind speed10.31 m/sMon, Jul 27, 11:00 AMscattered cloudsTemperature15.4 Â°CHumidity75 %Wind direction288Â°Wind speed7.35 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature16.3 Â°CHumidity73 %Wind direction338Â°Wind speed0.27 m/sMon, Jul 27, 05:00 PMscattered cloudsTemperature16.71 Â°CHumidity73 %Wind direction157Â°Wind speed3.82 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\u001b[2m    4 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m      - unexpected value \"InformationWeather ForecastClick on the map to load a forecast.\"\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m    - unexpected value \"InformationWeather ForecastLoading...\"\u001b[22m\n\u001b[2m    9 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m      - unexpected value \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMovercast cloudsTemperature13.89 Â°CHumidity81 %Wind direction243Â°Wind speed6.37 m/sSat, Jul 25, 08:00 AMovercast cloudsTemperature16.12 Â°CHumidity80 %Wind direction237Â°Wind speed7.96 m/sSat, Jul 25, 11:00 AMovercast cloudsTemperature19.22 Â°CHumidity67 %Wind direction243Â°Wind speed6.94 m/sSat, Jul 25, 02:00 PMbroken cloudsTemperature19.97 Â°CHumidity76 %Wind direction268Â°Wind speed10.49 m/sSat, Jul 25, 05:00 PMbroken cloudsTemperature19.99 Â°CHumidity78 %Wind direction287Â°Wind speed8.07 m/sSat, Jul 25, 08:00 PMlight rainTemperature18.09 Â°CHumidity82 %Wind direction256Â°Wind speed8.43 m/sSat, Jul 25, 11:00 PMovercast cloudsTemperature17.21 Â°CHumidity77 %Wind direction259Â°Wind speed8.15 m/sSun, Jul 26, 02:00 AMbroken cloudsTemperature15.9 Â°CHumidity80 %Wind direction272Â°Wind speed8.27 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature13.39 Â°CHumidity81 %Wind direction253Â°Wind speed5.67 m/sSun, Jul 26, 08:00 AMlight rainTemperature15.27 Â°CHumidity91 %Wind direction249Â°Wind speed2.87 m/sSun, Jul 26, 11:00 AMlight rainTemperature15.68 Â°CHumidity89 %Wind direction266Â°Wind speed3.72 m/sSun, Jul 26, 02:00 PMovercast cloudsTemperature16.17 Â°CHumidity85 %Wind direction287Â°Wind speed10.24 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature16.72 Â°CHumidity82 %Wind direction301Â°Wind speed8.07 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature15.42 Â°CHumidity87 %Wind direction351Â°Wind speed5.36 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.07 Â°CHumidity83 %Wind direction354Â°Wind speed1.13 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.57 Â°CHumidity85 %Wind direction288Â°Wind speed8.01 m/sMon, Jul 27, 05:00 AMscattered cloudsTemperature14.99 Â°CHumidity81 %Wind direction294Â°Wind speed10.58 m/sMon, Jul 27, 08:00 AMscattered cloudsTemperature14.87 Â°CHumidity79 %Wind direction296Â°Wind speed10.31 m/sMon, Jul 27, 11:00 AMscattered cloudsTemperature15.4 Â°CHumidity75 %Wind direction288Â°Wind speed7.35 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature16.3 Â°CHumidity73 %Wind direction338Â°Wind speed0.27 m/sMon, Jul 27, 05:00 PMscattered cloudsTemperature16.71 Â°CHumidity73 %Wind direction157Â°Wind speed3.82 m/s\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \u001b[32m\"UV-Index Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMovercast cloudsTemperature13.89 Â°CHumidity81 %Wind direction243Â°Wind speed6.37 m/sSat, Jul 25, 08:00 AMovercast cloudsTemperature16.12 Â°CHumidity80 %Wind direction237Â°Wind speed7.96 m/sSat, Jul 25, 11:00 AMovercast cloudsTemperature19.22 Â°CHumidity67 %Wind direction243Â°Wind speed6.94 m/sSat, Jul 25, 02:00 PMbroken cloudsTemperature19.97 Â°CHumidity76 %Wind direction268Â°Wind speed10.49 m/sSat, Jul 25, 05:00 PMbroken cloudsTemperature19.99 Â°CHumidity78 %Wind direction287Â°Wind speed8.07 m/sSat, Jul 25, 08:00 PMlight rainTemperature18.09 Â°CHumidity82 %Wind direction256Â°Wind speed8.43 m/sSat, Jul 25, 11:00 PMovercast cloudsTemperature17.21 Â°CHumidity77 %Wind direction259Â°Wind speed8.15 m/sSun, Jul 26, 02:00 AMbroken cloudsTemperature15.9 Â°CHumidity80 %Wind direction272Â°Wind speed8.27 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature13.39 Â°CHumidity81 %Wind direction253Â°Wind speed5.67 m/sSun, Jul 26, 08:00 AMlight rainTemperature15.27 Â°CHumidity91 %Wind direction249Â°Wind speed2.87 m/sSun, Jul 26, 11:00 AMlight rainTemperature15.68 Â°CHumidity89 %Wind direction266Â°Wind speed3.72 m/sSun, Jul 26, 02:00 PMovercast cloudsTemperature16.17 Â°CHumidity85 %Wind direction287Â°Wind speed10.24 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature16.72 Â°CHumidity82 %Wind direction301Â°Wind speed8.07 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature15.42 Â°CHumidity87 %Wind direction351Â°Wind speed5.36 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.07 Â°CHumidity83 %Wind direction354Â°Wind speed1.13 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.57 Â°CHumidity85 %Wind direction288Â°Wind speed8.01 m/sMon, Jul 27, 05:00 AMscattered cloudsTemperature14.99 Â°CHumidity81 %Wind direction294Â°Wind speed10.58 m/sMon, Jul 27, 08:00 AMscattered cloudsTemperature14.87 Â°CHumidity79 %Wind direction296Â°Wind speed10.31 m/sMon, Jul 27, 11:00 AMscattered cloudsTemperature15.4 Â°CHumidity75 %Wind direction288Â°Wind speed7.35 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature16.3 Â°CHumidity73 %Wind direction338Â°Wind speed0.27 m/sMon, Jul 27, 05:00 PMscattered cloudsTemperature16.71 Â°CHumidity73 %Wind direction157Â°Wind speed3.82 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\u001b[2m    4 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m      - unexpected value \"InformationWeather ForecastClick on the map to load a forecast.\"\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m    - unexpected value \"InformationWeather ForecastLoading...\"\u001b[22m\n\u001b[2m    9 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m      - unexpected value \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMovercast cloudsTemperature13.89 Â°CHumidity81 %Wind direction243Â°Wind speed6.37 m/sSat, Jul 25, 08:00 AMovercast cloudsTemperature16.12 Â°CHumidity80 %Wind direction237Â°Wind speed7.96 m/sSat, Jul 25, 11:00 AMovercast cloudsTemperature19.22 Â°CHumidity67 %Wind direction243Â°Wind speed6.94 m/sSat, Jul 25, 02:00 PMbroken cloudsTemperature19.97 Â°CHumidity76 %Wind direction268Â°Wind speed10.49 m/sSat, Jul 25, 05:00 PMbroken cloudsTemperature19.99 Â°CHumidity78 %Wind direction287Â°Wind speed8.07 m/sSat, Jul 25, 08:00 PMlight rainTemperature18.09 Â°CHumidity82 %Wind direction256Â°Wind speed8.43 m/sSat, Jul 25, 11:00 PMovercast cloudsTemperature17.21 Â°CHumidity77 %Wind direction259Â°Wind speed8.15 m/sSun, Jul 26, 02:00 AMbroken cloudsTemperature15.9 Â°CHumidity80 %Wind direction272Â°Wind speed8.27 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature13.39 Â°CHumidity81 %Wind direction253Â°Wind speed5.67 m/sSun, Jul 26, 08:00 AMlight rainTemperature15.27 Â°CHumidity91 %Wind direction249Â°Wind speed2.87 m/sSun, Jul 26, 11:00 AMlight rainTemperature15.68 Â°CHumidity89 %Wind direction266Â°Wind speed3.72 m/sSun, Jul 26, 02:00 PMovercast cloudsTemperature16.17 Â°CHumidity85 %Wind direction287Â°Wind speed10.24 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature16.72 Â°CHumidity82 %Wind direction301Â°Wind speed8.07 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature15.42 Â°CHumidity87 %Wind direction351Â°Wind speed5.36 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.07 Â°CHumidity83 %Wind direction354Â°Wind speed1.13 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.57 Â°CHumidity85 %Wind direction288Â°Wind speed8.01 m/sMon, Jul 27, 05:00 AMscattered cloudsTemperature14.99 Â°CHumidity81 %Wind direction294Â°Wind speed10.58 m/sMon, Jul 27, 08:00 AMscattered cloudsTemperature14.87 Â°CHumidity79 %Wind direction296Â°Wind speed10.31 m/sMon, Jul 27, 11:00 AMscattered cloudsTemperature15.4 Â°CHumidity75 %Wind direction288Â°Wind speed7.35 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature16.3 Â°CHumidity73 %Wind direction338Â°Wind speed0.27 m/sMon, Jul 27, 05:00 PMscattered cloudsTemperature16.71 Â°CHumidity73 %Wind direction157Â°Wind speed3.82 m/s\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_25\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:25:48",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_25\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 48,
+                      "line": 25
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 23 |\u001b[39m\n \u001b[90m 24 |\u001b[39m   \u001b[90m// Wait for the info panel to show feature info for both layers\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 25 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'info-panel'\u001b[39m))\u001b[33m.\u001b[39mtoContainText(\u001b[32m'UV-Index Station'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 26 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'info-panel'\u001b[39m))\u001b[33m.\u001b[39mtoContainText(\u001b[32m'EUCOS Ground Station'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_25\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 48,
+                        "line": 25
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \u001b[32m\"UV-Index Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMovercast cloudsTemperature13.89 Â°CHumidity81 %Wind direction243Â°Wind speed6.37 m/sSat, Jul 25, 08:00 AMovercast cloudsTemperature16.12 Â°CHumidity80 %Wind direction237Â°Wind speed7.96 m/sSat, Jul 25, 11:00 AMovercast cloudsTemperature19.22 Â°CHumidity67 %Wind direction243Â°Wind speed6.94 m/sSat, Jul 25, 02:00 PMbroken cloudsTemperature19.97 Â°CHumidity76 %Wind direction268Â°Wind speed10.49 m/sSat, Jul 25, 05:00 PMbroken cloudsTemperature19.99 Â°CHumidity78 %Wind direction287Â°Wind speed8.07 m/sSat, Jul 25, 08:00 PMlight rainTemperature18.09 Â°CHumidity82 %Wind direction256Â°Wind speed8.43 m/sSat, Jul 25, 11:00 PMovercast cloudsTemperature17.21 Â°CHumidity77 %Wind direction259Â°Wind speed8.15 m/sSun, Jul 26, 02:00 AMbroken cloudsTemperature15.9 Â°CHumidity80 %Wind direction272Â°Wind speed8.27 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature13.39 Â°CHumidity81 %Wind direction253Â°Wind speed5.67 m/sSun, Jul 26, 08:00 AMlight rainTemperature15.27 Â°CHumidity91 %Wind direction249Â°Wind speed2.87 m/sSun, Jul 26, 11:00 AMlight rainTemperature15.68 Â°CHumidity89 %Wind direction266Â°Wind speed3.72 m/sSun, Jul 26, 02:00 PMovercast cloudsTemperature16.17 Â°CHumidity85 %Wind direction287Â°Wind speed10.24 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature16.72 Â°CHumidity82 %Wind direction301Â°Wind speed8.07 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature15.42 Â°CHumidity87 %Wind direction351Â°Wind speed5.36 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.07 Â°CHumidity83 %Wind direction354Â°Wind speed1.13 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.57 Â°CHumidity85 %Wind direction288Â°Wind speed8.01 m/sMon, Jul 27, 05:00 AMscattered cloudsTemperature14.99 Â°CHumidity81 %Wind direction294Â°Wind speed10.58 m/sMon, Jul 27, 08:00 AMscattered cloudsTemperature14.87 Â°CHumidity79 %Wind direction296Â°Wind speed10.31 m/sMon, Jul 27, 11:00 AMscattered cloudsTemperature15.4 Â°CHumidity75 %Wind direction288Â°Wind speed7.35 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature16.3 Â°CHumidity73 %Wind direction338Â°Wind speed0.27 m/sMon, Jul 27, 05:00 PMscattered cloudsTemperature16.71 Â°CHumidity73 %Wind direction157Â°Wind speed3.82 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\u001b[2m    4 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m      - unexpected value \"InformationWeather ForecastClick on the map to load a forecast.\"\u001b[22m\n\u001b[2m    - locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m    - unexpected value \"InformationWeather ForecastLoading...\"\u001b[22m\n\u001b[2m    9 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m      - unexpected value \"InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMovercast cloudsTemperature13.89 Â°CHumidity81 %Wind direction243Â°Wind speed6.37 m/sSat, Jul 25, 08:00 AMovercast cloudsTemperature16.12 Â°CHumidity80 %Wind direction237Â°Wind speed7.96 m/sSat, Jul 25, 11:00 AMovercast cloudsTemperature19.22 Â°CHumidity67 %Wind direction243Â°Wind speed6.94 m/sSat, Jul 25, 02:00 PMbroken cloudsTemperature19.97 Â°CHumidity76 %Wind direction268Â°Wind speed10.49 m/sSat, Jul 25, 05:00 PMbroken cloudsTemperature19.99 Â°CHumidity78 %Wind direction287Â°Wind speed8.07 m/sSat, Jul 25, 08:00 PMlight rainTemperature18.09 Â°CHumidity82 %Wind direction256Â°Wind speed8.43 m/sSat, Jul 25, 11:00 PMovercast cloudsTemperature17.21 Â°CHumidity77 %Wind direction259Â°Wind speed8.15 m/sSun, Jul 26, 02:00 AMbroken cloudsTemperature15.9 Â°CHumidity80 %Wind direction272Â°Wind speed8.27 m/sSun, Jul 26, 05:00 AMscattered cloudsTemperature13.39 Â°CHumidity81 %Wind direction253Â°Wind speed5.67 m/sSun, Jul 26, 08:00 AMlight rainTemperature15.27 Â°CHumidity91 %Wind direction249Â°Wind speed2.87 m/sSun, Jul 26, 11:00 AMlight rainTemperature15.68 Â°CHumidity89 %Wind direction266Â°Wind speed3.72 m/sSun, Jul 26, 02:00 PMovercast cloudsTemperature16.17 Â°CHumidity85 %Wind direction287Â°Wind speed10.24 m/sSun, Jul 26, 05:00 PMovercast cloudsTemperature16.72 Â°CHumidity82 %Wind direction301Â°Wind speed8.07 m/sSun, Jul 26, 08:00 PMovercast cloudsTemperature15.42 Â°CHumidity87 %Wind direction351Â°Wind speed5.36 m/sSun, Jul 26, 11:00 PMlight rainTemperature15.07 Â°CHumidity83 %Wind direction354Â°Wind speed1.13 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.57 Â°CHumidity85 %Wind direction288Â°Wind speed8.01 m/sMon, Jul 27, 05:00 AMscattered cloudsTemperature14.99 Â°CHumidity81 %Wind direction294Â°Wind speed10.58 m/sMon, Jul 27, 08:00 AMscattered cloudsTemperature14.87 Â°CHumidity79 %Wind direction296Â°Wind speed10.31 m/sMon, Jul 27, 11:00 AMscattered cloudsTemperature15.4 Â°CHumidity75 %Wind direction288Â°Wind speed7.35 m/sMon, Jul 27, 02:00 PMscattered cloudsTemperature16.3 Â°CHumidity73 %Wind direction338Â°Wind speed0.27 m/sMon, Jul 27, 05:00 PMscattered cloudsTemperature16.71 Â°CHumidity73 %Wind direction157Â°Wind speed3.82 m/s\"\u001b[22m\n\n\n  23 |\n  24 |   // Wait for the info panel to show feature info for both layers\n> 25 |   await expect(page.getByTestId('info-panel')).toContainText('UV-Index Station');\n     |                                                ^\n  26 |   await expect(page.getByTestId('info-panel')).toContainText('EUCOS Ground Station');\n  27 | });\n  28 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_25\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:25:48"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T17:02:30.439Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-27ca6-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_25\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 48,
+                    "line": 25
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f72d7d1f6ad28e50795d-c9a29d3e2798d0b41876",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_25/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T17:02:29.803Z",
+    "duration": 9348.562,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

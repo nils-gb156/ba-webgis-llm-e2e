@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user clicks the 'Measurement' button in the toolbar to open the measurement panel.
+  await page.getByRole('button', { name: 'Measurement' }).click();
+
+  // Assert: The measurement panel is visible.
+  await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();
+
+  // Step 2: The user clicks several points on the map canvas to draw a line.
+  // Click three points to create a simple multi-segment line.
+  // We use fixed pixel offsets from the center of the visible map area to ensure
+  // the clicks land on the canvas without needing map-model-helpers.
+  const mapContainer = page.getByTestId('map-container');
+  const center = await mapContainer.boundingBox();
+  test.fail(!center, 'map-container bounding box should be available');
+
+  const clickPoints = [
+    { x: Math.round(center!.width / 2), y: Math.round(center!.height / 2) },
+    { x: Math.round(center!.width / 2) + 150, y: Math.round(center!.height / 2) + 150 },
+    { x: Math.round(center!.width / 2) + 300, y: Math.round(center!.height / 2) + 50 },
+  ];
+
+  for (const point of clickPoints) {
+    await mapContainer.click({ position: point });
+  }
+
+  // Step 3: The user double-clicks to finish the measurement.
+  await mapContainer.dblclick({ position: clickPoints[clickPoints.length - 1] });
+
+  // Assert: The measurement panel displays a length value with a unit.
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement' });
+  await expect.poll(() =>
+    measurementDialog.getByRole('paragraph').allTextContents()
+  ).toMatch(/[\d.,]+\s*km/i);
+});

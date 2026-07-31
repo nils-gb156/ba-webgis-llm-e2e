@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure info panel is visible.
+  // The initial state shows it is visible (pressed), but we ensure it stays visible.
+  const infoPanelToggle = page.getByRole('button', { name: 'Info Panel Switcher' });
+  const infoPanel = page.getByTestId('info-panel');
+
+  // Check if the toggle is currently pressed (meaning the panel is open).
+  // If it's not pressed, click it to open the panel.
+  const isTogglePressed = await infoPanelToggle.getAttribute('aria-pressed');
+  if (isTogglePressed !== 'true') {
+    await infoPanelToggle.click();
+  }
+
+  // Wait for the info panel to become visible after potential opening.
+  await expect(infoPanel).toBeVisible();
+
+  // Precondition: Ensure UV-Index Stations layer is active
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uviLayerCheckbox.isChecked())) {
+    await uviLayerCheckbox.click({ force: true });
+  }
+
+  // Precondition: Ensure EUCOS Ground Stations layer is active
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosLayerCheckbox.isChecked())) {
+    await eucosLayerCheckbox.click({ force: true });
+  }
+
+  // Precondition: Ensure measurement tool is not active
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Step 1: Click at the specified coordinates on the map canvas
+  // The coordinates are in EPSG:3857. We need to convert them to pixel positions on the map canvas.
+  const mapContainer = page.getByTestId('map-container');
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box not found');
+  }
+
+  // Use page.evaluate to convert EPSG:3857 coordinates to pixel coordinates on the map canvas
+  const pixelCoords = await page.evaluate(
+    ({ x, y, containerSelector }) => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      if (!map) return null;
+      const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+      return pixel;
+    },
+    { x: 1188692.84, y: 6767643.28, containerSelector: '#map-container' }
+  );
+
+  if (!pixelCoords) {
+    throw new Error('Could not convert coordinates to pixel positions');
+  }
+
+  // Adjust pixel coordinates relative to the map container's bounding box
+  const clickX = mapBox.x + pixelCoords[0];
+  const clickY = mapBox.y + pixelCoords[1];
+
+  await mapContainer.click({
+    position: { x: clickX, y: clickY },
+    button: 'left',
+    clickCount: 1,
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers.
+  // The info panel should display sections for both UV-Index Station and EUCOS Ground Station.
+  // We poll the panel content to wait for the asynchronous data to load.
+  await expect.poll(async () => {
+    const panelContent = await infoPanel.textContent();
+    return {
+      hasUvi: panelContent?.includes('UV-Index Station') ?? false,
+      hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,
+    };
+  }).toEqual({ hasUvi: true, hasEucos: true });
+
+  // Verify that the info panel contains both station types using explicit locators
+  await expect(infoPanel.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+  await expect(infoPanel.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});

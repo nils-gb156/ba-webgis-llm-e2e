@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Hide the Temperature overlay layer
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+
+  // 2. Show the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+
+  // Verify layer visibility state
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // 3. Search for a location
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search' });
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // 4. Wait for the result list to appear and select the first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+
+  // The results are rendered as list items with data-testid, not as ARIA options.
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // 5. Wait for the map to navigate to the selected location.
+  // The geocoder panel closes after selection.
+  // Note: The panel may remain visible in some states, but the search input should be cleared.
+  await expect.poll(() => geocoderInput.inputValue()).toBe('');
+
+  // 6. Wait for the info panel to load the forecast.
+  // The info panel is already visible, but the forecast content loads asynchronously.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Check for the presence of 24 forecast entries.
+  // The entries are likely list items or similar within the weather forecast section.
+  const forecastEntries = weatherForecastSection.getByRole('listitem');
+  await expect.poll(async () => forecastEntries.count()).toBe(24);
+});

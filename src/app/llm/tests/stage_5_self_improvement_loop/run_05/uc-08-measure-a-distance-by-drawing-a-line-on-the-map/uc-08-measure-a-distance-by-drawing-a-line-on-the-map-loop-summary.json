@@ -1,0 +1,49 @@
+{
+  "run": "run_05",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: Cannot read properties of undefined (reading '0')\n\n  31 |     // Let's get the current center of the map to click around it.\n  32 |     const initialCenter = await expect.poll(() => getMapCenter(page)).toBeTruthy();\n> 33 |     const centerX = initialCenter[0];\n     |                                  ^\n  34 |     const centerY = initialCenter[1];\n  35 |\n  36 |     // Click a few points to draw a line.\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_impro"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  38 |     // We can look for a pattern like \"1.23 km\" or \"1234.56 m\" inside the measurement panel.\n  39 |     // Since the exact text might vary, we can poll for the presence of a number followed by a unit.\n> 40 |     await expect.poll(() => measurementPanel.locator('text=/\\\\d+\\\\.?\\\\d*\\\\s*(km|m|mi|ft)/').isVisible()).toBeTruthy();\n     |                                     "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     // We can look for a pattern like \"75.24 km\" or similar inside the measurement panel.\n  36 |     // Since the exact text might vary, we can poll for the presence of a number followed by a unit.\n> 37 |     await expect.poll(() => measurementPanel.locator('text=/\\\\d+\\\\.?\\\\d*\\\\s*(km|m|mi|ft)/').isVisible()).toBe(true);\n     |   "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_41/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 8: Measure a distance by drawing a line on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3534,
+                  "error": {
+                    "message": "Error: Attempting to serialize unexpected value at position \"centerX.not.toBe\": (...args) => callMatcherAsStep(matcherName, info, actual, matcher, args, promise)",
+                    "stack": "Error: Attempting to serialize unexpected value at position \"centerX.not.toBe\": (...args) => callMatcherAsStep(matcherName, info, actual, matcher, args, promise)\n    at mapToPageCoords (c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:37:17)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:60:24",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                      "column": 17,
+                      "line": 37
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 35 |\u001b[39m   \u001b[90m// Helper to convert map coordinates to page coordinates\u001b[39m\n \u001b[90m 36 |\u001b[39m   \u001b[36mconst\u001b[39m mapToPageCoords \u001b[33m=\u001b[39m \u001b[36masync\u001b[39m (mapX\u001b[33m:\u001b[39m number\u001b[33m,\u001b[39m mapY\u001b[33m:\u001b[39m number) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 37 |\u001b[39m     \u001b[36mreturn\u001b[39m page\u001b[33m.\u001b[39mevaluate(\n \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 38 |\u001b[39m       ({ mapX\u001b[33m,\u001b[39m mapY\u001b[33m,\u001b[39m centerX\u001b[33m,\u001b[39m centerY\u001b[33m,\u001b[39m width\u001b[33m,\u001b[39m height\u001b[33m,\u001b[39m zoom }) \u001b[33m=>\u001b[39m {\n \u001b[90m 39 |\u001b[39m         \u001b[90m// Assuming the map is centered and fills the container\u001b[39m\n \u001b[90m 40 |\u001b[39m         \u001b[90m// This is a simplified conversion. The actual conversion might depend on the map library's view projection.\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                        "column": 17,
+                        "line": 37
+                      },
+                      "message": "Error: Attempting to serialize unexpected value at position \"centerX.not.toBe\": (...args) => callMatcherAsStep(matcherName, info, actual, matcher, args, promise)\n\n  35 |   // Helper to convert map coordinates to page coordinates\n  36 |   const mapToPageCoords = async (mapX: number, mapY: number) => {\n> 37 |     return page.evaluate(\n     |                 ^\n  38 |       ({ mapX, mapY, centerX, centerY, width, height, zoom }) => {\n  39 |         // Assuming the map is centered and fills the container\n  40 |         // This is a simplified conversion. The actual conversion might depend on the map library's view projection.\n    at mapToPageCoords (c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:37:17)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:60:24"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T22:13:55.451Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-9b609-y-drawing-a-line-on-the-map-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_41\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                    "column": 17,
+                    "line": 37
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "aaa3b38c6b9e4edd68f4-6211c900b025184c55da",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_41/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T22:13:54.764Z",
+    "duration": 5448.139,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

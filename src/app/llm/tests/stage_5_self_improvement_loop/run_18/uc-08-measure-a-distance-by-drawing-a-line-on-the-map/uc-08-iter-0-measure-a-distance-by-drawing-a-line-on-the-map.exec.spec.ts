@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Activate measurement tool
+  await page.getByRole('button', { name: 'Measurement' }).click();
+
+  // 2. Click several points on the map canvas to draw a line.
+  //    We need to click at distinct positions.
+  const center = await getMapCenter(page);
+  expect(center).toBeDefined();
+
+  // Click point 1 (approx. center of current view)
+  await page.getByTestId('map-container').click({ position: { x: 500, y: 300 } });
+  await page.getByTestId('map-container').click({ position: { x: 600, y: 300 } });
+  await page.getByTestId('map-container').click({ position: { x: 700, y: 300 } });
+
+  // 3. Double-click to finish the measurement.
+  await page.getByTestId('map-container').dblclick({ position: { x: 700, y: 300 } });
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // The measurement result is displayed in the info panel.
+  // It typically looks like "Length: 123.45 km" or similar.
+  // We assert that the info panel contains text matching a length pattern.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect.poll(() => infoPanel.getByText(/Length:\s*\d+\.?\d*\s*(m|km|mi|ft)/i)).toBeVisible();
+});

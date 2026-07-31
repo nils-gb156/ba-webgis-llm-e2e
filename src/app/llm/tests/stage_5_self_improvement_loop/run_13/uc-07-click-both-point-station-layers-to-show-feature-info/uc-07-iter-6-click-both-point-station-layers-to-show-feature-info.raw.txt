@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure the info panel is visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Precondition: Ensure no measurement tool is active
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Step 1: Click on the map at the specified coordinates
+  const targetX = 1188692.84;
+  const targetY = 6767643.28;
+  const mapContainer = page.getByTestId('map-container');
+
+  // Get the bounding box of the map container to translate map projection coordinates
+  // to canvas pixel coordinates.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box could not be determined');
+  }
+
+  // The coordinates provided are in EPSG:3857 (Web Mercator).
+  // We need to convert them to pixel coordinates relative to the canvas.
+  // We can use page.evaluate to perform the coordinate conversion inside the browser context
+  // where the OpenLayers map instance is available.
+
+  const pixelPosition = await page.evaluate(
+    ({ targetX, targetY, mapBox }) => {
+      const map = (globalThis as { __openPioneerMap?: { olMap: { getPixelFromCoordinate: (coord: [number, number]) => [number, number] } } }).__openPioneerMap;
+      if (!map) return null;
+      const pixel = map.olMap.getPixelFromCoordinate([targetX, targetY]);
+      // Return pixel coordinates relative to the canvas top-left
+      return {
+        x: pixel[0] - mapBox.x,
+        y: pixel[1] - mapBox.y,
+      };
+    },
+    { targetX, targetY, mapBox }
+  );
+
+  if (!pixelPosition) {
+    throw new Error('Could not convert map coordinates to pixel position');
+  }
+
+  // Click the map container at the calculated pixel position
+  await mapContainer.click({ position: pixelPosition });
+
+  // Step 2: Wait for the info panel to load feature information for both layers
+  // The feature info is loaded asynchronously, so we poll the text content.
+  await expect.poll(() => page.getByTestId('info-panel').textContent()).toContain('UV-Index Station');
+  await expect.poll(() => page.getByTestId('info-panel').textContent()).toContain('EUCOS Ground Station');
+});

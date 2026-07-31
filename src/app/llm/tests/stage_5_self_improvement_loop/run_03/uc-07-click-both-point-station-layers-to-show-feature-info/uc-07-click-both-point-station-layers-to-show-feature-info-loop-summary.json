@@ -1,0 +1,76 @@
+{
+  "run": "run_03",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 7,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: locator('canvas') resolved to 2 elements:\n    1) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').first()\n    2) <canvas width=\"1920\" height=\"1039\"></canvas> aka locator('canvas').nth(1)\n\nCall log:\n  - waiting for locator('canvas')\n\n\n  44 |   // Use force: true and Control+Shift to click at a specific position on the canvas\n  45 |   // The map container is the canvas element itself\n> 46 |   await page.locator('canvas').click({"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: Timeout 5000ms exceeded while waiting on the predicate\n\n  47 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  48 |     };\n> 49 |   }).toEqual({ hasUvi: true, hasEucos: true });\n     |      ^\n  50 |\n  51 |   // Verify that the info panel contains both station types\n  52 |   await expect(infoPanel.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  14 |\n  15 |   // Wait for the info panel to be visible after opening\n> 16 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  17 |\n  18 |   // Precondition: Ensure UV-Index Stations layer is active\n  19 |   const uviLayerCheckbo"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel')\n\n\n  17 |\n  18 |   // Wait for the info panel to be visible after potential opening\n> 19 |   await expect(infoPanel).toBeVisible();\n     |                           ^\n  20 |\n  21 |   // Precondition: Ensure UV-Index Stations layer is active\n  22 |   const uviLa"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEucos\": true,\n-   \"hasUvi\": true,\n+   \"hasEucos\": false,\n+   \"hasUvi\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  56 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  57 |     };\n> 58 |   }).toEqual({ hasUvi: true, hasEucos: true });\n     |      ^\n  59 |\n  60 |   // Verify that the info panel contains both station types "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Object {\n-   \"hasEucos\": true,\n-   \"hasUvi\": true,\n+   \"hasEucos\": false,\n+   \"hasUvi\": false,\n  }\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  72 |       hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false,\n  73 |     };\n> 74 |   }).toEqual({ hasUvi: true, hasEucos: true });\n     |      ^\n  75 |\n  76 |   // Verify that the info panel contains both station types "
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

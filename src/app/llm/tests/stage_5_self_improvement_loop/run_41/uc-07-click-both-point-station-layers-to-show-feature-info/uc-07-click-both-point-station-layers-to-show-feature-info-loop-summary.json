@@ -1,0 +1,76 @@
+{
+  "run": "run_41",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 7,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeChecked() failed\n\nLocator: getByRole('button', { name: 'Measurement' })\nExpected: not checked\nError: Not a checkbox or radio button\n\nCall log:\n  - Expect \"not toBeChecked\" with timeout 5000ms\n  - waiting for getByRole('button', { name: 'Measurement' })\n\n\n  17 |\n  18 |     // Precondition: No measurement tool is active\n> 19 |     await expect(page.getByRole('button', { name: 'Measurement' })).not.toBeChecked();\n     |                                                 "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"map-container\"]')\n    - locator resolved to <div data-testid=\"map-container\" class=\"map-container-root css-1c3iy1v\">â€¦</div>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <html lang=\"en\">â€¦</h"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  40 |     // Step 2: The user waits for the info panel to load the station info for both layers.\n  41 |     // Expected result: The info panel displays a 'UV-Index Station' section with feature information.\n> 42 |     await expect.poll(() => page.ge"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // Expected result: The info panel displays a 'UV-Index Station' section with feature information.\n  42 |     // Expected result: The info panel displays an 'EUCOS Ground Station' section with feature information.\n> 43 |     await expect.p"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index Station\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // Expected result: The info panel displays a 'UV-Index Station' section with feature information.\n  42 |     // Expected result: The info panel displays an 'EUCOS Ground Station' section with feature information.\n> 43 |     await expect.p"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"UV-Index\"\nReceived string:    \"InformationWeather ForecastClick on the map to load a forecast.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // Expected result: The info panel displays a 'UV-Index Station' section with feature information.\n  42 |     // Expected result: The info panel displays an 'EUCOS Ground Station' section with feature information.\n> 43 |     await expect.poll(() ="
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

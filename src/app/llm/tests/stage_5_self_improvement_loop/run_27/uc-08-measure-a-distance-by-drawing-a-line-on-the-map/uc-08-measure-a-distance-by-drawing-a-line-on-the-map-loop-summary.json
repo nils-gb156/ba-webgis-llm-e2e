@@ -1,0 +1,103 @@
+{
+  "run": "run_27",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('map-controls-panel')\nExpected pattern: /Length: \\d+\\.?\\d*\\s*(km|m|mi|ft)/i\nReceived string:  \"Layer SwitcherBasemapsCarto LightOperational layersEUCOS Ground StationsUV-Index StationsCloudsPrecipitationTemperatureUV-IndexLegendEUCOS Ground StationsType 0Type 1Type 2Type 3UV-Index StationsTemperature (Â°C)-65 - -55-55 - -45-45 - -40-40 - -30-30 - -20-20 - -10-10 - 00 - 1010 - 2020 - 2525 - 30\"\nTimeout: 5000ms\n\nCall log:\n"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement' })\nExpected pattern: /Length: \\d+\\.?\\d*\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">â€¦</div>\n       - une"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('measurement-panel')\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel')\n    14 Ã— locator resolved to <div data-measurement-panel=\"\" data-testid=\"measurement-panel\">â€¦</div>\n       - unexpected va"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('measurement-panel')\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel')\n    14 Ã— locator resolved to <div data-measurement-panel=\"\" data-testid=\"measurement-panel\">â€¦</div>\n       - unexpected va"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('measurement-panel')\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel')\n    14 Ã— locator resolved to <div data-measurement-panel=\"\" data-testid=\"measurement-panel\">â€¦</div>\n       - unexpected va"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     // The panel contains text like \"0 m\" or \"123.45 km\" after measurement.\n  36 |     // Use expect.poll to wait for the async measurement result to settle.\n> 37 |     await expect.poll(() => measurementPanel.textContent()).t"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     // The panel contains text like \"0 m\" or \"123.45 km\" after measurement.\n  36 |     // Use expect.poll to wait for the async measurement result to settle.\n> 37 |     await expect.poll(() => measurementPanel.textContent()).t"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     // The panel contains text like \"0 m\" or \"123.45 km\" after measurement.\n  36 |     // Use expect.poll to wait for the async measurement result to settle.\n> 37 |     await expect.poll(() => measurementPanel.textContent()).t"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     // The panel contains text like \"0 m\" or \"123.45 km\" after measurement.\n  36 |     // Use expect.poll to wait for the async measurement result to settle.\n> 37 |     await expect.poll(() => measurementPanel.textContent()).t"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\d+(\\.\\d+)?\\s*(km|m|mi|ft)/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  35 |     // The panel contains text like \"0 m\" or \"123.45 km\" after measurement.\n  36 |     // Use expect.poll to wait for the async measurement result to settle.\n> 37 |     await expect.poll(() => measurementPanel.textContent()).t"
+    }
+  ]
+}

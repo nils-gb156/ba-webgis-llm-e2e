@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_22/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "9: Print the current map view as a PNG",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7720,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('combobox', { name: 'File format' })\nExpected: \u001b[32m\"PNG\"\u001b[39m\nReceived: \u001b[31m\"png\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: 'File format' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <select id=\"_r_14_\" data-scope=\"field\" data-part=\"select\" class=\"chakra-native-select__field printing-select css-1fgm1uu\">â€¦</select>\u001b[22m\n\u001b[2m       - unexpected value \"png\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('combobox', { name: 'File format' })\nExpected: \u001b[32m\"PNG\"\u001b[39m\nReceived: \u001b[31m\"png\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: 'File format' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <select id=\"_r_14_\" data-scope=\"field\" data-part=\"select\" class=\"chakra-native-select__field printing-select css-1fgm1uu\">â€¦</select>\u001b[22m\n\u001b[2m       - unexpected value \"png\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts:32:34",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts",
+                      "column": 34,
+                      "line": 32
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 30 |\u001b[39m\n \u001b[90m 31 |\u001b[39m     \u001b[90m// Verify the combobox now shows PNG\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 32 |\u001b[39m     \u001b[36mawait\u001b[39m expect(formatCombobox)\u001b[33m.\u001b[39mtoHaveValue(\u001b[32m'PNG'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 33 |\u001b[39m\n \u001b[90m 34 |\u001b[39m     \u001b[90m// 4. The user clicks the export/print button.\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[90m// We set up the download listener before triggering the action.\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts",
+                        "column": 34,
+                        "line": 32
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('combobox', { name: 'File format' })\nExpected: \u001b[32m\"PNG\"\u001b[39m\nReceived: \u001b[31m\"png\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('combobox', { name: 'File format' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <select id=\"_r_14_\" data-scope=\"field\" data-part=\"select\" class=\"chakra-native-select__field printing-select css-1fgm1uu\">â€¦</select>\u001b[22m\n\u001b[2m       - unexpected value \"png\"\u001b[22m\n\n\n  30 |\n  31 |     // Verify the combobox now shows PNG\n> 32 |     await expect(formatCombobox).toHaveValue('PNG');\n     |                                  ^\n  33 |\n  34 |     // 4. The user clicks the export/print button.\n  35 |     // We set up the download listener before triggering the action.\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts:32:34"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T16:22:49.994Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-f58ca-e-current-map-view-as-a-PNG-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts",
+                    "column": 34,
+                    "line": 32
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "2dc11f08731782f572cc-5c65b1d07f9d67141959",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_22/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T16:22:49.368Z",
+    "duration": 10746.227,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

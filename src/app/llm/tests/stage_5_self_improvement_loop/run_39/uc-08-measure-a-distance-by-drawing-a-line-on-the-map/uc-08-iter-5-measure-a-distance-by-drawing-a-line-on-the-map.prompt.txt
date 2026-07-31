@@ -1,0 +1,503 @@
+The following Playwright end-to-end test (TypeScript) was generated for the use case
+below, but it FAILED when executed against the live application.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context extracted automatically from the running application (initial page state):
+data-testid attributes found in the app:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree (roles, names, states):
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 8: Measure a distance by drawing a line on the map
+
+**Description:** The user activates the measurement tool, draws a line on the map and checks that a measurement result is shown.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The measurement tool is accessible via the toolbar.
+- The map canvas is interactive.
+
+**Steps:**
+
+1. The user clicks the 'Measurement' button in the toolbar to open the measurement panel.
+2. The user clicks several points on the map canvas to draw a line.
+3. The user double-clicks to finish the measurement.
+
+**Expected results:**
+
+- The measurement panel is visible.
+- The measurement panel displays a length value with a unit.
+
+**Complexity:** hard
+
+Previous test code (failing):
+```typescript
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Activate the measurement tool
+    // The measurement toggle button in the toolbar.
+    // We check its pressed state first; if already pressed we skip the click.
+    const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+    const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementPressed !== 'true') {
+        await measurementToggle.click();
+    }
+
+    // Wait for the measurement panel/dialog to appear.
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement' });
+    await expect(measurementDialog).toBeVisible();
+
+    // Step 2: Draw a line by clicking points on the map canvas.
+    // Close the basemap combobox if it is open, as it intercepts pointer events.
+    const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+    const isBasemapExpanded = await basemapCombobox.getAttribute('aria-expanded');
+    if (isBasemapExpanded === 'true') {
+        await basemapCombobox.click();
+    }
+
+    const mapContainer = page.getByTestId('map-container');
+
+    // Click point 1 (slightly offset from center)
+    await mapContainer.click({ position: { x: 100, y: 100 } });
+    // Click point 2 (further away)
+    await mapContainer.click({ position: { x: 200, y: 200 } });
+    // Click point 3 (to make a longer line)
+    await mapContainer.click({ position: { x: 300, y: 150 } });
+
+    // Step 3: Double-click to finish the measurement.
+    await mapContainer.dblclick({ position: { x: 300, y: 150 } });
+
+    // Expected results:
+    // The measurement panel is visible.
+    // The measurement panel displays a length value with a unit.
+
+    // The measurement dialog should still be visible.
+    await expect(measurementDialog).toBeVisible();
+
+    // The measurement result should appear in the dialog.
+    // We'll poll for a string that looks like a measurement result.
+    // Common formats: "Length: 12.3 km", "Distance: 500 m", etc.
+    // We'll use a regex to match a number followed by a unit.
+    const measurementRegex = /Length:\s*\d+\.?\d*\s*(km|m|mi|ft)/i;
+
+    // Poll the measurement dialog's text content for the measurement result.
+    await expect.poll(async () => {
+        const text = await measurementDialog.textContent();
+        return text ? measurementRegex.test(text) : false;
+    }).toBe(true);
+});
+```
+
+Playwright error output:
+Test timeout of 30000ms exceeded.
+
+---
+
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByTestId('map-container')
+    - locator resolved to <div data-testid="map-container" class="map-container-root css-1c3iy1v">â€¦</div>
+  - attempting click action
+    2 Ã— waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div dir="ltr" role="option" data-part="item" data-scope="select" aria-selected="false" data-state="unchecked" data-value="9b74ccc6-8369-4e6d-9ae0-f20b4b66d3c0" id="select:_r_4_:option:9b74ccc6-8369-4e6d-9ae0-f20b4b66d3c0" class="basemap-switcher-option chakra-select__item css-1s6t891">â€¦</div> from <div dir="ltr" data-scope="select" data-part="positioner" id="select:_r_4_:positioner" class="chakra-select__positioner">â€¦</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 Ã— waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div dir="ltr" role="option" data-part="item" data-scope="select" aria-selected="false" data-state="unchecked" data-value="9b74ccc6-8369-4e6d-9ae0-f20b4b66d3c0" id="select:_r_4_:option:9b74ccc6-8369-4e6d-9ae0-f20b4b66d3c0" class="basemap-switcher-option chakra-select__item css-1s6t891">â€¦</div> from <div dir="ltr" data-scope="select" data-part="positioner" id="select:_r_4_:positioner" class="chakra-select__positioner">â€¦</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    52 Ã— waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div dir="ltr" role="option" data-part="item" data-scope="select" aria-selected="false" data-state="unchecked" data-value="9b74ccc6-8369-4e6d-9ae0-f20b4b66d3c0" id="select:_r_4_:option:9b74ccc6-8369-4e6d-9ae0-f20b4b66d3c0" class="basemap-switcher-option chakra-select__item css-1s6t891">â€¦</div> from <div dir="ltr" data-scope="select" data-part="positioner" id="select:_r_4_:positioner" class="chakra-select__positioner">â€¦</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - element is not visible
+  - retrying click action
+    - waiting 500ms
+
+
+  32 |     await mapContainer.click({ position: { x: 100, y: 100 } });
+  33 |     // Click point 2 (further away)
+> 34 |     await mapContainer.click({ position: { x: 200, y: 200 } });
+     |                        ^
+  35 |     // Click point 3 (to make a longer line)
+  36 |     await mapContainer.click({ position: { x: 300, y: 150 } });
+  37 |
+    at c:\Users\n.beikel\repos\ba-w
+[... truncated ...]
+
+Application state at the point of failure (data-testids and accessibility tree
+captured AFTER the test steps that did run — elements listed here may not exist
+in the initial page state):
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement
+  - measurement-panel
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps" [expanded]: Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement" [pressed]
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- dialog "Measurement":
+  - heading "Measurement" [level=1]
+  - paragraph: Click in the map to start a measurement.
+  - group:
+    - text: Mode
+    - combobox "Mode":
+      - option "Distance" [selected]
+      - option "Area"
+    - img
+  - button "Delete measurements"
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+- listbox:
+  - option "Carto Light" [selected]
+  - option "Carto Dark"
+  - option "OpenStreetMap"
+  - option "Without basemap"
+
+A screenshot of the application at the point of failure is attached as an image. It shows the visual state including the canvas-rendered map, which is not represented in the accessibility tree.
+
+Fix the test so that it correctly verifies the use case and passes.
+Do not weaken or remove assertions just to make the test pass — the test must
+still verify the behaviour described in the use case.
+Return only the corrected test code.

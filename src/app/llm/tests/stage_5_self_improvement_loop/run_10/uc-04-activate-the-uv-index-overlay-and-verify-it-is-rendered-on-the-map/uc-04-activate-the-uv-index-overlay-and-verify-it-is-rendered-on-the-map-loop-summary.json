@@ -1,0 +1,31 @@
+{
+  "run": "run_10",
+  "use_case_id": 4,
+  "title": "Activate the UV-Index overlay and verify it is rendered on the map",
+  "complexity": "medium",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "selector_ambiguity",
+      "error_excerpt": "Error: locator.click: Error: strict mode violation: getByRole('checkbox', { name: 'UV-Index' }) resolved to 2 elements:\n    1) <input checked value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_d_:input\" aria-labelledby=\"checkbox:_r_d_:label\"/> aka getByRole('checkbox', { name: 'UV-Index Stations' })\n    2) <input value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_p_:input\" aria-labelledby=\"checkbox:_r_p_:label\"/> aka getByRole('checkbox', { name: 'UV-Index', exact: true"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

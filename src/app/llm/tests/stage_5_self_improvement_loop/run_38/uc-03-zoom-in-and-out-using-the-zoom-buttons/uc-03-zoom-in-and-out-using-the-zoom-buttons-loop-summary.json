@@ -1,0 +1,103 @@
+{
+  "run": "run_38",
+  "use_case_id": 3,
+  "title": "Zoom in and out using the zoom buttons",
+  "complexity": "easy",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: received value must be a number or bigint\n\nReceived has value: undefined\n\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeTruthy();\n> 14 |   expect(zoomAfterIn).toBeGreaterThan(initialZoom);\n     |                       ^\n  15 |\n  16 |   await page.getByTestId('zoom-out-button').click();\n  17 |   const zoomAfterOut = await expect.poll(() => "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-03-iter-1-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-03-iter-3-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-03-iter-4-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-03-iter-5-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-03-iter-7-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-03-iter-8-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');\n   9 |\n> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                      ^\n  11 |\n  12 |   await page.getByTestId('zoom-in-button').click();\n  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-"
+    }
+  ]
+}

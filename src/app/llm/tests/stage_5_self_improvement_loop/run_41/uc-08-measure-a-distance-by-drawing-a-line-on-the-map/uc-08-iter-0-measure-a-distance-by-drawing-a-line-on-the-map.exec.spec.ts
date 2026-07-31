@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel, getMapCenter } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and get its center for click coordinates
+  const initialZoom = await expect.poll(() => getMapZoomLevel(page));
+  const initialCenter = await expect.poll(() => getMapCenter(page));
+  expect(initialZoom).toBeDefined();
+  expect(initialCenter).toBeDefined();
+
+  // 1. Click the Measurement button to open the measurement panel
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  const mapControlsPanel = page.getByTestId('map-controls-panel');
+  await expect(mapControlsPanel).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line
+  // Use the center and offset to create a small line
+  const mapContainer = page.getByTestId('map-container');
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box not found');
+  }
+
+  const center = initialCenter!;
+  const zoom = initialZoom!;
+
+  // Helper to convert map coordinates to page coordinates
+  const mapToPageCoords = async (mapX: number, mapY: number) => {
+    return page.evaluate(
+      ({ mapX, mapY, centerX, centerY, width, height, zoom }) => {
+        // Assuming the map is centered and fills the container
+        // This is a simplified conversion. The actual conversion might depend on the map library's view projection.
+        // Since we are using the map model helpers, we can trust the center and zoom.
+        // We will click relative to the center of the map container.
+        const pixelX = (mapX - centerX[0]) / (2 * Math.pow(2, 18 - zoom)) * width + width / 2;
+        const pixelY = -(mapY - centerY[1]) / (2 * Math.pow(2, 18 - zoom)) * height + height / 2;
+        return { x: pixelX, y: pixelY };
+      },
+      {
+        mapX,
+        mapY,
+        centerX: center,
+        centerY: center,
+        width: mapBox.width,
+        height: mapBox.height,
+        zoom,
+      },
+    );
+  };
+
+  // Click three points to form a line
+  const point1 = await mapToPageCoords(center[0], center[1]);
+  const point2 = await mapToPageCoords(center[0] + 100000, center[1]);
+  const point3 = await mapToPageCoords(center[0] + 100000, center[1] + 100000);
+
+  await mapContainer.click({ position: point1 });
+  await mapContainer.click({ position: point2 });
+  await mapContainer.click({ position: point3 });
+
+  // 3. Double-click to finish the measurement
+  await mapContainer.dblclick({ position: point3 });
+
+  // Expected results: The measurement panel displays a length value with a unit
+  // The measurement panel is already visible from step 1.
+  // We need to check for a length value with a unit (e.g., "123.45 km" or "123.45 m")
+  const measurementResultText = mapControlsPanel.getByText(/^[0-9.,]+\s*(km|m|mi|ft)$/);
+  await expect(measurementResultText).toBeVisible();
+});

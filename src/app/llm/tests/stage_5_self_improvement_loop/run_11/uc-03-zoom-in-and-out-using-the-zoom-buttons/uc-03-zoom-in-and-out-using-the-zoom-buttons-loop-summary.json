@@ -1,0 +1,103 @@
+{
+  "run": "run_11",
+  "use_case_id": 3,
+  "title": "Zoom in and out using the zoom buttons",
+  "complexity": "easy",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  13 |\n  14 |     // Verify zoom level is higher than initial\n> 15 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);\n     |                                                                          ^\n  16 |\n  17 |     // Step 2: Click the"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-03-iter-1-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  14 |\n  15 |     // Verify zoom level is higher than initial\n> 16 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom as number);\n     |                                                                          ^\n  17 |\n  18 |     // Step 2:"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  16 |\n  17 |     // Verify zoom level is higher than initial\n> 18 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);\n     |                                                                          ^\n  19 |\n  20 |     // Step 2: Click th"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-03-iter-3-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  16 |\n  17 |     // Verify zoom level is higher than initial\n> 18 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);\n     |                                                                          ^\n  19 |\n  20 |     // Step 2: Click th"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-03-iter-4-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: expected value must be a number or bigint\n\nExpected has value: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  17 |\n  18 |     // Verify zoom level is higher than initial\n> 19 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);\n     |                                                                          ^\n  20 |\n  21 |     // Step 2: Click the"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-03-iter-5-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\n   9 |     // Wait for the map to be ready and capture the initial zoom level\n  10 |     const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n> 11 |     expect(initialZoom).toBeDefined();\n     |                         ^\n  12 |\n  13 |     const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });\n  14 |     const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });\n    at c:\\Users"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-03-iter-6-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "TypeError: expect.poll(...).toBeNumber is not a function\n\n   8 |\n   9 |     // Wait for the map to be ready and capture the initial zoom level\n> 10 |     const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();\n     |                                                                        ^\n  11 |\n  12 |     const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });\n  13 |     const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });\n    at c:\\"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-03-iter-7-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: received value must be a number or bigint\n\nReceived has value: undefined\n\n  18 |     // Verify zoom level is higher than initial\n  19 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();\n> 20 |     expect(zoomedInLevel).toBeGreaterThan(initialZoom);\n     |                           ^\n  21 |\n  22 |     // Step 2: Click the 'Zoom out' button to decrease the zoom level\n  23 |     await zoomOutButt"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-03-iter-8-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: received value must be a number or bigint\n\nReceived has type:  object\nReceived has value: {\"not\": {\"toBe\": [Function anonymous], \"toBeAttached\": [Function anonymous], \"toBeChecked\": [Function anonymous], \"toBeCloseTo\": [Function anonymous], \"toBeDefined\": [Function anonymous], \"toBeDisabled\": [Function anonymous], \"toBeEditable\": [Function anonymous], \"toBeEmpty\": [Function anonymous], \"toBeEnabled\": [Function anonymous], \"toBeFal"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nMatcher error: received value must be a number or bigint\n\nReceived has type:  object\nReceived has value: {\"not\": {\"toBe\": [Function anonymous], \"toBeAttached\": [Function anonymous], \"toBeChecked\": [Function anonymous], \"toBeCloseTo\": [Function anonymous], \"toBeDefined\": [Function anonymous], \"toBeDisabled\": [Function anonymous], \"toBeEditable\": [Function anonymous], \"toBeEmpty\": [Function anonymous], \"toBeEnabled\": [Function anonymous], \"toBeFal"
+    }
+  ]
+}

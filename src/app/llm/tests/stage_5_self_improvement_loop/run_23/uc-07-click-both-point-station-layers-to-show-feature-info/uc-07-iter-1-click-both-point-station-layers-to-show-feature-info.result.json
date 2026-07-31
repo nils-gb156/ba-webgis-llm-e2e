@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_23/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7614,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: 'UV-Index Station', level: 2 })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'UV-Index Station', level: 2 })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: 'UV-Index Station', level: 2 })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'UV-Index Station', level: 2 })\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:76:85",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 85,
+                      "line": 76
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 74 |\u001b[39m\n \u001b[90m 75 |\u001b[39m     \u001b[90m// Wait for the info panel to load feature info for both layers\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 76 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'UV-Index Station'\u001b[39m\u001b[33m,\u001b[39m level\u001b[33m:\u001b[39m \u001b[35m2\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 77 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'EUCOS Ground Station'\u001b[39m\u001b[33m,\u001b[39m level\u001b[33m:\u001b[39m \u001b[35m2\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 78 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 79 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 85,
+                        "line": 76
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: 'UV-Index Station', level: 2 })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'UV-Index Station', level: 2 })\u001b[22m\n\n\n  74 |\n  75 |     // Wait for the info panel to load feature info for both layers\n> 76 |     await expect(page.getByRole('heading', { name: 'UV-Index Station', level: 2 })).toBeVisible();\n     |                                                                                     ^\n  77 |     await expect(page.getByRole('heading', { name: 'EUCOS Ground Station', level: 2 })).toBeVisible();\n  78 | });\n  79 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:76:85"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T16:30:07.515Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-ae9be-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 85,
+                    "line": 76
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b6acd50cd7d24f33a7ef-340b26d99ac5764d6484",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_23/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T16:30:06.898Z",
+    "duration": 10726.407,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

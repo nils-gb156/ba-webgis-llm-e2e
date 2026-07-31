@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_26\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_26/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 8: Measure a distance by drawing a line on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7068,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32mStringMatching /\\d+(\\.\\d+)?\\s+(km|m|mi|ft)/\u001b[39m\nReceived array: \u001b[31m[\"Click in the map to start a measurement.\"]\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32mStringMatching /\\d+(\\.\\d+)?\\s+(km|m|mi|ft)/\u001b[39m\nReceived array: \u001b[31m[\"Click in the map to start a measurement.\"]\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_26\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:31:86",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_26\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                      "column": 86,
+                      "line": 31
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 29 |\u001b[39m   \u001b[90m// The measurement result is displayed as a paragraph containing a number followed by a unit (e.g., \"150.49 km\").\u001b[39m\n \u001b[90m 30 |\u001b[39m   \u001b[90m// We use expect.poll to wait for the measurement value to appear and settle.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 31 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m measurementPanel\u001b[33m.\u001b[39mgetByRole(\u001b[32m'paragraph'\u001b[39m)\u001b[33m.\u001b[39mallTextContents())\u001b[33m.\u001b[39mtoContain(\n \u001b[90m    |\u001b[39m                                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 32 |\u001b[39m     expect\u001b[33m.\u001b[39mstringMatching(\u001b[35m/\\d+(\\.\\d+)?\\s+(km|m|mi|ft)/\u001b[39m)\n \u001b[90m 33 |\u001b[39m   )\u001b[33m;\u001b[39m\n \u001b[90m 34 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_26\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                        "column": 86,
+                        "line": 31
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32mStringMatching /\\d+(\\.\\d+)?\\s+(km|m|mi|ft)/\u001b[39m\nReceived array: \u001b[31m[\"Click in the map to start a measurement.\"]\u001b[39m\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  29 |   // The measurement result is displayed as a paragraph containing a number followed by a unit (e.g., \"150.49 km\").\n  30 |   // We use expect.poll to wait for the measurement value to appear and settle.\n> 31 |   await expect.poll(() => measurementPanel.getByRole('paragraph').allTextContents()).toContain(\n     |                                                                                      ^\n  32 |     expect.stringMatching(/\\d+(\\.\\d+)?\\s+(km|m|mi|ft)/)\n  33 |   );\n  34 | });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_26\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:31:86"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T17:30:17.929Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-0fef7-y-drawing-a-line-on-the-map-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_26\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                    "column": 86,
+                    "line": 31
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f755bf82f78b051ed6af-afc1091765f8dcf3d217",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_26/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T17:30:17.290Z",
+    "duration": 8914.199999999999,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

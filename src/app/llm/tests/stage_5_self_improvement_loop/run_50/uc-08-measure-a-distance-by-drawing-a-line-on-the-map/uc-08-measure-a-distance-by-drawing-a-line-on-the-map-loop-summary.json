@@ -1,0 +1,103 @@
+{
+  "run": "run_02",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: Cannot read properties of undefined (reading '0')\n\n  20 |   const clickPoints = [\n  21 |     center,\n> 22 |     [center[0] + 100000, center[1] + 100000],\n     |            ^\n  23 |     [center[0] + 200000, center[1] + 50000],\n  24 |   ];\n  25 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:22:12"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nMatcher error: received value must be a string\n\nReceived has type:  array\nReceived has value: [\"Click in the map to start a measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  37 |   await expect.poll(() =>\n  38 |     measurementDialog.getByRole('paragraph').allTextContents()\n> 39 |   ).toMatch(/[\\d.,]+\\s*km/i);\n     |     ^\n  40 | });\n  41 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_sel"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nMatcher error: received value must be a string\n\nReceived has type:  array\nReceived has value: [\"Click in the map to start a measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').allTextContents()\n> 41 |   ).toMatch(/[\\d.,]+\\s*km/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_sel"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nMatcher error: received value must be a string\n\nReceived has type:  array\nReceived has value: [\"Click in the map to start a measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').allTextContents()\n> 41 |   ).toMatch(/[\\d.,]+\\s*km/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_sel"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "matcher_type_error",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nMatcher error: received value must be a string\n\nReceived has type:  array\nReceived has value: [\"Click in the map to start a measurement.\"]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').allTextContents()\n> 41 |   ).toMatch(/[\\d.,]+\\s*km/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_sel"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.,]+\\s*km/i\nReceived string:  \"Click in the map to start a measurement.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').textContent()\n> 41 |   ).toMatch(/[\\d.,]+\\s*km/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-a-distan"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.,]+\\s*km/i\nReceived string:  \"Click in the map to start a measurement.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').textContent()\n> 41 |   ).toMatch(/[\\d.,]+\\s*km/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-a-distan"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.,]+\\s*(km|m)/i\nReceived string:  \"Click in the map to start a measurement.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').textContent()\n> 41 |   ).toMatch(/[\\d.,]+\\s*(km|m)/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.,]+\\s*(km|m)/i\nReceived string:  \"Click in the map to start a measurement.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').textContent()\n> 41 |   ).toMatch(/[\\d.,]+\\s*(km|m)/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /[\\d.,]+\\s*(km|m)/i\nReceived string:  \"Click in the map to start a measurement.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  39 |   await expect.poll(() =>\n  40 |     measurementDialog.getByRole('paragraph').textContent()\n> 41 |   ).toMatch(/[\\d.,]+\\s*(km|m)/i);\n     |     ^\n  42 | });\n  43 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_02\\uc-08-measure-"
+    }
+  ]
+}

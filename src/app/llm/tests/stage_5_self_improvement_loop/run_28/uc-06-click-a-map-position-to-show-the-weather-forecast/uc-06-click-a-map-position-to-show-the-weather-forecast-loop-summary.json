@@ -1,0 +1,103 @@
+{
+  "run": "run_28",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  27 |\n  28 |     // The clicked position is highlighted on the map.\n> 29 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  30 |\n  31 |     // The info panel displays a weather forecast section.\n  32 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  27 |\n  28 |     // The clicked position is highlighted on the map.\n> 29 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  30 |\n  31 |     // The info panel displays a weather forecast section.\n  32 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  27 |\n  28 |     // The clicked position is highlighted on the map.\n> 29 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  30 |\n  31 |     // The info panel displays a weather forecast section.\n  32 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeAttached() failed\n\nLocator:  getByRole('button', { name: 'Info Panel Switcher' })\nExpected: not attached\nReceived: attached\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeAttached\" with timeout 5000ms\n  - waiting for getByRole('button', { name: 'Info Panel Switcher' })\n    14 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-part=\"trigger\" data-state=\"closed\" data-scope=\"tooltip\" aria-pressed=\"false\" data-ownedby=\"_r_12_\" id=\"tooltip:_r_12_:trigger\" data"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeVisible() failed\n\nLocator:  getByText('Click on the map to load a forecast.', { exact: true })\nExpected: not visible\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeVisible\" with timeout 5000ms\n  - waiting for getByText('Click on the map to load a forecast.', { exact: true })\n    13 Ã— locator resolved to <p class=\"css-v0otzr\">Click on the map to load a forecast.</p>\n       - unexpected value \"visible\"\n\n\n  21 |     await expect(\n  22 |         pag"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-06-iter-5-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: `expect.poll()` does not support \"resolves\" matcher.\n\n  21 |     await expect.poll(() =>\n  22 |         page.getByRole('paragraph', { name: 'Click on the map to load a forecast.', exact: true }).isVisible()\n> 23 |     ).resolves.toBe(false);\n     |                ^\n  24 |\n  25 |     // The clicked position is highlighted on the map.\n  26 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_se"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-06-iter-6-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: `expect.poll()` does not support \"resolves\" matcher.\n\n  16 |     await expect.poll(() =>\n  17 |         page.getByRole('paragraph', { name: 'Click on the map to load a forecast.', exact: true }).isVisible()\n> 18 |     ).resolves.toBe(false);\n     |                ^\n  19 |\n  20 |     // The clicked position is highlighted on the map.\n  21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_se"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-06-iter-7-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  19 |\n  20 |     // The clicked position is highlighted on the map.\n> 21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  22 |\n  23 |     // The info panel displays a weather forecast section.\n  24 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-06-iter-8-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  19 |\n  20 |     // The clicked position is highlighted on the map.\n> 21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  22 |\n  23 |     // The info panel displays a weather forecast section.\n  24 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  19 |\n  20 |     // The clicked position is highlighted on the map.\n> 21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();\n     |                                                             ^\n  22 |\n  23 |     // The info panel displays a weather forecast section.\n  24 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev"
+    }
+  ]
+}

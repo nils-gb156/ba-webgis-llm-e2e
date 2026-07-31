@@ -1,0 +1,85 @@
+{
+  "run": "run_14",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 8,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-7-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').locator('li').first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').locator('li').first()\n\n\n  25 |     // The geocoder panel appears with results. We wait for the first list item to be visible.\n  26 |     const firstResult = page.getByTestId('geocoder-panel').locator('li').first();\n> 27 |     awai"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByTestId('weather-forecast-section').locator('li, .forecast-entry, [role=\"listitem\"]')\nExpected: 24\nReceived: 0\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 5000ms\n  - waiting for getByTestId('weather-forecast-section').locator('li, .forecast-entry, [role=\"listitem\"]')\n    14 Ã— locator resolved to 0 elements\n       - unexpected value \"0\"\n\n\n  41 |     // We expect at least 24 items to be present.\n  42 |     co"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByTestId('weather-forecast-section').locator('p').filter({ hasText: /^Fri, Jul/ })\nExpected: 24\nReceived: 3\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 5000ms\n  - waiting for getByTestId('weather-forecast-section').locator('p').filter({ hasText: /^Fri, Jul/ })\n    14 Ã— locator resolved to 3 elements\n       - unexpected value \"3\"\n\n\n  41 |     // We count the paragraphs that match the timestamp pattern to veri"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 3\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // We count the paragraphs that match the timestamp pattern to verify there are 24 entries.\n  42 |     const forecastEntries = weatherForecastSection.locator('p').filter({ hasText: /^Fri, Jul/ });\n> 43 |     await expect.poll(() => forecastEntries.count()).toBe(24);\n     |                                                      ^\n  44"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 3\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // We count the paragraphs that match the timestamp pattern to verify there are 24 entries.\n  42 |     const forecastEntries = weatherForecastSection.locator('p').filter({ hasText: /^Fri, Jul/ });\n> 43 |     await expect.poll(() => forecastEntries.count()).toBe(24);\n     |                                                      ^\n  44"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 3\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // We count the paragraphs that match the timestamp pattern to verify there are 24 entries.\n  42 |     const forecastEntries = weatherForecastSection.locator('p').filter({ hasText: /^Fri, Jul/ });\n> 43 |     await expect.poll(() => forecastEntries.count()).toBe(24);\n     |                                                      ^\n  44"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 3\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     // We count the paragraphs that match the timestamp pattern to verify there are 24 entries.\n  42 |     const forecastEntries = weatherForecastSection.locator('p').filter({ hasText: /^Fri, Jul/ });\n> 43 |     await expect.poll(() => forecastEntries.count()).toBe(24);\n     |                                                      ^\n  44"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-10-iter-7-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

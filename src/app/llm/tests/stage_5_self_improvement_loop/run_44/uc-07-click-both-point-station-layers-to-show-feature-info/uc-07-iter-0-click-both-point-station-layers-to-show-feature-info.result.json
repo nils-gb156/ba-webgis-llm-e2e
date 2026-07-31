@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_44/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UC7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3531,
+                  "error": {
+                    "message": "Error: `expect.poll()` does not support \"resolves\" matcher.",
+                    "stack": "Error: `expect.poll()` does not support \"resolves\" matcher.\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:13:89",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 89,
+                      "line": 13
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 11 |\u001b[39m\n \u001b[90m 12 |\u001b[39m   \u001b[90m// Precondition: UV-Index Stations layer is active\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 13 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'uvi-stations-legend'\u001b[39m)\u001b[33m.\u001b[39misVisible())\u001b[33m.\u001b[39mresolves\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 14 |\u001b[39m\n \u001b[90m 15 |\u001b[39m   \u001b[90m// Precondition: EUCOS Ground Stations layer is active\u001b[39m\n \u001b[90m 16 |\u001b[39m   \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'eucos-stations-legend'\u001b[39m)\u001b[33m.\u001b[39misVisible())\u001b[33m.\u001b[39mresolves\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 89,
+                        "line": 13
+                      },
+                      "message": "Error: `expect.poll()` does not support \"resolves\" matcher.\n\n  11 |\n  12 |   // Precondition: UV-Index Stations layer is active\n> 13 |   await expect.poll(() => page.getByTestId('uvi-stations-legend').isVisible()).resolves.toBe(true);\n     |                                                                                         ^\n  14 |\n  15 |   // Precondition: EUCOS Ground Stations layer is active\n  16 |   await expect.poll(() => page.getByTestId('eucos-stations-legend').isVisible()).resolves.toBe(true);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:13:89"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T23:11:57.453Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-1a1de-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_44\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 89,
+                    "line": 13
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "9e2d46bdeabfe33bdad4-aec9b419243a30a390a6",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_44/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T23:11:56.770Z",
+    "duration": 5421.5,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

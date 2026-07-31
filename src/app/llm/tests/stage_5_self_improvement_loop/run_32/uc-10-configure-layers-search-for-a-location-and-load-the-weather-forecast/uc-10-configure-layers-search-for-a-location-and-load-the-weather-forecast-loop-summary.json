@@ -1,0 +1,58 @@
+{
+  "run": "run_32",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 5,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('geocoder-panel').getByRole('option').first()\n\n\n  34 |   // Assuming the first item in the list is the one we want.\n  35 |   const firstResult = geocoderPanel.getByRole('option').first();\n> 36 |   await firstResult.click();\n     |                     ^\n  37 |\n  38 |   // 5. Wait for the map to navigate to the selected location.\n  39 |   // The map center should ch"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('geocoder-panel').getByRole('option').first()\n\n\n  34 |   // Assuming the first item in the list is the one we want.\n  35 |   const firstResult = geocoderPanel.getByRole('option').first();\n> 36 |   await firstResult.click();\n     |                     ^\n  37 |\n  38 |   // 5. Wait for the map to navigate to the selected location.\n  39 |   // The map center should ch"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toBeVisible() failed\n\nLocator:  getByTestId('geocoder-panel')\nExpected: not visible\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n  - Expect \"not toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel')\n    13 Ã— locator resolved to <div class=\"css-11ujcvz\" aria-label=\"Geocoder\" data-testid=\"geocoder-panel\">â€¦</div>\n       - unexpected value \"visible\"\n\n\n  37 |   // 5. Wait for the map to navigate to the selected location.\n  38 |   // The geocoder"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"\"\nReceived: \"MÃ¼nster, North Rhine-Westphalia, Germany\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  38 |   // The geocoder panel closes after selection.\n  39 |   // Note: The panel may remain visible in some states, but the search input should be cleared.\n> 40 |   await expect.poll(() => geocoderInput.inputValue()).toBe('');\n     |                                                       ^\n  41 |\n  4"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

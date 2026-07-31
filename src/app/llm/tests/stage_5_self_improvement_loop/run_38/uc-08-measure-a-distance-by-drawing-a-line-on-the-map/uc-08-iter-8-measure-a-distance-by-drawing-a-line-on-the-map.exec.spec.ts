@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+
+    // 1. Activate the measurement tool
+    const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+    // Ensure the toggle is in the pressed state by clicking it (force to bypass Chakra visual overlay)
+    await measurementToggle.click({ force: true });
+
+    // Verify the measurement panel is visible
+    await expect(page.getByRole('dialog', { name: 'Measurement' })).toBeVisible();
+
+    // 2. Draw a line by clicking several points on the map
+    // Click a first point
+    await mapContainer.click({ position: { x: 500, y: 300 } });
+
+    // Click a second point to form a segment
+    await mapContainer.click({ position: { x: 600, y: 300 } });
+
+    // Click a third point to add another segment
+    await mapContainer.click({ position: { x: 600, y: 400 } });
+
+    // 3. Double-click to finish the measurement
+    await mapContainer.dblclick({ position: { x: 600, y: 400 } });
+
+    // 4. Verify the measurement panel displays a length value with a unit
+    await expect.poll(() =>
+        page
+            .getByRole('dialog', { name: 'Measurement' })
+            .getByRole('paragraph')
+            .last()
+            .textContent()
+    ).toMatch(/.*\d+(\.\d+)?\s*(km|m|mi|ft).*/i);
+});

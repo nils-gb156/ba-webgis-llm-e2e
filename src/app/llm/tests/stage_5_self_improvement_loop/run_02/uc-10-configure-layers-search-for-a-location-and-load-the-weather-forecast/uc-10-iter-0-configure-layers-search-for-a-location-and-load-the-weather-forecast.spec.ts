@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Expected results: Precipitation layer is rendered, Temperature layer is not
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  // Step 3: Search for a location using the geocoder
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The geocoder panel becomes visible with the search results
+  await expect(page.getByTestId('geocoder-panel')).toBeVisible();
+
+  // Click the first result in the geocoder panel
+  await page.getByTestId('geocoder-panel').getByRole('option').first().click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We verify this by checking that the map center has changed from the initial extent.
+  // The initial center is roughly Berlin. Münster is to the west-northwest.
+  const initialCenter = await page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    const center = map?.olMap.getView().getCenter();
+    return center && center.length >= 2 ? [center[0], center[1]] : undefined;
+  });
+
+  // Wait for the map to settle on the new location (Münster)
+  // We poll the map center until it changes significantly from the initial center
+  await expect.poll(async () => {
+    const currentCenter = await page.evaluate(() => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      const center = map?.olMap.getView().getCenter();
+      return center && center.length >= 2 ? [center[0], center[1]] : undefined;
+    });
+    // Check if the center has moved significantly (e.g., more than 10km in x or y)
+    if (!initialCenter || !currentCenter) return false;
+    const dx = Math.abs(currentCenter[0] - initialCenter[0]);
+    const dy = Math.abs(currentCenter[1] - initialCenter[1]);
+    return dx > 10000 || dy > 10000;
+  }).toBe(true);
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The info panel should now show the weather forecast section
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Expected result: The info panel displays a weather forecast section with 24 entries
+  // We check that the weather forecast section contains at least 24 items (e.g., list items or rows)
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  await expect(forecastSection.getByRole('list').locator('li')).toHaveCount(24);
+});

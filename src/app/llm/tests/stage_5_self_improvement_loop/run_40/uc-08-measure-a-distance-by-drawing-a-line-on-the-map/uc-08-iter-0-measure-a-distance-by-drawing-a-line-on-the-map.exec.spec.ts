@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Activate the measurement tool
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // 2. Click several points on the map canvas to draw a line
+  // We click on the map container at different positions.
+  const mapContainer = page.getByTestId('map-container');
+
+  // Store the initial map state to ensure we can click on the map
+  await expect.poll(() => getMapCenter(page)).toBeDefined();
+
+  // Click first point
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+  // Click second point
+  await mapContainer.click({ position: { x: 400, y: 400 } });
+  // Click third point
+  await mapContainer.click({ position: { x: 500, y: 500 } });
+
+  // 3. Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 500, y: 500 } });
+
+  // Expected results
+  // The measurement panel is visible.
+  // The measurement panel displays a length value with a unit.
+  // The measurement panel is likely part of the info-panel or a dedicated measurement result panel.
+  // Based on the UI context, there is an 'info-panel' and 'info-panel-toggle'.
+  // Let's look for a measurement result. It might be in the info panel or a specific measurement panel.
+  // Since there's no specific 'measurement-panel' test id, we'll look for text that indicates a measurement.
+  // The 'info-panel' is visible in the screenshot. Let's check if the measurement result appears there or in a new panel.
+  // Often, measurement results are shown in a floating panel or the info panel.
+  // Let's try to find any element with a length value.
+  // We can look for a pattern like "X.XX km" or "X.XX m" in the info panel or the whole page.
+  // Let's assume the measurement result appears in the info panel or a new panel that might be the info panel.
+  // Let's first check if the info panel is visible and contains a measurement.
+  // Or, the measurement might be in a specific measurement result panel.
+  // Let's look for a text that matches a measurement pattern.
+  const measurementResultPattern = /[\d.]+\s*(km|m|cm|mm|mi|ft|in)/i;
+
+  // The measurement panel is visible. It might be the info panel or a separate one.
+  // Let's check if the info panel contains the measurement.
+  // If not, we might need to look for a different panel.
+  // Let's try to find the measurement result by looking for the pattern in the info panel first.
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Wait for the info panel to be visible (it might already be visible)
+  await expect(infoPanel).toBeVisible();
+
+  // Check if the info panel contains the measurement result
+  // We'll use a polling assertion to wait for the measurement result to appear
+  await expect.poll(async () => {
+    const infoPanelText = await infoPanel.innerText();
+    return measurementResultPattern.test(infoPanelText);
+  }).toBe(true);
+});

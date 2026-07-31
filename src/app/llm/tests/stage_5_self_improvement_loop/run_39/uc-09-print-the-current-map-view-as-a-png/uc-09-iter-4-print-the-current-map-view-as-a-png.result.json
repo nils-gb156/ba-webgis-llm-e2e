@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_39/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "9: Print the current map view as a PNG",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7830,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('option', { name: 'PNG' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <option value=\"png\">PNG</option>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('option', { name: 'PNG' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <option value=\"png\">PNG</option>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts:28:27",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts",
+                      "column": 27,
+                      "line": 28
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 26 |\u001b[39m   \u001b[90m// and the decorative control element intercepts pointer events.\u001b[39m\n \u001b[90m 27 |\u001b[39m   \u001b[36mconst\u001b[39m pngOption \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'option'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'PNG'\u001b[39m })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 28 |\u001b[39m   \u001b[36mawait\u001b[39m expect(pngOption)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 29 |\u001b[39m   \u001b[36mawait\u001b[39m pngOption\u001b[33m.\u001b[39mclick({ force\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 30 |\u001b[39m\n \u001b[90m 31 |\u001b[39m   \u001b[90m// Verify the combobox now shows PNG as selected\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts",
+                        "column": 27,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('option', { name: 'PNG' })\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('option', { name: 'PNG' })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <option value=\"png\">PNG</option>\u001b[22m\n\u001b[2m       - unexpected value \"hidden\"\u001b[22m\n\n\n  26 |   // and the decorative control element intercepts pointer events.\n  27 |   const pngOption = page.getByRole('option', { name: 'PNG' });\n> 28 |   await expect(pngOption).toBeVisible();\n     |                           ^\n  29 |   await pngOption.click({ force: true });\n  30 |\n  31 |   // Verify the combobox now shows PNG as selected\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts:28:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T21:51:58.527Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-77eb7-e-current-map-view-as-a-PNG-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-09-print-the-current-map-view-as-a-png\\uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts",
+                    "column": 27,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5d1fa58aa29a2120d85d-6404366fbb389e22204a",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_39/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-4-print-the-current-map-view-as-a-png.exec.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T21:51:57.829Z",
+    "duration": 10799.735,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

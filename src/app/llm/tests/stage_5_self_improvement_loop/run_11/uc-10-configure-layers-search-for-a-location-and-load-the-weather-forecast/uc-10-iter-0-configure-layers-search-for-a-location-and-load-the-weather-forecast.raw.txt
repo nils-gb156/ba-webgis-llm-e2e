@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Hide the Temperature overlay layer.
+    const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+    await temperatureCheckbox.click();
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // 2. Show the Precipitation overlay layer.
+    const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+    await precipitationCheckbox.click();
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // 3. Click the search field and type a place name.
+    const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search' });
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // 4. Wait for the result list to appear and select the first result.
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    await expect(geocoderPanel.locator('li')).toHaveCount({ gt: 0 });
+    await geocoderPanel.getByRole('option', { name: 'Münster' }).first().click();
+
+    // 5. Wait for the map to navigate to the selected location.
+    // The map center shifts from the initial extent to Münster.
+    // Initial extent center is roughly [4430000, 5460000] (EPSG:3857).
+    // Münster is roughly [5240000, 5720000] (EPSG:3857).
+    await expect.poll(() => page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+        if (!map) return undefined;
+        const center = map.olMap.getView().getCenter();
+        return center && center.length >= 2 ? center : undefined;
+    })).toMatchObject([5240000, 5720000]);
+
+    // 6. Wait for the info panel to load the forecast.
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Expected result: The info panel displays a weather forecast section with 24 entries.
+    // We poll for the number of forecast entries to reach at least 24.
+    await expect.poll(async () => {
+        return page.evaluate(() => {
+            const section = document.querySelector('[data-testid="weather-forecast-section"]');
+            if (!section) return 0;
+            // Assuming forecast entries are list items or similar structured elements within the section.
+            // Based on typical UI, they might be divs or list items.
+            // Let's count elements that look like forecast cards/entries.
+            const entries = section.querySelectorAll('.forecast-entry, li, .css-1c0t9j0'); // Common class names
+            return entries.length;
+        });
+    }).toBeGreaterThanOrEqual(24);
+});

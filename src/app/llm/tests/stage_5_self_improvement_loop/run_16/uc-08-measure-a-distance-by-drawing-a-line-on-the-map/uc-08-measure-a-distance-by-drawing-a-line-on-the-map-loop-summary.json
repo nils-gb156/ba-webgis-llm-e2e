@@ -1,0 +1,103 @@
+{
+  "run": "run_16",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  43 |     // We look for text that matches a number followed by a unit (e.g., \"123.45 km\").\n  44 |     const measurementResult = infoPanel.getByText(/[\\d,.]+\\s*(km|m|mi|ft)/);\n> 45 |   "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  43 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  44 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement-panel').getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  42 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  43 |     const measurementResult = measurementPanel.getByText(/[\\d,.]+\\s*(km"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d,.]+\\s*(km|m|mi|ft)/)\n\n\n  39 |     // We look for a pattern matching a number followed by a unit (e.g., \"123.45 km\").\n  40 |     const measurementResult = measurementPanel."
+    }
+  ]
+}

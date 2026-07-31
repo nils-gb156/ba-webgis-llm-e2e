@@ -1,0 +1,103 @@
+{
+  "run": "run_46",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  19 |     // Click first point\n  20 |     await mapContainer.click({ position: { x: 400, y: 300 } });\n> 21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();\n     |                                                             ^\n  22 |\n  23 |     // Click second point\n  24 |     await mapContainer.click({ position: { x: 500, y: 300 } });\n    at "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  19 |     // Click first point\n  20 |     await mapContainer.click({ position: { x: 400, y: 300 } });\n> 21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();\n     |                                                             ^\n  22 |\n  23 |     // Click second point\n  24 |     await mapContainer.click({ position: { x: 500, y: 300 } });\n    at "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |     // Click first point\n  21 |     await mapContainer.click({ position: { x: 400, y: 300 } });\n> 22 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();\n     |                                                             ^\n  23 |\n  24 |     // Click second point\n  25 |     await mapContainer.click({ position: { x: 500, y: 300 } });\n    at "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |     // Click first point\n  21 |     await mapContainer.click({ position: { x: 400, y: 300 } });\n> 22 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();\n     |                                                             ^\n  23 |\n  24 |     // Click second point\n  25 |     await mapContainer.click({ position: { x: 500, y: 300 } });\n    at "
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-08-iter-4-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeDefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  20 |     // Click first point\n  21 |     await mapContainer.click({ position: { x: 400, y: 300 } });\n> 22 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();\n     |                                                             ^\n  23 |\n  24 |     // Click second point\n  25 |     await mapContainer.click({ position: { x: 500, y: 300 } });\n    at "
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\n\n\n  32 |     // The dialog text changes from the instruction to the measurement result (e.g., \"123.45 m\")\n  33 |     const measurementResult = pag"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('measurement').getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('measurement').getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\n\n\n  32 |     // The dialog text changes from the instruction to the measurement result (e.g., \"123.45 km\")\n  33 |     const measurementResult = page.getByTestId('measurement').getByT"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\n\n\n  32 |     // The dialog text changes from the instruction to the measurement result (e.g., \"74.11 km\")\n  33 |     const measurementResult = pag"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-08-iter-8-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/\\d+\\.?\\d*\\s*(m|km|mi|ft)/)\n\n\n  32 |     // The dialog text changes from the instruction to the measurement result (e.g., \"74.11 km\")\n  33 |     const measurementResult = pag"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d,.]+\\s*(m|km|mi|ft)/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/[\\d,.]+\\s*(m|km|mi|ft)/)\n\n\n  32 |     // The dialog text changes from the instruction to the measurement result (e.g., \"74.11 km\")\n  33 |     const measurementResult = page.ge"
+    }
+  ]
+}

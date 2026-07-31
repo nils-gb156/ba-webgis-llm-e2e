@@ -1,0 +1,84 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Info panel is visible (it is open by default)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Precondition: UV-Index Stations layer is active
+  await expect(page.getByRole('checkbox', { name: 'UV-Index Stations' })).toBeChecked();
+
+  // Precondition: EUCOS Ground Stations layer is active
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+
+  // Precondition: No measurement tool is active
+  // The measurement toggle is a button, not a checkbox, so we check its pressed state.
+  // We use force: true because Chakra UI renders the interactive element visually hidden.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Step 1: Click at map coordinates [1188692.84, 6767643.28] (EPSG:3857)
+  // The coordinates are in EPSG:3857. We need to convert them to pixel coordinates
+  // relative to the map canvas to click on them.
+  // We use page.evaluate to do the conversion inside the browser context where the map model is available.
+  const pixelCoords = await page.evaluate(
+    ({ targetX, targetY }) => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      if (!map) {
+        return null;
+      }
+      const view = map.olMap.getView();
+      const center = view.getCenter();
+      const resolution = view.getResolution();
+      if (!center || !resolution) {
+        return null;
+      }
+      // Convert EPSG:3857 coordinates to pixel coordinates relative to the map center
+      const deltaX = (targetX - center[0]) / resolution;
+      const deltaY = (targetY - center[1]) / resolution;
+      // The click position is relative to the top-left of the map container.
+      // We need the center's pixel coordinates first.
+      const size = map.olMap.getSize();
+      if (!size) {
+        return null;
+      }
+      const centerX = size[0] / 2;
+      const centerY = size[1] / 2;
+      return {
+        x: Math.round(centerX + deltaX),
+        y: Math.round(centerY + deltaY),
+      };
+    },
+    { targetX: 1188692.84, targetY: 6767643.28 },
+  );
+
+  if (!pixelCoords) {
+    throw new Error('Could not determine pixel coordinates for the map click.');
+  }
+
+  await page.locator('[data-testid="map-container"]').click({
+    position: pixelCoords,
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // The info panel should contain sections for both "UV-Index Station" and "EUCOS Ground Station".
+  // The info panel contains multiple sections, including weather forecast. We need to assert
+  // that the specific station sections are present. We can use the accessibility tree to check
+  // for headings or roles that correspond to the station info.
+  // However, since the text content might be dynamic and contain other information,
+  // we should look for specific elements that indicate the station info is present.
+  // Based on the use case, we expect to see "UV-Index Station" and "EUCOS Ground Station" in the info panel.
+  // We can assert on the presence of these strings in the info panel's text content.
+  // To avoid strict mode violations and ensure we are checking the right element,
+  // we can use getByTestId('info-panel') and then check its text content.
+  // Since the text content might be large and contain other information, we can use toContain
+  // to check for the presence of the station names.
+  await expect.poll(() => page.getByTestId('info-panel').textContent()).toContain('UV-Index Station');
+  await expect.poll(() => page.getByTestId('info-panel').textContent()).toContain('EUCOS Ground Station');
+});

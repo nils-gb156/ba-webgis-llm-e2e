@@ -1,0 +1,94 @@
+{
+  "run": "run_15",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 9,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-8-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  22 |   // Step 4: Wait for the result list to appear and select the first result\n  23 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n> 24 |   await expect(geocoderPanel.getByRole('option')).toHaveCount({ gt: 0 });\n     |                                                   ^\n  25 |   await geocoderPanel.getByRole('option').first().click();\n  26 |\n  27 |   // Step 5: Wait for the map to navigate to the selected loca"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  23 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n  24 |   // The geocoder results are rendered as list items with role \"option\" inside the panel\n> 25 |   await expect(geocoderPanel.getByRole('option')).toHaveCount({ gte: 1 });\n     |                                                   ^\n  26 |   await geocoderPanel.getByRole('option').first().click();\n  27 |\n  28 |   // Step 5: Wait for the map to navigate to the"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "api_misuse",
+      "error_excerpt": "Error: locator._expect: expectedNumber: expected float, got object\n\n  23 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n  24 |   // The geocoder results are rendered as list items with role \"option\" inside the panel\n> 25 |   await expect(geocoderPanel.getByRole('option')).toHaveCount({ gte: 1 });\n     |                                                   ^\n  26 |   await geocoderPanel.getByRole('option').first().click();\n  27 |\n  28 |   // Step 5: Wait for the map to navigate to the"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('option', { name: 'MÃ¼nster, North' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('option', { name: 'MÃ¼nster, North' })\n\n\n  29 |   const geocoderPanel = page.getByTestId('geocoder-panel');\n  30 |   // The geocoder results are rendered as list items with role \"option\" inside"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('option', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('option', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' })\n\n\n  29 |   // The results are rendered as paragraphs with role \"option\" inside the geocoder panel\n  30"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('paragraph', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('paragraph', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' })\n\n\n  29 |   // The results are rendered as paragraphs inside the geocoder panel\n  30 |   const ge"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('geocoder-panel').getByRole('listitem', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('geocoder-panel').getByRole('listitem', { name: 'MÃ¼nster, North Rhine-Westphalia, Germany' })\n\n\n  29 |   // The results are rendered as list items inside the geocoder panel\n  30 |   const geoc"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-10-iter-7-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |   await expect.poll(() =>\n  42 |     page.getByTestId('weather-forecast-section').locator('li').count(),\n> 43 |   ).toBe(24);\n     |     ^\n  44 | });\n  45 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_15\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\u"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-10-iter-8-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

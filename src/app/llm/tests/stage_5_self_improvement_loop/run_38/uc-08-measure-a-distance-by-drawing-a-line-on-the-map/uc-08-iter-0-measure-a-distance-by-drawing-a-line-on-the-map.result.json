@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_38/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 8: Measure a distance by drawing a line on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 8017,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel').getByRole('paragraph')\nExpected pattern: \u001b[32m/.*\\d+(\\.\\d+)?\\s*(km|m|mi|ft).*/i\u001b[39m\nReceived string:  \u001b[31m\"Click on the map to load a forecast.\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel').getByRole('paragraph')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <p class=\"css-v0otzr\">Click on the map to load a forecast.</p>\u001b[22m\n\u001b[2m       - unexpected value \"Click on the map to load a forecast.\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel').getByRole('paragraph')\nExpected pattern: \u001b[32m/.*\\d+(\\.\\d+)?\\s*(km|m|mi|ft).*/i\u001b[39m\nReceived string:  \u001b[31m\"Click on the map to load a forecast.\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel').getByRole('paragraph')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <p class=\"css-v0otzr\">Click on the map to load a forecast.</p>\u001b[22m\n\u001b[2m       - unexpected value \"Click on the map to load a forecast.\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:37:73",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                      "column": 73,
+                      "line": 37
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 35 |\u001b[39m     \u001b[90m// The measurement result should be visible in the info panel\u001b[39m\n \u001b[90m 36 |\u001b[39m     \u001b[90m// We look for text that resembles a length measurement (e.g., \"X.XX km\" or \"X.XX m\")\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'info-panel'\u001b[39m)\u001b[33m.\u001b[39mgetByRole(\u001b[32m'paragraph'\u001b[39m))\u001b[33m.\u001b[39mtoHaveText(\u001b[35m/.*\\d+(\\.\\d+)?\\s*(km|m|mi|ft).*/i\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 38 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 39 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                        "column": 73,
+                        "line": 37
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel').getByRole('paragraph')\nExpected pattern: \u001b[32m/.*\\d+(\\.\\d+)?\\s*(km|m|mi|ft).*/i\u001b[39m\nReceived string:  \u001b[31m\"Click on the map to load a forecast.\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel').getByRole('paragraph')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <p class=\"css-v0otzr\">Click on the map to load a forecast.</p>\u001b[22m\n\u001b[2m       - unexpected value \"Click on the map to load a forecast.\"\u001b[22m\n\n\n  35 |     // The measurement result should be visible in the info panel\n  36 |     // We look for text that resembles a length measurement (e.g., \"X.XX km\" or \"X.XX m\")\n> 37 |     await expect(page.getByTestId('info-panel').getByRole('paragraph')).toHaveText(/.*\\d+(\\.\\d+)?\\s*(km|m|mi|ft).*/i);\n     |                                                                         ^\n  38 | });\n  39 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:37:73"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-24T21:24:22.992Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-4905a-y-drawing-a-line-on-the-map-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                    "column": 73,
+                    "line": 37
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "cb26cb23b3c55947180b-daefe3749814257ff0ed",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_38/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+          "line": 7,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-24T21:24:22.330Z",
+    "duration": 10965.926,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

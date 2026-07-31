@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and layers to render
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Activate the measurement tool
+    const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+    await measurementToggle.click();
+
+    // Step 2: Click several points on the map canvas to draw a line
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({ position: { x: 300, y: 300 } });
+    await mapContainer.click({ position: { x: 400, y: 400 } });
+    await mapContainer.click({ position: { x: 500, y: 350 } });
+
+    // Step 3: Double-click to finish the measurement
+    await mapContainer.dblclick({ position: { x: 500, y: 350 } });
+
+    // Expected results: The measurement panel is visible and displays a length value with a unit
+    const measurementPanel = page.getByTestId('map-controls-panel');
+    await expect(measurementPanel).toBeVisible();
+    await expect.poll(() => measurementPanel.textContent()).toMatch(/\d+(\.\d+)?\s*(m|km|mi|ft)/i);
+});

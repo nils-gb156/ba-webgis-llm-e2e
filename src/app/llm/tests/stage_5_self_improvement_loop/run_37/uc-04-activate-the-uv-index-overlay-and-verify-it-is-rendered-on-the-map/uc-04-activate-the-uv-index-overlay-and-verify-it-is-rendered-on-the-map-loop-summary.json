@@ -1,0 +1,31 @@
+{
+  "run": "run_37",
+  "use_case_id": 4,
+  "title": "Activate the UV-Index overlay and verify it is rendered on the map",
+  "complexity": "medium",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "pointer_interception",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByRole('checkbox', { name: 'UV-Index', exact: true })\n    - locator resolved to <input value=\"on\" type=\"checkbox\" aria-invalid=\"false\" id=\"checkbox:_r_p_:input\" aria-labelledby=\"checkbox:_r_p_:label\"/>\n  - attempting click action\n    2 Ã— waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if need"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

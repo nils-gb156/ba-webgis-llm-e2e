@@ -1,0 +1,31 @@
+{
+  "run": "run_27",
+  "use_case_id": 5,
+  "title": "Activate the Precipitation overlay and verify the legend updates",
+  "complexity": "medium",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('legend').getByText('Precipitation', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })\n\n\n  25 |   // The legend panel is identified by test-id \"legend\".\n  26 |   const legendPanel = page.getByTestId('legend');\n> 27 |   await expect(legendPanel.getByText('Precipitatio"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}
