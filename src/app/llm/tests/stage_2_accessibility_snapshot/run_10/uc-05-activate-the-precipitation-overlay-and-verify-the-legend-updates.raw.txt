@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await precipitationCheckbox.click();
+
+  // Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 2: View the legend and verify it displays an entry for the Precipitation layer
+  const legend = page.getByTestId('legend');
+  
+  // Wait for the legend to update with the Precipitation layer entry
+  // We poll for the presence of text that indicates the Precipitation legend is visible.
+  // Since we don't know the exact text, we look for the layer heading or a specific range.
+  // A safe bet is to wait for the legend container to be visible and then check for a substring
+  // that is likely unique to the precipitation legend, or simply wait for the legend to re-render.
+  // Given the previous legend had "Temperature", "EUCOS", "UV-Index", we can check if the legend
+  // still exists and potentially look for a new item. However, without a specific test-id for the
+  // precipitation legend item, we can assert that the legend is visible and contains some text
+  // related to precipitation if possible, or just that the legend is updated.
+  
+  // Let's assume the legend item will have text like "Precipitation" or specific ranges.
+  // We will poll for the legend to contain text that suggests the precipitation layer is listed.
+  // A common pattern for such layers is showing ranges like "0-10", "10-20" etc. or just the name.
+  // We'll check for the presence of "Precipitation" in the legend.
+  
+  await expect.poll(() => legend.getByText('Precipitation', { exact: false }).count()).toBeGreaterThan(0);
+});

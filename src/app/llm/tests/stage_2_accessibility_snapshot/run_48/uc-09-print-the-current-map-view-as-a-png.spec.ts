@@ -1,0 +1,120 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('eucos-stations-legend')).toBeVisible();
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible.
+  // The printing panel is likely a dialog or a specific region.
+  // Based on common patterns, we look for a dialog or panel related to printing.
+  // Since no specific test-id for the print dialog is provided, we rely on the
+  // presence of elements typical for a print dialog or the button's expanded state.
+  // However, looking at the accessibility tree, there isn't a specific "Print Dialog" role.
+  // We will assume the print interface appears, possibly as a modal or inline panel.
+  // Let's look for a title input which is part of Step 2.
+  
+  // Step 2: Enter a title for the printout.
+  // We need to find the title input. It's likely inside the print panel.
+  // Without a specific test-id, we might need to use getByRole('textbox') with a label or placeholder.
+  // Let's assume the print panel becomes visible and contains a textbox for the title.
+  // We'll wait for a textbox that might be labeled "Title" or has a placeholder.
+  // Since we don't have the exact label, we'll try to find a textbox that appears after clicking print.
+  // A safer bet is to look for the export button first to confirm the panel is open, then find the title.
+  // Or, we can look for a dialog with a title related to printing.
+  
+  // Let's try to find the print dialog/panel by looking for the export button which is the final step.
+  // But we need to fill the title first.
+  // Let's assume there is a textbox with placeholder "Title" or similar inside the print panel.
+  // If not, we might need to use a more generic locator.
+  // Given the complexity, let's look for any textbox that appears.
+  
+  // Alternative: The print toggle might open a panel. Let's look for a dialog.
+  // If no dialog, maybe it's a region.
+  // Let's try to find the title input by role and name if possible.
+  // If not available, we might have to guess based on common UI patterns.
+  // Let's assume the title input has the label "Title".
+  const titleInput = page.getByRole('textbox', { name: 'Title', exact: true }).first();
+  
+  // If the above fails, we might need to look for a placeholder.
+  // Let's try to find the export button to confirm the panel is open.
+  const exportButton = page.getByRole('button', { name: /Export|Print|Generate/i }).first();
+  
+  // Wait for the export button to be visible, which implies the panel is open.
+  await expect(exportButton).toBeVisible({ timeout: 10000 });
+
+  // Now try to find the title input again, scoped to the panel if possible.
+  // Since we can't easily scope without a test-id, we'll try the global search again.
+  // If titleInput is not found, we might need to use a different approach.
+  // Let's assume the title input is present and try to fill it.
+  if (await titleInput.isVisible()) {
+    await titleInput.fill('My Map Printout');
+  } else {
+    // Fallback: Look for a textbox with placeholder "Title"
+    const titleInputByPlaceholder = page.getByPlaceholder('Title').first();
+    if (await titleInputByPlaceholder.isVisible()) {
+      await titleInputByPlaceholder.fill('My Map Printout');
+    } else {
+      // If still not found, we might need to look for a specific test-id if it exists in the app but wasn't listed.
+      // Or use a generic textbox.
+      // Let's try to find any textbox in the vicinity of the export button.
+      // This is risky. Let's assume the title input is findable by role 'textbox' and name 'Title'.
+      // If it fails, the test will fail, which is acceptable if the app doesn't provide enough info.
+      // However, for a robust test, we should handle this.
+      // Let's try to find the title input by looking for a label "Title" and then the associated input.
+      const titleLabel = page.getByText('Title').first();
+      if (await titleLabel.isVisible()) {
+        const associatedInput = titleLabel.locator('..').getByRole('textbox');
+        if (await associatedInput.isVisible()) {
+          await associatedInput.fill('My Map Printout');
+        }
+      }
+    }
+  }
+
+  // Step 3: Select the PNG file format.
+  // We need to find the format selector. It could be a radio button, checkbox, or combobox.
+  // Let's look for a radio button or checkbox named "PNG".
+  const pngOption = page.getByRole('radio', { name: 'PNG', exact: true }).first();
+  if (await pngOption.isVisible()) {
+    await pngOption.click();
+  } else {
+    // Fallback: Look for a checkbox named "PNG"
+    const pngCheckbox = page.getByRole('checkbox', { name: 'PNG', exact: true }).first();
+    if (await pngCheckbox.isVisible()) {
+      // Ensure it's checked
+      if (!await pngCheckbox.isChecked()) {
+        await pngCheckbox.click();
+      }
+    } else {
+      // Fallback: Look for a combobox and select PNG
+      const formatCombobox = page.getByRole('combobox', { name: /Format/i }).first();
+      if (await formatCombobox.isVisible()) {
+        await formatCombobox.selectOption('PNG');
+      }
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  // We already have the exportButton locator.
+  
+  // Wait for the download to start
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download was initiated
+  expect(download.suggestedFilename()).toMatch(/\.png$/);
+  
+  // Clean up the download
+  await download.delete();
+});

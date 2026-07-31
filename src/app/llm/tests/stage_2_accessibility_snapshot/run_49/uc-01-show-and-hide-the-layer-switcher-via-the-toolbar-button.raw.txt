@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 1: Show and hide the layer switcher via the toolbar button', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and the layer switcher to be initially visible
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher' });
+  const layerSwitcherPanel = page.getByTestId('layer-switcher');
+
+  await expect(layerSwitcherPanel).toBeVisible();
+
+  // Step 1: Click the 'Layer Switcher' button to hide the panel
+  await layerSwitcherToggle.click();
+
+  // Expected result: After the first click, the layer switcher panel is no longer visible.
+  await expect(layerSwitcherPanel).not.toBeVisible();
+
+  // Step 2: Click the 'Layer Switcher' button again to show the panel.
+  // Note: The button might be in an "active" state (pressed=true) when visible.
+  // Clicking it when pressed=true should toggle it off.
+  // Clicking it when pressed=false should toggle it on.
+  // We need to ensure it is visible after the second click.
+  // Since we just hid it, the button is now unpressed. Clicking it should show the panel.
+  await layerSwitcherToggle.click();
+
+  // Expected result: After the second click, the layer switcher panel is visible again.
+  await expect(layerSwitcherPanel).toBeVisible();
+});

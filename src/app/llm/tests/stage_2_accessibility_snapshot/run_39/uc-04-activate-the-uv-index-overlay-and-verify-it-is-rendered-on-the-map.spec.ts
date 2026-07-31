@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure layer switcher is open (it is by default based on context, but let's be safe if needed)
+  // The context shows "Layer Switcher" [pressed] so it should be visible.
+  // We wait for the UV-Index checkbox to be present before interacting.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  await expect(uvIndexCheckbox).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer.
+  // The checkbox is initially unchecked. We click it to check it.
+  await uvIndexCheckbox.click();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We verify the expected results:
+  // 1. The UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // 2. The UV-Index overlay tiles are rendered on the map canvas.
+  // Since map content is on a canvas, we can't directly assert "tiles are rendered" via DOM.
+  // However, the presence of the UV-Index legend usually indicates the layer is active and loaded.
+  // Alternatively, we can assert that the layer is checked and assume the map updates asynchronously.
+  // To be more robust, we can check if the UV-Index stations legend appears, as it often appears when the UV-Index layer is active.
+  const uvStationsLegend = page.getByTestId('uvi-stations-legend');
+  // The legend might appear in the legend panel. Let's check if the legend panel is visible and contains the UV-Index legend.
+  // Or simply wait for the legend item to appear if it's part of the dynamic legend list.
+  // Given the complexity of map canvas assertions, checking the UI state (checked) and potentially a related UI element (legend) is standard.
+  // Let's wait for the UV-Index stations legend to be visible, as it is likely tied to the layer's visibility.
+  await expect(uvStationsLegend).toBeVisible({ timeout: 10000 });
+});

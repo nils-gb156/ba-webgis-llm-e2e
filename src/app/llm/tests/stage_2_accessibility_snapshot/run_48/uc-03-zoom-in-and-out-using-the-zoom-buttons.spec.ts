@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Helper to get current zoom level via the scale viewer text
+  const getZoomLevel = async (p: typeof page) => {
+    const scaleText = await p.getByTestId('scale-viewer').textContent();
+    // Extract the denominator from "Current scale: 1 to XXXXX"
+    const match = scaleText?.match(/1 to (\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    return undefined;
+  };
+
+  // Get initial zoom level
+  const initialZoomDenom = await getZoomLevel(page);
+  expect(initialZoomDenom).toBeDefined();
+
+  // Step 1: Click the 'Zoom in' button to increase the zoom level
+  // Zooming in makes the denominator smaller (closer view)
+  await page.getByRole('button', { name: 'Zoom in map' }).click();
+
+  // Wait for the zoom change to propagate and scale to update
+  await expect.poll(async () => getZoomLevel(page)).toBeLessThan(initialZoomDenom!);
+
+  // Store the zoom level after zooming in
+  const zoomedInDenom = await getZoomLevel(page);
+
+  // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  // Zooming out makes the denominator larger (farther view)
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Wait for the zoom change to propagate and scale to update
+  // The final denominator should be larger than the one after zooming in
+  await expect.poll(async () => getZoomLevel(page)).toBeGreaterThan(zoomedInDenom!);
+});

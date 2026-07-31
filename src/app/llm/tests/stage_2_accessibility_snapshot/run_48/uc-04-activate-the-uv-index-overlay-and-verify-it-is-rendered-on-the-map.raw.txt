@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to be ready and the map to be interactive
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Register a listener for network requests to verify the WMS tile request
+  const uvIndexTileRequest = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('LAYERS=UV-Index') && request.resourceType() === 'image';
+  });
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer to show it.
+  // The layer switcher is already visible and the UV-Index checkbox is unchecked.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  await uvIndexCheckbox.click();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  await uvIndexTileRequest;
+
+  // Expected result: The UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Expected result: The UV-Index overlay tiles are rendered on the map canvas.
+  // We verify this by checking that the map container still exists and is visible,
+  // and potentially by checking for the presence of the legend if available.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  
+  // Optional: Verify the UV-Index legend is visible if it appears when the layer is active
+  const uvIndexLegend = page.getByTestId('uvi-stations-legend');
+  // The legend might be for stations, not the overlay. Let's check if there's a specific UV-Index overlay legend.
+  // Based on the context, there isn't a specific 'uv-index-overlay-legend' test id.
+  // However, the layer switcher should reflect the state.
+  // We can also check if the UV-Index checkbox is checked, which we already did.
+  // To further confirm rendering, we could look for specific visual cues, but without a specific test id for the tile,
+  // we rely on the network request and the checkbox state.
+  
+  // Let's check if the UV-Index layer is listed in the legend section if it appears there.
+  // The accessibility tree shows "UV-Index Stations" legend, which is different.
+  // We will assume the network request and checkbox state are sufficient indicators for this use case.
+});

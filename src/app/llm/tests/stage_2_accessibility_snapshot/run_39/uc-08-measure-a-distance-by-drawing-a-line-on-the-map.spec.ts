@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready before interacting with it
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  // The info panel is already pressed/visible, and measurement usually adds content to it or a specific panel.
+  // Based on the context, the "Information" heading is visible. We check for the measurement result area.
+  // However, the prompt says "measurement panel is visible". Let's look for the info panel or a specific measurement UI.
+  // Since there is no specific "measurement-panel" test id, we rely on the result being visible or the info panel updating.
+  // The expected result is "The measurement panel displays a length value with a unit."
+  // We will assert on the info panel or a specific element that shows the result.
+  // Let's assume the info panel contains the result or a dedicated measurement display appears.
+  // Given the context, "info-panel" is a test id. Let's ensure it's visible.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas. The map is a canvas element.
+  // We'll click at different coordinates to draw a line.
+  // First, we need to find the bounding box of the map container to click within it.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or has no bounding box');
+  }
+
+  // Click 3 points to form a simple line/shape
+  const point1 = { x: mapBox.x + mapBox.width / 2, y: mapBox.y + mapBox.height / 2 };
+  const point2 = { x: mapBox.x + mapBox.width / 4, y: mapBox.y + mapBox.height / 4 };
+  const point3 = { x: mapBox.x + mapBox.width * 3 / 4, y: mapBox.y + mapBox.height * 3 / 4 };
+
+  await page.mouse.click(point1.x, point1.y);
+  await page.mouse.click(point2.x, point2.y);
+  await page.mouse.click(point3.x, point3.y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Expected results:
+  // - The measurement panel is visible. (Already asserted info panel)
+  // - The measurement panel displays a length value with a unit.
+  
+  // We need to find the element that displays the length.
+  // Often, this is inside the info panel or a specific measurement result container.
+  // Let's look for text that looks like a measurement (e.g., "123.45 m" or similar).
+  // Since we don't have a specific test id for the result, we'll look for text matching a pattern.
+  // We'll poll for the result to appear.
+  
+  await expect.poll(async () => {
+    // Try to find text that looks like a measurement result.
+    // It might be in the info panel.
+    const infoPanelText = await infoPanel.textContent();
+    return infoPanelText;
+  }).toMatch(/[\d.]+\s*(m|km|ft|mi)/);
+});

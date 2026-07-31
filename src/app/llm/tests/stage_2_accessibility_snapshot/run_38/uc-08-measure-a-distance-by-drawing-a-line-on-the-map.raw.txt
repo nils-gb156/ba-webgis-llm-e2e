@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Activate the measurement tool
+  await page.getByRole('button', { name: 'Measurement' }).click();
+
+  // Step 2: Click several points on the map to draw a line
+  // We use force: true to bypass Chakra UI's decorative overlay
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click first point (center-ish)
+  await mapContainer.click({ position: { x: 300, y: 300 }, force: true });
+  // Click second point
+  await mapContainer.click({ position: { x: 400, y: 200 }, force: true });
+  // Click third point
+  await mapContainer.click({ position: { x: 500, y: 300 }, force: true });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 500, y: 300 }, force: true });
+
+  // Expected Result 1: The measurement panel is visible
+  // The info panel is already open and pressed in the context, and the measurement tool
+  // typically updates the info panel or a specific measurement section within it.
+  // We assert the info panel is visible as the container for the result.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Expected Result 2: The measurement panel displays a length value with a unit.
+  // We look for text that resembles a measurement value (e.g., "1.23 km", "500 m")
+  // within the info panel or the general page content.
+  // Using expect.poll to wait for the async measurement calculation to complete.
+  await expect.poll(() => page.getByTestId('info-panel').innerText()).toMatch(/\d+\.?\d*\s*(km|m|ft|mi)/i);
+});

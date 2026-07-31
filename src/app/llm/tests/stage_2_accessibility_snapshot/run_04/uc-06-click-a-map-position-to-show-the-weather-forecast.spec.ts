@@ -1,0 +1,75 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible. The accessibility tree shows "Info Panel Switcher [pressed]",
+  // so it should already be open. We assert visibility to be sure before interacting.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas to trigger the forecast request.
+  // We click near the center of the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the info panel to update with the weather forecast.
+  // The expected result is that the "Weather Forecast" section appears.
+  await expect(page.getByRole('heading', { name: 'Weather Forecast' })).toBeVisible();
+
+  // Verify that the clicked position is highlighted on the map.
+  // The prompt mentions a "coordinate-viewer" test id, which likely shows the clicked coord.
+  // However, the specific requirement is "highlighted on the map". Since map features aren't DOM,
+  // we can infer highlighting by checking if the coordinate viewer has a value or if the forecast
+  // loaded. Let's check the coordinate viewer as a proxy for the map interaction being registered.
+  await expect(page.getByTestId('coordinate-viewer')).toBeVisible();
+
+  // Verify the forecast contains 24 entries.
+  // The "Weather Forecast" section likely contains a list or grid of entries.
+  // We will poll for the presence of 24 forecast items.
+  // Assuming each forecast entry is a list item or a distinct element within the weather forecast section.
+  // Without specific test IDs for forecast entries, we count elements by role or text pattern if possible.
+  // Let's assume the forecast entries are rendered as distinct elements (e.g., divs or list items)
+  // inside the "Weather Forecast" section.
+  
+  // We need to identify the forecast entries. Let's look for a common pattern.
+  // Often, forecast cards might have a specific role or class.
+  // If no specific test ID is available for forecast entries, we might need to count based on structure.
+  // Let's try to find elements inside the Weather Forecast section.
+  // If they are just text, we can't easily count "24 entries" without more context.
+  // However, typically these are structured. Let's assume they are list items or cards.
+  
+  // Let's try to get all elements inside the Weather Forecast heading's container that look like entries.
+  // Since we don't have specific test IDs for the entries, we'll rely on the structure.
+  // A robust way is to check if the number of forecast items reaches 24.
+  // Let's assume each forecast item has a unique time or temperature value.
+  // But polling for a specific count of dynamic elements is tricky without a stable selector.
+  
+  // Alternative: The prompt says "forecast contains 24 entries".
+  // Let's assume the forecast entries are rendered in a list or grid.
+  // We will poll for the existence of at least 24 forecast items.
+  // We need a selector for the forecast items. Let's assume they are `div` or `li` elements within the forecast section.
+  // If we can't find a specific selector, we might check the coordinate viewer or other indicators.
+  
+  // Let's look at the accessibility tree again. "Weather Forecast" is a heading.
+  // There are no specific roles listed for the forecast entries.
+  // We might need to use a CSS class or structure-based locator as a last resort.
+  // However, the prompt says "Do not use CSS selectors ... as a last resort".
+  // Let's assume there is a way to identify the entries.
+  // Maybe they are list items? Let's try `getByRole('listitem')` inside the forecast section.
+  
+  const forecastSection = page.getByRole('heading', { name: 'Weather Forecast' }).locator('..');
+  
+  // Poll for the count of forecast entries.
+  // We assume forecast entries are list items or have a specific role.
+  // If they are not list items, we might need to count based on text or other attributes.
+  // Let's try counting elements that might represent forecast data.
+  // Without more info, let's assume they are list items for now.
+  
+  await expect.poll(async () => {
+    const forecastItems = await forecastSection.getByRole('listitem').count();
+    return forecastItems;
+  }).toBe(24);
+});

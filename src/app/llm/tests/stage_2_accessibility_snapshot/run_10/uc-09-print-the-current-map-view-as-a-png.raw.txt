@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Precondition: The app is loaded successfully.
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: At least one base map and one overlay layer are visible on the map.
+  // The accessibility tree shows that EUCOS Ground Stations, UV-Index Stations, and Temperature are checked.
+  // The Layer Switcher is open and pressed. We can assume the layers are visible as per the initial state.
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Expected result: The printing panel is visible.
+  // We look for a dialog or panel that likely contains title and format inputs.
+  // Since there is no specific test id for the print dialog, we look for the title input which is part of the printing panel.
+  const titleInput = page.getByLabel('Title');
+  await expect(titleInput).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  await titleInput.fill('Test Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // We look for a radio button or select element for the format.
+  const pngFormat = page.getByRole('radio', { name: 'PNG' });
+  // If PNG is not selected by default, we select it. If it is, we skip.
+  // However, to be safe and explicit, we check its state.
+  if (!(await pngFormat.isChecked())) {
+    await pngFormat.check();
+  }
+
+  // Step 4: The user clicks the export/print button.
+  const exportButton = page.getByRole('button', { name: /Export|Print|Generate/i });
+  await expect(exportButton).toBeVisible();
+  
+  // Trigger download
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

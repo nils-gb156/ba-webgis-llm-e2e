@@ -1,0 +1,81 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready and get initial zoom level
+  const zoomLevel = async (p: typeof page) => {
+    const frame = p.frameLocator('iframe');
+    // Assuming the map container has an id or we can get the canvas.
+    // Since we don't have direct map helper functions in the prompt,
+    // we will rely on the fact that zoom changes are visual or we might need to
+    // inspect the map state if exposed. However, standard Playwright tests
+    // often verify UI interactions. Without a specific map state API,
+    // we can assert that the buttons are clickable and perhaps check the
+    // scale viewer or map container interaction.
+    // Let's look for a scale viewer or similar indicator if available.
+    // The context mentions "scale-viewer" and "Current scale: 1 to 2739072".
+    // We can parse the scale to infer zoom, or just assert the buttons work.
+    // But the requirement is to check zoom level.
+    // If no map helper is provided, we might have to rely on visual regression or
+    // specific DOM changes if the map library exposes them.
+    // Let's assume we can read the scale viewer text.
+    const scaleText = await page.getByRole('region', { name: 'Scale' }).textContent();
+    return scaleText;
+  };
+
+  const initialScale = await zoomLevel(page);
+
+  // Step 1: Click Zoom in
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await expect(zoomInButton).toBeVisible();
+  await zoomInButton.click();
+
+  // Wait for zoom action to complete
+  // We poll the scale viewer to see if it changed
+  await expect.poll(async () => {
+    const scaleText = await page.getByRole('region', { name: 'Scale' }).textContent();
+    return scaleText;
+  }).not.toBe(initialScale);
+
+  const scaleAfterZoomIn = await page.getByRole('region', { name: 'Scale' }).textContent();
+
+  // Step 2: Click Zoom out
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await expect(zoomOutButton).toBeVisible();
+  await zoomOutButton.click();
+
+  // Wait for zoom action to complete
+  await expect.poll(async () => {
+    const scaleText = await page.getByRole('region', { name: 'Scale' }).textContent();
+    return scaleText;
+  }).not.toBe(scaleAfterZoomIn);
+
+  const scaleAfterZoomOut = await page.getByRole('region', { name: 'Scale' }).textContent();
+
+  // Expected results:
+  // After zoom in, zoom level is higher (scale denominator is smaller).
+  // After zoom out, zoom level is lower (scale denominator is larger).
+  // We can't easily parse "1 to 2739072" into a number without regex,
+  // but we can assert that the values are different from the initial and each other.
+  // More robustly, we could check if the scale denominator decreased then increased.
+  // Let's extract the denominator.
+  const extractDenominator = (text: string | null) => {
+    if (!text) return 0;
+    const match = text.match(/1 to (\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  };
+
+  const initialDenom = extractDenominator(initialScale);
+  const inDenom = extractDenominator(scaleAfterZoomIn);
+  const outDenom = extractDenominator(scaleAfterZoomOut);
+
+  // Zoom in should result in a smaller denominator (closer view)
+  expect(inDenom).toBeLessThan(initialDenom);
+
+  // Zoom out should result in a larger denominator than after zoom in
+  expect(outDenom).toBeGreaterThan(inDenom);
+});

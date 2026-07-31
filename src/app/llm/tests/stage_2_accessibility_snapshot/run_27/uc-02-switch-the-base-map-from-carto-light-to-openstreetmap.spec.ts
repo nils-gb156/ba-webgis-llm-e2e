@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher toggle to be in the pressed state (layer switcher visible)
+  await expect(page.getByRole('button', { name: 'Layer Switcher' })).toBeChecked();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // The base map selector is a combobox with the name "Basemaps".
+  // We need to click it to open the list of options.
+  const basemapsCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  await basemapsCombobox.click();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // We select the option by its text content within the combobox's popup/list.
+  // Playwright's selectOption works with comboboxes that have options.
+  // Alternatively, if it's a custom dropdown, we might need to click the text.
+  // Given the accessibility tree shows a combobox, let's try selectOption first.
+  // If that fails due to custom implementation, we fallback to clicking the text.
+  // However, standard comboboxes usually support selectOption.
+  // Let's assume standard behavior for now. If it's a custom Chakra combobox, 
+  // the options might be in a listbox.
+  
+  // Let's try to find the option by text and click it, as Chakra Combobox often renders options in a list.
+  const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  await expect(osmOption).toBeVisible();
+  await osmOption.click();
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+  
+  // Assert that the combobox now displays OpenStreetMap
+  await expect(basemapsCombobox).toHaveValue('OpenStreetMap');
+});

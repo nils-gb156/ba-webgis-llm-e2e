@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the measurement toggle is in the correct state (unpressed) before clicking
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Step 1: Click the 'Measurement' button to open the measurement panel
+  await measurementToggle.click({ force: true });
+
+  // Verify the measurement panel is visible (using the map controls panel or a specific test id if available,
+  // but typically the toggle state or a specific panel container indicates visibility.
+  // Here we rely on the toggle being pressed and potentially a visible panel.
+  // Since no specific "measurement-panel" test id is listed, we check the toggle state and assume visibility
+  // or look for the map-controls-panel which might contain the result.
+  await expect(measurementToggle).toBeChecked();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. We'll pick arbitrary coordinates within the map area.
+  // The map container is identified by data-testid="map-container".
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+  await mapContainer.click({ position: { x: 300, y: 150 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 300, y: 150 } });
+
+  // Expected results:
+  // The measurement panel is visible.
+  // The measurement panel displays a length value with a unit.
+
+  // The result is likely shown in the map-controls-panel or a specific measurement result element.
+  // Let's check for a length value with a unit in the map controls panel or nearby.
+  // Since no specific test id for the result is provided, we look for text matching a length pattern.
+  // We'll poll for a length value to appear.
+  await expect.poll(async () => {
+    // Try to find text that looks like a length measurement (e.g., "123.45 m" or "123.45 km")
+    // We search within the map controls panel or the whole page if necessary.
+    // Let's try the map-controls-panel first.
+    const panel = page.getByTestId('map-controls-panel');
+    const text = await panel.textContent();
+    if (!text) return false;
+    // Regex for a number followed by a unit like m, km, mi, ft
+    return /[\d.,]+\s*(m|km|mi|ft)/i.test(text);
+  }).toBeTruthy();
+});

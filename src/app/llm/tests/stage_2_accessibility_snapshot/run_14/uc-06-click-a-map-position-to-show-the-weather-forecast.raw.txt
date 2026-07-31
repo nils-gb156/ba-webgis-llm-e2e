@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible.
+  // The accessibility tree shows "Info Panel Switcher [pressed]", so it is already open.
+  // We wait for it to be visible to ensure the app is ready.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas to trigger the forecast request.
+  // We click near the center of the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the weather forecast section to appear and contain data.
+  // The expected result is that the forecast contains 24 entries.
+  // We poll the weather forecast section to ensure it has loaded and populated.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  
+  await expect.poll(async () => {
+    const items = weatherForecastSection.locator('li');
+    const count = await items.count();
+    return count;
+  }).toBe(24);
+
+  // Verify the info panel is still visible and contains the forecast section.
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Verify the clicked position is highlighted on the map.
+  // Since the map is a canvas, we can't directly assert a visual highlight via DOM.
+  // However, the presence of the forecast in the info panel implies the click was processed.
+  // We can also check if there's any specific indicator for the selected point if available.
+  // The use case says "The clicked position is highlighted on the map."
+  // Without a specific test id for the highlight marker, we rely on the successful forecast load
+  // as a proxy for the map interaction being successful.
+  // If there were a marker test id, we would assert its visibility here.
+  // Given the constraints, the successful loading of 24 forecast entries is the primary assertion.
+});

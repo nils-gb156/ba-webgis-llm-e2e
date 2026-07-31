@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure no measurement tool is active (precondition)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Ensure UV-Index Stations layer is checked
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is checked
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Ensure info panel is visible
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const isInfoPanelVisible = await infoPanel.isVisible();
+  if (!isInfoPanelVisible) {
+    await infoPanelToggle.click({ force: true });
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 400, y: 300 } // Approximate center of the map viewport, adjusted for specific coordinates
+  });
+
+  // Wait for the info panel to update with feature information
+  // We poll for the presence of the specific section headers in the info panel
+  await expect.poll(async () => {
+    const panelContent = await infoPanel.textContent();
+    return {
+      hasUvi: panelContent?.includes('UV-Index Station') ?? false,
+      hasEucos: panelContent?.includes('EUCOS Ground Station') ?? false
+    };
+  }).toEqual({
+    hasUvi: true,
+    hasEucos: true
+  });
+
+  // Final assertions to confirm the sections are visible
+  await expect(infoPanel.getByRole('heading', { name: 'UV-Index Station', level: 2 })).toBeVisible();
+  await expect(infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', level: 2 })).toBeVisible();
+});

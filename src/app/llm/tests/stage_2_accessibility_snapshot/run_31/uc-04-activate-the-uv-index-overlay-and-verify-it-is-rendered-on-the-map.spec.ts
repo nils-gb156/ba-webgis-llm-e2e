@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to be fully loaded and interactive
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Precondition check: Layer switcher is visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Precondition check: UV-Index overlay layer is initially hidden (unchecked)
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Step 1: The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+  // Use force: true because Chakra UI checkboxes have a decorative overlay
+  await uvIndexCheckbox.click({ force: true });
+
+  // Expected result: The UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Step 2: The user waits for the map to load the layer tiles.
+  // We listen for network requests to the WMS service to ensure the layer data is requested.
+  // The UV-Index layer typically uses a WMS endpoint. We'll look for a WMS GetMap request.
+  const wmsRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('wms') && url.includes('GetMap');
+  });
+
+  // Trigger the layer load by interacting with the map or waiting for the layer switcher update to propagate.
+  // Sometimes clicking the checkbox is enough, but we can also click the map to ensure any pending updates are flushed.
+  // However, simply clicking the checkbox should trigger the layer addition.
+  // Let's wait for the WMS request to confirm the layer is being rendered.
+  await wmsRequestPromise;
+
+  // Expected result: The UV-Index overlay tiles are rendered on the map canvas.
+  // Since we can't assert canvas content directly, we verify the WMS request was made,
+  // which implies the tiles are being loaded. We also check that the legend for UV-Index is visible.
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+  
+  // Additionally, we can assert that the map container is still visible and the layer switcher reflects the change.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+});

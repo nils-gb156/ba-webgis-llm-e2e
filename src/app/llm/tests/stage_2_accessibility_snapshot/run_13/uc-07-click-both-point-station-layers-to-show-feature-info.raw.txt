@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is loaded and ready
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Ensure the info panel is visible (it is pressed in the context, but let's ensure it's open)
+  const infoPanelToggle = page.getByRole('button', { name: 'Info Panel Switcher' });
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Check current state of info panel toggle
+  const isInfoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+  if (isInfoPanelPressed !== 'true') {
+    await infoPanelToggle.click();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure no measurement tool is active (click it if it is pressed)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure UV-Index Stations layer is checked
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is checked
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28]
+  // These are EPSG:3857 coordinates. We click directly on the map container.
+  await page.locator('canvas').click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Wait for the info panel to load the station info for both layers.
+  // We expect to see headings or content related to both station types.
+  // Since we don't have specific test IDs for the info panel content sections,
+  // we look for the text "UV-Index Station" and "EUCOS Ground Station" within the info panel.
+  
+  await expect.poll(() => infoPanel.getByText('UV-Index Station').count()).toBeGreaterThan(0);
+  await expect.poll(() => infoPanel.getByText('EUCOS Ground Station').count()).toBeGreaterThan(0);
+});

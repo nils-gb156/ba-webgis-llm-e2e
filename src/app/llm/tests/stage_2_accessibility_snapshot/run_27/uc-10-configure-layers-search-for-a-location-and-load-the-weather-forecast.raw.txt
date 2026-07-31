@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature layer
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+
+  // Step 2: Show Precipitation layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+
+  // Step 3: Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+  
+  // The first result is usually the most relevant city match.
+  // We assume the first list item in the geocoder panel is the target.
+  const firstResult = geocoderPanel.getByRole('option', { name: 'Münster' }).first();
+  // Fallback if name matching is too strict or ambiguous, click the first available item in the panel
+  const targetResult = firstResult.count() > 0 ? firstResult : geocoderPanel.locator('[role="option"]').first();
+  
+  await expect(targetResult).toBeVisible();
+  await targetResult.click();
+
+  // Step 5: Wait for map to navigate (we assert the info panel starts loading as a proxy for map interaction)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 6: Wait for info panel to load the forecast with 24 entries
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Verify the number of forecast entries (24)
+  // The entries are likely in a list or grid within the weather forecast section.
+  // Assuming each entry has a distinct role or structure, we count them.
+  // Common pattern: a list of items.
+  const forecastEntries = weatherForecastSection.locator('[role="listitem"]').or(weatherForecastSection.locator('.forecast-entry'));
+  
+  // Use poll to wait for the entries to populate
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+});

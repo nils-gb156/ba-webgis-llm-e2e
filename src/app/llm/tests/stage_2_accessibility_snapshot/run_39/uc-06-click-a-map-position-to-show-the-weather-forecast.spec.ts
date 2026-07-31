@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is open by default per context)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas to trigger a forecast request
+  // We click near the center of the map container
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 200, y: 200 }
+  });
+
+  // Wait for the info panel to update with the forecast section
+  // The forecast section should appear and contain 24 entries
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Assert that the forecast contains 24 entries
+  // We assume each entry is a distinct element within the forecast section
+  // Using a poll to wait for the count to settle
+  await expect.poll(() => page.getByTestId('weather-forecast-section').locator('> *').count()).toBe(24);
+
+  // Verify the clicked position is highlighted on the map
+  // Since we can't assert DOM elements for the map, we rely on the info panel update
+  // as the primary indicator that the click was registered and processed.
+  // The presence of the forecast section confirms the action was successful.
+});

@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Step 1: Hide the Temperature overlay layer
+  // The Temperature checkbox is currently checked. We click it to uncheck (hide) it.
+  // Using force: true because Chakra UI checkboxes have a decorative overlay.
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+  
+  // Verify Temperature is now unchecked (hidden)
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer
+  // The Precipitation checkbox is currently unchecked. We click it to check (show) it.
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+  
+  // Verify Precipitation is now checked (visible)
+  await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+
+  // Step 3: Search for a location using the geocoder
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The geocoder panel appears with results. We wait for the first result to be visible.
+  // Assuming the first result has an accessible name or text containing "Münster".
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+  
+  // Select the first result. We look for a list item or button within the panel.
+  // Since the prompt doesn't specify exact test ids for results, we use getByRole/Text.
+  // We expect a list item or button with "Münster" in it.
+  const firstResult = geocoderPanel.getByRole('option', { name: /Münster/ }).first();
+  // Fallback if 'option' role isn't used, try 'listitem' or 'button'
+  const resultToClick = firstResult.count() > 0 
+    ? firstResult 
+    : geocoderPanel.getByText('Münster').first();
+  
+  await resultToClick.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // The map canvas updates. We can wait for the info panel to start updating or just wait for a short period
+  // combined with checking the info panel content.
+  // A robust way is to wait for the info panel to show content related to the search.
+  await expect(page.getByTestId('info-panel')).toContainText('Münster');
+
+  // Step 6: Wait for the info panel to load the forecast with 24 entries
+  // The expected result states the info panel displays a weather forecast section with 24 entries.
+  // We look for the weather forecast section and count the entries.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for 24 entries to be present.
+  // We poll for the count of forecast entries. Assuming each entry is a list item or similar.
+  // Since the prompt doesn't specify the exact structure of the forecast entries, 
+  // we might need to infer from the context. Often forecasts are in a list.
+  // Let's assume the entries are represented by list items within the weather forecast section.
+  const forecastEntries = weatherForecastSection.getByRole('listitem');
+  
+  // Poll until we have at least 24 entries
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBeGreaterThanOrEqual(24);
+});

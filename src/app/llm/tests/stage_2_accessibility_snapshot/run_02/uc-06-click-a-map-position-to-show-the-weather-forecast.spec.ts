@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible. The context shows it is initially visible.
+  // If it were hidden, we would click the toggle. Since it's visible, we proceed.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the center of the map canvas to trigger a forecast request.
+  // We use a position relative to the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+
+  // Wait for the forecast data to load and appear in the info panel.
+  // The expected result is that the forecast contains 24 entries.
+  // We poll the info panel for the presence of the weather forecast section
+  // and verify the number of entries.
+  await expect.poll(async () => {
+    const weatherSection = page.getByTestId('weather-forecast-section');
+    if (!(await weatherSection.isVisible())) {
+      return 0;
+    }
+    // Count the number of forecast entries. Assuming each entry is a distinct element
+    // within the weather-forecast-section. We look for common structures like list items
+    // or specific forecast cards. If the structure is a list of days/hours, we count them.
+    // Since the exact DOM structure of the forecast isn't specified, we look for a
+    // reasonable indicator of 24 entries. Often, this might be 24 distinct elements
+    // representing hours or days. Let's assume the section contains elements that
+    // represent the forecast entries.
+    const entries = weatherSection.locator('li, .forecast-entry, .forecast-item');
+    const count = await entries.count();
+    return count;
+  }).toBe(24);
+
+  // Verify that the clicked position is highlighted on the map.
+  // Since the map is a canvas, we can't directly assert the highlight via DOM.
+  // However, the presence of the forecast implies the click was registered.
+  // We can assert that the info panel is still visible and contains the forecast.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+});

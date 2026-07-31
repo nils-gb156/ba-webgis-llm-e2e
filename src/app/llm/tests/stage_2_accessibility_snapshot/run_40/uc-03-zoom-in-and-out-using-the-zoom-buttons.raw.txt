@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map container to be visible before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Get the initial zoom level by clicking on the map to ensure it's ready and getting the state
+  // We need a helper to read map state. Since no helper was provided in the prompt,
+  // we must rely on visual or DOM cues if available, or assume the test environment
+  // provides map state access. However, the prompt says "Map state ... is NOT represented
+  // as DOM elements ... therefore cannot be asserted through DOM locators."
+  // AND "If the prompt provides map model helper functions ... If no helpers are provided,
+  // this section is irrelevant — do not invent or import any helper module."
+  //
+  // Without a helper, we cannot programmatically assert the zoom level number.
+  // However, we can assert that the buttons exist and are clickable.
+  // The prompt asks to generate a test for the use case.
+  // Let's look closer. Is there any other way?
+  // The accessibility tree shows "Zoom in map" and "Zoom out map" buttons.
+  // We can assert they are visible.
+  // But how to assert zoom level changed?
+  //
+  // Re-reading: "Map state ... is NOT represented as DOM elements ... therefore cannot be asserted through DOM locators."
+  // This implies we CANNOT assert the zoom level change directly via DOM.
+  //
+  // Wait, often in these E2E tests, if a helper isn't provided, we might not be able to
+  // strictly verify the internal zoom level. However, the use case explicitly requires
+  // asserting the zoom level changes.
+  //
+  // Let's check if there's any scale info in the DOM.
+  // Accessibility tree: "region 'Scale': 'Current scale: 1 to 2739072'"
+  // This text changes with zoom!
+  // We can assert the scale text changes.
+
+  const scaleRegion = page.getByRole('region', { name: 'Scale' });
+  const initialScaleText = await scaleRegion.textContent();
+
+  // Step 1: Click 'Zoom in' button
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await expect(zoomInButton).toBeVisible();
+  await zoomInButton.click();
+
+  // Wait for the scale to update (zooming is async)
+  await expect.poll(async () => await scaleRegion.textContent()).not.toEqual(initialScaleText);
+  const scaleAfterZoomIn = await scaleRegion.textContent();
+
+  // Verify zoom in: The scale denominator should decrease (e.g., from 1:2739072 to 1:1369536)
+  // We can't easily parse the number, but we can assert the text changed.
+  // To be more robust, let's assume "Zoom in" makes the denominator smaller.
+  // We'll just assert the text changed, which implies a zoom action occurred.
+
+  // Step 2: Click 'Zoom out' button
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await expect(zoomOutButton).toBeVisible();
+  await zoomOutButton.click();
+
+  // Wait for the scale to update again
+  await expect.poll(async () => await scaleRegion.textContent()).not.toEqual(scaleAfterZoomIn);
+  const scaleAfterZoomOut = await scaleRegion.textContent();
+
+  // Verify zoom out: The scale text should have changed again.
+  // Ideally, we'd want it to go back to initial, but the use case just says "lower than after zooming in".
+  // Since we can't read the number, asserting it changed is the best we can do without helpers.
+  // However, if the user clicked zoom out once, it might not return to the exact initial state
+  // depending on step size, but it definitely changes.
+
+  // Let's try to extract the number from the scale string to make the assertion stronger.
+  // Format: "Current scale: 1 to {number}"
+  const extractScaleNumber = (text: string) => {
+    const match = text.match(/1 to (\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  };
+
+  const initialNumber = extractScaleNumber(initialScaleText);
+  const inNumber = extractScaleNumber(scaleAfterZoomIn);
+  const outNumber = extractScaleNumber(scaleAfterZoomOut);
+
+  // Assert zoom in: denominator decreased
+  expect(inNumber).toBeLessThan(initialNumber);
+
+  // Assert zoom out: denominator increased (compared to after zoom in)
+  expect(outNumber).toBeGreaterThan(inNumber);
+});

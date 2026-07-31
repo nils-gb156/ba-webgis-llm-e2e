@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible and the map is ready
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Step 1: Click on a position on the map canvas.
+  // We click near the center of the map container.
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container bounding box not found');
+  }
+
+  const clickX = box.x + box.width / 2;
+  const clickY = box.y + box.height / 2;
+
+  await page.mouse.click(clickX, clickY);
+
+  // Step 2: Wait for the info panel to load the forecast.
+  // We expect the weather forecast section to appear and contain 24 entries.
+
+  // First, ensure the info panel is still visible (it might have been toggled)
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Verify that the forecast contains 24 entries.
+  // Assuming each entry is a list item or similar structure within the weather-forecast-section.
+  // Since the exact structure isn't fully defined, we look for a container that likely holds the entries.
+  // Often, forecasts are rendered as a list. Let's assume the section itself or a child list has the items.
+  // If the items are direct children or within a specific list, we count them.
+  // Without specific test IDs for entries, we might rely on the structure or text.
+  // However, the prompt says "The forecast contains 24 entries".
+  // Let's assume the weather-forecast-section contains 24 distinct items.
+  // We can try to count elements within the section.
+  
+  // Since we don't have specific test IDs for the forecast entries, we might need to infer.
+  // Let's assume the entries are list items or have a common class/role.
+  // If no specific locator is available, we might check for the presence of a certain number of elements.
+  // However, the prompt implies a hard test, so there might be a specific structure.
+  // Let's try to find the entries. If they are not test-id'd, we might use getByRole or getByText.
+  // But "24 entries" is a count. Let's assume they are list items.
+  
+  // We will poll to wait for the entries to appear and then count them.
+  await expect.poll(async () => {
+    const entries = await weatherForecastSection.locator('li').count();
+    return entries;
+  }).toBe(24);
+
+  // Additionally, verify that the clicked position is highlighted on the map.
+  // The prompt mentions "coordinate-viewer" which might show the clicked coordinates.
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  await expect(coordinateViewer).toBeVisible();
+});

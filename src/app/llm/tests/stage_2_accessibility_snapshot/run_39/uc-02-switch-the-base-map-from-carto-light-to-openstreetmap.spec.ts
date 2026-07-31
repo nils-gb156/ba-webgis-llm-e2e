@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher to be visible (it should be open by default based on context)
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Open the base map selector in the layer switcher
+  // The combobox "Basemaps" is the selector for changing base maps.
+  // Clicking it should reveal the list of base map options.
+  const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  await basemapCombobox.click();
+
+  // Step 2: Select 'OpenStreetMap' as the base map
+  // The options in a combobox are typically list items within the dropdown.
+  // We look for a list item with the text "OpenStreetMap" inside the layer switcher context.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const openStreetMapOption = layerSwitcher.getByRole('option', { name: 'OpenStreetMap' });
+  
+  // It's possible the option is a list item or just text. Let's try role option first.
+  // If not found, we might need to look for a radio button or list item.
+  // Based on typical Chakra/Aria patterns for comboboxes, options are often list items.
+  // Let's try clicking the text directly if role option isn't standard, but role option is preferred.
+  // If the combobox expands, the options become available.
+  
+  // Fallback: If role option doesn't work, we might need to click a list item.
+  // Let's assume standard combobox behavior where options are selectable.
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Verify the combobox now displays OpenStreetMap
+  await expect(basemapCombobox).toHaveText('OpenStreetMap');
+
+  // Verify Carto Light is no longer the selected value in the combobox
+  // The combobox should only show the currently selected item.
+  await expect(basemapCombobox).not.toHaveText('Carto Light');
+});

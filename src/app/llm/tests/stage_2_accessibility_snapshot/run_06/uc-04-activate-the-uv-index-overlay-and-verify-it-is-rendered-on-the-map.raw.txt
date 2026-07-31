@@ -1,0 +1,24 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the layer switcher is open so we can interact with the layer list
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher' });
+  const layerSwitcherState = await layerSwitcherToggle.getAttribute('aria-pressed');
+  if (layerSwitcherState !== 'true') {
+    await layerSwitcherToggle.click();
+  }
+
+  // 1. The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  await uvIndexCheckbox.click();
+
+  // 2. The user waits for the map to load the layer tiles.
+  // We verify the checkbox is checked and that the UV-Index legend is visible,
+  // which indicates the layer has been processed and rendered.
+  await expect(uvIndexCheckbox).toBeChecked();
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+});

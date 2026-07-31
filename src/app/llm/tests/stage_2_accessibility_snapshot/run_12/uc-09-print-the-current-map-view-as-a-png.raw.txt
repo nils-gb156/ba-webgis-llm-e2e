@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be visible
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('eucos-stations-legend')).toBeVisible();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible.
+  // The print toggle is pressed, indicating the panel is open.
+  await expect(printToggle).toBeChecked();
+
+  // Step 2: Enter a title for the printout.
+  // We look for an input field within the print panel/dialog.
+  // Since no specific test id is given for the title input, we use getByLabel.
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format.
+  // We look for a radio button or select option for PNG.
+  // Assuming a radio group or similar control for format selection.
+  const pngFormat = page.getByRole('radio', { name: 'PNG' });
+  await pngFormat.check();
+
+  // Step 4: Click the export/print button.
+  const exportButton = page.getByRole('button', { name: /Export|Print|Generate/i });
+  
+  // Wait for the download event before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Verify the download started and has the correct filename
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

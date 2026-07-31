@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Preconditions: Ensure info panel is visible and layers are active
+  // The accessibility tree indicates the info panel toggle is pressed, so it should be visible.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure UV-Index Stations and EUCOS Ground Stations layers are checked
+  // The accessibility tree shows them as [checked], but we verify explicitly.
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  await expect(uviCheckbox).toBeChecked();
+
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  await expect(eucosCheckbox).toBeChecked();
+
+  // Ensure measurement tool is NOT active (precondition)
+  // The accessibility tree shows "Measurement" button but doesn't explicitly say [pressed].
+  // We assume it's inactive by default, but let's ensure it's not pressed just in case.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Step 1: Click on the map at the specific coordinates where both stations are located.
+  // Coordinates: [1188692.84, 6767643.28] (EPSG:3857)
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28
+    }
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers.
+  // Expected results:
+  // - The info panel displays a 'UV-Index Station' section with feature information.
+  // - The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+  // Wait for the info panel to contain text indicating UV-Index Station info
+  // We use expect.poll to wait for the async feature info to load
+  await expect.poll(async () => {
+    const infoPanel = page.getByTestId('info-panel');
+    const content = await infoPanel.textContent();
+    return content;
+  }).toContain('UV-Index Station');
+
+  // Wait for the info panel to contain text indicating EUCOS Ground Station info
+  await expect.poll(async () => {
+    const infoPanel = page.getByTestId('info-panel');
+    const content = await infoPanel.textContent();
+    return content;
+  }).toContain('EUCOS Ground Station');
+});

@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure base map and overlay layers are visible (preconditions)
+  // The layer switcher is open by default. Ensure basemap is selected.
+  const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  await expect(basemapCombobox).toBeVisible();
+  // Ensure at least one operational layer is checked. EUCOS Ground Stations is checked by default.
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  await expect(eucosCheckbox).toBeChecked();
+
+  // Step 1: Click the 'Print Map' button to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible.
+  // The print dialog/panel is likely a dialog or part of the map controls.
+  // We look for the print toggle to be in an active state or a dialog appearing.
+  // Based on other toggles, it might be a panel. Let's assume it's a dialog or visible section.
+  // We'll assert on the presence of typical print form elements.
+  await expect(page.getByRole('heading', { name: 'Print' })).toBeVisible();
+
+  // Step 2: Enter a title for the printout.
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('Test Map Print');
+
+  // Step 3: Select the PNG file format.
+  const pngFormatRadio = page.getByRole('radio', { name: 'PNG' });
+  await pngFormatRadio.click();
+
+  // Step 4: Click the export/print button.
+  // Wait for the download event before clicking the trigger.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Export' }).click()
+  ]);
+
+  // Verify the download occurred and has a PNG extension.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

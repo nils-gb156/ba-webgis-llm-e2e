@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is ready before interacting
+  await expect(page.locator('#map-container')).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  // The prompt does not provide a specific test id for the measurement panel,
+  // but typically it appears near the toolbar or as a side panel.
+  // We'll wait for the map to be ready for interaction (pointer events restored).
+  await expect(page.locator('#map-container')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. We'll use the center of the map
+  // and then move to adjacent points.
+  const mapContainer = page.locator('#map-container');
+  await mapContainer.click();
+
+  // Move to a new position and click again
+  await page.mouse.move(600, 300);
+  await page.mouse.click(600, 300);
+
+  // Move to another position and click again
+  await page.mouse.move(700, 400);
+  await page.mouse.click(700, 400);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.dblclick('#map-container');
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+
+  // Since there is no specific test id for the measurement result, we look for
+  // text that resembles a measurement (e.g., "m", "km", "mi") or a numeric value.
+  // We'll poll for any text that looks like a measurement result.
+  await expect.poll(async () => {
+    const bodyText = await page.locator('body').textContent();
+    // Check for common measurement units or patterns
+    return bodyText?.match(/\d+(\.\d+)?\s*(m|km|mi|ft)/i) !== null;
+  }).toBeTruthy();
+});

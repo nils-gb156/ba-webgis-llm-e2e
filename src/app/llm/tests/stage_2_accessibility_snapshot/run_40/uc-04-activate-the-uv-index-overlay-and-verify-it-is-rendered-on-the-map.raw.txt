@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and the map to be ready
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer to show it.
+  // The layer switcher is visible by default (pressed state in accessibility tree).
+  // The UV-Index checkbox is initially unchecked.
+  // Using force: true because Chakra UI checkbox control intercepts pointer events.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' });
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // The UV-Index layer is an operational layer, likely loaded via WMS or tile server.
+  // We can wait for a network response that indicates the layer data has been fetched.
+  // Assuming the layer uses a standard WMS GetMap request or similar tile request.
+  // Since we don't have specific URL patterns, we can wait for a reasonable amount of time
+  // or wait for a specific network request if we knew the URL pattern.
+  // However, a more robust way is to wait for the map canvas to update or for a specific element
+  // related to the layer to appear. But the prompt says map content is not in DOM.
+  // Let's wait for a network response that might be associated with the layer.
+  // Often, WMS requests have a distinct signature. Let's try to catch a WMS GetMap request.
+  // Alternatively, we can just wait for the layer to be visually present, but that's hard to assert.
+  // Let's wait for a network response that is likely the layer data.
+  // We'll listen for any request to the geoserver or tile server.
+  // Since we don't know the exact URL, we can wait for a short period or use a more generic approach.
+  // Let's try to wait for a response that contains 'GetMap' or 'wms' in the URL, which is common for WMS layers.
+  const [response] = await Promise.all([
+    page.waitForResponse((response) => {
+      const url = response.url();
+      return url.includes('GetMap') || url.includes('wms') || url.includes('uv-index');
+    }),
+    // The click already happened, so we just wait for the response.
+    // If the click triggers the request, this will resolve.
+  ]);
+
+  // If no specific response is caught, we can assume the layer is loaded after a short delay
+  // or by checking the layer switcher state again. But the prompt asks to verify it is rendered.
+  // Since we can't assert on the canvas directly, we rely on the network request and the checked state.
+  // Let's also wait for the layer to be visually present by waiting for the legend to update or something similar.
+  // But the legend for UV-Index is an image, which might not change immediately.
+  // Let's just ensure the network request was made.
+  expect(response.ok()).toBeTruthy();
+
+  // Additional verification: The UV-Index stations legend should be visible or updated.
+  // The accessibility tree shows an img for UV-Index Stations legend.
+  // We can wait for this image to be visible or loaded.
+  const uvIndexStationsLegend = page.getByTestId('uvi-stations-legend');
+  await expect(uvIndexStationsLegend).toBeVisible();
+});

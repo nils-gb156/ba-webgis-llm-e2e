@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We click distinct points to form a simple line/shape.
+  const map = page.locator('canvas');
+  await map.click({ position: { x: 100, y: 100 } });
+  await map.click({ position: { x: 200, y: 200 } });
+  await map.click({ position: { x: 300, y: 150 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await map.dblclick({ position: { x: 300, y: 150 } });
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+
+  // The measurement result is typically shown in the info panel or a dedicated measurement result area.
+  // Given the context, the "Information" heading is present. Let's look for text indicating measurement.
+  // Often, the result appears in the info panel or a toast. Let's check the info panel first.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the measurement result to appear. It should contain a number and a unit like "km" or "m".
+  // We poll for any text that looks like a measurement result (number followed by unit).
+  await expect.poll(() => infoPanel.locator('text=/\\d+\\.?\\d*\\s*(km|m|mi|ft)/').first().textContent()).toMatch(/\\d+\\.?\\d*\\s*(km|m|mi|ft)/);
+});

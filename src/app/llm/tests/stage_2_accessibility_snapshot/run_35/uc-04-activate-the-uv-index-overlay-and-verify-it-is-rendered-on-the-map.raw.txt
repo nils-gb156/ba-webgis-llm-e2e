@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to be fully loaded and interactive
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer to show it.
+  // The accessibility tree shows "checkbox 'UV-Index'" which is currently unchecked.
+  // We use force: true because Chakra UI renders the input visually hidden.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' });
+  await uvIndexToggle.click({ force: true });
+
+  // Wait for the layer to become checked in the UI
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We register a listener for the request before asserting to ensure we capture the specific tile request.
+  const uvIndexTileRequest = page.waitForRequest((request) => {
+    const url = request.url();
+    // UV-Index tiles typically come from a WMS or tile service.
+    // We look for requests that might contain "UV" or specific tile patterns if known.
+    // Since we don't have the exact URL pattern, we wait for a general network idle or a specific tile request pattern.
+    // A common pattern for WMS tiles includes 'GetMap' or specific tile URLs.
+    // Let's assume a generic tile request or WMS GetMap request for UV-Index.
+    return url.includes('UV') || url.includes('uv') || url.includes('UV-Index');
+  });
+
+  // Wait for the request to be sent
+  await uvIndexTileRequest;
+
+  // Verify that the UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Verify that the UV-Index overlay tiles are rendered on the map canvas.
+  // We can't directly assert on canvas content, but we can assert that the map container
+  // has received the tiles by checking if the map is still interactive and loaded.
+  // A common way to verify tiles are loaded is to check if the map container is visible
+  // and perhaps has some content (though canvas content is hard to verify directly).
+  // We will assert that the map container is visible and that the layer toggle is checked.
+  // To further verify, we can check if the legend for UV-Index is updated or visible if applicable,
+  // but the prompt doesn't specify a test id for the legend update.
+  // We will rely on the successful network request and the checked state of the toggle.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Additional check: Ensure the layer switcher is still visible and the toggle is checked
+  await expect(uvIndexToggle).toBeChecked();
+});

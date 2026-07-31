@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 3: Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel).toBeVisible();
+  
+  const firstResult = geocoderPanel.getByRole('option', { name: /Münster/ }).first();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate (implied by geocoder selection)
+  // We wait for the info panel to start updating or for the geocoder panel to close/dismiss
+  await expect(geocoderPanel).not.toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Expected Result: Info panel displays a weather forecast section with 24 entries
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the forecast entries to load. Assuming each entry is a distinct element (e.g., list item or card).
+  // We poll for at least 24 entries to be present.
+  await expect.poll(async () => {
+    return weatherForecastSection.locator('li, [role="listitem"], .forecast-entry').count();
+  }).toBeGreaterThanOrEqual(24);
+});

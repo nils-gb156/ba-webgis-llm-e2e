@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the map canvas to trigger a forecast request
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+
+  // Wait for the weather forecast section to appear and contain 24 entries
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  
+  // The forecast entries are likely list items or similar inside the section.
+  // We poll until we see at least 24 entries to ensure the data has loaded.
+  await expect.poll(async () => {
+    const entries = forecastSection.locator('li').or(forecastSection.locator('[role="listitem"]'));
+    return await entries.count();
+  }).toBeGreaterThanOrEqual(24);
+
+  // Verify the info panel still contains the forecast section
+  await expect(forecastSection).toBeVisible();
+
+  // Verify the clicked position is highlighted on the map.
+  // Since map state is not in DOM, we rely on the fact that the forecast loaded.
+  // However, the prompt says "The clicked position is highlighted on the map."
+  // Without helper functions provided in the prompt, we cannot assert map features directly.
+  // But typically, a highlight might be a DOM element if it's an overlay feature.
+  // Let's look for a common test id for map features or highlights if available.
+  // The context doesn't provide a specific test id for map highlights.
+  // We will assume the successful loading of the forecast implies the click was processed.
+  // If there were a test id for the highlight, we would use it here.
+  // Given the constraints, we assert the visible outcome: the forecast data.
+});

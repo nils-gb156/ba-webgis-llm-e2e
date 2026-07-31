@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to be fully loaded
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+  // The layer switcher is already visible and the UV-Index checkbox is unchecked.
+  // We use force: true because Chakra UI renders the real input visually hidden.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' });
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: The user waits for the map to load the layer tiles.
+  // We listen for the network request that loads the UV-Index tiles.
+  // The WMS request typically includes the layer name.
+  const uvIndexTileRequest = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('EUCOS_UVI') || url.includes('UVI') && url.includes('GetMap');
+  });
+
+  // Trigger the tile request by clicking somewhere on the map to ensure it refreshes/updates
+  // or simply wait for the existing async load if the layer visibility change triggers it.
+  // Since the layer was just toggled, the map should request new tiles.
+  // We click the map container to ensure the map is focused and potentially trigger a redraw if needed,
+  // but usually toggling a layer triggers the request immediately.
+  // Let's wait for the request directly.
+  await uvIndexTileRequest;
+
+  // Expected results:
+  // - The UV-Index overlay layer toggle is in the enabled (checked) state. (Already asserted)
+  // - The UV-Index overlay tiles are rendered on the map canvas.
+  // Since we cannot assert DOM elements for map tiles, we verify the network request was made.
+  // Additionally, we can check if the legend for UV-Index is visible, which implies the layer is active.
+  const uvIndexLegend = page.getByTestId('uvi-stations-legend');
+  await expect(uvIndexLegend).toBeVisible();
+});

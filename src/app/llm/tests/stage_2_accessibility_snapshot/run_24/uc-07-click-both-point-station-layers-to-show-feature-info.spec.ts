@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure no measurement tool is active (it might be toggled on by default in some states)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const measurementState = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementState === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure UV-Index Stations layer is checked
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click();
+  }
+
+  // Ensure EUCOS Ground Stations layer is checked
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click();
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  // Coordinates: [1188692.84, 6767643.28] (EPSG:3857)
+  // We need to convert these to pixel coordinates relative to the map container.
+  // However, Playwright's click with position is relative to the element's top-left.
+  // Since we don't have a helper to convert EPSG:3857 to pixels, we rely on the fact that
+  // the prompt provides specific coordinates. We will attempt to click the map container.
+  // Note: Without a helper function provided in the prompt to convert coordinates,
+  // we must assume the test environment allows clicking or we use a generic click if precise
+  // coordinate conversion isn't available via helpers.
+  // Given the "hard" complexity and specific coordinates, usually there's a helper.
+  // But the instructions say "only if provided in the prompt". No helper was provided.
+  // Therefore, we must click the map. To hit the specific point, we'd need pixel coordinates.
+  // Since we cannot convert EPSG:3857 to pixel without a helper, and the prompt doesn't give pixel coords,
+  // we will click the map container. In a real scenario, we'd need the helper.
+  // However, looking at the context, often these tests assume the map is centered such that
+  // the features are visible. Let's try to click the map center or a known location.
+  // Actually, let's look at the "map-container" test id.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Since we can't convert EPSG:3857 to pixels without a helper, and the prompt forbids inventing helpers,
+  // we have to rely on the fact that the map is likely centered on these features or we click the center.
+  // But the use case is specific. Let's assume the map is already positioned correctly.
+  // We will click the center of the map container as a proxy, hoping the features are there.
+  // If the features are not at the center, this test will fail, but we cannot do better without the helper.
+  // Wait, let's re-read the prompt. "Map state via helper functions (only if provided in the prompt)".
+  // They are NOT provided. So we cannot convert coordinates.
+  // However, the prompt says "Click at map coordinates...".
+  // In many Open Pioneer tests, there is a `map` fixture or helper.
+  // Since none is provided, I will click the map container.
+  // To maximize chances, I'll click the center of the map.
+  const box = await mapContainer.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  } else {
+    // Fallback if bounding box is not available
+    await mapContainer.click();
+  }
+
+  // Wait for the info panel to load the station info
+  // The info panel should display sections for both UV-Index Station and EUCOS Ground Station
+  
+  // Wait for UV-Index Station info
+  await expect(page.getByRole('heading', { name: 'UV-Index Station', exact: true })).toBeVisible({ timeout: 10000 });
+  
+  // Wait for EUCOS Ground Station info
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true })).toBeVisible({ timeout: 10000 });
+});

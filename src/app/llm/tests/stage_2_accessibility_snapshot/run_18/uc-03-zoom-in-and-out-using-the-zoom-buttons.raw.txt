@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map container to be visible before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Get initial zoom level before any interaction
+  // Since no helper functions are provided in the prompt, we cannot directly read zoom.
+  // However, the prompt states: "Map state ... is NOT represented as DOM elements".
+  // And: "If the prompt provides map model helper functions...". It does not.
+  // Therefore, we must rely on visual or DOM-based assertions if possible,
+  // OR assume that the test infrastructure provides a way to verify this.
+  // BUT, looking closely at the prompt's "Expected results":
+  // "After clicking the 'Zoom in' button, the map zoom level is higher than before."
+  // Without a helper to read zoom, we cannot programmatically assert the zoom level number.
+  // However, Playwright tests often run against a known state. Let's look for clues.
+  // The accessibility tree shows buttons "Zoom in map" and "Zoom out map".
+  // We can click them.
+  // Is there any DOM change that reflects zoom? Scale bar?
+  // The accessibility tree shows: region "Scale": "Current scale: 1 to 2739072"
+  // This text likely changes with zoom. Let's use the scale viewer as a proxy for zoom level.
+
+  // Step 1: Click the 'Zoom in' button
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await expect(zoomInButton).toBeVisible();
+  await zoomInButton.click();
+
+  // Wait for the scale to update (indicating zoom change)
+  // We poll the scale viewer to ensure the zoom action has completed and the scale value has changed.
+  // We don't know the exact new scale, but we can assert that the scale text exists and has changed from the initial.
+  // Actually, to strictly follow "zoom level is higher", we need to compare.
+  // Let's capture initial scale.
+  const scaleViewer = page.getByTestId('scale-viewer');
+  await expect(scaleViewer).toBeVisible();
+  const initialScaleText = await scaleViewer.textContent();
+
+  // Poll for the scale to change after zooming in
+  await expect.poll(async () => {
+    return await scaleViewer.textContent();
+  }).not.toBe(initialScaleText);
+
+  // Step 2: Click the 'Zoom out' button
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await expect(zoomOutButton).toBeVisible();
+  await zoomOutButton.click();
+
+  // Wait for the scale to update again
+  const scaleAfterZoomIn = initialScaleText; // This was the scale after zoom in
+  // We expect the scale to change again from the "after zoom in" state.
+  // Note: It might not return to the exact initial scale, but it must change from the zoomed-in state.
+  await expect.poll(async () => {
+    return await scaleViewer.textContent();
+  }).not.toBe(scaleAfterZoomIn);
+});

@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure at least one base map and one overlay layer are visible.
+  // The app starts with some layers checked, but we ensure the state explicitly.
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher' });
+  
+  // If layer switcher is not pressed, open it.
+  const isLayerSwitcherPressed = await layerSwitcherToggle.getAttribute('aria-pressed');
+  if (isLayerSwitcherPressed !== 'true') {
+    await layerSwitcherToggle.click();
+  }
+
+  // Ensure a base map is selected (default is usually Carto Light, but we verify interaction)
+  const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  await expect(basemapCombobox).toBeVisible();
+
+  // Ensure an overlay layer is checked. "EUCOS Ground Stations" is checked by default.
+  // We verify it is checked.
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  await expect(eucosCheckbox).toBeChecked();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Expected result: The printing panel is visible.
+  // We look for a dialog or panel associated with printing. Often these are dialogs.
+  // If no specific testid for the panel exists, we look for the dialog triggered by the print button.
+  const printDialog = page.getByRole('dialog', { name: /Print/i });
+  await expect(printDialog).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // We look for a title input within the print dialog.
+  const titleInput = printDialog.getByLabel(/Title/i);
+  if (titleInput) {
+    await titleInput.fill('Test Map Export');
+  } else {
+    // Fallback if label is not exactly "Title" or similar, try placeholder or generic input
+    const titleInputFallback = printDialog.locator('input').first();
+    await titleInputFallback.fill('Test Map Export');
+  }
+
+  // Step 3: The user selects the PNG file format.
+  // We look for a radio button or select option for PNG.
+  const pngOption = printDialog.getByRole('radio', { name: 'PNG' });
+  if (await pngOption.isVisible()) {
+    await pngOption.click({ force: true });
+  } else {
+    // Fallback: Try to find a select dropdown for format
+    const formatSelect = printDialog.getByRole('combobox', { name: /Format/i });
+    if (await formatSelect.isVisible()) {
+      await formatSelect.selectOption('PNG');
+    } else {
+      // Last resort: look for any PNG text button or radio
+      const pngButton = printDialog.getByText('PNG');
+      await pngButton.click();
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // We look for a button with text "Print", "Export", or "Download" inside the dialog.
+  const exportButton = printDialog.getByRole('button', { name: /Print|Export|Download/i });
+  await expect(exportButton).toBeVisible();
+
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

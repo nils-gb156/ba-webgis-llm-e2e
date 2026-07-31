@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).toBeChecked();
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible.
+  // The printing panel is likely a dialog or panel. We look for a dialog or panel that might contain print-specific inputs.
+  // Since no specific testid is provided for the print dialog itself, we look for the title input which is a strong indicator.
+  // We assume the print dialog is accessible. Let's look for a dialog or panel containing a title input.
+  // Often, such panels might be identified by a role or text. Let's try to find the title input directly or via a parent.
+  // Given the accessibility tree, there isn't a specific "Print Dialog" role listed, but the button "Print Map" was clicked.
+  // Let's assume the print interface appears. We can look for a textbox that might be for the title.
+  // If there's no specific testid, we might need to rely on the context.
+  // Let's look for a dialog or panel. If not found, we might need to infer.
+  // However, the prompt says "The printing panel is visible".
+  // Let's try to find a dialog or a specific region.
+  // Since no specific testid is given for the print panel, we'll look for common patterns.
+  // Often, print dialogs have a title. Let's try to find a textbox with label "Title" or similar.
+  // If we can't find it, we might need to look for the dialog itself.
+  // Let's assume the print panel is a dialog.
+  
+  // Try to find the print dialog. If it's a dialog, it might have a role="dialog".
+  // If not, it might be a panel. Let's look for a container that appears after clicking print.
+  // We'll look for a textbox that is likely the title input.
+  
+  // Let's look for a dialog first.
+  const printDialog = page.getByRole('dialog', { name: /Print/i, exact: false }).first();
+  
+  // If no dialog is found, maybe it's a panel. Let's try to find the title input directly.
+  // We'll look for a textbox that could be the title.
+  // Since we don't have a testid, we'll use getByLabel.
+  const titleLabel = page.getByLabel('Title');
+  
+  // If titleLabel is not found, we might need to look for a different pattern.
+  // Let's try to find the print panel by looking for the export button or format selector.
+  // Let's assume the print dialog is present.
+  
+  // Wait for the print dialog/panel to appear.
+  // We'll wait for the title input to be visible as a proxy for the print panel being open.
+  await expect(titleLabel).toBeVisible({ timeout: 5000 });
+
+  // Step 2: Enter a title for the printout.
+  await titleLabel.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format.
+  // Look for a radio button or dropdown for format selection.
+  // We'll look for a radio button labeled "PNG".
+  const pngFormat = page.getByRole('radio', { name: 'PNG', exact: true });
+  
+  // If radio is not found, maybe it's a select/dropdown.
+  const pngSelect = page.getByRole('combobox', { name: /Format/i });
+  
+  if (await pngFormat.isVisible()) {
+    await pngFormat.click();
+  } else if (await pngSelect.isVisible()) {
+    await pngSelect.selectOption('PNG');
+  } else {
+    // Fallback: look for a checkbox or other control.
+    // Let's try to find any element with "PNG" in its text or label.
+    const pngControl = page.getByRole('button', { name: 'PNG' }).first();
+    if (await pngControl.isVisible()) {
+      await pngControl.click();
+    } else {
+      // Last resort: look for a select option or radio by text.
+      // This is risky, but we'll try to find a radio or checkbox with PNG.
+      const pngRadio = page.getByRole('radio', { name: /PNG/ }).first();
+      if (await pngRadio.isVisible()) {
+        await pngRadio.click();
+      }
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  // Look for a button labeled "Export" or "Print" or "Download".
+  const exportButton = page.getByRole('button', { name: /Export|Print|Download/i, exact: false }).first();
+  
+  // Wait for the export button to be clickable.
+  await expect(exportButton).toBeEnabled({ timeout: 5000 });
+  
+  // Prepare for download
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download happened
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

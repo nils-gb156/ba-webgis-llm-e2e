@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await expect(measurementToggle).toBeVisible();
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  // The map toolbar is visible, and typically the measurement panel appears within or near it.
+  // We check for the presence of the map controls panel which usually contains the measurement input/result
+  const mapControlsPanel = page.getByTestId('map-controls-panel');
+  await expect(mapControlsPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // We need to click on the map canvas. We'll use positions relative to the map container.
+  // First, get the bounding box of the map container to calculate click positions
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Define points for a line (e.g., top-left to bottom-right)
+  const point1 = { x: mapBox.x + 100, y: mapBox.y + 100 };
+  const point2 = { x: mapBox.x + 200, y: mapBox.y + 200 };
+  const point3 = { x: mapBox.x + 300, y: mapBox.y + 300 };
+
+  // Click the first point
+  await page.mouse.click(point1.x, point1.y);
+
+  // Click the second point
+  await page.mouse.click(point2.x, point2.y);
+
+  // Step 3: Double-click to finish the measurement
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Expected results:
+  // - The measurement panel is visible (already checked via map-controls-panel)
+  // - The measurement panel displays a length value with a unit.
+  
+  // The measurement result is likely displayed in the map controls panel or a specific result element.
+  // Since no specific test id for the result is provided, we look for text patterns indicating length.
+  // Common units: m, km, mi, ft. We'll look for a number followed by one of these units.
+  
+  // We expect the result to appear in the map controls panel.
+  // Using expect.poll to wait for the asynchronous measurement result to settle.
+  await expect.poll(async () => {
+    const content = await mapControlsPanel.textContent();
+    return content;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/);
+});

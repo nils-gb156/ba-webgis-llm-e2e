@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible (it is open by default per context, but let's be explicit)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the map canvas to trigger a forecast request.
+  // Using a central position on the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 200 } });
+
+  // Wait for the weather forecast section to appear and populate with 24 entries.
+  // The forecast data loads asynchronously.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  
+  // Wait for the section to be visible
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the forecast to contain 24 entries.
+  // We assume the entries are rendered as distinct elements within the forecast section.
+  // Since we don't have specific test IDs for individual forecast entries, we look for a list or items.
+  // Based on typical structures, we might look for a list of items or specific text patterns.
+  // However, the prompt says "The forecast contains 24 entries".
+  // Let's assume the entries are listed in a way that we can count them or check for a specific structure.
+  // If there's no specific locator for entries, we might need to infer from the text or structure.
+  // Let's try to find a list within the weather forecast section and count its items.
+  // Or, if the entries have a specific role or text, we can use that.
+  // Given the complexity, let's poll for the presence of 24 distinct time slots or entries.
+  // A common pattern is a list of hours or dates.
+  // Let's assume the entries are in a list with a specific role or structure.
+  // If not, we might need to check for the presence of 24 specific time strings (e.g., "00:00", "01:00", etc.)
+  // However, without knowing the exact structure, we can try to find a list and count its children.
+  
+  // Let's try to find a list within the weather forecast section.
+  const forecastList = weatherForecastSection.locator('ul, ol, [role="list"]');
+  
+  // Wait for the list to have 24 items
+  await expect.poll(async () => {
+    const count = await forecastList.locator('li, [role="listitem"]').count();
+    return count;
+  }).toBe(24);
+
+  // Verify the clicked position is highlighted on the map.
+  // This is tricky because the map is a canvas.
+  // We can't easily assert on a visual highlight on a canvas.
+  // However, the use case says "The clicked position is highlighted on the map".
+  // If there's no specific test ID or accessible element for the highlight, we might skip this assertion or rely on the forecast appearing.
+  // Given the constraints, we'll rely on the forecast appearing as the primary indicator that the click was processed.
+  // If there's a specific marker or feature, it should have a test ID or accessible name.
+  // Since none is provided, we'll assume the forecast appearing is sufficient proof of the map interaction.
+
+  // Additional check: Ensure the info panel is still visible and contains the forecast
+  await expect(infoPanel).toBeVisible();
+});

@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the measurement tool is not already active.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Step 1: Click the 'Measurement' button to activate the tool.
+  await measurementToggle.click();
+  await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+
+  // Step 2 & 3: Draw a line by clicking points on the map and double-clicking to finish.
+  const mapContainer = page.getByTestId('map-container');
+
+  // Get the center of the map container to click relative to it.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or has no bounding box');
+  }
+
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+
+  // Click first point (center)
+  await page.mouse.click(centerX, centerY);
+
+  // Click second point (offset to create a line)
+  await page.mouse.click(centerX + 100, centerY + 100);
+
+  // Double-click to finish the measurement
+  await page.mouse.dblclick(centerX + 200, centerY + 200);
+
+  // Wait a bit for the measurement result to render
+  await page.waitForTimeout(500);
+
+  // Expected result: The measurement panel is visible and displays a length value with a unit.
+  // The info panel is typically where measurement results are shown.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Check for a length value with a unit (e.g., "1.23 km", "1234.56 m")
+  const measurementText = infoPanel.locator('text=/\\d+\\.?\\d*\\s*(km|m|mi|ft)/');
+  await expect(measurementText).toBeVisible();
+});

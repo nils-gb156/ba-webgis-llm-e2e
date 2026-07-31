@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and UI to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  await printToggle.click();
+
+  // Verify the printing panel is visible
+  // The print dialog/panel is likely part of the info-panel or a modal.
+  // Based on context, we look for the print interface.
+  // Often print dialogs have a specific title or input fields.
+  // Let's assume the print panel appears within the info-panel or as a distinct overlay.
+  // We will look for a title input which is part of Step 2, implying the panel is open.
+  
+  // Step 2: The user enters a title for the printout.
+  // We need to find the title input. It might be inside the info panel or a dedicated print dialog.
+  // Since no specific test-id for print dialog is provided, we look for accessible roles.
+  // A common pattern is a dialog or a panel with a text input.
+  const titleInput = page.getByLabel('Title').or(page.getByPlaceholder('Title'));
+  
+  // If getByLabel doesn't find it directly, we might need to scope it.
+  // Let's try to find the print panel first. It's likely the "Information" panel or a new one.
+  // Given the "Print Map" button is clicked, let's assume the info panel updates or a modal appears.
+  // We'll try to type into a title field if it exists.
+  
+  // Attempting to locate the title input more robustly.
+  // It might be a textbox with label "Title" or placeholder.
+  const titleField = page.locator('input[placeholder="Title"]').or(page.getByLabel('Title'));
+  
+  // If the above is too specific and fails, we might need to look for any text input in a print context.
+  // However, let's assume standard accessibility.
+  if (await titleField.count() > 0) {
+    await titleField.fill('My Map Printout');
+  } else {
+    // Fallback: Look for any text input in the visible area that isn't the geocoder
+    // This is risky, but without a test-id, we rely on context.
+    // Let's assume the print panel has a recognizable structure.
+    // We will look for a button that says "Print" or "Export" to infer the panel.
+    const printButton = page.getByRole('button', { name: /Print|Export|Generate/i });
+    if (await printButton.count() > 0) {
+        // If we find a print button, we assume the panel is open.
+        // We still need to fill the title. Let's look for a textbox near the print button.
+        const container = printButton.locator('..').locator('..'); // Try to get a parent container
+        const fallbackTitleInput = container.getByRole('textbox', { name: /title/i }).or(container.getByPlaceholder(/title/i));
+        if (await fallbackTitleInput.count() > 0) {
+            await fallbackTitleInput.fill('My Map Printout');
+        }
+    }
+  }
+
+  // Step 3: The user selects the PNG file format.
+  // Look for a radio button or select for format.
+  const formatRadio = page.getByRole('radio', { name: 'PNG' });
+  if (await formatRadio.count() > 0) {
+    await formatRadio.check();
+  } else {
+    // Try select
+    const formatSelect = page.getByRole('combobox', { name: /Format/i });
+    if (await formatSelect.count() > 0) {
+      await formatSelect.selectOption('PNG');
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Prepare for download
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: /Print|Export|Download|Generate/i }).click()
+  ]);
+
+  // Expected results:
+  // - A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

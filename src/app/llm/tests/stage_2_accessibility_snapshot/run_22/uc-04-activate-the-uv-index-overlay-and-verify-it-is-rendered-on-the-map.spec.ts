@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher to be visible and the UV-Index checkbox to be present
+  // The layer switcher is already open per the context, but we ensure stability
+  await expect(page.getByRole('checkbox', { name: 'UV-Index' })).toBeVisible();
+
+  // Verify the UV-Index checkbox is initially unchecked (hidden)
+  await expect(page.getByRole('checkbox', { name: 'UV-Index' })).not.toBeChecked();
+
+  // Click the UV-Index checkbox to enable the layer
+  // Using force: true because Chakra UI renders the actual input hidden under a decorative control
+  await page.getByRole('checkbox', { name: 'UV-Index' }).click({ force: true });
+
+  // Verify the checkbox is now checked
+  await expect(page.getByRole('checkbox', { name: 'UV-Index' })).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // We assert on the UV-Index legend item being visible as a proxy for the layer being rendered/loaded.
+  // The legend is already visible, but we wait for the specific UV-Index legend content to ensure the layer is active.
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+
+  // Verify that the UV-Index legend is rendered on the map canvas by checking its presence in the DOM.
+  // Since map tiles are on a canvas, we rely on the legend/sidebar update as the primary verification
+  // that the layer has been activated and loaded in the application state.
+  await expect(page.getByRole('heading', { name: 'UV-Index Stations' })).toBeVisible();
+});

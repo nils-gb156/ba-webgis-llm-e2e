@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+  // The UV-Index checkbox is initially unchecked.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Click the checkbox. Since it's a Chakra UI control, we use force: true to bypass the decorative overlay.
+  await uvIndexCheckbox.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Step 2: The user waits for the map to load the layer tiles.
+  // We capture the request for the UV-Index layer tiles to verify the layer is requested.
+  // We expect a WMS GetMap or tile request containing 'UV-Index' or similar identifier.
+  // Based on the layer name, we'll look for a request that likely involves the UV-Index layer.
+  // Since we don't have the exact URL pattern, we'll listen for any request and filter it.
+  const uvIndexRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    // Heuristic: look for requests that might be related to the UV-Index layer.
+    // Often WMS layers have their name in the URL or parameters.
+    // Alternatively, we can just wait for a network idle or a specific response if known.
+    // Given the context, let's assume the layer name appears in the URL or we can infer from the action.
+    // A safer bet for "layer rendered" in E2E without specific map helpers is to check for network activity
+    // related to the map or just wait for a short period if no specific endpoint is known.
+    // However, the prompt says "verify that the layer is requested".
+    // Let's try to find a request that contains 'UV-Index' in the URL or parameters.
+    return url.includes('UV-Index') || url.includes('uv-index');
+  });
+
+  // Trigger the request by ensuring the map updates (clicking elsewhere or waiting for layer switcher change to propagate)
+  // The click on the checkbox should have triggered the layer visibility change and subsequent tile requests.
+  // We wait for the request to be made.
+  await uvIndexRequestPromise;
+
+  // Verify the UV-Index overlay tiles are rendered on the map canvas.
+  // Since we cannot assert directly on the canvas content easily without helpers,
+  // and the prompt says "verify that the layer is requested and rendered",
+  // we've already verified the request.
+  // To further confirm rendering, we can check if the map container is still visible and stable.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Additional verification: The UV-Index legend should be visible now that the layer is active.
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+});

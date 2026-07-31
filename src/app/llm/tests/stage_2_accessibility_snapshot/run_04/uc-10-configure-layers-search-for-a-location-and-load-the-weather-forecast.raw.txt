@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer.
+  // The layer switcher is initially open. We target the Temperature checkbox.
+  // Chakra UI checkboxes need force: true because the decorative overlay intercepts clicks.
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer.
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+
+  // Verify layer states immediately after toggling.
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 3: Search for a location using the geocoder.
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  await expect(geocoderPanel.locator('li')).toHaveCount({ min: 1 });
+
+  // Select the first result. Assuming the first item in the list corresponds to the primary search result.
+  const firstResult = geocoderPanel.locator('li').first();
+  await firstResult.click();
+
+  // Step 5 & 6: Wait for the map to navigate and the info panel to load the forecast.
+  // The info panel contains the weather forecast section.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  
+  // Wait for the forecast section to become visible (indicating data has loaded for the new location).
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Expected Result: The info panel displays a weather forecast section with 24 entries.
+  // We poll for the number of forecast entries to reach 24.
+  await expect.poll(() => weatherForecastSection.locator('li').count()).toBe(24);
+});

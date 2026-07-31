@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer.
+  // The layer switcher is already open. We find the "Temperature" checkbox and click it.
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureCheckbox).toBeChecked();
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer.
+  // The layer switcher is still open. We find the "Precipitation" checkbox and click it.
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 3: Search for a location using the geocoder.
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search' });
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  // The geocoder panel appears with search results. We select the first one.
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  // Wait for the first result to be visible
+  await expect(geocoderPanel.getByRole('option', { name: 'Münster' })).toBeVisible();
+  // Click the first result
+  await geocoderPanel.getByRole('option', { name: 'Münster' }).first().click();
+
+  // Step 5: Wait for the map to navigate to the selected location.
+  // We can verify this by checking that the map container is still visible and the geocoder panel might close or update.
+  // Since we don't have map helpers, we rely on the info panel updating as a proxy for map navigation.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast.
+  // The info panel should now display weather forecast data.
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = infoPanel.getByRole('region', { name: 'Weather Forecast' });
+  
+  // Wait for the weather forecast section to be visible and contain 24 entries.
+  // The entries might be in a list or grid. We look for the section first.
+  await expect(weatherForecastSection).toBeVisible();
+  
+  // Check for 24 entries. The structure isn't fully defined, but typically forecasts are in a list.
+  // We'll poll for the count of forecast items. Assuming they are list items or similar distinct elements within the section.
+  // If the structure is different, we might need to adjust. Let's assume they are list items for now.
+  // If not, we might count by text or specific class. Given the complexity, let's try to find 24 distinct items.
+  // A common pattern is a list of forecast cards or rows.
+  
+  // Let's try to find elements that represent forecast entries. 
+  // Since we don't have exact test ids for forecast entries, we might count based on the structure.
+  // However, the expected result says "24 entries". 
+  // We can try to count the number of forecast items. 
+  // Let's assume the forecast items are list items within the weather forecast section.
+  
+  const forecastEntries = weatherForecastSection.locator('li');
+  
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+});

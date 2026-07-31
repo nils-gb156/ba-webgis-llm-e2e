@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible.
+  // The accessibility tree shows "Info Panel Switcher [pressed]", so it should already be open.
+  // We wait for it to be visible to ensure the app is ready.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure no measurement tool is active.
+  // The accessibility tree shows "Measurement" button without [pressed].
+  // We assert it is not pressed to be safe.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await expect(measurementToggle).not.toBeChecked();
+
+  // Ensure both point station layers are active.
+  // The accessibility tree shows both checkboxes are [checked].
+  await expect(page.getByRole('checkbox', { name: 'UV-Index Stations' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+
+  // Click on the map at the specified coordinates where both stations are located.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Wait for the info panel to load the station info for both layers.
+  // We check for the presence of the section headings or titles for both layer types.
+  await expect(page.getByText('UV-Index Station')).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible();
+});

@@ -1,0 +1,24 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer
+  // The layer switcher is already open and visible.
+  // We use force: true because Chakra UI checkboxes have a decorative overlay.
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await precipitationCheckbox.click({ force: true });
+
+  // Step 2: Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 2: Verify the legend displays an entry corresponding to the Precipitation layer.
+  // We look for a legend entry that mentions "Precipitation".
+  // Since the legend updates dynamically, we use expect.poll to wait for the new entry to appear.
+  await expect.poll(() =>
+    page.getByRole('listitem').filter({ hasText: 'Precipitation' }).count()
+  ).toBeGreaterThan(0);
+});

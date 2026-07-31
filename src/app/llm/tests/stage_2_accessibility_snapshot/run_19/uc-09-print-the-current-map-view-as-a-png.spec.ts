@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure base map and overlay layers are visible.
+  // The accessibility tree shows EUCOS, UV-Index, and Temperature are checked.
+  // We assume the default state meets the precondition, but we ensure the layer switcher is closed
+  // to avoid UI clutter affecting the print or clicks.
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  if (await layerSwitcherToggle.getAttribute('aria-pressed') === 'true') {
+    await layerSwitcherToggle.click({ force: true });
+  }
+  
+  const legendToggle = page.getByTestId('legend-toggle');
+  if (await legendToggle.getAttribute('aria-pressed') === 'true') {
+    await legendToggle.click({ force: true });
+  }
+
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  if (await infoPanelToggle.getAttribute('aria-pressed') === 'true') {
+    await infoPanelToggle.click({ force: true });
+  }
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  // Assert it is not already pressed/open
+  const isPressed = await printToggle.getAttribute('aria-pressed');
+  if (isPressed !== 'true') {
+    await printToggle.click({ force: true });
+  }
+
+  // Assert the printing panel is visible.
+  // The panel usually appears near the toggle or as a dialog. 
+  // Based on typical patterns, we look for a panel associated with the print action.
+  // Since no specific test id for the panel content is provided, we rely on the toggle being pressed
+  // and potentially the presence of form elements inside the map-controls-panel or a new region.
+  // Let's assume the print controls appear in the map-controls-panel or a dedicated region.
+  // We will look for a title input to confirm the panel is open.
+  await expect(page.getByLabel('Title')).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  await page.getByLabel('Title').fill('Test Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // We look for a radio button or select element for format.
+  // Assuming a radio group or select named "Format" or similar.
+  const formatRadio = page.getByRole('radio', { name: 'PNG' });
+  if (!await formatRadio.isChecked()) {
+    await formatRadio.click({ force: true });
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // We look for a button labeled "Print", "Export", or similar inside the panel.
+  const printButton = page.getByRole('button', { name: /Print|Export/i });
+  
+  // Wait for the download event before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printButton.click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

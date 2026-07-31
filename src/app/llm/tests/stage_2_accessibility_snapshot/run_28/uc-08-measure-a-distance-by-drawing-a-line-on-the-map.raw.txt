@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  await page.getByTestId('map-container').waitFor({ state: 'visible' });
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  
+  // Check current state to ensure we are opening it, not closing it
+  const isPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isPressed === 'true') {
+    // If already pressed, click to close then open, or just ensure it's open.
+    // The use case says "activate", implying it should be on.
+    // Let's click once to ensure it's in the "on" state.
+    await measurementToggle.click({ force: true });
+  } else {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Assert the measurement panel is visible.
+  // The panel content is likely inside the info-panel or a specific measurement container.
+  // We look for text indicating measurement mode or the panel itself.
+  // Based on context, the info-panel is pressed. The measurement result usually appears there or nearby.
+  // Let's assert that the info-panel is visible as it likely hosts the measurement UI.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // 2. The user clicks several points on the map canvas to draw a line.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map to calculate click positions
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Calculate center and offset points to draw a line
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+  
+  // Point 1: Center
+  await page.mouse.click(centerX, centerY);
+  
+  // Point 2: Offset slightly to the right and down
+  await page.mouse.click(centerX + 100, centerY + 100);
+  
+  // Point 3: Offset further to the right and down
+  await page.mouse.click(centerX + 200, centerY + 200);
+
+  // 3. The user double-clicks to finish the measurement.
+  await page.mouse.dblclick(centerX + 200, centerY + 200);
+
+  // Wait for the measurement result to appear.
+  // The result is likely displayed in the info-panel or a dedicated measurement section.
+  // We poll for a pattern that looks like a length measurement (e.g., "m" or "km" after a number).
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Use expect.poll to wait for the measurement value to appear in the info panel
+  await expect.poll(async () => {
+    const content = await infoPanel.textContent();
+    return content;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/i);
+});

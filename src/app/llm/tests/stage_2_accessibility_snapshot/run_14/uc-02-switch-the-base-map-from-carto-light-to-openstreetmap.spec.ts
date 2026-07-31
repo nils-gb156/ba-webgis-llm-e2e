@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher to be visible (it should be open by default per context)
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Open the base map selector in the layer switcher.
+  // The combobox "Basemaps" is the selector for base maps.
+  const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  await basemapCombobox.click();
+
+  // Wait for the list of base maps to appear
+  // We can't easily see the dropdown items by role directly without more context,
+  // but we can assert that the combobox is expanded or simply proceed to click the target.
+  // Playwright's click on a combobox usually expands it.
+
+  // Step 2: Select 'OpenStreetMap' as the base map.
+  // We look for the text "OpenStreetMap" within the combobox's expanded list.
+  // Since it's a combobox, the options might be in a listbox or just selectable via text.
+  // Using getByText inside the combobox context is a safe fallback if getByRole('option') isn't clear.
+  // However, standard comboboxes often use role="option" for items.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  
+  // It's possible the option isn't immediately visible if the list is long, but usually comboboxes expand fully.
+  // We click the option.
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Assert the combobox now shows OpenStreetMap
+  await expect(basemapCombobox).toHaveValue('OpenStreetMap');
+  
+  // Alternatively, if the combobox doesn't update its value immediately or shows the current selection differently,
+  // we can check the aria-pressed state or similar if available, but usually the value changes.
+  // Let's also verify that the map container has updated by checking for the presence of OSM tiles or simply
+  // asserting the selection state if we had a direct reference to the active layer.
+  // Since we don't have map helpers, we rely on the UI state.
+  
+  // Double check that the combobox name/label reflects the change if it updates dynamically.
+  // The combobox label is "Basemaps". The value or text content should reflect "OpenStreetMap".
+  // In many implementations, the combobox displays the selected item.
+  await expect(page.getByText('OpenStreetMap', { exact: false })).toBeVisible();
+});

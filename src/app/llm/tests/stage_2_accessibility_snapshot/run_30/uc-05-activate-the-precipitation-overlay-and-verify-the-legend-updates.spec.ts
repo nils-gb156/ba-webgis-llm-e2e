@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and the map to be ready
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: The user clicks the visibility toggle of the Precipitation overlay layer to show it.
+  // The layer switcher is already visible (from preconditions/initial state).
+  // We locate the checkbox for "Precipitation" and click it.
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await precipitationCheckbox.click();
+
+  // Step 2: The user views the legend.
+  // Expected result 1: The Precipitation overlay layer toggle is in the enabled (checked) state.
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Expected result 2: The legend displays an entry corresponding to the Precipitation layer.
+  // We assert that the legend container contains text indicating precipitation data.
+  // Since specific test-ids for the precipitation legend item aren't listed, we check for
+  // visible text in the legend region that would indicate the precipitation legend is present.
+  // Common legend entries for precipitation might include ranges like "0 - 1", "1 - 5", etc.,
+  // or a title "Precipitation". We'll look for the presence of the legend section.
+  const legend = page.getByTestId('legend');
+  
+  // We expect the legend to contain some text related to precipitation.
+  // A robust way is to check if the legend is visible and contains text that suggests precipitation data.
+  // However, without knowing the exact legend text, we can check for the existence of the legend
+  // and perhaps a generic indicator. Let's look for a common precipitation legend title or range.
+  // If the application adds a specific heading for Precipitation in the legend, we should find it.
+  // Let's try to find a heading or text that mentions "Precipitation" within the legend.
+  const precipitationLegendEntry = legend.getByText(/Precipitation/i);
+  
+  // Wait for the legend to update and show the precipitation entry.
+  // Using expect.poll to wait for the legend to reflect the new layer.
+  await expect.poll(async () => {
+    const count = await precipitationLegendEntry.count();
+    return count;
+  }).toBeGreaterThan(0);
+
+  // Alternatively, if we can't find specific text, we can just assert the legend is visible
+  // and the precipitation checkbox is checked, which is a strong indicator the legend updated.
+  // But the requirement is to verify the legend updates.
+  // Let's assume the legend will show a title or range for precipitation.
+  // If no specific text is found, we might need to rely on the checkbox state and legend visibility.
+  // However, the prompt asks to verify the legend displays an entry.
+  // Let's try to find any text in the legend that is not present before, or a specific pattern.
+  // Since we don't have the exact text, we'll check for the presence of the legend and its visibility.
+  // A more specific check would be ideal, but without it, we check for the checkbox state and legend visibility.
+  
+  // Let's refine: check if the legend contains text that is likely part of a precipitation legend.
+  // Common values: mm, precipitation, etc.
+  // We'll check if the legend element is visible and contains some text.
+  await expect(legend).toBeVisible();
+});

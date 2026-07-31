@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is loaded and interactive before proceeding
+  await expect(page.locator('#map-container')).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Wait for the measurement panel to appear.
+  // The info-panel is visible because the Info Panel Switcher is pressed.
+  // The measurement tool likely adds UI to this panel or a dedicated overlay.
+  // We wait for the measurement input or result container to appear.
+  // Based on typical patterns, the measurement input field or a specific measurement UI element appears.
+  // Let's wait for the info panel to be ready for measurement input, often indicated by a specific class or child element.
+  // Since we don't have a specific test id for the measurement input, we'll wait for the map to be in measurement mode.
+  // A common pattern is that the map cursor changes or a specific UI element appears.
+  // Let's assume the measurement panel is part of the info-panel or a floating div.
+  // We will wait for a reasonable time for the UI to update, then proceed to click.
+  // However, to be robust, let's look for the measurement result container or input.
+  // If no specific test id, we rely on the map being ready.
+  
+  // Let's click points on the map. We need the map container locator.
+  const mapContainer = page.locator('#map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We'll click 3 points to create a simple polyline.
+  // Point 1
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+  // Point 2
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+  // Point 3
+  await mapContainer.click({ position: { x: 300, y: 100 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 300, y: 100 } });
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+  
+  // The measurement result is likely displayed in the info-panel or a dedicated measurement result area.
+  // Let's look for text that resembles a measurement value (e.g., "1.23 km", "500 m").
+  // We'll poll for this text to appear.
+  
+  // Wait for the measurement result to appear.
+  // The result might be in the info-panel or a toast.
+  // Let's check the info-panel first.
+  const infoPanel = page.locator('[data-testid="info-panel"]');
+  await expect(infoPanel).toBeVisible();
+
+  // Poll for a measurement value with a unit.
+  // Common units: km, m, mi, ft.
+  // We'll look for a pattern like "number unit".
+  await expect.poll(async () => {
+    const text = await infoPanel.innerText();
+    // Regex to match a number followed by a unit (km, m, mi, ft, etc.)
+    return /(\d+(\.\d+)?\s*(km|m|mi|ft|cm|mm))/i.test(text);
+  }).toBeTruthy();
+});

@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map container to be visible before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The accessibility tree shows "button Measurement".
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  // The map-controls-panel likely contains the measurement UI.
+  await expect(page.getByTestId('map-controls-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. We'll pick a few distinct coordinates.
+  // The map container is identified by data-testid="map-container".
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click first point
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+
+  // Click second point
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+
+  // Click third point to continue drawing
+  await mapContainer.click({ position: { x: 300, y: 100 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 300, y: 100 } });
+
+  // Expected results:
+  // - The measurement panel is visible. (Already asserted above, but good to re-assert if needed)
+  await expect(page.getByTestId('map-controls-panel')).toBeVisible();
+
+  // - The measurement panel displays a length value with a unit.
+  // We look for text that resembles a number followed by a unit like "m" or "km".
+  // Since the exact text might vary, we poll for a pattern.
+  await expect.poll(() =>
+    page.getByTestId('map-controls-panel').innerText()
+  ).toMatch(/\d+(\.\d+)?\s*(m|km|mi|ft)/);
+});

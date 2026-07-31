@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // The layer switcher toggle is already pressed (active), so we just need to interact with the combobox.
+  // We use the test id for the layer switcher to scope our search for the combobox.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const baseMapCombobox = layerSwitcher.getByRole('combobox', { name: 'Basemaps' });
+
+  // Click the combobox to open the dropdown options
+  await baseMapCombobox.click();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // We look for a list item or option containing "OpenStreetMap" within the layer switcher.
+  // Since it's a combobox, the options might be in a listbox or just visible items.
+  // Based on the accessibility tree, we have a list "Operational layers" but the base maps are in a combobox.
+  // We will try to find the text "OpenStreetMap" within the layer switcher context and click it.
+  const osmOption = layerSwitcher.getByText('OpenStreetMap', { exact: true });
+  await expect(osmOption).toBeVisible();
+  await osmOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  // We verify the selection by checking the combobox value or text.
+  await expect(baseMapCombobox).toHaveText('OpenStreetMap');
+});

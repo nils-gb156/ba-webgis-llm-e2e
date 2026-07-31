@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  // The checkbox is initially checked. We force click to uncheck it.
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  // The checkbox is initially unchecked. We force click to check it.
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Assertions for layer state changes
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+
+  // Step 3: Search for a location
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The geocoder panel usually appears automatically or we wait for the list item
+  const firstResult = page.getByRole('option', { name: /Münster/ }).first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We assert that the map container is still visible and the info panel updates
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The expected result is a weather forecast section with 24 entries.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  
+  // We poll for the weather forecast section to become visible and contain entries
+  await expect.poll(async () => {
+    const section = page.getByTestId('weather-forecast-section');
+    const isVisible = await section.isVisible();
+    if (!isVisible) return false;
+    
+    // Count the number of forecast entries (typically list items or similar structures within the section)
+    // Since the exact structure isn't fully specified beyond "24 entries", we look for the section being populated.
+    // A robust check is to ensure the section is visible and has some content, or specifically 24 items if identifiable.
+    // Given the context, let's assume the entries are distinct elements within the section.
+    // If the section itself becomes visible and populated, that's a good indicator.
+    // Let's try to find specific entry count if possible, otherwise just visibility and some text.
+    const entries = section.locator('li').or(section.locator('[class*="entry"]')).or(section.locator('div'));
+    const count = await entries.count();
+    return count >= 24;
+  }).toBeTruthy();
+
+  // Final assertion: The info panel displays a weather forecast section
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+});

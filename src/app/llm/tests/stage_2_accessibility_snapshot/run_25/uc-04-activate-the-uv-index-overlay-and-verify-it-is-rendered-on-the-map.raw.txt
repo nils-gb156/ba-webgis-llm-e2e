@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to be fully loaded
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+  // The layer switcher is already visible and the UV-Index checkbox is initially unchecked.
+  // We use force: true because Chakra UI checkboxes render the input visually hidden.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' });
+  await uvIndexToggle.click({ force: true });
+
+  // Step 2: The user waits for the map to load the layer tiles.
+  // We verify that the toggle is now checked.
+  await expect(uvIndexToggle).toBeChecked();
+
+  // We also verify that the UV-Index legend is visible, which indicates the layer has been processed/rendered.
+  const uvIndexLegend = page.getByTestId('uvi-stations-legend');
+  await expect(uvIndexLegend).toBeVisible();
+
+  // To verify the tiles are rendered on the map canvas, we can check that the map container
+  // is still visible and that no error messages appear. Since we cannot directly assert on
+  // canvas content without helper functions, we rely on the legend visibility and layer toggle state
+  // as indicators that the layer request was successful and the layer is active.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+});

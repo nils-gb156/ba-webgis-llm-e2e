@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Preconditions:
+  // - The app is loaded successfully (navigation handles this)
+  // - The info panel is visible.
+  // - The UV-Index Stations layer (WMS) is active.
+  // - The EUCOS Ground Stations layer (WFS) is active.
+  // - No measurement tool is active.
+  //
+  // The accessibility tree shows that UV-Index Stations, EUCOS Ground Stations,
+  // and Temperature are checked. The info panel toggle is pressed (visible).
+  // The measurement toggle is present. We should ensure it is not pressed.
+  // The layer switcher and legend are also pressed (visible).
+
+  // Ensure the info panel is visible. It appears pressed in the tree, but we
+  // assert it to be safe.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure the measurement tool is NOT active.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  // Check if it's pressed. If so, click to deactivate.
+  const isMeasurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementPressed === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure UV-Index Stations layer is active.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uvIndexCheckbox.isChecked())) {
+    await uvIndexCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is active.
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Step 1: The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Step 2: The user waits for the info panel to load the station info for both layers.
+  // Expected results:
+  // - The info panel displays a 'UV-Index Station' section with feature information.
+  // - The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+  // Wait for the info panel to contain text indicating UV-Index Station info
+  await expect.poll(async () => {
+    const content = await infoPanel.textContent();
+    return content;
+  }).toContain('UV-Index Station');
+
+  // Wait for the info panel to contain text indicating EUCOS Ground Station info
+  await expect.poll(async () => {
+    const content = await infoPanel.textContent();
+    return content;
+  }).toContain('EUCOS Ground Station');
+});

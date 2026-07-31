@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+  await temperatureToggle.click();
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+  await precipitationToggle.click();
+
+  // Step 3: Search for a location using the geocoder
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const firstResult = geocoderPanel.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We wait for the info panel to update, which implies the map has navigated and data is loading
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Step 6: Wait for the info panel to load the forecast with 24 entries
+  // The expected result is a weather forecast section with 24 entries.
+  // We poll for the presence of the weather forecast section and then count its entries.
+  await expect.poll(async () => {
+    const weatherSection = infoPanel.getByTestId('weather-forecast-section');
+    if (await weatherSection.isVisible()) {
+      const entries = weatherSection.getByRole('listitem');
+      const count = await entries.count();
+      return count;
+    }
+    return 0;
+  }).toBe(24);
+
+  // Verify Expected Results:
+  // The Precipitation overlay layer toggle is in the disabled state (checked, so enabled).
+  await expect(precipitationToggle).toBeChecked();
+
+  // The Temperature overlay layer toggle is in the enabled state (unchecked, so hidden).
+  await expect(temperatureToggle).not.toBeChecked();
+});

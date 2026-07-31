@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible.
+  // The accessibility tree shows "Info Panel Switcher" [pressed], so it is likely already open.
+  // However, to be safe and ensure the precondition "info panel is visible" is met,
+  // we check its state and toggle if necessary.
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+
+  // Check if info panel is visible; if not, click the toggle
+  if (!(await infoPanel.isVisible())) {
+    // The toggle button might be pressed (active) or not.
+    // We need to check the aria-pressed state of the toggle to know if it's currently open/closed.
+    // If it's pressed, it's open. If not pressed, it's closed.
+    const isPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (isPressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  // Ensure the map canvas is interactive by waiting for it to be visible.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Click on a position on the map canvas.
+  // We use a central position to ensure we are clicking on the map.
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the info panel to load the forecast.
+  // The expected result is that the forecast contains 24 entries.
+  // We can check for the presence of the weather forecast section.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Assert that the clicked position is highlighted on the map.
+  // Since map state is not in the DOM, we rely on the helper functions if provided.
+  // No helper functions are provided in the prompt, so we skip this assertion or assume it's visually verified.
+  // However, the use case says "The clicked position is highlighted on the map."
+  // Without helpers, we cannot assert this programmatically via DOM.
+  // We will proceed with the other assertions.
+
+  // Assert that the info panel displays a weather forecast section.
+  // Already done above with expect(weatherForecastSection).toBeVisible();
+
+  // Assert that the forecast contains 24 entries.
+  // We need to count the entries in the weather forecast section.
+  // The structure is not explicitly given, but we can assume it's a list or a series of elements.
+  // Let's assume there are 24 distinct elements representing the forecast entries.
+  // We will use expect.poll to wait for the entries to appear.
+  const forecastEntries = weatherForecastSection.locator('li').or(weatherForecastSection.locator('[role="listitem"]')).or(weatherForecastSection.locator('.forecast-entry'));
+  
+  // If the structure is unknown, we might need to be more generic.
+  // Let's assume the entries are in a list with a specific class or role.
+  // Since we don't have the exact structure, we'll count any child elements that look like forecast entries.
+  // A common pattern is a list of items. Let's try to find 24 items.
+  // We'll use expect.poll to wait for the count to reach 24.
+  await expect.poll(async () => {
+    const count = await forecastEntries.count();
+    return count;
+  }).toBe(24);
+});

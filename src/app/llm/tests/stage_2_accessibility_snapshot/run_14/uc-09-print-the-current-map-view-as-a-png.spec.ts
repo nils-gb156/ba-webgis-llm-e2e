@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and map to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await printButton.click();
+
+  // Verify the printing panel is visible
+  // The print dialog/panel is likely a dialog or a specific region.
+  // Based on the context, we look for elements that would appear in a print dialog.
+  // Often, print dialogs have a title input and format selection.
+  // We check for the presence of typical print dialog elements or the panel itself.
+  // Since there's no specific test id for the print panel, we infer from the steps.
+  // We expect a title input and format options to appear.
+  await expect(page.getByLabel('Title')).toBeVisible({ timeout: 5000 });
+
+  // Step 2: Enter a title for the printout.
+  await page.getByLabel('Title').fill('Test Map Print');
+
+  // Step 3: Select the PNG file format.
+  // Look for radio buttons or a dropdown for format.
+  // Commonly, print dialogs have radio buttons for format selection.
+  const pngFormat = page.getByRole('radio', { name: 'PNG' });
+  if (await pngFormat.isVisible()) {
+    await pngFormat.click();
+  } else {
+    // Fallback if it's a dropdown
+    const formatSelect = page.getByRole('combobox', { name: /Format/i });
+    if (await formatSelect.isVisible()) {
+      await formatSelect.selectOption('png');
+    } else {
+      // Last resort: try to find PNG text and click it
+      await page.getByText('PNG').first().click();
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  // Wait for the download event before clicking the print button
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Print|Export|Generate/i }).click();
+
+  // Verify the file is downloaded
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  // Additional assertion: Verify the printing panel closes or the action completes
+  // The panel might close automatically after export.
+  // We can check if the print button is clickable again or if the dialog is gone.
+  // For now, the download assertion is the primary success criterion.
+});

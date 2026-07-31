@@ -1,0 +1,77 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer.
+  // The layer switcher is already open. We click the checkbox for "Temperature".
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer.
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Step 3: Search for a location using the geocoder.
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  // The geocoder panel contains the search results.
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  // Wait for the first result item to be visible (assuming the first item is a listitem or similar)
+  // Since we don't have specific test IDs for results, we look for the first interactive element in the panel
+  // or wait for the panel to contain text.
+  await expect(geocoderPanel).toBeVisible();
+  
+  // Select the first result. Usually, the first result is clickable.
+  // We try to find the first list item or button within the geocoder panel.
+  const firstResult = geocoderPanel.locator('li').first();
+  if (await firstResult.isVisible()) {
+    await firstResult.click();
+  } else {
+    // Fallback: click the first button or link in the panel if listitems aren't directly clickable
+    const firstButton = geocoderPanel.getByRole('button').first();
+    if (await firstButton.isVisible()) {
+      await firstButton.click();
+    } else {
+      // Last resort: click the first element that looks like a result
+      await geocoderPanel.locator('[role="option"]').first().click();
+    }
+  }
+
+  // Step 5: Wait for the map to navigate to the selected location.
+  // We wait for the info panel to start loading or for the map to be interactive.
+  // A simple wait for the info panel to update its content is a good proxy.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast.
+  // The expected result is 24 entries in the weather forecast section.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the forecast entries to populate.
+  // We poll for the presence of at least one entry, and then check the count.
+  // Assuming each entry has a consistent structure, we can count them.
+  // Let's assume the entries are divs or list items within the weather-forecast-section.
+  const forecastEntries = weatherForecastSection.locator('> div'); // Adjust selector if needed based on actual DOM structure
+  
+  // Poll until we have a reasonable number of entries (e.g., at least 1, ideally 24)
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBeGreaterThanOrEqual(1);
+
+  // Final assertion: Check that we have 24 entries as per the expected result.
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+
+  // Verify layer states as per expected results.
+  // Temperature should be unchecked (hidden)
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+  
+  // Precipitation should be checked (visible)
+  await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+});

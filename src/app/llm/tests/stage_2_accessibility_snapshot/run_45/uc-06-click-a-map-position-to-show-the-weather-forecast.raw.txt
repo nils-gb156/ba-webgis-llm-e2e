@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible. The accessibility tree shows it is already pressed/visible.
+  // We verify it is visible before proceeding.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the map canvas to trigger the forecast request.
+  // We click near the center of the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 200 } });
+
+  // Wait for the info panel to update with the weather forecast.
+  // The forecast section should become visible.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the forecast entries to load.
+  // The expected result states there are 24 entries.
+  // We poll for the number of entries in the forecast section.
+  await expect.poll(async () => {
+    const entries = weatherForecastSection.locator('li');
+    return await entries.count();
+  }).toBe(24);
+
+  // Verify that the clicked position is highlighted on the map.
+  // Since we can't assert map features directly via DOM, we rely on the info panel update
+  // and the presence of the forecast as proof the click was processed.
+  // However, if there's a specific indicator for the selected point (like a marker or coordinate display),
+  // we should check it. The coordinate-viewer might show the coordinates.
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  await expect(coordinateViewer).toBeVisible();
+});

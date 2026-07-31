@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Precondition: The app is loaded successfully.
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be visible.
+  // We assert on the map container to ensure the map is rendered.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  
+  // Wait for a base map and at least one overlay layer to be visible.
+  // The accessibility tree shows "EUCOS Ground Stations" and "UV-Index Stations" are checked.
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+  await expect(page.getByTestId('eucos-stations-legend')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await printButton.click();
+
+  // Expected result: The printing panel is visible.
+  // We look for a dialog or panel related to printing. Since no specific test id is given for the panel itself,
+  // we look for elements typically inside a print dialog, such as a title input or format selector.
+  // The accessibility tree doesn't explicitly list a "Print Dialog" role, but we can infer its presence
+  // by looking for the controls mentioned in subsequent steps.
+  // Let's wait for the geocoder panel to be hidden or a print-specific element to appear.
+  // A safer bet is to look for the "title" input or "format" selector.
+  // Assuming the print panel contains an input for the title and a select for format.
+  // We will wait for a reasonable time or a specific element to appear.
+  // Since we don't have explicit test IDs for the print dialog's internal elements, we rely on accessibility.
+  // However, the prompt says "UI context extracted automatically", and we don't see a print dialog in the tree yet.
+  // This implies the click might have opened a modal/panel that isn't fully reflected in the initial tree extraction
+  // or we need to wait for it to render.
+  
+  // Let's assume the print dialog has a title input. We'll try to find it.
+  // If the UI has a specific test id for the print dialog, we would use it. Since it's not listed, we use getByRole.
+  // Often print dialogs are dialogs.
+  const printDialog = page.getByRole('dialog', { name: /Print/i });
+  
+  // If the dialog is not immediately visible, we might need to wait for it.
+  // However, the click should trigger it. Let's assert its visibility.
+  // In case the dialog doesn't have a clear name, we might need to look for specific inputs.
+  // Let's try to find an input that could be the title.
+  // We'll wait for the print dialog to be visible.
+  await expect(printDialog).toBeVisible({ timeout: 5000 });
+
+  // Step 2: The user enters a title for the printout.
+  // We need to find the title input within the print dialog.
+  const titleInput = printDialog.getByLabel(/Title/i);
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // We need to find the format selector within the print dialog.
+  const formatSelect = printDialog.getByLabel(/Format/i);
+  await expect(formatSelect).toBeVisible();
+  await formatSelect.selectOption('png');
+
+  // Step 4: The user clicks the export/print button.
+  const exportButton = printDialog.getByRole('button', { name: /Export|Print|Download/i });
+  await expect(exportButton).toBeVisible();
+  
+  // Wait for the download to start before clicking, to ensure we catch it.
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  
+  // Assert that a file was downloaded and it is likely a PNG.
+  expect(suggestedFilename).toContain('.png');
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

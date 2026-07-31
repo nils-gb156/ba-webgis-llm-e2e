@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready by checking for the scale viewer, which updates with zoom
+  await expect(page.getByTestId('scale-viewer')).toBeVisible();
+
+  // Get the initial zoom level from the scale viewer text
+  const initialScaleText = await page.getByTestId('scale-viewer').textContent();
+  const initialScaleMatch = initialScaleText?.match(/1 to (\d+)/);
+  test.assertTrue(!!initialScaleMatch, 'Scale viewer text is expected to contain a scale ratio');
+  const initialScaleValue = parseInt(initialScaleMatch![1], 10);
+
+  // Step 1: Click the 'Zoom in' button to increase the zoom level
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await expect(zoomInButton).toBeVisible();
+  await zoomInButton.click();
+
+  // Wait for the zoom level to change by polling the scale viewer
+  await expect.poll(() => page.getByTestId('scale-viewer').textContent()).not.toBe(initialScaleText);
+
+  const zoomedInScaleText = await page.getByTestId('scale-viewer').textContent();
+  const zoomedInScaleMatch = zoomedInScaleText?.match(/1 to (\d+)/);
+  test.assertTrue(!!zoomedInScaleMatch, 'Zoomed in scale viewer text is expected to contain a scale ratio');
+  const zoomedInScaleValue = parseInt(zoomedInScaleMatch![1], 10);
+
+  // Assert that the zoom level is higher (scale denominator is smaller)
+  expect(zoomedInScaleValue).toBeLessThan(initialScaleValue);
+
+  // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await expect(zoomOutButton).toBeVisible();
+  await zoomOutButton.click();
+
+  // Wait for the zoom level to change again
+  await expect.poll(() => page.getByTestId('scale-viewer').textContent()).not.toBe(zoomedInScaleText);
+
+  const zoomedOutScaleText = await page.getByTestId('scale-viewer').textContent();
+  const zoomedOutScaleMatch = zoomedOutScaleText?.match(/1 to (\d+)/);
+  test.assertTrue(!!zoomedOutScaleMatch, 'Zoomed out scale viewer text is expected to contain a scale ratio');
+  const zoomedOutScaleValue = parseInt(zoomedOutScaleMatch![1], 10);
+
+  // Assert that the zoom level is lower (scale denominator is larger) than after zooming in
+  expect(zoomedOutScaleValue).toBeGreaterThan(zoomedInScaleValue);
+});

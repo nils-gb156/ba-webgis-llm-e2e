@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Helper to get current zoom level from the map state
+  const getZoomLevel = async (page: any) => {
+    // We need to access the map instance. Since no helper functions were provided
+    // in the prompt, we must rely on DOM assertions or side effects.
+    // However, the prompt says "Map state... is NOT represented as DOM elements".
+    // And "If no helpers are provided, this section is irrelevant".
+    // But we MUST verify zoom level changes.
+    // Let's look for a scale viewer or similar that might expose zoom.
+    // The accessibility tree shows: "region 'Scale': 'Current scale: 1 to 2739072'"
+    // This suggests the scale changes. We can assert on the scale text content change.
+    // But scale is not exactly zoom level.
+    // Let's re-read carefully: "Map state ... is not in the DOM. Read it only through the helper functions provided in the prompt."
+    // "If no helpers are provided, this section is irrelevant — do not invent or import any helper module."
+    // This creates a conflict: I need to assert zoom level, but I have no helper and no DOM element for zoom.
+    // However, usually in these tests, if a helper isn't provided, we might assert on the map canvas state visually? No, that's hard.
+    // Or maybe the scale viewer IS the proxy. Let's assume the scale changes are a valid proxy for zoom level changes in this context,
+    // OR that there is a hidden element or we can evaluate JS.
+    // The prompt says "do not invent ... helper module". It doesn't explicitly forbid `page.evaluate`.
+    // But `page.evaluate` to get OpenLayers zoom is effectively inventing a helper.
+    // Let's look at the accessibility tree again.
+    // "region 'Scale': 'Current scale: 1 to 2739072'"
+    // This text is inside a region with testid `scale-viewer`? No, `scale-viewer` is a testid.
+    // Let's check if `scale-viewer` contains the scale text.
+    // If so, we can assert that the scale text changes.
+    // Zooming in -> Scale denominator decreases.
+    // Zooming out -> Scale denominator increases.
+    
+    // Let's try to extract the scale denominator.
+    const scaleText = await page.getByTestId('scale-viewer').textContent();
+    // Format: "Current scale: 1 to 2739072"
+    const match = scaleText?.match(/1 to (\d+)/);
+    return match ? parseInt(match[1], 10) : undefined;
+  };
+
+  // Initial zoom level
+  const initialZoomLevel = await getZoomLevel(page);
+  expect(initialZoomLevel).toBeDefined();
+
+  // Step 1: Click Zoom In
+  await page.getByRole('button', { name: 'Zoom in map' }).click();
+  
+  // Wait for zoom to complete and scale to update
+  await page.waitForTimeout(500); // Minimal wait for animation/async update if any
+  
+  const zoomedInScale = await getZoomLevel(page);
+  expect(zoomedInScale).toBeDefined();
+  // Zooming in means the scale denominator gets smaller (more detail)
+  expect(zoomedInScale).toBeLessThan(initialZoomLevel!);
+
+  // Step 2: Click Zoom Out
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Wait for zoom to complete
+  await page.waitForTimeout(500);
+
+  const zoomedOutScale = await getZoomLevel(page);
+  expect(zoomedOutScale).toBeDefined();
+  // Zooming out means the scale denominator gets larger (less detail)
+  expect(zoomedOutScale).toBeGreaterThan(zoomedInScale!);
+});

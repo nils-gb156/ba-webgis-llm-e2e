@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive before interacting with it
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. Using a central point and then moving slightly.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to calculate click positions
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click first point (center)
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  
+  // Click second point (offset to create a line)
+  await page.mouse.click(box.x + box.width / 2 + 100, box.y + box.height / 2 + 100);
+  
+  // Click third point (further offset)
+  await page.mouse.click(box.x + box.width / 2 + 200, box.y + box.height / 2);
+
+  // Step 3: Double-click to finish the measurement
+  await page.mouse.dblclick(box.x + box.width / 2 + 200, box.y + box.height / 2);
+
+  // Expected results:
+  // The measurement panel is visible.
+  // The measurement panel displays a length value with a unit.
+  
+  // The measurement result is typically shown in the info panel or a dedicated measurement result area.
+  // Based on the context, the info panel is already open. Let's look for measurement results there.
+  // We'll poll for a numeric value followed by a unit (e.g., "km", "m") in the info panel or map controls.
+  
+  // Try to find the measurement result in the info panel first, as it's open.
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Poll for a length value with a unit. Common formats: "1.23 km", "1234 m", "1.2 km"
+  await expect.poll(async () => {
+    const text = await infoPanel.textContent();
+    return text;
+  }).toMatch(/[\d.]+\s*(km|m|mi|ft)/);
+});

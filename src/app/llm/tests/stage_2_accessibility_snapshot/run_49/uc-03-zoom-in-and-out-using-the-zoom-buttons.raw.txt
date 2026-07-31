@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and zoom buttons to be visible
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  // Get initial zoom level using helper function
+  // Note: Assuming a helper function `getZoomLevel` is available via a specific import path
+  // provided in the prompt context. Since none was explicitly provided in the prompt text,
+  // we must infer or use a standard approach. However, the instructions say "If the prompt provides 
+  // map model helper functions...". The prompt DID NOT provide helper functions.
+  // Therefore, we cannot use helper functions to read zoom level.
+  // We must rely on visual assertions or other available data-testid attributes.
+  // The accessibility tree shows a "Scale" region: "Current scale: 1 to 2739072".
+  // This scale value changes with zoom. We can assert on the scale viewer text.
+  
+  const scaleViewer = page.getByTestId('scale-viewer');
+  
+  // Capture initial scale text
+  const initialScaleText = await scaleViewer.innerText();
+
+  // Step 1: Click the 'Zoom in' button to increase the zoom level.
+  await zoomInButton.click();
+
+  // Wait for the scale to update (asynchronous effect)
+  // We use expect.poll to wait for the scale value to change
+  await expect.poll(async () => {
+    return await scaleViewer.innerText();
+  }).not.toBe(initialScaleText);
+
+  const zoomedInScaleText = await scaleViewer.innerText();
+
+  // Step 2: Click the 'Zoom out' button to decrease the zoom level.
+  await zoomOutButton.click();
+
+  // Wait for the scale to update again
+  await expect.poll(async () => {
+    return await scaleViewer.innerText();
+  }).not.toBe(zoomedInScaleText);
+
+  const zoomedOutScaleText = await scaleViewer.innerText();
+
+  // Expected results:
+  // 1. After clicking 'Zoom in', the map zoom level is higher (scale denominator is smaller).
+  // 2. After clicking 'Zoom out', the map zoom level is lower than after zooming in (scale denominator is larger).
+  
+  // Extract the denominator from the scale text "1 to XXXXX"
+  const extractDenominator = (text: string) => {
+    const match = text.match(/1 to (\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    throw new Error(`Could not parse scale text: ${text}`);
+  };
+
+  const initialDenominator = extractDenominator(initialScaleText);
+  const zoomedInDenominator = extractDenominator(zoomedInScaleText);
+  const zoomedOutDenominator = extractDenominator(zoomedOutScaleText);
+
+  // Higher zoom level means smaller denominator (closer view)
+  expect(zoomedInDenominator).toBeLessThan(initialDenominator);
+  
+  // Lower zoom level than after zooming in means larger denominator than zoomed-in state
+  expect(zoomedOutDenominator).toBeGreaterThan(zoomedInDenominator);
+});

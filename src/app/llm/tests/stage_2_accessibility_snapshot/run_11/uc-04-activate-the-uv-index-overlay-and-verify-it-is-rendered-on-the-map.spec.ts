@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher-toggle')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer to show it.
+  // The UV-Index checkbox is initially unchecked. We click it to check it.
+  // Note: Chakra UI checkboxes require force: true as per conventions.
+  await page.getByRole('checkbox', { name: 'UV-Index' }).click({ force: true });
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We wait for the checkbox to be checked, which indicates the layer is enabled.
+  // The map tiles load asynchronously, but we can verify the layer is active via the DOM state.
+  await expect(page.getByRole('checkbox', { name: 'UV-Index' })).toBeChecked();
+
+  // Expected result: The UV-Index overlay layer toggle is in the enabled (checked) state.
+  // Already asserted above.
+
+  // Expected result: The UV-Index overlay tiles are rendered on the map canvas.
+  // Since map canvas content cannot be asserted via DOM, we verify the layer is active
+  // and potentially check for any associated UI elements that might appear (like a legend item).
+  // The accessibility tree shows a legend item for UV-Index Stations.
+  // We can check if the legend item for UV-Index is visible, which implies the layer is loaded.
+  await expect(page.getByRole('heading', { name: 'UV-Index Stations' })).toBeVisible();
+
+  // Additionally, we can verify that the UV-Index stations legend is visible
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+});

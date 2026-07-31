@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial UI to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  // 1. Activate the measurement tool
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  
+  // Check current state: if it's already pressed, the tool is active.
+  // We want to ensure it is active. If it's not pressed, click it.
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive !== 'true') {
+    await measurementToggle.click();
+  }
+
+  // Verify the measurement panel is visible
+  await expect(page.getByRole('region', { name: /Measurement/ })).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map to calculate click positions
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Define points for a simple line (e.g., diagonal)
+  const points = [
+    { x: box.x + 100, y: box.y + 100 },
+    { x: box.x + 200, y: box.y + 200 },
+    { x: box.x + 300, y: box.y + 150 },
+  ];
+
+  for (const point of points) {
+    await page.mouse.click(point.x, point.y);
+  }
+
+  // 3. Double-click to finish the measurement
+  await page.mouse.dblclick(points[points.length - 1].x, points[points.length - 1].y);
+
+  // Wait a bit for the measurement calculation to complete
+  await page.waitForTimeout(500);
+
+  // Expected result: The measurement panel displays a length value with a unit
+  // The measurement result is likely in the info panel or a dedicated measurement result area.
+  // Based on the UI context, the info panel is open. We'll look for text matching a distance pattern.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Look for a measurement result pattern like "123.45 m" or "1.23 km"
+  // Since we don't have a specific test id for the result, we scan the visible text.
+  // We use expect.poll to wait for the asynchronous calculation to appear.
+  await expect.poll(async () => {
+    const text = await infoPanel.textContent();
+    return text;
+  }).toMatch(/\d+\.?\d*\s*(m|km|mi|ft)/);
+});

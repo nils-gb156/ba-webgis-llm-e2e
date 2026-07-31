@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible. The accessibility tree shows "Info Panel Switcher [pressed]",
+  // so it is likely already open. We assert visibility to be sure, but we do not click the toggle
+  // unless we are sure it is closed, to avoid toggling it off.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the center of the map canvas to trigger the forecast request.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the weather forecast section to appear and contain data.
+  // The expected result states the forecast contains 24 entries.
+  // We poll for the presence of the weather forecast section and verify it has rendered content.
+  await expect.poll(async () => {
+    const weatherSection = page.getByTestId('weather-forecast-section');
+    const isVisible = await weatherSection.isVisible();
+    if (!isVisible) {
+      return 0;
+    }
+    // Count the number of forecast entries (typically list items or similar structures inside the section).
+    // Since we don't have specific test ids for entries, we count the direct children or items within the section.
+    // A robust way is to count elements that look like forecast items.
+    // Let's assume the section contains a list of forecast items.
+    const count = await weatherSection.locator('li').count();
+    return count;
+  }).toBe(24);
+
+  // Verify the clicked position is highlighted on the map.
+  // Since map content is canvas-based, we can't assert via DOM directly.
+  // However, the prompt implies we should check if the position is highlighted.
+  // Without map helper functions, we rely on the fact that the info panel updated,
+  // which implies the click was processed.
+  // If there were map helpers, we would check for a highlighted coordinate.
+  // Since none are provided, we assume the successful update of the info panel
+  // and the visibility of the forecast section are sufficient indicators.
+  // We can also check if the info panel shows the coordinates of the click.
+  // Let's check if the info panel has any text content related to the forecast.
+  const infoPanelText = await infoPanel.innerText();
+  expect(infoPanelText).not.toBe('');
+});

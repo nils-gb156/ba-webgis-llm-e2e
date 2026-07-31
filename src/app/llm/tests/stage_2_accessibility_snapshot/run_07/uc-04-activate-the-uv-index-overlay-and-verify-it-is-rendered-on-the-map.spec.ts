@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to be fully loaded and the map to be ready
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Register listener for WMS GetMap requests (layer tiles)
+  const layerRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('SERVICE=WMS') && url.includes('REQUEST=GetMap') && url.includes('LAYERS=UV-Index');
+  });
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer
+  // The layer switcher is already open and visible based on the context.
+  // The UV-Index checkbox is currently unchecked.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  await expect(uvIndexCheckbox).not.toBeChecked();
+  await uvIndexCheckbox.click({ force: true });
+
+  // Step 2: Wait for the map to load the layer tiles
+  await layerRequestPromise;
+
+  // Expected results:
+  // 1. The UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // 2. The UV-Index overlay tiles are rendered on the map canvas.
+  // We verify this by asserting that the GetMap request was actually sent and completed.
+  // The request promise already ensures the request was made.
+  // To further verify rendering, we can check that the layer is visible in the legend or simply rely on the network request.
+  // Since map canvas cannot be asserted directly via DOM, the successful network request for the specific layer is the primary indicator.
+  // We can also assert that the UV-Index legend item is present or visible if needed, but the prompt asks to verify it is rendered on the map.
+  // The successful completion of the WMS request is the best proxy for "rendered on the map" in this context.
+  // Let's also assert that the UV-Index legend is visible to ensure the layer is recognized by the UI.
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+});

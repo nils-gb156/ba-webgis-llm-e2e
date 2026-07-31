@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the Measurement button to open the measurement panel.
+  // The accessibility tree shows "button Measurement", and the test id is measurement-toggle.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  // The info-panel is typically used for such tools in this app structure.
+  // We check that the info-panel is visible and contains measurement-related content.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to click within it.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Calculate some points to click to draw a rough line.
+  // We'll click near the center, then move up-left, then down-right.
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+  
+  const point1 = { x: centerX, y: centerY };
+  const point2 = { x: centerX - 100, y: centerY - 100 };
+  const point3 = { x: centerX + 100, y: centerY + 100 };
+
+  await page.mouse.click(point1.x, point1.y);
+  await page.mouse.click(point2.x, point2.y);
+  await page.mouse.click(point3.x, point3.y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Expected results: The measurement panel displays a length value with a unit.
+  // The info-panel should contain text that looks like a measurement result (e.g., "1.23 km").
+  // We use expect.poll to wait for the result to appear.
+  await expect.poll(async () => {
+    const infoPanelContent = await infoPanel.textContent();
+    return infoPanelContent;
+  }).toMatch(/[\d.,]+\s*(m|km|mi|ft)/);
+});

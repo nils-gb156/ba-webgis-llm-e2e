@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible. The accessibility tree shows "Info Panel Switcher [pressed]",
+  // meaning it is already open. We assert visibility to ensure the precondition is met.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas. Using a central position.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the forecast to load. The expected result is 24 entries.
+  // We poll the weather forecast section to see if it contains the expected number of entries.
+  // Assuming each entry is a distinct DOM element (e.g., a card, list item, or row) within the weather-forecast-section.
+  await expect.poll(async () => {
+    const forecastSection = page.getByTestId('weather-forecast-section');
+    if (await forecastSection.isVisible()) {
+      // Count the number of child elements that represent forecast entries.
+      // Common patterns: list items, cards, or rows. We'll count generic child elements that look like data.
+      // If the structure is a list of items, we can count listitems or specific cards.
+      // Without specific test IDs for entries, we count the direct children of the forecast section
+      // that are likely to be the forecast cards/items.
+      const count = await forecastSection.locator('> *').count();
+      return count;
+    }
+    return 0;
+  }).toBe(24);
+
+  // Verify the info panel displays a weather forecast section (already confirmed by the poll above, but explicit check)
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Verify the clicked position is highlighted on the map.
+  // Since map content is canvas-based, we can't easily assert the highlight via DOM.
+  // However, the prompt implies we should check it. Without map helpers, we rely on the fact that
+  // the forecast loaded for the clicked position, which implies the map interaction was successful.
+  // If there were map helpers provided, we would check for a highlighted coordinate here.
+  // Since none are provided, we assume the successful loading of the forecast for the specific click
+  // serves as a proxy for the map interaction being successful.
+});

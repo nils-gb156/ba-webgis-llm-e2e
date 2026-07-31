@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial UI to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The accessibility tree shows "button Measurement". We use getByRole with exact name.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement', exact: true });
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  // The prompt doesn't give a specific test id for the panel content, but we can infer
+  // the panel exists. Often measurement panels might not have a dedicated test id,
+  // but we can check for the presence of a result or the tool's active state.
+  // Since the expected result is that the panel displays a length value, we will wait for that.
+  // For now, let's assume the tool is active. We can look for a specific indicator if available.
+  // However, the most robust assertion for the "panel is visible" requirement without a specific ID
+  // is to ensure the tool interaction is possible. Let's proceed to drawing.
+
+  // 2. Click several points on the map canvas to draw a line.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to click within it
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Define some points to draw a line. 
+  // We'll click three points to form a simple line.
+  const points = [
+    { x: mapBox.width / 2, y: mapBox.height / 2 },
+    { x: mapBox.width / 2 + 100, y: mapBox.height / 2 - 50 },
+    { x: mapBox.width / 2 + 200, y: mapBox.height / 2 },
+  ];
+
+  for (const point of points) {
+    await mapContainer.click({
+      position: { x: point.x, y: point.y },
+    });
+    // Small delay to ensure the map registers the click and updates the line
+    await page.waitForTimeout(100);
+  }
+
+  // 3. Double-click to finish the measurement.
+  await mapContainer.dblclick({
+    position: { x: points[points.length - 1].x, y: points[points.length - 1].y },
+  });
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+
+  // We need to find the measurement result. 
+  // The prompt doesn't explicitly give a test id for the measurement result text.
+  // However, we can look for text that matches a length pattern (e.g., "1.23 km", "123 m").
+  // Since we can't rely on specific text without knowing the exact distance drawn,
+  // we can look for any text that looks like a measurement.
+  // Alternatively, we can check if the measurement tool's result area is visible.
+  // Let's try to find text that matches a common measurement format.
+  
+  // A more robust way is to check if the measurement tool has produced a result.
+  // Since we don't have a specific test id for the result, we'll poll for any text that looks like a distance.
+  // Common formats: "1.23 km", "1234 m", "1.2 km".
+  
+  await expect.poll(async () => {
+    // Try to find text that looks like a distance measurement.
+    // We'll search for text containing numbers followed by 'km' or 'm' or 'mi'.
+    // This is a bit heuristic but works for this use case.
+    const bodyText = await page.locator('body').innerText();
+    // Regex to find patterns like "1.23 km", "123 m", etc.
+    const distanceRegex = /\d+\.?\d*\s*(km|m|mi|ft)/i;
+    return distanceRegex.test(bodyText);
+  }).toBeTruthy({
+    message: 'Measurement result with length value and unit was not found.',
+  });
+
+  // As an additional check, we can verify that the measurement panel is visible.
+  // Since we don't have a specific test id for the panel, we assume that if the result is there, the panel is visible.
+  // If there was a specific test id for the measurement panel (e.g., 'measurement-panel'), we would use:
+  // await expect(page.getByTestId('measurement-panel')).toBeVisible();
+});

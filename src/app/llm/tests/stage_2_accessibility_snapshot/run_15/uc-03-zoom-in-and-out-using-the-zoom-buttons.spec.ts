@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Get the initial zoom level before any interaction
+  const initialZoom = await page.evaluate(() => {
+    // @ts-ignore - OpenLayers map instance is typically on window or a specific global
+    const map = (window as any).__openPioneerMap;
+    if (!map) {
+      throw new Error('Map not found');
+    }
+    return map.getView().getZoom();
+  });
+
+  // Step 1: The user clicks the 'Zoom in' button to increase the zoom level.
+  await page.getByRole('button', { name: 'Zoom in map' }).click();
+
+  // Wait for zoom animation/action to complete
+  await page.waitForTimeout(500);
+
+  // Verify zoom level is higher after zooming in
+  const zoomAfterIn = await page.evaluate(() => {
+    const map = (window as any).__openPioneerMap;
+    return map.getView().getZoom();
+  });
+
+  expect(zoomAfterIn).toBeGreaterThan(initialZoom);
+
+  // Step 2: The user clicks the 'Zoom out' button to decrease the zoom level.
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Wait for zoom animation/action to complete
+  await page.waitForTimeout(500);
+
+  // Verify zoom level is lower after zooming out compared to after zooming in
+  const zoomAfterOut = await page.evaluate(() => {
+    const map = (window as any).__openPioneerMap;
+    return map.getView().getZoom();
+  });
+
+  expect(zoomAfterOut).toBeLessThan(zoomAfterIn);
+});

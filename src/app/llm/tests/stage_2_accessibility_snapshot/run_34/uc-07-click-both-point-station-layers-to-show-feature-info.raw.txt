@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure no measurement tool is active (it might be toggled on by default or previous tests)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementState = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementState === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Ensure Info Panel is visible
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanelState = await infoPanelToggle.getAttribute('aria-pressed');
+  if (infoPanelState !== 'true') {
+    await infoPanelToggle.click({ force: true });
+  }
+
+  // Ensure UV-Index Stations layer is active
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  const uviChecked = await uviCheckbox.isChecked();
+  if (!uviChecked) {
+    await uviCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is active
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  const eucosChecked = await eucosCheckbox.isChecked();
+  if (!eucosChecked) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Wait for the info panel to load feature information
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Assert that UV-Index Station info is displayed
+  await expect(infoPanel.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible();
+
+  // Assert that EUCOS Ground Station info is displayed
+  await expect(infoPanel.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible();
+});

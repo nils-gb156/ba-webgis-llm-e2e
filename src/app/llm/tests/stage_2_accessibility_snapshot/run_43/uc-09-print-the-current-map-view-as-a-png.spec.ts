@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is loaded and layers are visible.
+  // The accessibility tree shows EUCOS, UV-Index, and Temperature are checked.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the 'Print Map' button to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible.
+  // We look for a dialog or panel that appears after clicking the print toggle.
+  // Since there is no specific test-id for the print dialog, we look for common print UI elements.
+  // Often print dialogs have a title or specific input fields.
+  // Let's assume the print panel contains a title input and format selection.
+  // We'll wait for the print dialog/panel to appear.
+  const printPanel = page.getByRole('dialog', { name: /Print/i }).or(page.getByRole('region', { name: /Print/i }));
+  await expect(printPanel).toBeVisible({ timeout: 5000 });
+
+  // Step 2: Enter a title for the printout.
+  // We look for a text input labeled 'Title' or similar within the print panel.
+  const titleInput = printPanel.getByLabel(/Title/i).or(printPanel.getByPlaceholder(/Title/i));
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format.
+  // We look for a radio group or select for format, with 'PNG' as an option.
+  const formatSelector = printPanel.getByRole('radiogroup').or(printPanel.getByRole('combobox'));
+  if (formatSelector) {
+    // If it's a radio group, we select the PNG radio button.
+    const pngRadio = printPanel.getByRole('radio', { name: /PNG/i });
+    if (await pngRadio.isVisible()) {
+      await pngRadio.click();
+    } else {
+      // If it's a combobox, we select PNG.
+      await formatSelector.selectOption({ label: 'PNG' });
+    }
+  } else {
+    // Fallback: look for a button or link labeled PNG to click.
+    const pngButton = printPanel.getByRole('button', { name: /PNG/i });
+    if (await pngButton.isVisible()) {
+      await pngButton.click();
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  const exportButton = printPanel.getByRole('button', { name: /Export|Print|Download/i });
+  await expect(exportButton).toBeVisible();
+
+  // Wait for the download to start before clicking.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download was triggered and has the correct suggested filename.
+  // The prompt expects a PNG file.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  // Clean up the download.
+  await download.cancel();
+});

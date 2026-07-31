@@ -1,0 +1,142 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay layer
+  // The layer switcher is already visible and open.
+  // Temperature checkbox is currently checked. Clicking it unchecks it.
+  await page.getByRole('checkbox', { name: 'Temperature' }).click();
+
+  // Step 2: Show Precipitation overlay layer
+  // Precipitation checkbox is currently unchecked. Clicking it checks it.
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click();
+
+  // Step 3: Search for a location using the geocoder
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for result list and select the first result
+  // The geocoder panel appears with results. We select the first one.
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  // Wait for the panel to appear and contain results
+  await expect(geocoderPanel).toBeVisible();
+  
+  // Select the first result. Usually the first item in the list is the most relevant.
+  // We look for a list item or button within the geocoder panel.
+  // Assuming the results are interactive elements (buttons or list items) inside the panel.
+  const firstResult = geocoderPanel.locator('role=listitem[name=/Münster/]').first();
+  // Fallback: if listitem isn't used, try button or generic clickable
+  const resultLocator = firstResult.count() > 0 ? firstResult : geocoderPanel.locator('button, [role="option"]').first();
+  await resultLocator.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We can check for a change in the map or simply wait for the info panel to update.
+  // Since map state isn't directly in DOM, we rely on the info panel loading the forecast.
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast with 24 entries
+  // The expected result states the info panel displays a weather forecast section with 24 entries.
+  // We poll for the presence of 24 forecast entries within the weather-forecast-section.
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  await expect.poll(async () => {
+    const entries = forecastSection.locator('role=listitem, .forecast-entry, div'); // Adjust selector based on actual forecast item structure
+    // Since we don't have the exact class for forecast entries, we assume they are list items or distinct blocks.
+    // Let's try counting list items within the forecast section or similar.
+    // If the structure is a list of 24 items:
+    const count = await forecastSection.locator('li').count();
+    return count;
+  }).toBe(24);
+
+  // Verify Expected Results:
+  // 1. The Precipitation overlay layer toggle is in the disabled state (unchecked).
+  // Note: "disabled" in the prompt likely means "unchecked" or "not active" for visibility.
+  // If it means the checkbox is unchecked:
+  await expect(page.getByRole('checkbox', { name: 'Precipitation' })).not.toBeChecked();
+
+  // 2. The Temperature overlay layer toggle is in the enabled state (checked).
+  // Note: The prompt says "enabled state" for Temperature after hiding it? 
+  // Re-reading: "The user clicks the visibility toggle of the Temperature overlay layer to hide it."
+  // Expected result: "The Temperature overlay layer toggle is in the enabled state."
+  // This seems contradictory. Usually, hiding means unchecking. 
+  // Let's re-read carefully: "The user clicks... to hide it." -> Expected: "Temperature... enabled state."
+  // This might be a typo in the prompt's expected results, or "enabled" means "available to be clicked" (not disabled).
+  // However, in UI testing, "enabled" for a checkbox usually means checked. 
+  // Let's assume the prompt meant "unchecked" for the hidden layer.
+  // But wait, "Precipitation... disabled state". If Precipitation was hidden and now shown, it should be checked.
+  // Let's look at the preconditions: "Temperature... initially visible", "Precipitation... initially hidden".
+  // Step 1: Click Temperature to hide -> Unchecked.
+  // Step 2: Click Precipitation to show -> Checked.
+  // Expected Result 1: "Precipitation... disabled state". This contradicts Step 2 showing it.
+  // Expected Result 2: "Temperature... enabled state". This contradicts Step 1 hiding it.
+  
+  // Alternative interpretation: "Enabled/Disabled" refers to the button's `disabled` attribute?
+  // No, these are checkboxes.
+  
+  // Let's look at the wording again.
+  // "The Precipitation overlay layer toggle is in the disabled state."
+  // "The Temperature overlay layer toggle is in the enabled state."
+  
+  // Maybe the steps are reversed in the description vs expected results?
+  // Or maybe "enabled" means "checked" and "disabled" means "unchecked"?
+  // If so:
+  // Step 1: Hide Temp -> Unchecked.
+  // Step 2: Show Precip -> Checked.
+  // Expected: Precip disabled (Unchecked)? Temp enabled (Checked)?
+  // This is the opposite of what the steps do.
+  
+  // Let's assume the "Expected results" describe the state AFTER the steps, and there might be a terminology mix-up.
+  // If I hide Temp, it is unchecked. If I show Precip, it is checked.
+  // If the expected result says "Precipitation... disabled", it might mean the layer is not active/visible?
+  // But Step 2 says "show it".
+  
+  // Let's stick to the visual state of the checkboxes.
+  // After Step 1: Temperature checkbox is unchecked.
+  // After Step 2: Precipitation checkbox is checked.
+  
+  // If the prompt insists on "Precipitation... disabled" and "Temperature... enabled", 
+  // it might be referring to a different UI element or a mistake.
+  // Given the complexity "hard", I will assert the visual state resulting from the steps.
+  // I will also check if there is a "disabled" attribute on the checkbox if it exists.
+  
+  // Let's assume "enabled" = checked and "disabled" = unchecked for the sake of the test logic matching the steps.
+  // But the expected results are explicit.
+  // Let's re-read: "The Precipitation overlay layer toggle is in the disabled state."
+  // Could "disabled" mean the layer is turned off? Yes.
+  // Could "enabled" mean the layer is turned on? Yes.
+  // So:
+  // Step 1: Hide Temp -> Temp is OFF.
+  // Step 2: Show Precip -> Precip is ON.
+  // Expected: Precip OFF? Temp ON?
+  // This is a direct contradiction.
+  
+  // Hypothesis: The steps and expected results are swapped or the names are swapped.
+  // Or, "disabled" refers to the fact that the user cannot interact with it? No.
+  
+  // Let's look at the preconditions again.
+  // Temp: Visible. Precip: Hidden.
+  // Step 1: Click Temp to hide. -> Temp becomes Hidden.
+  // Step 2: Click Precip to show. -> Precip becomes Visible.
+  // Final State: Temp Hidden, Precip Visible.
+  
+  // Expected Results:
+  // "Precipitation... disabled state" -> Hidden?
+  // "Temperature... enabled state" -> Visible?
+  
+  // This implies the final state is Temp Visible, Precip Hidden.
+  // This contradicts the steps.
+  
+  // I will follow the steps as the primary source of truth for actions, and assert the resulting visual state.
+  // If the expected results are contradictory, I will assert what actually happens after the steps.
+  // However, I must include assertions for the expected results if possible.
+  
+  // Let's assume the prompt meant:
+  // Step 1: Hide Precip (if it was visible? No, it's hidden).
+  // Step 2: Show Temp (if it was hidden? No, it's visible).
+  
+  // Let's just assert the state of the checkboxes after the steps.
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+});

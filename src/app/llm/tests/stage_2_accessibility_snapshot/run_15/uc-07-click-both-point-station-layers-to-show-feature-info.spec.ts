@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (precondition)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const measurementPressedState = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressedState === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Ensure UV-Index Stations layer is checked (precondition)
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is checked (precondition)
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 },
+  });
+
+  // Wait for and verify that the info panel displays information for both layers
+  await expect(page.getByTestId('info-panel')).toContainText('UV-Index Station');
+  await expect(page.getByTestId('info-panel')).toContainText('EUCOS Ground Station');
+});

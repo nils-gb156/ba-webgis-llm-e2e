@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and the zoom controls to be visible
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  // Get initial zoom level from map state if possible, otherwise rely on visual/interaction success
+  // Since we don't have explicit map helper functions in the prompt, we assert the actions are successful
+  // and the map reacts. We can check the scale viewer as a proxy for zoom level change.
+  const scaleViewer = page.getByTestId('scale-viewer');
+
+  // Capture initial scale text to compare against later
+  const initialScaleText = await scaleViewer.textContent();
+
+  // Step 1: Click the 'Zoom in' button
+  await zoomInButton.click();
+
+  // Wait for the map to update (zoom animation or tile load)
+  // We poll the scale viewer to ensure the zoom level has actually changed
+  await expect.poll(async () => {
+    const currentScale = await scaleViewer.textContent();
+    return currentScale;
+  }).not.toBe(initialScaleText);
+
+  // Verify zoom in happened: Scale denominator should be smaller (closer to 1)
+  // e.g., "1 to 2739072" -> "1 to 1369536" (approx half)
+  // We just need to ensure the scale value changed and represents a "larger" scale (smaller denominator)
+  const scaleAfterZoomIn = await scaleViewer.textContent();
+  const zoomInDenominator = parseInt(scaleAfterZoomIn?.match(/1 to (\d+)/)?.[1] || '0', 10);
+  const initialDenominator = parseInt(initialScaleText?.match(/1 to (\d+)/)?.[1] || '0', 10);
+  
+  expect(zoomInDenominator).toBeLessThan(initialDenominator);
+
+  // Step 2: Click the 'Zoom out' button
+  await zoomOutButton.click();
+
+  // Wait for the map to update again
+  await expect.poll(async () => {
+    const currentScale = await scaleViewer.textContent();
+    return currentScale;
+  }).not.toBe(scaleAfterZoomIn);
+
+  // Verify zoom out happened: Scale denominator should be larger
+  const scaleAfterZoomOut = await scaleViewer.textContent();
+  const zoomOutDenominator = parseInt(scaleAfterZoomOut?.match(/1 to (\d+)/)?.[1] || '0', 10);
+  
+  expect(zoomOutDenominator).toBeGreaterThan(zoomInDenominator);
+});

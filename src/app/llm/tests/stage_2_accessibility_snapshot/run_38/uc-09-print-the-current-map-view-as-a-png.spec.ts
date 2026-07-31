@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Precondition: The app is loaded successfully.
+  // At least one base map and one overlay layer are visible on the map.
+  // The accessibility tree confirms layers like "EUCOS Ground Stations" and "Temperature" are checked.
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await printButton.click();
+
+  // Expected result: The printing panel is visible.
+  // We assume the print panel contains the title input and format selection.
+  // Since no specific test id is given for the panel itself, we look for the title input which implies the panel is open.
+  const titleInput = page.getByLabel('Title');
+  await expect(titleInput).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  await titleInput.fill('Test Map Print');
+
+  // Step 3: The user selects the PNG file format.
+  const pngFormatOption = page.getByRole('radio', { name: 'PNG' });
+  // Use force: true because Chakra UI radios are visually hidden inputs under decorative elements
+  await pngFormatOption.click({ force: true });
+  await expect(pngFormatOption).toBeChecked();
+
+  // Step 4: The user clicks the export/print button.
+  // We need to wait for the download before clicking the button.
+  const downloadPromise = page.waitForEvent('download');
+  const exportButton = page.getByRole('button', { name: /Export|Print|Generate/i });
+  await exportButton.click();
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

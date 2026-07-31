@@ -1,0 +1,21 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // The layer switcher is already visible and "pressed" (open) by default according to the context.
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // The combobox for basemaps is already visible and focused/available.
+  const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  await basemapCombobox.selectOption('OpenStreetMap');
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  await expect(basemapCombobox).toHaveValue('OpenStreetMap');
+});

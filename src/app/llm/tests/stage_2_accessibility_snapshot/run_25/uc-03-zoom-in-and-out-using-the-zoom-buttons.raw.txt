@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Get the initial zoom level before any interaction
+  const initialZoom = await page.evaluate(() => {
+    // @ts-ignore - OL map is available globally or via module
+    const map = (window as any).__openPioneerMap;
+    if (!map) return undefined;
+    return map.getView().getZoom();
+  });
+
+  // Step 1: Click the 'Zoom in' button to increase the zoom level.
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await expect(zoomInButton).toBeVisible();
+  await zoomInButton.click();
+
+  // Wait for the zoom level to change and verify it is higher
+  await expect.poll(() => {
+    return page.evaluate(() => {
+      const map = (window as any).__openPioneerMap;
+      if (!map) return undefined;
+      return map.getView().getZoom();
+    });
+  }).toBeGreaterThan(initialZoom);
+
+  // Get the zoom level after zooming in
+  const zoomedInLevel = await page.evaluate(() => {
+    const map = (window as any).__openPioneerMap;
+    if (!map) return undefined;
+    return map.getView().getZoom();
+  });
+
+  // Step 2: Click the 'Zoom out' button to decrease the zoom level.
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await expect(zoomOutButton).toBeVisible();
+  await zoomOutButton.click();
+
+  // Wait for the zoom level to change and verify it is lower than after zooming in
+  await expect.poll(() => {
+    return page.evaluate(() => {
+      const map = (window as any).__openPioneerMap;
+      if (!map) return undefined;
+      return map.getView().getZoom();
+    });
+  }).toBeLessThan(zoomedInLevel);
+});

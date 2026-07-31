@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure no measurement tool is active (it might be toggled on by default or previous state)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementState = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementState === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Ensure UV-Index Stations and EUCOS Ground Stations layers are checked.
+  // The accessibility tree indicates they are checked [checked], but we verify/ensure state.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  if (!(await uvIndexCheckbox.isChecked())) {
+    await uvIndexCheckbox.click({ force: true });
+  }
+
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Ensure Info Panel is visible.
+  // The accessibility tree shows "Info Panel Switcher" [pressed], implying it is open.
+  // We check if the info panel is visible, if not, toggle it.
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  
+  if (!(await infoPanel.isVisible())) {
+    await infoPanelToggle.click({ force: true });
+    await expect(infoPanel).toBeVisible();
+  }
+
+  // Click on the map at the specific coordinates where both stations are located.
+  // Coordinates: [1188692.84, 6767643.28] (EPSG:3857)
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28
+    }
+  });
+
+  // Wait for the info panel to load the station info for both layers.
+  // We use expect.poll to wait for the content to appear in the DOM.
+  await expect.poll(async () => {
+    const panelContent = await infoPanel.textContent();
+    return panelContent;
+  }).toContain('UV-Index Station');
+
+  await expect.poll(async () => {
+    const panelContent = await infoPanel.textContent();
+    return panelContent;
+  }).toContain('EUCOS Ground Station');
+
+  // Verify that the info panel displays the specific sections.
+  // Using getByTestId or getByRole to find the sections if they have specific IDs, 
+  // otherwise relying on text content within the info panel.
+  // Since specific IDs for the feature info sections aren't in the provided list, 
+  // we assert on the text presence within the info panel.
+  await expect(infoPanel.getByText('UV-Index Station')).toBeVisible();
+  await expect(infoPanel.getByText('EUCOS Ground Station')).toBeVisible();
+});

@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map container to be visible before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Helper to get the current zoom level via the scale viewer or map state
+  // Since no map helpers are provided, we rely on the scale viewer text or map container state.
+  // However, zoom buttons directly affect the map. Let's use the scale viewer as a proxy for zoom level.
+  // Scale viewer text: "Current scale: 1 to 2739072". A smaller denominator means higher zoom.
+  
+  const getScaleDenominator = async (page) => {
+    const text = await page.getByTestId('scale-viewer').textContent();
+    // Extract the number after "1 to "
+    const match = text?.match(/1 to (\d+)/);
+    return match ? parseInt(match[1], 10) : undefined;
+  };
+
+  // Initial state
+  const initialScale = await getScaleDenominator(page);
+  expect(initialScale).toBeDefined();
+
+  // Step 1: Click Zoom in
+  await page.getByRole('button', { name: 'Zoom in map' }).click();
+
+  // Wait for zoom to complete and scale to update
+  await expect.poll(() => getScaleDenominator(page)).toBeLessThan(initialScale!);
+
+  // Step 2: Click Zoom out
+  await page.getByRole('button', { name: 'Zoom out map' }).click();
+
+  // Wait for zoom to complete and scale to update
+  // The final scale should be larger (lower zoom) than the scale after zooming in.
+  // It might not return exactly to initialScale if the UI has discrete steps or delays,
+  // but it must be greater than the zoomed-in scale.
+  const scaleAfterZoomOut = await expect.poll(() => getScaleDenominator(page));
+  expect(scaleAfterZoomOut).toBeGreaterThan(initialScale!);
+});

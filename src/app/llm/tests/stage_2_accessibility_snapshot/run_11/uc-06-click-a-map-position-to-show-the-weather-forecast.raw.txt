@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible. The accessibility tree shows the Info Panel Switcher is [pressed],
+  // meaning the panel is likely already open. We assert visibility to confirm the precondition.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the map canvas to trigger the forecast load.
+  // We use a central position on the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the weather forecast section to appear in the info panel.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Assert that the forecast contains 24 entries.
+  // We look for list items or similar structures within the forecast section.
+  // Since the exact structure of the forecast entries isn't detailed in the prompt's accessibility tree
+  // for the loaded state, we assume they are rendered as children of the weather-forecast-section.
+  // We will check for the count of elements that likely represent the hourly/daily entries.
+  // A common pattern is a list or a grid of items. Let's assume they are divs or li elements.
+  // If the structure is unknown, we might need to rely on the section being visible and having content.
+  // However, the requirement is specific: "24 entries".
+  // Let's try to count elements within the weather-forecast-section.
+  // Without specific test IDs for the entries, we might need to use a generic selector.
+  // Let's assume the entries are direct children or have a common class/role.
+  // Given the complexity, let's try to find elements with a specific role or tag if possible.
+  // If not, we might have to guess based on typical implementations.
+  // Let's assume the entries are rendered as a list of items.
+  
+  // We will poll for the count of forecast entries.
+  // We need to identify what constitutes an "entry".
+  // Let's assume they are divs or similar container elements within the weather-forecast-section.
+  // If the accessibility tree doesn't give us more info, we might have to use a generic selector.
+  // Let's try to get the number of child elements that look like forecast items.
+  
+  // Since we don't have specific test IDs for the entries, we'll use a generic approach.
+  // We'll count the number of elements that are likely forecast entries.
+  // Let's assume they are 'div' elements or have a specific class.
+  // For the sake of this test, let's assume they are 'div' elements within the section.
+  // This is a heuristic and might need adjustment based on actual implementation.
+  
+  // Alternative: If the entries are not easily selectable, we might check for the presence of 24 distinct pieces of data.
+  // But counting elements is more robust.
+  
+  // Let's try to select elements within the weather-forecast-section.
+  // We'll assume they are 'div' elements for now.
+  const forecastEntries = weatherForecastSection.locator('div');
+  
+  // We poll for the count to be 24.
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+});

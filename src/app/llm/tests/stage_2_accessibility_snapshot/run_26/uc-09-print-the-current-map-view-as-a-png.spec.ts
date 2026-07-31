@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is ready and layers are visible
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).toBeChecked();
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible
+  // The print toggle is pressed when the panel is open
+  await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+
+  // Step 2: Enter a title for the printout
+  // We need to find the title input within the print dialog/panel.
+  // Since no specific test id is provided for the title input, we look for a label or role.
+  // Assuming standard form controls within the print panel.
+  const printPanel = page.getByRole('dialog', { name: /print/i }).first();
+  // If the dialog doesn't have a specific name, we might need to scope by the panel content or button.
+  // Let's try to find an input with a label like "Title" or "Map Title".
+  const titleInput = printPanel.getByLabel(/title/i).first();
+  
+  if (titleInput) {
+    await titleInput.fill('My Map Printout');
+  } else {
+    // Fallback: if no label is found, try to find any text input in the print panel
+    const anyInput = printPanel.locator('input[type="text"]').first();
+    await expect(anyInput).toBeVisible();
+    await anyInput.fill('My Map Printout');
+  }
+
+  // Step 3: Select the PNG file format
+  // Look for radio buttons or a select for format.
+  const formatRadio = printPanel.getByRole('radio', { name: /png/i }).first();
+  if (formatRadio) {
+    await formatRadio.click();
+  } else {
+    // Fallback: look for a select or other control
+    const formatSelect = printPanel.getByRole('combobox', { name: /format/i }).first();
+    if (formatSelect) {
+      await formatSelect.selectOption('png');
+    } else {
+      // Last resort: look for a button or option explicitly named PNG
+      const pngOption = printPanel.getByText('PNG').first();
+      await expect(pngOption).toBeVisible();
+      await pngOption.click();
+    }
+  }
+
+  // Step 4: Click the export/print button
+  // Look for a button labeled "Print", "Export", "Download", or similar within the panel.
+  const exportButton = printPanel.getByRole('button', { name: /print|export|download/i }).first();
+  await expect(exportButton).toBeVisible();
+
+  // Prepare for download
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download started and has the correct suggested filename (png)
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

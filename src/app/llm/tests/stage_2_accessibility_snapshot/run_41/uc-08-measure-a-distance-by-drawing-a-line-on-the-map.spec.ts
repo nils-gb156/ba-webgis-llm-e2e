@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the measurement toggle is not already active (pressed=true means active)
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    // If it's already active, click it to deactivate, then click again to activate
+    // to ensure we start from a known "off" state before turning it on.
+    await measurementToggle.click();
+  }
+  
+  // Click the measurement button to activate the tool
+  await measurementToggle.click();
+
+  // Wait for the measurement panel to become visible
+  // The panel is likely inside the info-panel or a dedicated measurement UI element.
+  // Based on the context, "info-panel" is pressed/visible. Let's look for measurement results.
+  // Since there's no specific measurement-panel testid, we'll assert on the map interaction first.
+  
+  // Locate the map container
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click several points on the map to draw a line.
+  // We need to get the bounding box of the map to calculate click positions.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Define points for a simple line (e.g., top-left to bottom-right)
+  // Point 1: Top-left area
+  const point1 = { x: mapBox.x + 100, y: mapBox.y + 100 };
+  // Point 2: Middle area
+  const point2 = { x: mapBox.x + mapBox.width / 2, y: mapBox.y + mapBox.height / 2 };
+  // Point 3: Bottom-right area
+  const point3 = { x: mapBox.x + mapBox.width - 100, y: mapBox.y + mapBox.height - 100 };
+
+  // Click first point
+  await page.mouse.click(point1.x, point1.y);
+  
+  // Click second point
+  await page.mouse.click(point2.x, point2.y);
+  
+  // Double-click to finish the measurement
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Wait for the measurement result to appear.
+  // The result is likely displayed in the info-panel or a dedicated tooltip/panel.
+  // Given the context has "info-panel" and "Weather Forecast", and the use case says "measurement panel is visible",
+  // we should check for text that looks like a measurement (e.g., "m", "km", "km²").
+  // Let's poll the info-panel for measurement-related text.
+  
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Poll for a measurement value pattern (e.g., "123.45 m" or similar)
+  await expect.poll(async () => {
+    const text = await infoPanel.textContent();
+    // Look for a number followed by a unit like 'm', 'km', 'ha'
+    return /[\d.,]+\s*(m|km|ha|ft|mi)/i.test(text ?? '');
+  }).toBeTruthy();
+
+  // Verify the measurement panel is visible (the info panel is likely the container)
+  await expect(infoPanel).toBeVisible();
+});

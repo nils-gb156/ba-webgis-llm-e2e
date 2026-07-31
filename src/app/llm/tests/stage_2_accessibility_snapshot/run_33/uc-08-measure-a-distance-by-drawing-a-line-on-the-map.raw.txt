@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is loaded and ready
+  await expect(page.locator('#map-container')).toBeVisible();
+
+  // Step 1: Click the Measurement button to open the measurement panel
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await measurementToggle.click();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // The map container is identified by data-testid
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click first point (approximate center of visible map area)
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+  // Click second point
+  await mapContainer.click({ position: { x: 400, y: 400 } });
+  // Click third point
+  await mapContainer.click({ position: { x: 500, y: 350 } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 500, y: 350 } });
+
+  // Expected results:
+  // 1. The measurement panel is visible.
+  // The measurement result is typically displayed in the info panel or a specific measurement result container.
+  // Based on the context, the info-panel is visible and pressed. Let's look for measurement results inside it or nearby.
+  // Often, measurement results appear in a dedicated panel or the info panel.
+  // Let's check for any text that looks like a length measurement (e.g., "km", "m") in the info panel or a potential measurement result container.
+  // Since no specific testid for measurement result is provided, we'll look for text containing length units in the info panel.
+  
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // 2. The measurement panel displays a length value with a unit.
+  // We expect to see some text indicating distance. Let's poll for a pattern matching distance.
+  await expect.poll(() => infoPanel.locator('text=/\\d+\\.?\\d*\\s*(km|m|mi|ft)/i').first().textContent()).toMatch(/\\d+\\.?\\d*\\s*(km|m|mi|ft)/i);
+});

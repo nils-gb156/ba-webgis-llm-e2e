@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher to be visible (it is open by default according to context)
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // The base map selector is a combobox with the current value "Carto Light"
+  // Click the combobox to open the dropdown
+  await page.getByRole('combobox', { name: 'Basemaps' }).click();
+
+  // Select 'OpenStreetMap' from the dropdown list
+  // The option is typically a listitem or button inside the combobox popup
+  await page.getByRole('option', { name: 'OpenStreetMap' }).click();
+
+  // Assert that the combobox now displays 'OpenStreetMap'
+  await expect(page.getByRole('combobox', { name: 'Basemaps' })).toHaveValue('OpenStreetMap');
+
+  // Assert that the map container has updated (we can check for a visual change or simply assume
+  // the combobox state reflects the selection. To be more robust, we can wait for the map tiles
+  // to potentially change, but since we don't have map helpers, we rely on the UI state).
+  // We can also verify that the old base map is no longer selected if there was a list of selected items,
+  // but the combobox value is the primary indicator.
+});

@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the initial layers to be visible and the layer switcher to be open
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations' })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Temperature' })).toBeChecked();
+  await expect(page.getByRole('button', { name: 'Layer Switcher' })).toBePressed();
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation' });
+  await precipitationCheckbox.click({ force: true });
+
+  // Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 2: View the legend and verify it displays an entry corresponding to the Precipitation layer
+  // The legend is already visible as per preconditions
+  const legendLocator = page.getByRole('list');
+  
+  // Wait for the legend to update with the Precipitation entry
+  await expect.poll(() => legendLocator.locator('p').textContent()).toMatch(/Precipitation/i);
+});

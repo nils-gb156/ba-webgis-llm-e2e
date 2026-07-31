@@ -1,0 +1,103 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and map to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await expect(printToggle).toBeVisible();
+  
+  // The print toggle is not pressed initially. Click it to open the panel.
+  await printToggle.click();
+
+  // Verify the printing panel is visible. We look for a dialog or panel that contains print-specific inputs.
+  // Since we don't have a specific testid for the print panel container, we look for the title input which is part of the print flow.
+  // We assume the print panel contains a text input for the title.
+  // Let's check for the presence of a title input or a dialog with print-related content.
+  // Based on typical UI, there might be a dialog. Let's try to find the title input.
+  // If no specific testid, we use getByRole or getByLabel.
+  
+  // Step 2: The user enters a title for the printout.
+  // We need to find the title input. It's likely a textbox.
+  // Let's assume the print panel has a label "Title" or similar.
+  // Since we don't have the exact label, we'll look for a textbox that appears after clicking print.
+  // A robust way is to look for a textbox inside the area that appeared.
+  // However, without a specific testid for the panel, we might need to rely on the dialog role if it's a dialog.
+  // Let's try to find the title input by its placeholder or label if available.
+  // If not, we might have to guess the label. Let's assume the label is "Title".
+  const titleInput = page.getByLabel('Title').or(page.getByPlaceholder('Title'));
+  
+  // If the above fails to find it, we might need to look for the print dialog specifically.
+  // Let's try to find the print dialog first.
+  const printDialog = page.getByRole('dialog', { name: /Print/i }).or(page.getByRole('dialog', { name: /Export/i }));
+  
+  // If there is no dialog role, we might need to look for the panel by its content.
+  // Let's assume the print toggle opens a panel. We can check for the visibility of the title input.
+  // Let's try to find the title input by its role and a likely name.
+  const titleField = page.getByRole('textbox', { name: 'Title' });
+  
+  // If the title field is not found by name, we might need to look for it in the context of the print button.
+  // Let's assume the print panel is a dialog.
+  // If the above doesn't work, we'll try to find the input by its placeholder.
+  const titleInputFallback = page.getByPlaceholder('Title');
+  
+  // Combine them: try to find the title input.
+  const titleInputLocator = titleField.or(titleInputFallback);
+  
+  // Wait for the print panel to be visible and the title input to be available.
+  await expect(titleInputLocator).toBeVisible({ timeout: 10000 });
+  
+  await titleInputLocator.fill('My Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // We need to find the format selector. It's likely a radio group or a dropdown.
+  // Let's look for a radio button or checkbox with label "PNG".
+  const pngFormat = page.getByRole('radio', { name: 'PNG' }).or(page.getByRole('checkbox', { name: 'PNG' }));
+  
+  // If PNG is already selected, we don't need to click it.
+  // If it's a dropdown, we might need to select it from a combobox.
+  // Let's assume it's a radio button or a checkbox.
+  // If it's a combobox, we'll handle that.
+  
+  // Let's try to find the format selector.
+  const formatSelector = page.getByRole('combobox', { name: /Format/i }).or(page.getByRole('group', { name: /Format/i }).getByRole('radio', { name: 'PNG' }));
+  
+  // If it's a radio button in a group:
+  const pngRadio = page.getByRole('radio', { name: 'PNG' });
+  
+  // Check if PNG radio is checked. If not, click it.
+  const isPngChecked = await pngRadio.isChecked();
+  if (!isPngChecked) {
+    await pngRadio.click();
+  }
+  
+  // Wait for the PNG format to be selected.
+  await expect(pngRadio).toBeChecked();
+
+  // Step 4: The user clicks the export/print button.
+  // We need to find the export/print button.
+  const exportButton = page.getByRole('button', { name: /Export/i }).or(page.getByRole('button', { name: /Print/i })).or(page.getByRole('button', { name: 'OK' }));
+  
+  // Wait for the export button to be visible.
+  await expect(exportButton).toBeVisible({ timeout: 10000 });
+  
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+  
+  // Verify the download was successful
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+  
+  // Verify the file was saved
+  const path = await download.path();
+  expect(path).toBeTruthy();
+});

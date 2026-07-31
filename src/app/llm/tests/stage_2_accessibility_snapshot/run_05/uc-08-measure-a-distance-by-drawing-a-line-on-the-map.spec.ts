@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map container to be ready and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The measurement toggle button has test id 'measurement-toggle'.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  // The info panel is used for measurement results in this app context.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas. We'll use the map-container locator.
+  // To draw a line, we click distinct points.
+  const mapBoundingBox = await mapContainer.boundingBox();
+  if (!mapBoundingBox) {
+    throw new Error('Map container bounding box not found');
+  }
+
+  // Calculate some points within the map area
+  // Point 1: Near the center-left
+  const point1X = mapBoundingBox.x + mapBoundingBox.width * 0.3;
+  const point1Y = mapBoundingBox.y + mapBoundingBox.height * 0.5;
+
+  // Point 2: Near the center-right
+  const point2X = mapBoundingBox.x + mapBoundingBox.width * 0.7;
+  const point2Y = mapBoundingBox.y + mapBoundingBox.height * 0.5;
+
+  // Point 3: Near the top-center
+  const point3X = mapBoundingBox.x + mapBoundingBox.width * 0.5;
+  const point3Y = mapBoundingBox.y + mapBoundingBox.height * 0.3;
+
+  // Click the first point
+  await page.mouse.click(point1X, point1Y);
+
+  // Click the second point
+  await page.mouse.click(point2X, point2Y);
+
+  // Click the third point
+  await page.mouse.click(point3X, point3Y);
+
+  // Step 3: Double-click to finish the measurement.
+  // We double-click on the last point or nearby to finish.
+  await page.mouse.dblclick(point3X, point3Y);
+
+  // Expected results:
+  // The measurement panel is visible (already checked).
+  // The measurement panel displays a length value with a unit.
+  // We look for text that resembles a length measurement, e.g., "1.23 km" or "1234 m".
+  // The info panel should contain this information.
+  const measurementResultLocator = infoPanel.getByText(/^[0-9.]+\s*(km|m|mi|ft)$/);
+  await expect(measurementResultLocator).toBeVisible();
+});

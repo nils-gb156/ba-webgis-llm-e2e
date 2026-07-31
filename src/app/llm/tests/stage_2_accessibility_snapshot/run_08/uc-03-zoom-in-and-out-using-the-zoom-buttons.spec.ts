@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Helper to get current zoom level via polling
+  const getZoomLevel = async (p: typeof page) => {
+    // Assuming map helpers are not provided in prompt, we rely on visual/interaction cues
+    // or we can try to read from a scale viewer if available.
+    // The prompt mentions scale-viewer. Let's try to infer zoom from scale or just
+    // assert that the buttons work by checking if the map reacts.
+    // Since we cannot read map state directly without helpers, we will assert
+    // that the buttons are clickable and the scale changes (as scale is related to zoom).
+    
+    // Let's capture the initial scale text
+    const scaleViewer = page.getByTestId('scale-viewer');
+    await expect(scaleViewer).toBeVisible();
+    const initialScaleText = await scaleViewer.textContent();
+    return initialScaleText;
+  };
+
+  const initialScale = await getZoomLevel(page);
+
+  // Step 1: Click 'Zoom in' button
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await expect(zoomInButton).toBeVisible();
+  await zoomInButton.click();
+
+  // Wait for zoom animation/state change to settle
+  // We poll the scale viewer to see if it changed
+  await expect.poll(async () => {
+    const scaleText = await page.getByTestId('scale-viewer').textContent();
+    return scaleText;
+  }).not.toBe(initialScale);
+
+  const scaleAfterZoomIn = await page.getByTestId('scale-viewer').textContent();
+
+  // Step 2: Click 'Zoom out' button
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await expect(zoomOutButton).toBeVisible();
+  await zoomOutButton.click();
+
+  // Wait for zoom animation/state change to settle
+  await expect.poll(async () => {
+    const scaleText = await page.getByTestId('scale-viewer').textContent();
+    return scaleText;
+  }).not.toBe(scaleAfterZoomIn);
+
+  const scaleAfterZoomOut = await page.getByTestId('scale-viewer').textContent();
+
+  // Expected Results:
+  // - After zoom in, scale should change (higher zoom = smaller scale denominator usually, but let's just ensure it changed)
+  // - After zoom out, scale should change again (lower zoom = larger scale denominator)
+  
+  // Verify that the scale changed after zooming in
+  expect(scaleAfterZoomIn).not.toBe(initialScale);
+
+  // Verify that the scale changed after zooming out
+  expect(scaleAfterZoomOut).not.toBe(scaleAfterZoomIn);
+});

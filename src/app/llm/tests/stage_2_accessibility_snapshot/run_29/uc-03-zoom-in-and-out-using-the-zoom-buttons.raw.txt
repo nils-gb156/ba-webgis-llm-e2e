@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and controls to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Get the initial zoom level using the scale viewer as a proxy for map state
+  // Since we don't have explicit map helper functions in the prompt, we rely on
+  // the scale viewer text which changes with zoom.
+  const scaleViewer = page.getByTestId('scale-viewer');
+
+  // Helper to extract zoom level from scale text "Current scale: 1 to X"
+  // Lower number in denominator means higher zoom.
+  const getScaleDenominator = async () => {
+    const text = await scaleViewer.textContent();
+    const match = text?.match(/1 to (\d+)/);
+    return match ? parseInt(match[1], 10) : undefined;
+  };
+
+  // Wait for initial scale to be available
+  await expect.poll(getScaleDenominator).toBeDefined();
+
+  const initialScale = await getScaleDenominator();
+
+  // Step 1: Click the 'Zoom in' button to increase the zoom level.
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in map' });
+  await zoomInButton.click();
+
+  // Wait for the zoom action to complete and scale to update
+  await expect.poll(getScaleDenominator).not.toBe(initialScale);
+
+  const zoomedInScale = await getScaleDenominator();
+
+  // Assert: After clicking the 'Zoom in' button, the map zoom level is higher than before.
+  // Higher zoom level means a smaller denominator in the scale.
+  expect(zoomedInScale).toBeLessThan(initialScale);
+
+  // Step 2: Click the 'Zoom out' button to decrease the zoom level.
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out map' });
+  await zoomOutButton.click();
+
+  // Wait for the zoom action to complete and scale to update
+  await expect.poll(getScaleDenominator).not.toBe(zoomedInScale);
+
+  const zoomedOutScale = await getScaleDenominator();
+
+  // Assert: After clicking the 'Zoom out' button, the map zoom level is lower than after zooming in.
+  // Lower zoom level means a larger denominator in the scale.
+  expect(zoomedOutScale).toBeGreaterThan(zoomedInScale);
+});

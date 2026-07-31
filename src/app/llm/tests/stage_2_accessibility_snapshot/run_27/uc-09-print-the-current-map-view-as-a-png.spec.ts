@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and UI to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await printButton.click();
+
+  // Verify the printing panel is visible.
+  // The printing panel is likely a dialog or a specific section.
+  // Since no specific testid for the panel itself is given, we look for common print dialog elements.
+  // Often print dialogs have a title or specific input fields.
+  // Let's assume the print panel contains a title input and format selector.
+  // We can assert visibility of the print button's action or a dialog.
+  // Given the context, let's look for a dialog or panel that appears.
+  // If no specific testid, we might look for the presence of print-related controls.
+  // However, the prompt mentions "print-toggle" is NOT in the testids list, but "print-toggle" is in the accessibility tree?
+  // No, "print-toggle" is NOT in the data-testid list.
+  // But "print-toggle" is mentioned in the "Locators" section as an example of a toggle.
+  // Let's look for a dialog or panel.
+  // Often, print dialogs are accessible via role dialog.
+  // Let's try to find a dialog with "Print" in the name.
+  const printDialog = page.getByRole('dialog', { name: /Print/i });
+  
+  // If the print interface is not a dialog but a panel, we might need to look for specific inputs.
+  // Let's assume it's a dialog for now, or a panel with specific testids if available.
+  // Since no testid for the panel is provided, we rely on accessibility.
+  // Let's wait for the print interface to appear.
+  // We can look for a title input which is Step 2.
+  const titleInput = page.getByLabel('Title');
+  
+  // If the print dialog is not immediately visible or has a different structure,
+  // we might need to check for the presence of the print controls.
+  // Let's try to find the title input. If it exists, the panel is open.
+  await expect(titleInput).toBeVisible({ timeout: 5000 });
+
+  // Step 2: The user enters a title for the printout.
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // Look for a format selector, likely a radio group or select.
+  const pngFormatOption = page.getByRole('radio', { name: 'PNG' });
+  const pngFormatSelect = page.getByLabel('Format');
+  
+  // Try radio first, as it's more common for format selection in modern UIs
+  if (await pngFormatOption.isVisible()) {
+    await pngFormatOption.click();
+  } else {
+    // Fallback to select
+    await pngFormatSelect.selectOption('PNG');
+  }
+
+  // Verify PNG is selected
+  if (await pngFormatOption.isVisible()) {
+    await expect(pngFormatOption).toBeChecked();
+  } else {
+    await expect(pngFormatSelect).toHaveValue('PNG');
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Look for an export or print button in the dialog.
+  const exportButton = page.getByRole('button', { name: /Export|Print|Download/i });
+  
+  // Wait for the download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  
+  await exportButton.click();
+
+  // Wait for the download to complete
+  const download = await downloadPromise;
+  
+  // Step 5: Verify the file is downloaded and is a PNG
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

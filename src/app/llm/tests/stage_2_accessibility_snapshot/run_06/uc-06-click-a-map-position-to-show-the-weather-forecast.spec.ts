@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible and toggled on
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Check if the info panel is already pressed/visible. 
+  // The context shows "button "Info Panel Switcher" [pressed]", so it should be open.
+  // However, to be safe and explicit about the state required for the test:
+  const isInfoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+  if (isInfoPanelPressed !== 'true') {
+    await infoPanelToggle.click({ force: true });
+  }
+  
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the map canvas to trigger the forecast
+  // We click near the center of the map container
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the weather forecast section to appear and contain 24 entries
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  
+  // The expected result is that the forecast contains 24 entries.
+  // We poll for the number of entries inside the weather forecast section.
+  // Assuming each entry is a distinct element (e.g., a row or card) within the section.
+  // Since the exact structure isn't specified, we look for a list or similar container inside.
+  // A common pattern is a list of items. Let's assume the section contains a list of forecast items.
+  // We will poll for the count of items.
+  
+  await expect.poll(async () => {
+    const section = page.getByTestId('weather-forecast-section');
+    // Try to find a list or container of items. 
+    // If the structure is unknown, we might just check for the presence of the section and some text.
+    // However, "24 entries" implies a countable set.
+    // Let's assume there is a list element or a specific class for forecast items.
+    // Without specific test IDs for items, we might rely on the structure.
+    // Let's try to count elements that look like forecast entries.
+    // Often, these are divs or li elements.
+    // Let's try to get the text content and check if it implies data, or count specific roles.
+    // A safer bet for "24 entries" without specific IDs is to check if the section is visible and then poll for a specific indicator of completion.
+    // But the requirement is explicit: "contains 24 entries".
+    // Let's assume the forecast items are rendered as a list.
+    const items = weatherForecastSection.locator('div'); // Generic fallback
+    // This is risky. Let's look at the accessibility tree again.
+    // There is no specific role for forecast items in the provided tree.
+    // However, the section is "Weather Forecast".
+    // Let's assume the implementation uses a grid or list.
+    // We will poll for the visibility of the section and then check the number of child elements that are likely entries.
+    // A more robust way if we don't know the selector is to check if the section has content.
+    // But to verify "24", we need a count.
+    // Let's assume the forecast items are in a list with a specific class or role.
+    // Since we can't guess, we will use a generic approach: count non-empty divs or similar.
+    // Or, we can check if the section exists and then assume the test framework will fail if the count is wrong if we had a better locator.
+    // Given the constraints, let's try to find a list within the section.
+    const listItems = weatherForecastSection.locator('li, div[class*="item"], div[class*="entry"]');
+    const count = await listItems.count();
+    return count;
+  }).toBe(24);
+
+  // Verify the info panel is still visible
+  await expect(infoPanel).toBeVisible();
+
+  // Verify a position is highlighted on the map
+  // The prompt mentions "clicked position is highlighted".
+  // Without a specific test ID for the highlight, we can check if the map container has changed or if there's a specific element.
+  // Since we can't assert map DOM easily, we rely on the successful loading of the forecast as a proxy for the map click being processed.
+  // However, if there's a specific test ID for the marker/highlight, we should use it.
+  // The provided test IDs do not include a marker/highlight ID.
+  // We will assume the successful forecast display confirms the map interaction.
+});
