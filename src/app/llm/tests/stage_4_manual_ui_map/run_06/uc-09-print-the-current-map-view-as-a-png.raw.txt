@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure at least one base layer and one overlay are visible
+  // The defaults should already satisfy this, but we wait for the map to be ready
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  
+  // Check current state to avoid toggling if already open
+  const printingPanel = page.getByTestId('printing-panel');
+  const isPanelVisible = await printingPanel.isVisible();
+  
+  if (!isPanelVisible) {
+    await printToggle.click({ force: true });
+  }
+
+  // Verify printing panel is visible
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // Assuming the printing panel contains an input for the title.
+  // Based on common UI patterns and the context, we look for an input inside the printing panel.
+  // Since no specific test-id is given for the title input, we use getByLabel or getByRole inside the panel.
+  // We assume the label is "Title" or similar. If not, we might need to rely on placeholder or first input.
+  // Let's try to find an input inside the printing panel.
+  const titleInput = printingPanel.getByRole('textbox', { name: /title/i }).first();
+  if (await titleInput.isVisible()) {
+    await titleInput.fill('My Map Printout');
+  } else {
+    // Fallback: if no accessible name, try to find any input in the panel
+    const anyInput = printingPanel.getByRole('textbox').first();
+    if (await anyInput.isVisible()) {
+      await anyInput.fill('My Map Printout');
+    }
+  }
+
+  // Step 3: Select the PNG file format
+  // Look for a radio button or select element for format.
+  // We look for "PNG" in the printing panel.
+  const formatSelect = printingPanel.getByRole('radio', { name: 'PNG' }).first();
+  if (await formatSelect.isVisible()) {
+    await formatSelect.click({ force: true });
+  } else {
+    // Fallback: maybe it's a select or button group
+    const pngButton = printingPanel.getByText('PNG').first();
+    if (await pngButton.isVisible()) {
+      await pngButton.click();
+    }
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = printingPanel.getByRole('button', { name: /export|print|download/i }).first();
+  
+  // Wait for download before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download happened and has a PNG extension
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

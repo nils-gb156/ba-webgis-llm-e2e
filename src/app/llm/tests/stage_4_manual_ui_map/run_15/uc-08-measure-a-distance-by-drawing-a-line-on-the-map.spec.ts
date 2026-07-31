@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // We need to click on the map container. The map is inside #map-container.
+  // We will click a few distinct points to create a polyline.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click first point (center-ish)
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+  // Click second point
+  await mapContainer.click({ position: { x: 400, y: 300 } });
+  // Click third point
+  await mapContainer.click({ position: { x: 400, y: 400 } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 400, y: 400 } });
+
+  // Expected results:
+  // The measurement panel is visible (already verified above, but good to re-assert if state changed)
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // The measurement panel displays a length value with a unit.
+  // The measurement element is inside the measurement panel.
+  // We expect to see text that looks like a number followed by a unit (e.g., "1.23 km", "500 m").
+  const measurementElement = page.getByTestId('measurement');
+  await expect(measurementElement).toBeVisible();
+  
+  // Use expect.poll to wait for the measurement value to appear and update
+  await expect.poll(() => measurementElement.textContent()).toMatch(/\d+(\.\d+)?\s*(km|m|cm|mm|mi|ft|in)/);
+});

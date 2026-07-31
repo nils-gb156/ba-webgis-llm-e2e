@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Precondition: Carto Light is active by default
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    // Step 1: Open the base map selector in the layer switcher
+    // The layer switcher is visible by default, so we just need to interact with the dropdown.
+    // We assume the dropdown trigger is accessible or has a test id.
+    // Based on the UI map, "basemaps" is a dropdown controlType.
+    // We need to find the dropdown control. Usually, this is a button or a select.
+    // Let's look for the layer switcher toggle if it's hidden, but it's visibleByDefault.
+    // The UI map says "layer-switcher" is visible by default.
+    // We need to find the base map selector within the layer switcher.
+    // Since no specific test id is given for the base map dropdown itself, we might need to use getByRole or getByText.
+    // However, often these are standard HTML selects or Chakra dropdowns.
+    // Let's assume there is a way to identify the base map selector.
+    // If not, we might look for "Carto Light" text and click it if it's a button, or find a select.
+    // Given the "controlType": "dropdown", it's likely a Chakra Menu or similar.
+    // Let's try to find the element that allows changing the base map.
+    // Often, the current selection is displayed as a button.
+    await page.getByText('Carto Light').click({ force: true });
+
+    // Step 2: Select 'OpenStreetMap' as the base map
+    // The options are ["Carto Light", "Carto Dark", "OpenStreetMap"]
+    // After clicking the dropdown, the options should appear.
+    await page.getByText('OpenStreetMap').click();
+
+    // Expected results:
+    // - The OpenStreetMap base map is selected.
+    // - The Carto Light base map is no longer selected.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

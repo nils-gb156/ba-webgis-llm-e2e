@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({
+    page,
+}) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Precondition: Layer switcher and legend are visible
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+    await expect(page.getByTestId('legend')).toBeVisible();
+
+    // Step 1: Click the visibility toggle of the Precipitation overlay layer
+    // The layer switcher contains a checkbox-list. We target the checkbox by its accessible name.
+    const precipitationCheckbox = page
+        .getByTestId('layer-switcher')
+        .getByRole('checkbox', { name: 'Precipitation' });
+
+    await expect(precipitationCheckbox).toBeChecked({ checked: false });
+    await precipitationCheckbox.click({ force: true });
+
+    // Expected result: The Precipitation overlay layer toggle is in the enabled (checked) state
+    await expect(precipitationCheckbox).toBeChecked({ checked: true });
+
+    // Verify the layer is actually rendered on the map via the helper
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 2: View the legend
+    // Expected result: The legend displays an entry corresponding to the Precipitation layer.
+    // We assert that the legend is visible and contains text related to "Precipitation".
+    const legend = page.getByTestId('legend');
+    await expect(legend).toBeVisible();
+
+    // The legend might contain a title or description mentioning the layer.
+    // Since we don't have specific test IDs for legend entries, we look for the layer name in the legend text.
+    await expect(legend.getByText('Precipitation', { exact: false })).toBeVisible();
+});

@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  await page.getByRole('checkbox', { name: 'Temperature' }).click();
+
+  // Step 2: Show the Precipitation overlay layer
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click();
+
+  // Step 3: Search for a location
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We verify the map center has changed from the default (0,0) or initial position
+  await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The weather forecast section appears after clicking the map/searching
+  await expect.poll(() => page.getByTestId('weather-forecast').isVisible()).resolves.toBe(true);
+
+  // Expected Results:
+  // - The Precipitation overlay layer toggle is in the disabled state (checked/enabled visually, but "disabled" in use case context usually means "active/checked" for visibility toggles in this specific app context, or literally disabled attribute. Given the description "show it", it should be checked. Let's assume "enabled state" means checked/visible).
+  // Let's re-read carefully: "The Precipitation overlay layer toggle is in the disabled state." 
+  // Wait, usually "disabled" means you can't click it. But the step was "show it". 
+  // Let's look at the previous step: "Temperature ... to hide it". 
+  // If the use case says "disabled state" for Precipitation, it might be a typo for "checked/active" or it might mean the layer is loaded but the control is disabled because it's the only one? No, that doesn't make sense.
+  // Let's look at the Temperature result: "Temperature overlay layer toggle is in the enabled state".
+  // In many UIs, "enabled" = checked/visible, "disabled" = unchecked/hidden.
+  // However, "disabled" often refers to the `disabled` HTML attribute.
+  // Let's look at the UI Map. It says `controlType: "checkbox-list"`.
+  // If I click to hide Temperature, it becomes unchecked.
+  // If I click to show Precipitation, it becomes checked.
+  // The expected result says: "Precipitation ... disabled", "Temperature ... enabled".
+  // This is contradictory if "enabled" means "checked". 
+  // Let's look at the wording again. 
+  // Maybe "enabled" means the checkbox is checked (active) and "disabled" means unchecked (inactive)?
+  // Or maybe the app disables the checkbox when the layer is already in the desired state? No.
+  // Let's assume "enabled" = checked (visible) and "disabled" = unchecked (hidden) is WRONG based on standard terminology.
+  // Standard: Enabled = interactive. Disabled = non-interactive.
+  // But in layer contexts: "Layer Enabled" often means "Visible".
+  // Let's look at the expected results again.
+  // "Precipitation ... disabled". "Temperature ... enabled".
+  // If Temperature was hidden, it should be "disabled" (if disabled=hidden).
+  // If Precipitation was shown, it should be "enabled" (if enabled=visible).
+  // The expected results seem swapped or use non-standard terminology.
+  // Let's look at the steps:
+  // 1. Hide Temperature.
+  // 2. Show Precipitation.
+  // Expected: Precipitation disabled, Temperature enabled.
+  // This implies:
+  // - "Enabled" = Hidden/Unchecked?
+  // - "Disabled" = Visible/Checked?
+  // This is highly unusual. 
+  // Alternative interpretation: The checkboxes themselves have a `disabled` attribute when the layer is not available? No.
+  // Let's look at the UI Map again. `controlType: "checkbox-list"`.
+  // Let's assume the prompt meant:
+  // - Temperature is UNCHECKED (Hidden).
+  // - Precipitation is CHECKED (Visible).
+  // And the expected results text "disabled" and "enabled" refer to the visual state of the toggle switch/button in a way that might be confusing.
+  // However, `toBeChecked()` is the standard assertion for checkboxes.
+  // I will assert that Temperature is NOT checked and Precipitation IS checked.
+  // I will also check the layer rendering state using the helper.
+
+  // Assert Temperature is hidden
+  await expect.poll(() => page.getByRole('checkbox', { name: 'Temperature' }).isChecked()).resolves.toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).resolves.toBe(false);
+
+  // Assert Precipitation is visible
+  await expect.poll(() => page.getByRole('checkbox', { name: 'Precipitation' }).isChecked()).resolves.toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).resolves.toBe(true);
+
+  // Assert Weather Forecast has 24 entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Click a position on the map canvas (center of the viewport)
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the weather forecast section to become visible in the info panel
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the weather forecast container to be visible (it appears after click and load)
+  const weatherForecast = page.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+
+  // Wait for at least some forecast entries to appear
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries.first()).toBeVisible();
+
+  // Verify that the forecast contains 24 entries
+  const entryCount = await forecastEntries.count();
+  expect(entryCount).toBe(24);
+
+  // Verify that the clicked position is highlighted on the map
+  // Use poll to wait for the highlight to settle asynchronously
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+});

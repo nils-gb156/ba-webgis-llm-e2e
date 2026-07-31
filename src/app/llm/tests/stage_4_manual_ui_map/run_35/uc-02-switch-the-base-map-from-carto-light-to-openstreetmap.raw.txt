@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Verify Carto Light is active by default
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+  // Step 1: Open the base map selector in the layer switcher.
+  // The layer switcher is visible by default, so we can interact with it directly.
+  // We look for the dropdown control within the layer-switcher panel.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  // Assuming the dropdown trigger has a test id or is accessible. 
+  // Based on typical Chakra UI dropdowns, we might need to click the trigger.
+  // If no specific test id for the dropdown trigger is provided in the UI map, 
+  // we might need to infer or use a generic selector if strictly necessary, 
+  // but let's assume there's a way to interact. 
+  // Looking at the UI map, `basemaps` is a dropdown. Often these are inside the layer switcher.
+  // Let's look for a button or input that acts as the dropdown trigger.
+  // Since no specific test id is given for the dropdown trigger in the `basemaps` section, 
+  // we will look for a button or role that represents the selection control.
+  // However, the UI map says `controlType: "dropdown"`. 
+  // Let's assume there is a test id or accessible name. 
+  // If not, we might need to click the layer switcher toggle if it wasn't visible, but it is.
+  // Let's try to find the dropdown trigger. Often it's a button with an icon or text.
+  // Without a specific test id, we might rely on the fact that the layer switcher is visible.
+  // Let's assume the dropdown is inside the layer switcher.
+  // We will look for a button that opens the dropdown.
+  // If we can't find a specific test id, we might have to use a generic approach.
+  // But wait, the UI map doesn't specify a test id for the dropdown trigger itself.
+  // Let's look at the `layer-switcher` element. It contains the operational layers and basemaps.
+  // Let's assume there is a test id for the basemap dropdown trigger, or we can click on the current value.
+  // Let's try clicking on the layer switcher's content area if it's a dropdown.
+  // Actually, let's look for a button that says "Carto Light" or similar.
+  // Or maybe the dropdown is triggered by a specific button.
+  // Let's assume there is a test id for the basemap selector trigger.
+  // If not, we will use `getByRole('button', { name: /Carto Light/i })` or similar.
+  // Let's try to find the dropdown trigger.
+  
+  // Attempt to click the basemap dropdown trigger.
+  // Since no test id is provided for the dropdown trigger, we'll try to find it by role/text.
+  // The current selection is "Carto Light".
+  const basemapDropdownTrigger = page.getByRole('button', { name: /Carto Light/i }).first();
+  await basemapDropdownTrigger.click();
+
+  // Step 2: Select 'OpenStreetMap' as the base map.
+  // The dropdown options are "Carto Light", "Carto Dark", "OpenStreetMap".
+  // We need to click on "OpenStreetMap".
+  const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  await expect(osmOption).toBeVisible();
+  await osmOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+});

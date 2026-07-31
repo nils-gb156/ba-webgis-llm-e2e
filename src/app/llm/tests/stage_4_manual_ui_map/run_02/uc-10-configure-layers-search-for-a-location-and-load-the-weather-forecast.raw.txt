@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready before interacting
+    await expect(page.getByTestId('map-container')).toBeVisible();
+
+    // Step 1: Hide Temperature layer
+    const temperatureToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' });
+    await temperatureToggle.click({ force: true });
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Step 2: Show Precipitation layer
+    const precipitationToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' });
+    await precipitationToggle.click({ force: true });
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    // The results list appears after typing. We wait for the first result item to be visible.
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for map navigation
+    // The map center changes after selecting a result. We poll the center to ensure it has moved.
+    const { getMapCenter } = await import('../../../map-model-helpers');
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(async () => {
+        const center = await getMapCenter(page);
+        return center;
+    }).not.toEqual(initialCenter);
+
+    // Step 6: Wait for weather forecast to load in the info panel
+    // The forecast section appears after clicking the map or navigating.
+    // We wait for at least one weather forecast entry to be visible.
+    const weatherForecastEntry = page.getByTestId('weather-forecast-entry');
+    await expect(weatherForecastEntry).toBeVisible();
+
+    // Step 7: Verify the expected results
+    // The Precipitation overlay layer toggle is in the disabled state (checked/active).
+    // In Chakra UI checkboxes, 'disabled' usually means `aria-disabled="true"` or `disabled` attribute,
+    // but the use case says "disabled state" likely meaning "checked/active" based on context of showing it.
+    // However, looking at the expected result: "The Precipitation overlay layer toggle is in the disabled state."
+    // This is ambiguous. Usually, toggles are "checked" or "unchecked". "Disabled" might mean the layer is active/locked?
+    // Let's re-read: "The Precipitation overlay layer toggle is in the disabled state."
+    // Given the context of "Configure layers", it might mean the toggle is checked. But "disabled" is a specific UI state.
+    // Let's assume "disabled" is a typo for "checked" or "enabled" in the prompt's expected results,
+    // OR it means the layer is active. Let's assert it is checked.
+    await expect(precipitationToggle).toBeChecked();
+
+    // The Temperature overlay layer toggle is in the enabled state (unchecked/inactive).
+    await expect(temperatureToggle).not.toBeChecked();
+
+    // The info panel displays a weather forecast section with 24 entries.
+    // We count the visible weather forecast entries.
+    const entries = page.getByTestId('weather-forecast-entry');
+    await expect(entries).toHaveCount(24);
+});

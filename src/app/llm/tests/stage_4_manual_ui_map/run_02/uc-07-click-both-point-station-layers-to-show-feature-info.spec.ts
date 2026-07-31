@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is by default, but let's ensure state is clean)
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Check if info panel is currently visible. If not, click the toggle.
+  // The prompt says "The info panel is visible" as a precondition, but we should ensure it.
+  // Since it toggles, we check its current state.
+  const isInfoPanelVisible = await infoPanel.isVisible();
+  if (!isInfoPanelVisible) {
+    await infoPanelToggle.click();
+  }
+
+  // Ensure UV-Index Stations and EUCOS Ground Stations layers are active.
+  // The prompt says they are active as preconditions, but we should verify or enable them if needed.
+  // The default operational layers include "UV-Index Stations" and "EUCOS Ground Stations".
+  // We wait for them to be rendered to ensure they are active and loaded.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Click on the map at the specified coordinates to trigger GetFeatureInfo for both layers.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28,
+    },
+  });
+
+  // Wait for the info panel to load the station info for both layers.
+  // We expect the uvi-station-info and eucos-station-info elements to be visible.
+  await expect(page.getByTestId('uvi-station-info')).toBeVisible();
+  await expect(page.getByTestId('eucos-station-info')).toBeVisible();
+});

@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Hide the Temperature overlay layer.
+    // Note: The layer switcher is visible by default. We click the checkbox for "Temperature".
+    // Since it's a Chakra UI checkbox, we use force: true to bypass the decorative element.
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+
+    // 2. Show the Precipitation overlay layer.
+    // It is initially hidden. We click the checkbox for "Precipitation".
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+
+    // 3. Type a place name into the geocoder search field.
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // 4. Wait for the result list to appear and select the first result.
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // 5. Wait for the map to navigate to the selected location.
+    // We poll the map center to ensure it has changed from the initial view.
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        return currentCenter && (currentCenter[0] !== initialCenter?.[0] || currentCenter[1] !== initialCenter?.[1]);
+    }).toBeTruthy();
+
+    // 6. Wait for the info panel to load the forecast.
+    // The forecast section appears after clicking the map, but the use case implies the geocoder selection triggers navigation and potentially info panel updates.
+    // However, the UI map says "weather-forecast" appears after clicking the map-container.
+    // The use case steps don't explicitly say "click the map", but step 5 says "map navigates" and step 6 "info panel loads forecast".
+    // Usually, selecting a geocoder result centers the map but doesn't automatically click it to show forecast unless the app does it.
+    // Let's look at the expected result: "info panel displays a weather forecast section with 24 entries".
+    // And the UI map: "weather-forecast ... visibleWhen: action: click, target: map-container".
+    // So we likely need to click the map to trigger the forecast load after navigation.
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click();
+
+    // Wait for the forecast section to be visible and have entries.
+    const weatherForecast = page.getByTestId('weather-forecast');
+    await expect(weatherForecast).toBeVisible();
+
+    // Check that there are 24 entries.
+    const entries = page.getByTestId('weather-forecast-entry');
+    await expect(entries).toHaveCount(24);
+
+    // Verify expected results for layer states.
+    // The Precipitation toggle should be enabled (checked).
+    await expect(precipitationToggle).toBeChecked();
+    // The Temperature toggle should be disabled (unchecked, as we hid it).
+    await expect(temperatureToggle).not.toBeChecked();
+});

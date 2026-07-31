@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to be rendered
+  await expect.poll(() => page.evaluate(() => (globalThis as any).__openPioneerMap)).toBeDefined();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  await printToggle.click();
+
+  // Verify the printing panel is visible
+  const printingPanel = page.getByTestId('printing-panel');
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // We need to find the title input within the printing panel.
+  // Based on common patterns, it might be a text input with a label or test id.
+  // Since no specific test id for the title input is provided in the UI map, we look for a role or text.
+  // However, the UI map says "printing-panel" contains "printing".
+  // Let's assume there's an input for title. If not explicitly listed, we might need to infer or use a generic locator.
+  // Given the complexity and lack of specific test ID for the title input, we'll try to find an input inside the printing panel.
+  // If the application uses a standard form, it might have a label.
+  // Let's assume the title input is accessible via a label or placeholder.
+  // Since the UI map doesn't specify the internal structure of 'printing' component, we'll make a best guess.
+  // Often, these panels have a title field. Let's try to find an input by role or by being inside the panel.
+  // We will use `getByRole('textbox')` scoped to the printing panel.
+  const titleInput = printingPanel.getByRole('textbox');
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // We need to find the format selection control.
+  // Again, not explicitly detailed in the UI map's 'printing' section.
+  // We'll look for a radio group or dropdown for format selection within the printing panel.
+  // Let's assume there's a radio button or select for format.
+  // We'll try to find a radio button with text 'PNG' or a select option.
+  // Let's try to find a radio button for PNG.
+  const pngFormatOption = printingPanel.getByRole('radio', { name: 'PNG' });
+  // If radio doesn't exist, it might be a select. Let's try select first as it's common for format.
+  const formatSelect = printingPanel.getByRole('combobox');
+  if (await formatSelect.isVisible()) {
+    await formatSelect.selectOption('PNG');
+  } else {
+    // Fallback to radio if combobox not found or doesn't have PNG option
+    if (await pngFormatOption.isVisible()) {
+      await pngFormatOption.check();
+    } else {
+      // If neither, we might need to look for a button or other control.
+      // For now, we'll assume the PNG radio exists as per common UI patterns for this type of task.
+      // If the test fails here, it might be due to the specific UI implementation of the printing panel.
+      // We'll try to find any checkbox or radio that mentions PNG.
+      const pngControl = printingPanel.getByRole('checkbox', { name: /PNG/i }).first();
+      if (await pngControl.isVisible()) {
+        await pngControl.check();
+      } else {
+        // Last resort: try to find a button or link with PNG text
+        const pngButton = printingPanel.getByText('PNG');
+        if (await pngButton.isVisible()) {
+          await pngButton.click();
+        }
+      }
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // We need to find the export/print button within the printing panel.
+  const exportButton = printingPanel.getByRole('button', { name: /export|print/i });
+  await expect(exportButton).toBeVisible();
+
+  // Wait for the download to start before clicking the button
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Assert that the download was triggered and has a PNG filename
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

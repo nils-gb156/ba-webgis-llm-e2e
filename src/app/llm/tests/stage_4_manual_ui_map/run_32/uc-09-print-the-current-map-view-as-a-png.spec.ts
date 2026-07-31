@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and at least one base layer to be active
+  await expect.poll(() => page.evaluate(() => (globalThis as any).__openPioneerMap)).toBeTruthy();
+  await expect.poll(() => page.evaluate(() => (globalThis as any).__openPioneerMap?.layers.getActiveBaseLayer()?.title)).toBe('Carto Light');
+
+  // 1. The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  const printPanel = page.getByTestId('printing-panel');
+
+  // Ensure the printing panel is visible
+  await expect(printPanel).toBeVisible();
+
+  // 2. The user enters a title for the printout.
+  // Assuming the printing panel contains an input for the title.
+  // Since specific test ids for the title input are not provided in the UI map,
+  // we look for a label or role within the printing panel.
+  // Common patterns: label "Title" or placeholder "Title".
+  // We will try to find an input inside the printing panel.
+  const titleInput = printPanel.getByLabel('Title').or(page.getByPlaceholder('Title'));
+  // If getByLabel fails, try getByRole('textbox') scoped to the panel
+  const titleInputLocator = titleInput.count() > 0 ? titleInput : printPanel.getByRole('textbox');
+  
+  await titleInputLocator.fill('My Map Printout');
+
+  // 3. The user selects the PNG file format.
+  // Assuming there is a radio group or dropdown for format selection.
+  // We look for a radio button or option labeled "PNG".
+  const pngFormatOption = printPanel.getByRole('radio', { name: 'PNG' }).or(printPanel.getByText('PNG'));
+  
+  // If it's a radio, click it. If it's a dropdown, we might need to click then select.
+  // Given "selects the PNG file format", radio buttons are a likely candidate for format selection in print dialogs.
+  // If the radio is not visible or clickable directly due to Chakra UI, we might need force: true.
+  // Let's assume it's a radio button.
+  if (await pngFormatOption.isVisible()) {
+    await pngFormatOption.click({ force: true });
+  } else {
+    // Fallback: maybe it's a dropdown
+    const formatDropdown = printPanel.getByRole('combobox').or(printPanel.getByRole('button', { name: /Format/i }));
+    if (await formatDropdown.isVisible()) {
+      await formatDropdown.click();
+      await page.getByText('PNG').click();
+    }
+  }
+
+  // 4. The user clicks the export/print button.
+  // We need to wait for the download before clicking the button.
+  const downloadPromise = page.waitForEvent('download');
+  
+  const exportButton = printPanel.getByRole('button', { name: /Print|Export|Generate/i });
+  await exportButton.click();
+
+  // Verify the download started
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  
+  // The file should be a PNG
+  expect(suggestedFilename).toMatch(/\.png$/i);
+  
+  // Clean up the download
+  await download.delete();
+
+  // Verify the printing panel is still visible (or closed, depending on app behavior, but usually stays open or shows success)
+  // The expected result says "printing panel is visible", so we assert it remains visible or was visible during interaction.
+  await expect(printPanel).toBeVisible();
+});

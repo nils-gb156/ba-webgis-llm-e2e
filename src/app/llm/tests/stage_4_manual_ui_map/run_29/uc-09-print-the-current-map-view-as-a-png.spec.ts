@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  
+  // Check current state to avoid closing an already open panel
+  const printingPanel = page.getByTestId('printing-panel');
+  const isPanelVisible = await printingPanel.isVisible();
+  
+  if (!isPanelVisible) {
+    await printToggle.click();
+  }
+
+  // Verify the printing panel is visible
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // We need to find the title input inside the printing panel
+  const titleInput = printingPanel.getByLabel('Title').or(printingPanel.getByTestId('printing-title-input'));
+  // Fallback if specific test id or label isn't immediately obvious, try generic input inside printing panel
+  const actualTitleInput = titleInput.count() > 0 ? titleInput : printingPanel.locator('input[type="text"]').first();
+  await actualTitleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  // Locate the format selector within the printing panel
+  const formatSelector = printingPanel.getByRole('combobox', { name: /format/i }).or(printingPanel.getByTestId('printing-format-selector'));
+  const actualFormatSelector = formatSelector.count() > 0 ? formatSelector : printingPanel.locator('select').first();
+  
+  // Select PNG from the dropdown
+  await actualFormatSelector.selectOption('PNG');
+
+  // Step 4: Click the export/print button
+  const exportButton = printingPanel.getByRole('button', { name: /export|print/i }).or(printingPanel.getByTestId('printing-export-button'));
+  const actualExportButton = exportButton.count() > 0 ? exportButton : printingPanel.locator('button').first();
+
+  // Wait for the download to start before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    actualExportButton.click()
+  ]);
+
+  // Verify the download was successful
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i, 'The downloaded file should be a PNG');
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

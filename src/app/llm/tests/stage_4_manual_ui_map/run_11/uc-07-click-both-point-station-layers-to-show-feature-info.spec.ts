@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify preconditions: required layers are active and rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure info panel is visible (it is visible by default, but assert for clarity)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Click on the map at the specific coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 },
+  });
+
+  // Wait for the info panel to load the station info for both layers
+  // The UVI station info section becomes visible when uviFeatureInfo.status is 'json' or 'text'
+  const uviStationInfo = page.getByTestId('uvi-station-info');
+  await expect(uviStationInfo).toBeVisible();
+
+  // The EUCOS station info section becomes visible when eucosFeatureInfo.status is 'json' or 'text'
+  const eucosStationInfo = page.getByTestId('eucos-station-info');
+  await expect(eucosStationInfo).toBeVisible();
+
+  // Verify that a highlight is shown on the map at the clicked location
+  // The helper returns coordinates in EPSG:3857, so we compare directly
+  const highlightedCoord = await expect.poll(() => getHighlightedCoordinate(page));
+  expect(highlightedCoord).toBeDefined();
+  // Allow a small tolerance for floating point comparison or minor rendering differences
+  // The expected coordinates are [1188692.84, 6767643.28]
+  expect(highlightedCoord![0]).toBeCloseTo(1188692.84, 0);
+  expect(highlightedCoord![1]).toBeCloseTo(6767643.28, 0);
+});

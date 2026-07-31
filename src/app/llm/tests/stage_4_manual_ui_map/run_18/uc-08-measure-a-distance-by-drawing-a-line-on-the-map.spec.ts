@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. The user clicks the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // 2. The user clicks several points on the map canvas to draw a line.
+  // We need to click on the map container. The map is interactive.
+  // We'll click a few distinct points to draw a line.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click first point
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+  // Click second point
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+  // Click third point
+  await mapContainer.click({ position: { x: 300, y: 150 } });
+
+  // 3. The user double-clicks to finish the measurement.
+  // Double-click at the last point or nearby to finish.
+  await mapContainer.dblclick({ position: { x: 300, y: 150 } });
+
+  // Expected results:
+  // - The measurement panel is visible (already checked).
+  // - The measurement panel displays a length value with a unit.
+  
+  // The measurement result is inside the measurement panel.
+  // We expect to see some text indicating a length, e.g., "123.45 m" or similar.
+  // Since the exact value depends on the coordinates clicked, we check for a pattern.
+  const measurementPanel = page.getByTestId('measurement-panel');
+  
+  // Wait for the measurement result to appear and contain a number and a unit.
+  // Common units are 'm' (meters), 'km' (kilometers), 'mi' (miles), 'ft' (feet).
+  // We'll poll for any text inside the measurement panel that looks like a measurement.
+  await expect.poll(() => 
+    measurementPanel.locator('[data-testid="measurement"]').textContent()
+  ).toMatch(/[\d.,]+\s*(m|km|mi|ft|yd|nmi)/i);
+});

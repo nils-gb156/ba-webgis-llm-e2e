@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay
+  await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+  
+  // Step 2: Show Precipitation overlay
+  await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Verify layer states
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 3: Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map navigation (center change)
+  // We poll the map center to ensure the map has actually moved to the searched location.
+  const initialCenter = await page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    return map?.olMap.getView().getCenter();
+  });
+  
+  // Wait for the center to change from the initial state
+  await expect.poll(async () => {
+    const currentCenter = await page.evaluate(() => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      return map?.olMap.getView().getCenter();
+    });
+    return currentCenter;
+  }).not.toEqual(initialCenter);
+
+  // Step 6: Wait for weather forecast to load in the info panel
+  // The info panel contains a weather-forecast section with multiple entries.
+  // We wait for at least one entry to appear, and then verify the count.
+  const weatherForecast = page.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+
+  // The expected result states 24 entries. We poll for the count of entries.
+  await expect.poll(async () => {
+    return page.locator('[data-testid="weather-forecast-entry"]').count();
+  }).toBe(24);
+});

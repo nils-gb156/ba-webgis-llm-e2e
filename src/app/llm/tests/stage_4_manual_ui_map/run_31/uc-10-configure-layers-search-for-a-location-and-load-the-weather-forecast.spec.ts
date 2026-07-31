@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide Temperature overlay
+    await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+    // Step 2: Show Precipitation overlay
+    await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+    // Verify layer states
+    await expect(page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+    await expect(page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+
+    // Step 3: Search for a location
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // Wait for results to appear
+    await expect(page.getByTestId('geocoder-results')).toBeVisible();
+
+    // Step 4: Select the first result
+    await page.getByTestId('geocoder-result-item-0').click();
+
+    // Step 5: Wait for map navigation
+    // The map should have moved to the new location. We poll the center to ensure it changed/settled.
+    // We expect the center to be different from the initial default (which is likely Germany but not Münster).
+    // Since we don't know the exact initial center, we just wait for the map to stabilize at a new position.
+    // A simple way is to wait for the zoom/center to be defined and then check if the info panel updates.
+    await expect.poll(() => getMapCenter(page)).toBeDefined();
+
+    // Step 6: Wait for info panel to load the forecast
+    // The forecast section should be visible
+    await expect(page.getByTestId('weather-forecast')).toBeVisible();
+
+    // Verify the forecast has 24 entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

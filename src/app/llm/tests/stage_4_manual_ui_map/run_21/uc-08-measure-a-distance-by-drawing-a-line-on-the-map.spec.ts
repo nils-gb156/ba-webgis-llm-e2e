@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+
+  // Get a center point on the map to click around
+  // We'll click three points to form a line
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or has no bounding box');
+  }
+
+  // Click first point (approximate center)
+  await mapContainer.click({
+    position: {
+      x: mapBox.width / 2,
+      y: mapBox.height / 2,
+    },
+  });
+
+  // Click second point (to the right)
+  await mapContainer.click({
+    position: {
+      x: mapBox.width / 2 + 100,
+      y: mapBox.height / 2,
+    },
+  });
+
+  // Click third point (further right and slightly down)
+  await mapContainer.click({
+    position: {
+      x: mapBox.width / 2 + 200,
+      y: mapBox.height / 2 + 50,
+    },
+  });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({
+    position: {
+      x: mapBox.width / 2 + 200,
+      y: mapBox.height / 2 + 50,
+    },
+  });
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit
+  const measurementElement = page.getByTestId('measurement');
+  await expect(measurementElement).toBeVisible();
+
+  // Wait for the measurement value to appear. It might take a moment to calculate.
+  // We'll poll for text content that looks like a measurement (e.g., "1.23 km", "500 m")
+  await expect.poll(async () => {
+    const text = await measurementElement.textContent();
+    return text;
+  }).toMatch(/[\d.,]+\s*(m|km|mi|ft)/i);
+});

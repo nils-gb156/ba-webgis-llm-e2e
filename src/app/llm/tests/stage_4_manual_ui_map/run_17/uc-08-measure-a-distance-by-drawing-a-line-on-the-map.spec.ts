@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Click the measurement button in the toolbar to open the measurement panel.
+  // The panel is not visible by default, so we click the toggle to open it.
+  await page.getByTestId('measurement-toggle').click();
+
+  // Verify the measurement panel is visible.
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+  await expect(page.getByTestId('measurement')).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line.
+  // We need to click on the map container at different positions.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to calculate click positions.
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click three points to form a line.
+  // Point 1: Top-left area
+  await page.mouse.click(box.x + 100, box.y + 100);
+  // Point 2: Center area
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  // Point 3: Bottom-right area
+  await page.mouse.click(box.x + box.width - 100, box.y + box.height - 100);
+
+  // 3. Double-click to finish the measurement.
+  // We double-click on the last point or nearby to finish.
+  await page.mouse.dblclick(box.x + box.width - 100, box.y + box.height - 100);
+
+  // Expected results:
+  // - The measurement panel is visible. (Already asserted)
+  // - The measurement panel displays a length value with a unit.
+  // We poll for the measurement element to contain text that looks like a length value (e.g., "1.23 km", "500 m").
+  await expect.poll(() => page.getByTestId('measurement').textContent()).toMatch(/[\d.]+\s*(km|m|cm|mm|mi|ft|in)/i);
+});

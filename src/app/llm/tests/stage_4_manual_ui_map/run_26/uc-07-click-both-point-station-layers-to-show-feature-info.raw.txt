@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanelVisible = await infoPanelToggle.getAttribute('aria-pressed');
+  if (infoPanelVisible !== 'true') {
+    await infoPanelToggle.click({ force: true });
+  }
+
+  // Ensure UV-Index Stations and EUCOS Ground Stations layers are active
+  const uvIndexStationsRendered = await isLayerRendered(page, 'UV-Index Stations');
+  if (!uvIndexStationsRendered) {
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const layerSwitcherVisible = await layerSwitcherToggle.getAttribute('aria-pressed');
+    if (layerSwitcherVisible !== 'true') {
+      await layerSwitcherToggle.click({ force: true });
+    }
+
+    const uvIndexStationsCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+    const isUvChecked = await uvIndexStationsCheckbox.isChecked();
+    if (!isUvChecked) {
+      await uvIndexStationsCheckbox.check();
+    }
+
+    const eucosStationsCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+    const isEucosChecked = await eucosStationsCheckbox.isChecked();
+    if (!isEucosChecked) {
+      await eucosStationsCheckbox.check();
+    }
+  }
+
+  // Click on the map at the specific coordinates
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 100, y: 100 },
+    force: true,
+  });
+
+  // Wait for the info panel to load the station info for both layers
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Wait for UVI station info to appear
+  const uviStationInfo = page.getByTestId('uvi-station-info');
+  await expect(uviStationInfo).toBeVisible();
+
+  // Wait for EUCOS station info to appear
+  const eucosStationInfo = page.getByTestId('eucos-station-info');
+  await expect(eucosStationInfo).toBeVisible();
+});

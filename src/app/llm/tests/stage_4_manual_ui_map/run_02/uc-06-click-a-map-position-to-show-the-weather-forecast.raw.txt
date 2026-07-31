@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is ready and interactive
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Click a position on the map canvas to trigger the forecast
+  // Using the center of the map container as a safe default position
+  const mapContainer = page.getByTestId('map-container');
+  const box = await mapContainer.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  // Wait for the forecast to load in the info panel
+  // The forecast section should become visible
+  await expect(page.getByTestId('weather-forecast')).toBeVisible({ timeout: 30000 });
+
+  // Verify the clicked position is highlighted on the map
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Verify the forecast contains 24 entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer.
+  // The UI map indicates "Temperature" is initially visible (checked).
+  // We click the checkbox to uncheck it.
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer.
+  // The UI map indicates "Precipitation" is initially hidden (unchecked).
+  // We click the checkbox to check it.
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Search for a location using the geocoder.
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location.
+  // We poll the map center to ensure it has moved from the initial default position.
+  const initialCenter = await getMapCenter(page);
+  await expect.poll(async () => {
+    const currentCenter = await getMapCenter(page);
+    return currentCenter !== undefined && (currentCenter[0] !== initialCenter?.[0] || currentCenter[1] !== initialCenter?.[1]);
+  }).toBeTruthy();
+
+  // Step 6: Wait for the info panel to load the forecast.
+  // The forecast section appears after clicking the map or selecting a geocoder result.
+  // We expect 24 weather forecast entries to be visible.
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

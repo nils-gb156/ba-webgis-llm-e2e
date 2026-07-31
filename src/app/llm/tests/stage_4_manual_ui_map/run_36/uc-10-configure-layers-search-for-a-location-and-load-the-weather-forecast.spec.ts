@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  // The default state has Temperature visible. We click its checkbox to hide it.
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer
+  // The default state has Precipitation hidden. We click its checkbox to show it.
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Search for a location
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  // We wait for the first result item to appear and then click it.
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We poll the map center to ensure it has moved from the default view.
+  // The default center is likely somewhere else, so we just verify the map is ready and has a center.
+  const initialCenter = await getMapCenter(page);
+  await expect.poll(() => getMapCenter(page)).not.toEqual(initialCenter);
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The forecast section becomes visible after clicking the map or navigating.
+  // We wait for the weather forecast section to be visible.
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // The expected result states the info panel displays a weather forecast section with 24 entries.
+  // We verify the weather forecast container is visible and contains multiple entries.
+  const weatherForecast = page.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+
+  // Check for the presence of forecast entries. The UI map notes that entries are dynamic.
+  // We expect at least one entry to be visible, indicating the forecast has loaded.
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries.first()).toBeVisible();
+
+  // To verify the "24 entries" requirement more robustly, we can check the count of entries.
+  // Since they might load asynchronously, we poll for the count.
+  await expect.poll(async () => {
+    return page.getByTestId('weather-forecast-entry').count();
+  }).toBeGreaterThanOrEqual(24);
+});

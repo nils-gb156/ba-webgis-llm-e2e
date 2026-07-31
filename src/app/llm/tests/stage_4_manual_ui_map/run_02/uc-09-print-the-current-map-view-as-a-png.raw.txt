@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure at least one base map and one overlay layer are visible
+  const baseLayer = await expect.poll(() => getActiveBaseLayerTitle(page));
+  expect(baseLayer).toBeDefined();
+
+  const uviRendered = await expect.poll(() => isLayerRendered(page, 'UV-Index Stations'));
+  expect(uviRendered).toBe(true);
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  const printingPanel = page.getByTestId('printing-panel');
+
+  // Check current state to ensure we open it if closed
+  const isPanelVisible = await printingPanel.isVisible();
+  if (!isPanelVisible) {
+    await printToggle.click({ force: true });
+  }
+
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // Assuming the printing panel contains an input for the title.
+  // Since no specific test id is given for the title input, we look for a label or role.
+  // Based on typical UI patterns, it might be a text input with a label "Title" or similar.
+  // We will try to find an input inside the printing panel.
+  const titleInput = printingPanel.locator('input[type="text"], input:not([type])');
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  // Assuming there is a radio group or dropdown for format.
+  // We look for a radio button or option labeled "PNG".
+  const pngOption = printingPanel.getByRole('radio', { name: 'PNG', exact: true }).or(
+    printingPanel.getByRole('option', { name: 'PNG', exact: true })
+  );
+  
+  // If it's a checkbox or switch, we might need to force click, but radio is more likely for format selection.
+  // Let's try to find a checkbox/radio/switch for PNG.
+  const pngControl = printingPanel.getByRole('checkbox', { name: 'PNG', exact: true }).or(
+    printingPanel.getByRole('radio', { name: 'PNG', exact: true }).or(
+      printingPanel.getByRole('switch', { name: 'PNG', exact: true })
+    )
+  );
+
+  // If no specific PNG control found by role, try text or test id if available in a real scenario.
+  // Here we assume a standard control exists.
+  if (await pngControl.isVisible()) {
+    await pngControl.click({ force: true });
+  } else {
+    // Fallback: look for a button or text "PNG" inside the panel if roles are not exposed correctly
+    const pngButton = printingPanel.getByRole('button', { name: 'PNG', exact: true });
+    if (await pngButton.isVisible()) {
+      await pngButton.click();
+    }
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = printingPanel.getByRole('button', { name: /Export|Print|Download/i, exact: true });
+  
+  // Wait for download before clicking
+  const downloadPromise = page.waitForEvent('download');
+  
+  await exportButton.click();
+
+  // Assert the download occurred
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+});

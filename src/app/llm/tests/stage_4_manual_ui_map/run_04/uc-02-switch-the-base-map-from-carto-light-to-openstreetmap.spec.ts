@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: The user opens the base map selector in the layer switcher.
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    await expect(layerSwitcherToggle).toBeVisible();
+    await layerSwitcherToggle.click();
+
+    // Step 2: The user selects 'OpenStreetMap' as the base map.
+    // The base map selector is a dropdown inside the layer switcher.
+    // We locate the dropdown control and select the option.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+
+    // The base map selector is likely a dropdown. We look for a button or select that controls it.
+    // Based on the UI map, basemaps is a dropdown.
+    // We try to find the dropdown trigger or the select element within the layer switcher.
+    // Since specific test ids for the dropdown trigger aren't listed, we look for the basemap options.
+    // Often, the dropdown is triggered by clicking a button showing the current value or a chevron.
+    // Let's assume the dropdown is accessible via role or text within the layer switcher.
+    
+    // Attempt to find the dropdown button. It might be a button with text "Carto Light" or similar.
+    // Or it might be a select element.
+    // Let's try to click the layer switcher toggle again if it closed, or assume it's open.
+    // The UI map says layer-switcher is visibleByDefault: true, but toggledBy info-panel-toggle? No, toggledBy layer-switcher-toggle.
+    // So clicking layer-switcher-toggle opens/closes it.
+    
+    // Let's look for the basemap dropdown. It's inside layer-switcher.
+    // We can try to find a button that says "Carto Light" or a select.
+    const basemapDropdown = layerSwitcher.locator('button').filter({ hasText: 'Carto Light' }).first();
+    if (await basemapDropdown.isVisible()) {
+        await basemapDropdown.click();
+    } else {
+        // Fallback: maybe it's a select element
+        const select = layerSwitcher.locator('select').first();
+        if (await select.isVisible()) {
+            await select.selectOption('OpenStreetMap');
+        } else {
+            // Fallback: look for an option list
+            const options = layerSwitcher.locator('li').filter({ hasText: 'OpenStreetMap' });
+            if (await options.count() > 0) {
+                // Try clicking the option directly if it's visible
+                await options.first().click();
+            } else {
+                // Last resort: try to find any dropdown trigger
+                const dropdownTrigger = layerSwitcher.locator('[role="combobox"]').first();
+                if (await dropdownTrigger.isVisible()) {
+                    await dropdownTrigger.click();
+                    await page.getByText('OpenStreetMap').click();
+                }
+            }
+        }
+    }
+
+    // Wait for the map to update and the base layer to change
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+
+    // Verify Carto Light is no longer selected
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+});

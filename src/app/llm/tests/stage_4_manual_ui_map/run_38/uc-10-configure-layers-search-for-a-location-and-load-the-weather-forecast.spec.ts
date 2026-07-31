@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay
+  const temperatureToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show Precipitation overlay
+  const precipitationToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation', exact: true });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Type in geocoder
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select first
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map navigation
+  await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+  await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+  // Step 6: Wait for weather forecast in info panel
+  const weatherForecast = page.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect.poll(() => forecastEntries.count()).toBe(24);
+});

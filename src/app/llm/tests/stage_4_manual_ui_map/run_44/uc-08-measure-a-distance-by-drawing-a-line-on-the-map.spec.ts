@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Click the measurement button to open the measurement panel.
+  // The toggle button is not pressed by default, so we can click it directly.
+  await page.getByTestId('measurement-toggle').click();
+
+  // Assert that the measurement panel is visible.
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line.
+  // We need to click on the map container. We'll pick some arbitrary coordinates
+  // within the visible map area.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to ensure we click within it.
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click three points to form a line.
+  // Point 1: Center-ish
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  // Point 2: Offset to the right and down
+  await page.mouse.click(box.x + box.width / 2 + 100, box.y + box.height / 2 + 100);
+  // Point 3: Offset further right and down
+  await page.mouse.click(box.x + box.width / 2 + 200, box.y + box.height / 2 + 200);
+
+  // 3. Double-click to finish the measurement.
+  await page.mouse.dblclick(box.x + box.width / 2 + 200, box.y + box.height / 2 + 200);
+
+  // Expected results:
+  // - The measurement panel is visible (already asserted).
+  // - The measurement panel displays a length value with a unit.
+  // We poll for the measurement element to be visible and contain text that looks like a measurement.
+  await expect.poll(async () => {
+    const measurementElement = page.getByTestId('measurement');
+    const isVisible = await measurementElement.isVisible();
+    if (!isVisible) return false;
+    const text = await measurementElement.innerText();
+    // Check if the text contains a number and a unit (e.g., "m", "km", "mi")
+    return /\d+(\.\d+)?\s*(m|km|mi|ft)/i.test(text);
+  }).toBe(true);
+});

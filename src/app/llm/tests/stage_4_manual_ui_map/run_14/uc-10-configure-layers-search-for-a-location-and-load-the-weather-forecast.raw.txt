@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, isLayerRendered } from "../../../map-model-helpers";
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Precondition checks
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+    await expect(page.getByTestId('geocoder-input')).toBeVisible();
+
+    // Step 1: Hide Temperature layer
+    // The prompt states Temperature is initially visible. We click its toggle to hide it.
+    // Chakra checkboxes need force: true because the visual control intercepts events.
+    await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+    // Step 2: Show Precipitation layer
+    // The prompt states Precipitation is initially hidden. We click its toggle to show it.
+    await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+    // Verify layer state changes
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for a location
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    // The results list appears after typing. We wait for the first result item.
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for map navigation
+    // The map center should change from the default (likely center of Germany/Europe) to Münster.
+    // Münster coordinates are roughly 7.6, 51.9 lon/lat -> ~848000, 6560000 EPSG:3857.
+    // We poll for the center to move to a new location.
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(async () => {
+        const center = await getMapCenter(page);
+        return center;
+    }).not.toBe(initialCenter);
+
+    // Also verify zoom level is reasonable (not zoomed out to max)
+    const zoomLevel = await getMapZoomLevel(page);
+    expect(zoomLevel).toBeGreaterThan(0);
+
+    // Step 6: Wait for weather forecast to load
+    // The weather forecast section appears after clicking the map or navigating.
+    // The prompt says "info panel displays a weather forecast section with 24 entries".
+    // We look for the weather-forecast element which becomes visible.
+    const weatherForecast = page.getByTestId('weather-forecast');
+    await expect(weatherForecast).toBeVisible();
+
+    // Verify there are 24 forecast entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

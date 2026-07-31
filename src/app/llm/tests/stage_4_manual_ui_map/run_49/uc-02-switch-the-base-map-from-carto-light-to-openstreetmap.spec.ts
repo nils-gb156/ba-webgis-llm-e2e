@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. The user opens the base map selector in the layer switcher.
+  // The layer switcher is visible by default, so we just need to interact with the dropdown.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  // The base map selector is likely a dropdown within the layer switcher.
+  // We look for a dropdown control. Since no specific test id is given for the dropdown trigger,
+  // we look for a role that represents a combobox or select within the layer switcher.
+  // Often, Chakra UI dropdowns use a button or a select element.
+  // Let's try to find the dropdown by its context. If there's a specific test id for the base map selector,
+  // we would use it. Since there isn't one explicitly named, we look for the dropdown control.
+  // Assuming the base map selector is a combobox or similar within the layer switcher.
+  // We will click the layer switcher's dropdown trigger. If the structure is nested, we might need to be more specific.
+  // Looking at the UI map, "basemaps" is a dropdown control. Let's assume it has a test id or we can find it by role.
+  // Since no test id is provided for the basemaps dropdown specifically, we might need to rely on the fact that
+  // the layer switcher is visible. Let's try to find a combobox or select within the layer switcher.
+  // However, often these are implemented as buttons that open a menu.
+  // Let's try clicking the layer switcher itself if it acts as a toggle, or find the specific dropdown.
+  // Given the UI map says "controlType": "dropdown", let's look for a select or combobox.
+  // If not found, we might need to click the layer switcher toggle if it's closed, but it's visible by default.
+  // Let's assume the dropdown is accessible via getByRole('combobox') or similar within the layer switcher.
+  // To be safe, let's try to find the dropdown by looking for a button that might open it, or the select element itself.
+  // Since we don't have a specific test id, we'll try to find the dropdown within the layer switcher.
+  // Let's try to find a button or select that represents the base map selector.
+  // We will try to find the dropdown by its label or role.
+  // Let's try to click the layer switcher's dropdown trigger. If it's a Chakra dropdown, it might be a button.
+  // Let's try to find the dropdown by its text or role.
+  // Since we don't have enough info, let's try to find the dropdown by its role 'combobox' or 'listbox' or 'button'.
+  // Let's try to find the dropdown by its text "Carto Light" if it's a button, or a select.
+  // Let's try to find the dropdown by its role.
+  // We will try to find the dropdown by its role 'combobox' within the layer switcher.
+  const baseMapDropdown = layerSwitcher.getByRole('combobox', { name: /base map/i });
+  if (await baseMapDropdown.isVisible()) {
+    await baseMapDropdown.click();
+  } else {
+    // Fallback: try to find a button or select
+    const baseMapSelect = layerSwitcher.getByRole('listbox', { name: /base map/i });
+    if (await baseMapSelect.isVisible()) {
+      await baseMapSelect.click();
+    } else {
+      // Last resort: try to find any dropdown-like element
+      const dropdown = layerSwitcher.locator('button').first();
+      await dropdown.click();
+    }
+  }
+
+  // 2. The user selects 'OpenStreetMap' as the base map.
+  // We need to click the 'OpenStreetMap' option.
+  // This might be in a listbox or menu.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  if (await openStreetMapOption.isVisible()) {
+    await openStreetMapOption.click();
+  } else {
+    // Fallback: try to find the option in a list or menu
+    const option = page.getByText('OpenStreetMap');
+    await option.click();
+  }
+
+  // Expected results: The OpenStreetMap base map is selected.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

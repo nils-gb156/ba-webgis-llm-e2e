@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  
+  // Step 1: Hide the Temperature overlay layer
+  // The default state is visible, so we click to hide it.
+  // Chakra checkboxes need force: true because the input is visually hidden.
+  await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  // The default state is hidden, so we click to show it.
+  await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Step 3: Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  // The results list appears dynamically. We wait for the first result item.
+  await expect(page.getByTestId('geocoder-result-item-0')).toBeVisible({ timeout: 10000 });
+  await page.getByTestId('geocoder-result-item-0').click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We poll the map center to ensure it has changed from the initial state.
+  const initialCenter = await getMapCenter(page);
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    return center;
+  }).not.toBe(initialCenter);
+  
+  // Also wait for zoom to settle as navigation often involves zooming
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The weather forecast section appears after clicking the map or navigating to a result.
+  // We expect the weather forecast container to be visible.
+  await expect(page.getByTestId('weather-forecast')).toBeVisible({ timeout: 15000 });
+
+  // Expected Result: Verify the info panel displays a weather forecast section with 24 entries.
+  // We count the forecast entries.
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+
+  // Expected Result: Precipitation overlay layer toggle is in the enabled state (checked).
+  // We assert the checkbox state.
+  await expect(page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+
+  // Expected Result: Temperature overlay layer toggle is in the disabled state (unchecked).
+  await expect(page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+});

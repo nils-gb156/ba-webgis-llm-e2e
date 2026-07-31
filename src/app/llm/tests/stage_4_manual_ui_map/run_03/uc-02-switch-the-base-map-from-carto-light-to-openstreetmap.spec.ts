@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify initial state: Carto Light is active
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Open the layer switcher if not already visible, or ensure it's visible
+  // The ui-map says layer-switcher is visibleByDefault: true, but we might need to ensure the panel is open
+  // The layer-switcher-toggle toggles the "layer-switcher" element.
+  // Let's check if the layer-switcher container is visible.
+  const layerSwitcherContainer = page.getByTestId('layer-switcher');
+  await expect(layerSwitcherContainer).toBeVisible();
+
+  // Open the base map selector in the layer switcher
+  // The ui-map describes a "basemaps" control of type "dropdown" inside "layers".
+  // We need to find the dropdown for basemaps.
+  // Usually, this is a select or a custom dropdown.
+  // Let's look for a label or text indicating "Basemaps" or similar.
+  // Since no specific test id is given for the dropdown trigger, we look for accessible name.
+  // The ui-map says options are ["Carto Light", "Carto Dark", "OpenStreetMap"].
+  // Let's try to find a button or select that controls these.
+  // Often in such UIs, there's a "Base Maps" label.
+  const baseMapLabel = page.getByText('Base Maps', { exact: true }).or(page.getByText('Basemaps', { exact: true }));
+  
+  // If the label isn't directly clickable, we might need to find the dropdown itself.
+  // Let's assume the dropdown is triggered by a button with an accessible name like "Base Maps" or similar.
+  // If not found, we might need to look for a select element.
+  // Let's try to find a select element that contains the options.
+  const baseMapSelect = page.locator('select').filter({ hasText: /Carto Light/ });
+  
+  if (await baseMapSelect.count() > 0) {
+    // It's a native select
+    await baseMapSelect.selectOption('OpenStreetMap');
+  } else {
+    // It's likely a custom Chakra dropdown or button.
+    // Let's look for a button that says "Carto Light" or similar to open the menu.
+    const baseMapButton = page.getByRole('button', { name: /Carto Light|Base Map/ });
+    if (await baseMapButton.count() > 0) {
+      await baseMapButton.click();
+      // Select OpenStreetMap from the list
+      const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+      await expect(osmOption).toBeVisible();
+      await osmOption.click();
+    } else {
+      // Fallback: try to find the dropdown by its test id if available, or by label
+      // The ui-map doesn't give a test id for the dropdown itself, only for the container "layer-switcher"
+      // Let's try to find a button with "OpenStreetMap" in the layer switcher to see if it's already visible? No, it's a selection.
+      // Let's try to find the dropdown trigger by searching for the current value in the layer switcher.
+      const layerSwitcher = page.getByTestId('layer-switcher');
+      const currentValueInLayerSwitcher = layerSwitcher.getByText('Carto Light');
+      if (await currentValueInLayerSwitcher.count() > 0) {
+        // It might be a button showing the current selection
+        await currentValueInLayerSwitcher.click();
+        const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+        await expect(osmOption).toBeVisible();
+        await osmOption.click();
+      } else {
+        // Last resort: try to find any button in layer switcher that might open the base map selector
+        // This is tricky without more specific UI details.
+        // However, the prompt says "The user opens the base map selector".
+        // Let's assume there is a clear way to interact.
+        // Let's try to find a button with "Base" in the name inside layer switcher.
+        const baseMapTrigger = layerSwitcher.getByRole('button', { name: /Base/ });
+        if (await baseMapTrigger.count() > 0) {
+          await baseMapTrigger.click();
+          const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+          await expect(osmOption).toBeVisible();
+          await osmOption.click();
+        } else {
+          // If none of the above work, we might need to look for a specific pattern.
+          // Let's assume the standard Chakra Select or a button with the current value.
+          // Let's try clicking the text "Carto Light" inside the layer switcher if it's a button.
+          const cartoLightText = layerSwitcher.getByText('Carto Light', { exact: true });
+          if (await cartoLightText.count() > 0) {
+            await cartoLightText.click();
+            const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+            await expect(osmOption).toBeVisible();
+            await osmOption.click();
+          }
+        }
+      }
+    }
+  }
+
+  // Verify that OpenStreetMap is now the active base map
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

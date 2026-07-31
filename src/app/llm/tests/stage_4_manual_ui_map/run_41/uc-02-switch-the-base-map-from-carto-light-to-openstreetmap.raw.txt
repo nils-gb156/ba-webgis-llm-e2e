@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: The user opens the base map selector in the layer switcher.
+    // The layer switcher is visible by default. We look for the basemaps dropdown.
+    // Based on the UI map, the basemaps control is a dropdown within the layers section.
+    // We need to locate the dropdown trigger. Since no specific testid is given for the dropdown trigger itself,
+    // we look for the "Carto Light" text or role associated with the basemaps selection.
+    // However, the UI map says "basemaps" is a dropdown with options. Let's look for the layer-switcher first.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+
+    // The basemaps dropdown is likely inside the layer switcher.
+    // We will look for an element that represents the current selection or the dropdown trigger.
+    // Since we don't have a specific testid for the dropdown button, we might need to infer from the structure.
+    // Often, these are rendered as a Chakra Select or similar.
+    // Let's try to find the dropdown by its context. If there's no explicit button, we might need to click the container
+    // or look for a specific role.
+    // Let's assume the dropdown is accessible. We'll try to find the "Carto Light" text which is the default.
+    // If it's a dropdown, clicking it should reveal options.
+    
+    // Let's look for the basemaps dropdown. It might be labeled or have text.
+    // We will try to find the dropdown trigger. If it's a Chakra Select, it might be a div with role="combobox" or similar.
+    // Let's try to find the "Carto Light" text and click it if it's part of the dropdown trigger.
+    // Or, we can look for the dropdown within the layer-switcher.
+    
+    // Let's try to find the dropdown by looking for the options or the trigger.
+    // Since the UI map says "basemaps" is a dropdown, let's try to find a combobox or select.
+    // We'll try to find the element that contains "Carto Light" and is clickable.
+    
+    // A safer bet is to look for the dropdown trigger. If it's not explicitly labeled, we might need to use the testid of the container if available.
+    // The UI map doesn't give a testid for the basemaps dropdown itself, only for the layer-switcher.
+    // Let's assume the dropdown is inside the layer-switcher.
+    
+    // Let's try to find the dropdown by its role. It's likely a combobox or button.
+    // We'll look for a combobox inside the layer-switcher.
+    const basemapDropdown = layerSwitcher.getByRole('combobox', { name: /basemap/i });
+    
+    // If that doesn't work, we might need to look for the text "Carto Light" and click it.
+    // Let's try clicking the layer-switcher if it's collapsible, but the UI map says it's visible by default.
+    
+    // Let's try to find the dropdown by looking for the current value "Carto Light".
+    // If the dropdown is a Chakra Select, it might have a specific structure.
+    // Let's try to find the dropdown by looking for the text "Carto Light" within the layer-switcher.
+    const cartoLightText = layerSwitcher.getByText('Carto Light');
+    // If "Carto Light" is the displayed value of the dropdown, clicking it might open the dropdown.
+    // However, it might also be a static text. Let's try to find a button or combobox.
+    
+    // Let's try to find the dropdown by its accessibility name if available.
+    // If not, we'll try to find the dropdown by its position or structure.
+    // Let's assume the dropdown is a combobox.
+    
+    // If we can't find a combobox, we'll try to find the dropdown by looking for the options.
+    // But we need to open it first.
+    
+    // Let's try to find the dropdown by looking for the text "Basemap" or similar.
+    // The UI map doesn't specify the label.
+    
+    // Let's try a different approach. Let's look for the dropdown by its testid if it exists.
+    // The UI map doesn't provide a testid for the basemaps dropdown.
+    
+    // Let's try to find the dropdown by looking for the Chakra Select component.
+    // Chakra Select renders a div with role="combobox" or similar.
+    
+    // Let's try to find the dropdown by looking for the text "Carto Light" and clicking it.
+    // If it's a dropdown, clicking it should open the list.
+    await cartoLightText.click();
+    
+    // Step 2: The user selects 'OpenStreetMap' as the base map.
+    // Now the dropdown should be open. We look for the "OpenStreetMap" option.
+    const openStreetMapOption = layerSwitcher.getByRole('option', { name: 'OpenStreetMap' });
+    await expect(openStreetMapOption).toBeVisible();
+    await openStreetMapOption.click();
+
+    // Expected results:
+    // - The OpenStreetMap base map is selected.
+    // - The Carto Light base map is no longer selected.
+    
+    // We use the helper to check the active base layer title.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and the default base layer to be Carto Light
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+    // Step 1: Open the base map selector in the layer switcher.
+    // The layer switcher is visible by default. We need to find the dropdown control.
+    // Based on the UI map, there is a 'layer-switcher' container.
+    // The base maps are in a dropdown. We'll look for a button or combobox that triggers it.
+    // Since specific test IDs for the dropdown trigger aren't provided, we look for the layer switcher toggle or the dropdown itself.
+    // The UI map says 'basemaps' is a dropdown controlType.
+    // We will try to click the layer switcher toggle first to ensure it's open, although it is visibleByDefault.
+    // Then we look for the base map selection area.
+    
+    // The layer switcher toggle button
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    // Check if it's already pressed (open). If not, click it.
+    const isLayerSwitcherOpen = await layerSwitcherToggle.getAttribute('aria-pressed');
+    if (isLayerSwitcherOpen !== 'true') {
+        await layerSwitcherToggle.click();
+    }
+
+    // Wait for the layer switcher panel to be visible
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+    // Step 2: Select 'OpenStreetMap' as the base map.
+    // The basemaps are in a dropdown. We need to find the dropdown control.
+    // It's likely a select or a combobox inside the layer switcher.
+    // We'll look for a getByRole('combobox') or 'listbox' or 'select' inside the layer switcher.
+    // Or we can look for the text "Carto Light" and click it if it's a list.
+    // Given "controlType": "dropdown", it's likely a select or a custom dropdown.
+    // Let's try to find an element with the text "OpenStreetMap" inside the layer switcher.
+    const osmOption = page.getByTestId('layer-switcher').getByText('OpenStreetMap');
+    
+    // If it's a standard HTML select, we might need to select it differently.
+    // However, Playwright's getByText often works for visible options in custom dropdowns too.
+    // If it's a listbox, getByText finds the option.
+    
+    // Let's assume the option is clickable.
+    await osmOption.click();
+
+    // Expected results:
+    // The OpenStreetMap base map is selected.
+    // The Carto Light base map is no longer selected.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+});

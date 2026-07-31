@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map to be ready and initial base layer to be Carto Light
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+    // 1. The user opens the base map selector in the layer switcher.
+    // The layer switcher is visible by default. We need to find the dropdown for basemaps.
+    // Based on the UI map, the layer-switcher contains the basemaps dropdown.
+    // We look for a dropdown/combobox within the layer-switcher.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    // The basemaps control is a dropdown. We can try to find it by role or text.
+    // Since there is no specific test-id for the basemap dropdown itself, we look inside layer-switcher.
+    // It's likely a select or a custom dropdown. Let's try getting the element that represents the base map selection.
+    // Often these are labeled. Let's assume there's a label or text "Basemaps" or similar.
+    // If not, we might need to click the layer-switcher-toggle if it were hidden, but it's visible.
+    // Let's look for a button or input that triggers the basemap selection.
+    // Without a specific test-id, we might rely on the structure.
+    // Let's try to find a dropdown inside the layer-switcher.
+    const basemapDropdown = layerSwitcher.getByRole('combobox', { name: /basemap/i }).first();
+    
+    // If the above is too specific and fails, we might need to look for the first dropdown.
+    // But let's try a more robust approach: click the layer switcher if it's a toggle, but here it's visible.
+    // The prompt says "base map selector in the layer switcher".
+    // Let's assume the dropdown is accessible.
+    
+    // Fallback: if we can't find by accessible name, we might need to inspect.
+    // However, for this exercise, let's assume standard accessibility.
+    // If "Basemaps" isn't the name, it might be "Base Map" or similar.
+    // Let's try clicking the layer switcher area to see if it expands options, or directly the combobox.
+    
+    // Let's try to find the dropdown by its position or first combobox in layer-switcher.
+    // A safer bet for "base map selector" might be a button that opens a list.
+    // Let's try to find any combobox or select inside layer-switcher.
+    const basemapControl = layerSwitcher.locator('select, [role="combobox"]').first();
+    
+    await basemapControl.click();
+    
+    // 2. The user selects 'OpenStreetMap' as the base map.
+    // Wait for the list of options to appear.
+    // The options are "Carto Light", "Carto Dark", "OpenStreetMap".
+    await page.getByRole('option', { name: 'OpenStreetMap' }).click();
+    
+    // Expected results: The OpenStreetMap base map is selected.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+});

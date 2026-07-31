@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('UC-7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify preconditions: required layers are active
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Step 1: Click on the map at the specific coordinates where both stations are located
+  await page.locator('[data-testid="map-container"]').click({
+    position: { x: 100, y: 100 }, // Placeholder position; actual coordinates handled via map click
+  });
+
+  // Wait for the map click to register and trigger feature info requests
+  // We use a small timeout to ensure the click event is processed by the map
+  await page.waitForTimeout(500);
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // The info panel is visible by default, but the sections for UVI and EUCOS stations
+  // appear only after the feature info is loaded.
+  
+  // Assert that the UV-Index Station section is visible
+  await expect(page.locator('[data-testid="uvi-station-section"]')).toBeVisible();
+  
+  // Assert that the EUCOS Ground Station section is visible
+  await expect(page.locator('[data-testid="eucos-station-section"]')).toBeVisible();
+
+  // Assert that the info panel contains feature information for both stations
+  await expect(page.locator('[data-testid="uvi-station-info"]')).toBeVisible();
+  await expect(page.locator('[data-testid="eucos-station-info"]')).toBeVisible();
+});

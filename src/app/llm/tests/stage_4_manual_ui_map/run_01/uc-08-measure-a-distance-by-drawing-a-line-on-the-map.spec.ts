@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('UC-8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 1: Click the measurement toggle to open the panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  // Toggle is initially inactive, so clicking it opens the panel
+  await measurementToggle.click();
+
+  // Verify measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2: Click several points on the map to draw a line
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map to calculate click positions
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found');
+  }
+
+  // Calculate center and offsets for clicks
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+  
+  // Click first point (center)
+  await mapContainer.click({ position: { x: centerX, y: centerY } });
+  
+  // Click second point (offset right)
+  await mapContainer.click({ position: { x: centerX + 100, y: centerY } });
+  
+  // Click third point (offset right and down)
+  await mapContainer.click({ position: { x: centerX + 200, y: centerY + 100 } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: centerX + 200, y: centerY + 100 } });
+
+  // Expected results: Verify measurement result is displayed
+  const measurementElement = page.getByTestId('measurement');
+  await expect(measurementElement).toBeVisible();
+  
+  // Check that a length value with a unit is displayed
+  // The exact text might vary (e.g., "1.23 km", "500 m"), so we check for a pattern
+  await expect(measurementElement).toContainText(/[\d.]+\s*(m|km|mi|ft)/i);
+});

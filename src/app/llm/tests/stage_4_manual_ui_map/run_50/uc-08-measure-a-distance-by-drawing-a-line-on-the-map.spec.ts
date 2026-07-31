@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The toggle button might already be active (pressed), so we check its state first.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementTogglePressed = await measurementToggle.getAttribute('aria-pressed');
+  
+  if (isMeasurementTogglePressed !== 'true') {
+    await measurementToggle.click();
+  }
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. The map is rendered on a canvas inside #map-container.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click first point (approximate center-ish)
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+  
+  // Click second point
+  await mapContainer.click({ position: { x: 400, y: 400 } });
+  
+  // Click third point
+  await mapContainer.click({ position: { x: 500, y: 300 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 500, y: 300 } });
+
+  // Expected results:
+  // - The measurement panel is visible (already checked above).
+  // - The measurement panel displays a length value with a unit.
+  // We poll the measurement panel content to wait for the result to settle.
+  const measurementResult = page.getByTestId('measurement');
+  
+  await expect.poll(async () => {
+    const text = await measurementResult.textContent();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/i);
+});

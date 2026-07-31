@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+  await expect(page.getByTestId('measurement')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  // We need to click on the map container. We'll use the center of the map area.
+  // Since we don't have exact coordinates, we'll click relative to the map container's bounding box.
+  const mapContainer = page.getByTestId('map-container');
+  const boundingBox = await mapContainer.boundingBox();
+  if (!boundingBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Define some points to draw a line (relative to the map container)
+  // Point 1: near the top-left
+  const point1 = { x: boundingBox.x + 100, y: boundingBox.y + 100 };
+  // Point 2: middle
+  const point2 = { x: boundingBox.x + 200, y: boundingBox.y + 200 };
+  // Point 3: bottom-right
+  const point3 = { x: boundingBox.x + 300, y: boundingBox.y + 300 };
+
+  // Click the first point
+  await page.mouse.click(point1.x, point1.y);
+  // Click the second point
+  await page.mouse.click(point2.x, point2.y);
+  // Click the third point
+  await page.mouse.click(point3.x, point3.y);
+
+  // Step 3: Double-click to finish the measurement
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit.
+  // We'll check that the measurement element contains text that looks like a number followed by a unit (e.g., "1.23 km")
+  const measurementElement = page.getByTestId('measurement');
+  await expect(measurementElement).toBeVisible();
+
+  // Wait for the measurement result to appear and contain a length value
+  await expect.poll(async () => {
+    const text = await measurementElement.innerText();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/);
+});

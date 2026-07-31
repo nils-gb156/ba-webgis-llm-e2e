@@ -1,0 +1,106 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Verify Carto Light is active by default
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Step 1: Open the base map selector in the layer switcher
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+
+  // Ensure layer switcher is visible (it might be toggled off initially)
+  if (!(await layerSwitcher.isVisible())) {
+    await layerSwitcherToggle.click();
+  }
+
+  // Locate the basemap dropdown within the layer switcher
+  // The UI map indicates a dropdown with options ["Carto Light", "Carto Dark", "OpenStreetMap"]
+  // We look for a select/dropdown role inside the layer switcher
+  const basemapSelect = layerSwitcher.getByRole('combobox', { name: /basemap/i });
+  
+  // If a specific "basemap" label isn't available, we might need to find the dropdown by its options
+  // However, usually there's a label. Let's try to find the select element that contains the options.
+  // Since we don't have explicit test IDs for the dropdown itself, we rely on the layer switcher context.
+  // A robust way is to find the select element that has the option "OpenStreetMap"
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  
+  // Check if the option is already visible (meaning the dropdown is open)
+  if (!(await openStreetMapOption.isVisible())) {
+    // Click the layer switcher to ensure it's open, then find the dropdown
+    // The dropdown might be a native <select> or a custom component.
+    // Given it's Chakra UI, it's likely a custom component or a standard select.
+    // Let's try to find the input/select that opens the list.
+    // Often, the first select or a labeled select is the basemap selector.
+    // Let's try clicking the layer switcher area to ensure focus, then look for the select.
+    
+    // Alternative: The UI map says "controlType": "dropdown". 
+    // Let's try to find the dropdown by its position or label if available.
+    // If no label, we might need to guess the order or use a broader selector.
+    // Let's assume the first dropdown in the layer switcher is the basemap selector, 
+    // or look for a select with the default value "Carto Light".
+    
+    const basemapDropdown = layerSwitcher.locator('select').first();
+    if (await basemapDropdown.isVisible()) {
+      await basemapDropdown.selectOption('OpenStreetMap');
+    } else {
+      // If it's a custom Chakra dropdown, it might be a button or div
+      // Let's try to find the element that, when clicked, shows "OpenStreetMap"
+      // We can search for a clickable element that is a sibling or child of the layer switcher
+      // and then click the option.
+      
+      // Try to find the dropdown trigger. In Chakra, it might be a Button or a Select component.
+      // Let's try to find any button or div that represents the current selection "Carto Light"
+      const currentBasemapLabel = layerSwitcher.getByText('Carto Light').first();
+      if (await currentBasemapLabel.isVisible()) {
+        // This might be the label, not the trigger. 
+        // Let's look for a select element again, maybe it's not a native select.
+        // Chakra's Select renders a button-like element.
+        const chakraSelect = layerSwitcher.locator('button').filter({ hasText: 'Carto Light' }).first();
+        if (await chakraSelect.isVisible()) {
+          await chakraSelect.click();
+        } else {
+          // Fallback: try to find the dropdown by looking for the option and clicking its parent trigger
+          // This is tricky without a test id. 
+          // Let's assume there is a native select or a standard Chakra select.
+          // If the above failed, let's try to find the select by its aria-label or name if possible.
+          // Since we can't see the actual HTML, we rely on the UI map description.
+          // "controlType": "dropdown" usually implies a <select> or a Chakra Select.
+          // Let's try to find the select element by checking if it has options.
+          const select = layerSwitcher.locator('select').first();
+          if (await select.isVisible()) {
+             await select.selectOption('OpenStreetMap');
+          } else {
+             // If no native select, try Chakra Select component which renders a button
+             // We need to click the button that opens the list
+             const selectButton = layerSwitcher.locator('button').filter({ hasText: 'Carto Light' }).first();
+             if (await selectButton.isVisible()) {
+                await selectButton.click();
+             } else {
+                // Last resort: try to find any clickable element in the layer switcher that isn't a toggle
+                // and click it, hoping it opens the dropdown.
+                // This is fragile. Let's assume the Chakra Select button is the one.
+                const anyButton = layerSwitcher.locator('button').first();
+                if (await anyButton.isVisible()) {
+                   await anyButton.click();
+                }
+             }
+          }
+        }
+      }
+    }
+  }
+
+  // Step 2: Select 'OpenStreetMap' as the base map
+  // If the dropdown is open, click the option
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

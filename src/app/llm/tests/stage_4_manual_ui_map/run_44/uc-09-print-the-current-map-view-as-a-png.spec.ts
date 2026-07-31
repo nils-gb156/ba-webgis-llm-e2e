@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and at least one base layer to be active
+  await expect.poll(() => page.evaluate(() => (globalThis as any).__openPioneerMap?.layers.getActiveBaseLayer()?.title)).toBeTruthy();
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  // Ensure the toggle is in the pressed state to open the panel
+  await expect(printToggle).not.toBeChecked();
+  await printToggle.click({ force: true });
+  await expect(page.getByTestId('printing')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // Assuming the printing panel contains an input for the title.
+  // Based on typical UI patterns, we look for a label or placeholder.
+  // If there's a specific test id for the title input, we'd use it.
+  // Since none is explicitly listed for the title input inside printing-panel,
+  // we try to find it by role or text.
+  // The UI map lists "printing" inside "printing-panel" but doesn't detail internal inputs.
+  // We will assume there is a text input for the title.
+  // Let's try to find an input within the printing panel.
+  const titleInput = page.getByTestId('printing').getByRole('textbox', { name: /title/i });
+  await titleInput.fill('Test Map Print');
+
+  // Step 3: Select the PNG file format
+  // Assuming there is a radio group or dropdown for format.
+  // Let's look for a radio button or select option for PNG.
+  // If there's a specific test id, we'd use it.
+  // We'll try to find a radio button or similar control labeled "PNG".
+  const pngOption = page.getByTestId('printing').getByRole('radio', { name: /PNG/i });
+  // If it's not a radio, it might be a select. Let's try radio first.
+  // If the UI uses a select, getByRole('radio') might fail.
+  // Let's try to find any selectable element labeled PNG.
+  const pngSelector = page.getByTestId('printing').getByRole('option', { name: /PNG/i });
+  
+  // Heuristic: Try to find the PNG selection mechanism.
+  // If there's a test id for the format selector, we should use it.
+  // Since it's not provided, we rely on accessible names.
+  // Let's assume there is a radio group for format.
+  if (await pngOption.count() > 0) {
+    await pngOption.click({ force: true });
+  } else if (await pngSelector.count() > 0) {
+    // It might be inside a select
+    const select = page.getByTestId('printing').getByRole('combobox', { name: /format/i });
+    await select.selectOption({ label: /PNG/i });
+  } else {
+    // Fallback: Try to find any input or button related to PNG
+    // This is a weak assumption, but necessary without more context.
+    // Let's assume there is a button or radio labeled "PNG"
+    const pngButton = page.getByTestId('printing').getByRole('button', { name: /PNG/i });
+    if (await pngButton.count() > 0) {
+      await pngButton.click();
+    } else {
+      // Last resort: assume there's a specific test id for the format if it exists
+      // Since we can't guess it, we'll try to find a checkbox or radio for PNG
+      const pngRadio = page.getByTestId('printing').getByRole('checkbox', { name: /PNG/i });
+      if (await pngRadio.count() > 0) {
+        await pngRadio.click({ force: true });
+      } else {
+        // If all else fails, we might need to look for a specific test id
+        // For now, we'll assume the test will fail if we can't find the PNG selector
+        // This is a limitation of the provided UI map.
+        // We'll try one more thing: look for a text "PNG" and click its parent or sibling
+        const pngText = page.getByTestId('printing').getByText('PNG');
+        if (await pngText.count() > 0) {
+          // Try to click the nearest interactive element
+          await pngText.click({ force: true });
+        }
+      }
+    }
+  }
+
+  // Step 4: Click the export/print button
+  // Assuming there is a button labeled "Export" or "Print" inside the printing panel
+  const exportButton = page.getByTestId('printing').getByRole('button', { name: /export|print/i });
+  await expect(exportButton).toBeEnabled();
+  
+  // Wait for the download to start
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Assert that a file was downloaded
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

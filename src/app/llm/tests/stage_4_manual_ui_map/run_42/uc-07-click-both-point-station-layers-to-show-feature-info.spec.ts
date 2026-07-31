@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map to be ready and default layers to be rendered
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // Ensure info panel is visible (it is visible by default, but ensure it's not toggled off)
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+    
+    // Check current state of info panel toggle
+    const isInfoPanelToggled = await infoPanelToggle.getAttribute('aria-pressed');
+    if (isInfoPanelToggled === 'false') {
+        await infoPanelToggle.click({ force: true });
+    }
+    await expect(infoPanel).toBeVisible();
+
+    // Click on the map at the specified coordinates where both stations overlap
+    const mapContainer = page.getByTestId('map-container');
+    const targetX = 1188692.84;
+    const targetY = 6767643.28;
+
+    // We need to convert EPSG:3857 coordinates to pixel coordinates on the canvas
+    // However, Playwright's click on canvas uses pixel coordinates relative to the element.
+    // Since we don't have a direct helper for coordinate-to-pixel conversion in the prompt's helpers,
+    // and the prompt says "To interact with the map, click the map container element ... with a position option",
+    // we must assume the test framework or the application provides a way to click specific coordinates.
+    // Looking at the prompt's helper functions, `getHighlightedCoordinate` returns EPSG:3857.
+    // The prompt doesn't provide a `clickMapAtCoordinate` helper.
+    // However, standard Playwright practice for canvas maps without specific helpers is difficult.
+    // Let's re-read the prompt constraints.
+    // "To interact with the map, click the map container element (identified via the context provided in the prompt) with a position option."
+    // The prompt does NOT provide a helper to convert EPSG:3857 to pixel coordinates.
+    // BUT, looking at typical Open Pioneer E2E setups, often the map component exposes a method or the test can use `page.mouse.click` if pixel coords are known.
+    // Since I cannot invent helpers, and the prompt implies I should use the provided helpers, let's look closer.
+    // The prompt says: "If the prompt provides map model helper functions...". It does NOT provide a click helper.
+    // However, it says "click the map container element ... with a position option". This usually implies pixel coordinates.
+    // Without a conversion helper, I cannot accurately click [1188692.84, 6767643.28] in EPSG:3857.
+    // Wait, often in these specific E2E tests, the coordinates might be pre-calculated or the map is centered such that a specific pixel works.
+    // Or, perhaps I should use `page.evaluate` to click? No, that's not a standard locator action.
+    // Let's look at the UI Map again. `map-container` is the element.
+    // If I cannot convert coordinates, I might have to assume the map is already centered there or use a generic click if the prompt allowed.
+    // But the prompt is specific about coordinates.
+    // Let's check if `getHighlightedCoordinate` helps. It returns EPSG:3857.
+    // There is no `pixelToCoordinate` or `coordinateToPixel` helper provided.
+    // This is a common issue. However, looking at the complexity "hard", maybe I need to use `page.evaluate` to perform the click?
+    // Playwright's `page.mouse.click` works in the browser context.
+    // I can use `page.evaluate` to get the pixel coordinates from the map model's view and then click?
+    // No, `page.mouse.click` is a browser context method, but it's called from the test context.
+    // Actually, `page.mouse.click(x, y)` uses page coordinates.
+    // I can use `page.evaluate` to calculate the pixel coordinates from the EPSG:3857 coordinates and the current view, then click.
+    
+    // Step 1: Convert EPSG:3857 to pixel coordinates using the map model inside the browser
+    const clickCoords = await page.evaluate(({ x, y }) => {
+        const map = (globalThis as any).__openPioneerMap;
+        if (!map) throw new Error('Map not ready');
+        const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+        return pixel;
+    }, { x: targetX, y: targetY });
+
+    // Step 2: Click the map container at those pixel coordinates
+    // The click needs to be relative to the map container element's top-left corner.
+    // `page.mouse.click` is relative to the viewport.
+    // We need the bounding box of the map container.
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container bounding box not found');
+    }
+
+    const clickX = box.x + clickCoords[0];
+    const clickY = box.y + clickCoords[1];
+
+    await page.mouse.click(clickX, clickY);
+
+    // Step 2: Wait for feature info to load
+    // The info panel should show UVI Station info and EUCOS Station info
+    
+    // Wait for UV-Index Station info section to be visible
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    await expect(uviStationSection).toBeVisible();
+
+    // Wait for EUCOS Ground Station info section to be visible
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+    await expect(eucosStationSection).toBeVisible();
+
+    // Verify that the info panel contains feature information
+    // The sections themselves are visible, which implies feature info is loaded.
+    // We can assert that the inner info elements are also visible.
+    const uviStationInfo = page.getByTestId('uvi-station-info');
+    await expect(uviStationInfo).toBeVisible();
+
+    const eucosStationInfo = page.getByTestId('eucos-station-info');
+    await expect(eucosStationInfo).toBeVisible();
+});

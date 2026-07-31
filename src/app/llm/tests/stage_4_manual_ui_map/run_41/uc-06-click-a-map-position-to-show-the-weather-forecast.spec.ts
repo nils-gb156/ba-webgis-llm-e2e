@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible (it is by default, but let's ensure it's not toggled off)
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  
+  // Check if info panel is currently visible. If not, toggle it on.
+  const isInfoPanelVisible = await infoPanel.isVisible();
+  if (!isInfoPanelVisible) {
+    await infoPanelToggle.click();
+  }
+
+  // Wait for the map to be ready and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Click on a position on the map canvas.
+  // We click near the center of the visible map area.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box not found');
+  }
+  
+  const clickX = mapBox.x + mapBox.width / 2;
+  const clickY = mapBox.y + mapBox.height / 2;
+
+  await page.mouse.click(clickX, clickY);
+
+  // Wait for the weather forecast to load in the info panel
+  const weatherForecast = page.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+
+  // Verify the clicked position is highlighted on the map
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Verify the forecast contains 24 entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

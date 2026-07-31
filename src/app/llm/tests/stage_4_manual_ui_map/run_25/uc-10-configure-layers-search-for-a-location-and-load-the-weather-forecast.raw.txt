@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Hide Temperature layer
+    await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature', exact: true }).click({ force: true });
+
+    // 2. Show Precipitation layer
+    await page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation', exact: true }).click({ force: true });
+
+    // 3. Search for 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // 4. Wait for results and select the first one
+    // The results list appears after typing. We wait for the first result item to be visible.
+    await page.waitForSelector('[data-testid="geocoder-result-item-0"]');
+    await page.getByTestId('geocoder-result-item-0').click();
+
+    // 5. Wait for map navigation to the new location
+    // We poll the map center to ensure it has moved from the initial extent.
+    // The initial center is likely around Berlin or similar. Münster is roughly [600000, 6300000] in EPSG:3857.
+    // We just assert that the center is not undefined and has changed, or specifically that the location is valid.
+    // A safer assertion for "navigated to searched location" is that the map center is now in the expected region.
+    // However, without exact coordinates, we assert that the map is no longer at the initial state and has a valid center.
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+    // 6. Wait for info panel to load the forecast
+    // The forecast section appears after clicking the map or navigating. The geocoder selection usually triggers a map click/navigate.
+    // We wait for the weather forecast section to be visible and contain entries.
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    const weatherForecast = page.getByTestId('weather-forecast');
+    await expect(weatherForecast).toBeVisible();
+
+    // Assert that the forecast has 24 entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+
+    // Assert layer states
+    // Temperature should be hidden (not rendered)
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Precipitation should be visible (rendered)
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+});

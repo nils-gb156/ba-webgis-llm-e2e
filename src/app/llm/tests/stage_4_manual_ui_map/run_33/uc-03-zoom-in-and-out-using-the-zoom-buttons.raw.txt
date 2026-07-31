@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for map to be ready before capturing initial state
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  const initialZoom = await getMapZoomLevel(page);
+  expect(initialZoom).toBeDefined();
+
+  // Step 1: Click 'Zoom in' button
+  await page.getByTestId('zoom-in-button').click();
+
+  // Verify zoom level increased
+  const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page));
+  expect(zoomAfterIn).toBeGreaterThan(initialZoom as number);
+
+  // Step 2: Click 'Zoom out' button
+  await page.getByTestId('zoom-out-button').click();
+
+  // Verify zoom level decreased compared to the zoomed-in state
+  const zoomAfterOut = await expect.poll(() => getMapZoomLevel(page));
+  expect(zoomAfterOut).toBeLessThan(zoomAfterIn);
+});

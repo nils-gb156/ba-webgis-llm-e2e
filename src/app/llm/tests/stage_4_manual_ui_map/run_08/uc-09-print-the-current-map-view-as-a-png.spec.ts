@@ -1,0 +1,102 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Preconditions: Ensure at least one base map and one overlay layer are visible.
+  // The default state should satisfy this, but we verify it.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  
+  // Check current state of the toggle to ensure we open the panel
+  const isPrintTogglePressed = await printToggle.getAttribute('aria-pressed');
+  if (isPrintTogglePressed === 'true') {
+    // If already pressed, the panel might be open or closed depending on implementation,
+    // but usually toggling closes it. We want it open. Let's click to ensure it's open.
+    // However, if it's already pressed, clicking it closes it.
+    // We need the panel OPEN. So if it's pressed, we should NOT click, or click twice?
+    // The UI map says `toggles: "printing-panel"`. Usually toggle buttons keep state.
+    // Let's assume standard toggle behavior: if pressed, it's active/open.
+    // But wait, `aria-pressed="true"` usually means the panel IS open/active in these toolbars.
+    // Let's check the panel visibility directly.
+    const printingPanel = page.getByTestId('printing-panel');
+    const panelVisible = await printingPanel.isVisible();
+    if (!panelVisible) {
+      // If panel is not visible but button is pressed, something is weird. 
+      // Let's just click the button to ensure the panel is visible. 
+      // If it was open, this closes it. If it was closed, this opens it.
+      // We want it OPEN.
+      // If it's currently closed, we click. If it's open, we do nothing.
+      // How do we know if it's open? Check visibility.
+      await printToggle.click();
+    }
+  } else {
+    // If not pressed, click to open.
+    await printToggle.click();
+  }
+
+  // Verify printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // We need to find the title input inside the printing panel.
+  // The UI map doesn't explicitly list the title input test-id, but it's inside `printing-panel`.
+  // Usually it's a text input. Let's look for a label or placeholder.
+  // Since no test-id is provided for the title input, we use getByRole('textbox') or getByLabel.
+  // Let's assume there is a label "Title" or similar.
+  // If not, we might need to use a generic textbox.
+  // Let's try to find an input inside the printing panel.
+  const printingPanel = page.getByTestId('printing-panel');
+  const titleInput = printingPanel.getByRole('textbox', { name: /title/i, exact: true }).first();
+  
+  // If no specific label, fallback to any textbox inside the panel
+  const targetTitleInput = titleInput.count() > 0 ? titleInput : printingPanel.getByRole('textbox').first();
+  
+  await targetTitleInput.fill('My Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // Look for a radio button or dropdown for format.
+  // UI map doesn't specify the format control test-id.
+  // Let's look for a radio group or select inside the printing panel.
+  // Assuming there's a radio button for "PNG".
+  const pngFormatOption = printingPanel.getByRole('radio', { name: /png/i, exact: true }).first();
+  if (await pngFormatOption.count() > 0) {
+    // Check if it's already checked
+    const isChecked = await pngFormatOption.isChecked();
+    if (!isChecked) {
+      await pngFormatOption.click({ force: true });
+    }
+  } else {
+    // Fallback: Look for a select/dropdown and select PNG
+    const formatSelect = printingPanel.getByRole('combobox', { name: /format/i, exact: true }).first();
+    if (await formatSelect.count() > 0) {
+      await formatSelect.selectOption('png');
+    } else {
+      // Last resort: try to find any radio or option with PNG text
+      await printingPanel.getByText('PNG').click();
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Look for an export/print button inside the printing panel.
+  const exportButton = printingPanel.getByRole('button', { name: /export|print/i, exact: true }).first();
+  
+  // Wait for download before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the file was downloaded and is a PNG
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible (it is by default, but let's be explicit about the state)
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  // The info panel is visible by default. If the toggle was clicked previously,
+  // we might need to ensure it's open. However, the UI map says visibleByDefault: true.
+  // We check if the toggle button is pressed. If not, the panel might be hidden.
+  // Let's assume the default state is correct and the panel is visible.
+  // If the toggle is not pressed, we click it to ensure visibility.
+  const isTogglePressed = await infoPanelToggle.getAttribute('aria-pressed');
+  if (isTogglePressed !== 'true') {
+    await infoPanelToggle.click();
+  }
+
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas. The map container is the target.
+  // We click near the center of the map to ensure we hit the canvas.
+  const mapContainer = page.getByTestId('map-container');
+  const box = await mapContainer.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  // Wait for the forecast to load. The forecast appears in the info panel.
+  // The expected result is 24 entries.
+  // We poll for the weather forecast section to become visible and contain entries.
+  await expect.poll(async () => {
+    const forecastSection = page.getByTestId('weather-forecast');
+    const isVisible = await forecastSection.isVisible();
+    if (!isVisible) return 0;
+    
+    // Count the number of forecast entries
+    const entries = forecastSection.getByTestId('weather-forecast-entry');
+    const count = await entries.count();
+    return count;
+  }).toBe(24);
+
+  // Verify the clicked position is highlighted on the map
+  const highlightedCoord = await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+  expect(highlightedCoord).toBeDefined();
+
+  // Verify the info panel displays a weather forecast section
+  await expect(page.getByTestId('weather-forecast')).toBeVisible();
+});

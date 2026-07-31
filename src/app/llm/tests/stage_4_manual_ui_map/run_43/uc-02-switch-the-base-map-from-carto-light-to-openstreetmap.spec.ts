@@ -1,0 +1,22 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Open the base map selector in the layer switcher
+  // The layer switcher is visible by default, so we look for the basemaps dropdown within it
+  const basemapsDropdown = page.getByTestId('layer-switcher').getByRole('combobox', { name: 'Basemaps' });
+  await expect(basemapsDropdown).toBeVisible();
+  await basemapsDropdown.click();
+
+  // Step 2: Select 'OpenStreetMap' as the base map
+  // The dropdown options are "Carto Light", "Carto Dark", "OpenStreetMap"
+  await page.getByRole('option', { name: 'OpenStreetMap' }).click();
+
+  // Expected results: The OpenStreetMap base map is selected.
+  // We use the helper to assert the map model state since the DOM doesn't reflect the rendered base map.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

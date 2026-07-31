@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and the initial layers to be rendered before interacting
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Click the visibility toggle of the Precipitation overlay layer
+    // The layer switcher is visible by default. We look for the checkbox labeled "Precipitation".
+    // Using force: true because Chakra UI checkbox inputs are visually hidden behind decorative elements.
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await precipitationToggle.click({ force: true });
+
+    // Verify the Precipitation layer is now rendered on the map
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Verify the toggle is in the checked state
+    await expect(precipitationToggle).toBeChecked();
+
+    // Step 2: View the legend and verify it contains an entry for Precipitation
+    // The legend panel is visible by default
+    const legend = page.getByTestId('legend');
+    await expect(legend).toBeVisible();
+
+    // Check that the legend displays an entry corresponding to the Precipitation layer.
+    // We look for text "Precipitation" within the legend container.
+    await expect(legend.getByText('Precipitation')).toBeVisible();
+});

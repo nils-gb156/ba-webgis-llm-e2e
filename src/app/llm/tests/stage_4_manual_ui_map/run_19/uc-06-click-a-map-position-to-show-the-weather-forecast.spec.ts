@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and interactive
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+
+    // Ensure the info panel is visible (it is visible by default per UI map)
+    const infoPanel = page.getByTestId('info-panel');
+    await expect(infoPanel).toBeVisible();
+
+    // 1. The user clicks on a position on the map canvas.
+    // Click near the center of the map container
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container bounding box not found');
+    }
+    const centerX = mapBox.x + mapBox.width / 2;
+    const centerY = mapBox.y + mapBox.height / 2;
+    await page.mouse.click(centerX, centerY);
+
+    // 2. The user waits for the info panel to load the forecast.
+    // Wait for the weather forecast section to become visible
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Wait for the weather forecast content to appear
+    const weatherForecast = page.getByTestId('weather-forecast');
+    await expect(weatherForecast).toBeVisible();
+
+    // Expected results:
+    // - The clicked position is highlighted on the map.
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+
+    // - The info panel displays a weather forecast section. (Already asserted above)
+
+    // - The forecast contains 24 entries.
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

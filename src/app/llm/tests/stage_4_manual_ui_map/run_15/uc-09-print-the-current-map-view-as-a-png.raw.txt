@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to be rendered
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  const printPanel = page.getByTestId('printing-panel');
+
+  // Ensure the panel is closed before starting (toggle might be active)
+  if (await printPanel.isVisible()) {
+    await printToggle.click({ force: true });
+  }
+
+  // Open the panel
+  await printToggle.click({ force: true });
+
+  // Verify the printing panel is visible
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // Locate the title input inside the printing panel to avoid ambiguity
+  const titleInput = printPanel.getByLabel('Title').or(printPanel.getByTestId('printing').getByRole('textbox', { name: 'Title' }));
+  
+  // Fallback to a more generic search if specific label isn't found, scoped to the panel
+  const finalTitleInput = titleInput.count() > 0 ? titleInput : printPanel.getByRole('textbox');
+  
+  await finalTitleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  // Locate the format selector inside the printing panel
+  const formatSelector = printPanel.getByRole('combobox', { name: /format/i }).or(printPanel.getByRole('listbox', { name: /format/i }).locator('..'));
+  
+  // If combobox is not found, try to find radio buttons or a dropdown specific to format
+  const formatGroup = printPanel.locator('role=group[name=/format/i]').or(printPanel.getByTestId('printing').locator('role=group[name=/format/i]'));
+  
+  let pngFormatOption;
+  if (await formatGroup.count() > 0) {
+    pngFormatOption = formatGroup.getByRole('radio', { name: 'PNG' }).or(formatGroup.getByText('PNG'));
+  } else {
+    // Fallback: try to find PNG in the panel
+    pngFormatOption = printPanel.getByRole('radio', { name: 'PNG' }).or(printPanel.getByText('PNG'));
+  }
+
+  // Click the PNG option
+  await pngFormatOption.click({ force: true });
+
+  // Step 4: Click the export/print button
+  const exportButton = printPanel.getByRole('button', { name: /export|print|generate/i }).or(printPanel.getByText('Export').or(printPanel.getByText('Print')));
+  
+  // Wait for download before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the downloaded file has a PNG extension
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

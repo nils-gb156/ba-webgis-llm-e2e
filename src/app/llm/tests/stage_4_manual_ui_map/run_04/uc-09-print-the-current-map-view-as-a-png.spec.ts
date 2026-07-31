@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to render
+  await expect.poll(() => page.evaluate(() => (globalThis as any).__openPioneerMap)).toBeTruthy();
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  // Ensure the panel is not already open before clicking
+  const printPanel = page.getByTestId('printing');
+  const isPanelVisible = await printPanel.isVisible();
+  if (!isPanelVisible) {
+    await printToggle.click();
+  }
+  
+  // Wait for the printing panel to be visible
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // Assuming there is a text input for the title within the printing panel.
+  // Since no specific test-id for the title input is provided in the UI map, we look for a common pattern.
+  // Based on typical UI, it might be a label "Title" or similar.
+  // Let's look for an input inside the printing panel.
+  const titleInput = printPanel.getByLabel(/Title/i).or(printPanel.getByPlaceholder(/Title/i)).first();
+  // If getByLabel/Placeholder fails, we might need to rely on the structure. 
+  // However, the UI map doesn't specify the internal structure of 'printing' panel elements.
+  // Let's assume a standard label/input pair or a specific test id if it existed.
+  // Since it's not in the UI map, we have to guess or use a generic locator.
+  // Let's try to find an input field.
+  const inputField = printPanel.locator('input[type="text"]').first();
+  await inputField.fill('My Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // Assuming there is a radio group or dropdown for format selection.
+  // Let's look for a radio button or select with "PNG".
+  const pngOption = printPanel.getByRole('radio', { name: 'PNG' }).or(printPanel.getByRole('option', { name: 'PNG' })).first();
+  if (await pngOption.isVisible()) {
+    await pngOption.click();
+  } else {
+    // Fallback: maybe it's a select
+    const formatSelect = printPanel.getByLabel(/Format/i).or(printPanel.getByRole('combobox')).first();
+    if (await formatSelect.isVisible()) {
+      await formatSelect.selectOption('PNG');
+    } else {
+      // Last resort: look for any PNG text and click it if it's interactive
+      const pngText = printPanel.getByText('PNG').first();
+      if (await pngText.isVisible()) {
+        await pngText.click();
+      }
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Assuming a button labeled "Print", "Export", or "Download".
+  const exportButton = printPanel.getByRole('button', { name: /Print|Export|Download/i }).first();
+  
+  // Wait for download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Verify download
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

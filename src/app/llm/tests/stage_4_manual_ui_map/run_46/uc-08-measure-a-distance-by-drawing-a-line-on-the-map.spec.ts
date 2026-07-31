@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // 1. Click the Measurement button to open the measurement panel.
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    // Ensure the toggle is in the pressed state to open the panel.
+    // We check the current state first to avoid closing it if it's already open.
+    const isPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (isPressed !== 'true') {
+        await measurementToggle.click();
+    }
+
+    // Wait for the measurement panel to be visible.
+    await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+    // 2. Click several points on the map canvas to draw a line.
+    const mapContainer = page.getByTestId('map-container');
+
+    // Click first point (approximate center of map)
+    await mapContainer.click({ position: { x: 300, y: 300 } });
+    // Click second point
+    await page.waitForTimeout(200); // Small delay to ensure click is registered
+    await mapContainer.click({ position: { x: 400, y: 300 } });
+    // Click third point
+    await page.waitForTimeout(200);
+    await mapContainer.click({ position: { x: 400, y: 400 } });
+
+    // 3. Double-click to finish the measurement.
+    await page.waitForTimeout(200);
+    await mapContainer.dblclick({ position: { x: 400, y: 400 } });
+
+    // Expected results:
+    // - The measurement panel is visible.
+    await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+    // - The measurement panel displays a length value with a unit.
+    // We poll for the measurement text to appear, as it might take a moment to calculate/render.
+    await expect.poll(() =>
+        page.getByTestId('measurement').textContent()
+    ).toMatch(/[\d.,]+\s*(m|km|mi|ft)/i);
+});

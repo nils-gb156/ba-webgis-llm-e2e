@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to settle
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click();
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click();
+
+  // Verify layer states via map model helpers
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 3: Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the searched location
+  // We verify navigation by checking that the center has changed from the default
+  const initialCenter = await page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    return map?.olMap.getView().getCenter();
+  });
+
+  await expect.poll(async () => {
+    const center = await page.evaluate(() => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      return map?.olMap.getView().getCenter();
+    });
+    return center !== undefined && (center[0] !== initialCenter?.[0] || center[1] !== initialCenter?.[1]);
+  }).toBe(true);
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The forecast section appears after clicking the map, which the geocoder selection triggers.
+  const forecastSection = page.getByTestId('weather-forecast');
+  await expect(forecastSection).toBeVisible();
+
+  // Verify that the forecast has loaded 24 entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect.poll(() => forecastEntries.count()).toBe(24);
+});

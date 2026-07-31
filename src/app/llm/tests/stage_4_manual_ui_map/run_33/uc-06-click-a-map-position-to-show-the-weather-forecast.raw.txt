@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure info panel is visible (it is visibleByDefault, but we assert it anyway)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas.
+  // We click near the center of the map container.
+  const mapContainer = page.getByTestId('map-container');
+  const boundingBox = await mapContainer.boundingBox();
+  if (!boundingBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  const clickX = boundingBox.x + boundingBox.width / 2;
+  const clickY = boundingBox.y + boundingBox.height / 2;
+
+  await page.mouse.click(clickX, clickY);
+
+  // Wait for the weather forecast to appear in the info panel.
+  // The forecast section itself is visibleByDefault, but the actual forecast content
+  // appears after clicking and loading.
+  await expect(page.getByTestId('weather-forecast')).toBeVisible({ timeout: 30000 });
+
+  // Verify that the clicked position is highlighted on the map.
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Verify that the forecast contains 24 entries.
+  // The forecast entries are dynamic elements inside the weather-forecast container.
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

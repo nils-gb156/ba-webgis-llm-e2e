@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Carto Light should be active by default
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Step 1: Open the base map selector in the layer switcher
+  // The layer switcher is visible by default, so we can interact with it directly.
+  // We look for the dropdown control within the layer-switcher container.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  // The base map selector is typically a dropdown. We assume a test-id or role for the dropdown trigger.
+  // Based on the UI map, it's a "dropdown" controlType. We'll try to find the select/dropdown element.
+  // Since no specific test-id is given for the dropdown trigger, we use getByRole('combobox') or similar
+  // or look for a button that opens the dropdown. Let's assume the dropdown is accessible.
+  // If the dropdown itself has a test-id, we'd use it. Otherwise, we rely on the structure.
+  // Let's assume the dropdown is inside the layer-switcher and is a combobox or select.
+  // We will try to click the first combobox or select within the layer switcher.
+  // However, to be more robust, let's look for a button or the dropdown itself.
+  // The UI map says "controlType": "dropdown". In Chakra UI, this is often a Select component.
+  // We can try to find the Select component by its label or just the first one in the panel.
+  // Let's try to find the dropdown by its role.
+  const dropdown = layerSwitcher.getByRole('combobox');
+  await expect(dropdown).toBeVisible();
+  await dropdown.click();
+
+  // Step 2: Select 'OpenStreetMap' as the base map
+  // After clicking the dropdown, the options should appear.
+  // We can then select the option by text.
+  const option = page.getByRole('option', { name: 'OpenStreetMap' });
+  await expect(option).toBeVisible();
+  await option.click();
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

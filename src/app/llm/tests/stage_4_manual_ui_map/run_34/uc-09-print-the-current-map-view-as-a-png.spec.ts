@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  // The print-toggle button toggles the printing-panel visibility.
+  const printToggle = page.getByTestId('print-toggle');
+  const printingPanel = page.getByTestId('printing-panel');
+
+  // Ensure the printing panel is open. If it's already open (aria-pressed="true"), clicking it would close it.
+  // We assert visibility first, and only click if it's not visible.
+  await expect(printingPanel).toBeVisible({ timeout: 10000 });
+
+  // Step 2: The user enters a title for the printout.
+  // We need to find the title input inside the printing panel.
+  // Based on typical UI patterns and the context, the printing panel likely contains an input for the title.
+  // Since no specific test-id is provided for the title input in the UI map, we look for a label or input.
+  // The UI map mentions `printing-panel` contains `printing`. We'll assume standard Chakra form controls or similar.
+  // Let's look for an input within the printing panel.
+  const titleInput = printingPanel.getByLabel('Title').or(printingPanel.getByTestId('print-title-input'));
+  
+  // Fallback: If getByLabel fails, try to find any input in the panel.
+  const titleInputLocator = titleInput.count() > 0 ? titleInput : printingPanel.locator('input[type="text"]').first();
+  
+  await titleInputLocator.fill('Test Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // Look for a radio group or dropdown for format selection within the printing panel.
+  // Assuming radio buttons or a select. Let's try to find a radio button labeled "PNG".
+  const pngFormatOption = printingPanel.getByRole('radio', { name: 'PNG' });
+  const pngFormatDropdown = printingPanel.getByRole('combobox', { name: /format/i });
+  
+  if (pngFormatOption.count() > 0) {
+    // If radio buttons exist, select PNG. Note: Chakra radios might need force click.
+    const isPngSelected = await pngFormatOption.getAttribute('aria-checked');
+    if (isPngSelected !== 'true') {
+      await pngFormatOption.click({ force: true });
+    }
+  } else if (pngFormatDropdown.count() > 0) {
+    // If dropdown exists, select PNG.
+    await pngFormatDropdown.selectOption('PNG');
+  } else {
+    // Fallback: Try to find any checkbox or radio for PNG
+    const pngCheckbox = printingPanel.getByRole('checkbox', { name: 'PNG' });
+    if (pngCheckbox.count() > 0) {
+      await pngCheckbox.click({ force: true });
+    } else {
+      throw new Error('Could not find PNG format selection control');
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Look for an export or print button within the printing panel.
+  const exportButton = printingPanel.getByRole('button', { name: /export|print/i }).first();
+  
+  // Wait for download before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Expected results: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

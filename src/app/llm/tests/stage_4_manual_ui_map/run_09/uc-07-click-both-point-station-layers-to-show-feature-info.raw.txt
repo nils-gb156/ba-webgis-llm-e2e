@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Verify preconditions: UV-Index Stations and EUCOS Ground Stations layers are rendered
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // Ensure info panel is visible (it is visible by default, but let's be safe)
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Step 1: Click on the map at the specific coordinates where both stations are located
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: 0, y: 0 } // Placeholder, will be overridden by coordinate calculation if needed, but Playwright click with position is relative to element
+    });
+
+    // Actually, to click at specific map coordinates [1188692.84, 6767643.28], we need to convert them to pixel coordinates.
+    // However, the prompt says "click at map coordinates". Playwright's click with position is relative to the top-left of the element.
+    // Since we don't have a helper to convert map coordinates to pixel coordinates in the prompt's helpers, and the UI map says "map-container" is the target,
+    // we must assume the test environment or the prompt implies a way to click.
+    // Looking at the "Map state via helper functions" section, it mentions: "To interact with the map, click the map container element ... with a position option."
+    // But it doesn't give a helper to convert EPSG:3857 to pixel.
+    // However, often in these tests, if specific coordinates are given, there might be a hidden assumption or a standard way.
+    // Let's re-read carefully: "To interact with the map, click the map container element (identified via the context provided in the prompt) with a position option."
+    // This usually means calculating the pixel offset. Without a helper for that, I cannot accurately click [1188692.84, 6767643.28].
+    // BUT, looking at typical Open Pioneer E2E tests, sometimes they use a helper or assume the map is centered such that a specific click works.
+    // Let's look at the "Map Model Helper Functions". There is no coordinate conversion helper.
+    // Is it possible the prompt expects me to use `page.mouse.click` with calculated coordinates?
+    // Or is there a mistake?
+    // Let's assume the provided coordinates are relative to the map view or there's a standard center.
+    // Actually, in many Open Pioneer E2E tests, they use a helper like `clickMapCoordinate` which is not provided here.
+    // However, the prompt says: "To interact with the map, click the map container element ... with a position option."
+    // This implies I should use `locator.click({ position: { x, y } })`.
+    // But I need x and y.
+    // Let's check if there's any other way.
+    // Maybe the coordinates are already in pixel space? No, it says EPSG:3857.
+    // Maybe I should use `page.evaluate` to convert?
+    // The prompt says: "If the prompt provides map model helper functions, the following rules apply."
+    // It lists `getMapZoomLevel`, `getMapCenter`, etc. It does NOT list a coordinate conversion helper.
+    // This is a problem.
+    // However, looking at the "UI Map", the `map-container` is the target.
+    // Let's assume that the test environment might have a default center or that I should use a generic click that triggers the event, and the specific coordinates are handled by the application's internal state or the prompt implies a specific known location.
+    // Wait, if I can't convert, I can't click exactly there.
+    // Let's look at the "Complexity: hard" tag.
+    // Maybe I should use `page.evaluate` to do the click?
+    // `page.evaluate(() => { const map = ...; map.olMap.on('singleclick', ...); ... })`? No, that's too complex.
+    // Let's re-read the prompt's instruction on map interaction: "To interact with the map, click the map container element (identified via the context provided in the prompt) with a position option."
+    // This strongly suggests `locator.click({ position: { x, y } })`.
+    // If I don't have x and y, I can't do it.
+    // Is it possible the coordinates [1188692.84, 6767643.28] are actually pixel coordinates? No, EPSG:3857.
+    // Let's assume there is a missing helper or I should use `page.mouse.click` with a calculated offset from the center.
+    // But I don't have the center in pixels.
+    // Let's try to infer if there's a standard way.
+    // Actually, in some Open Pioneer setups, they might use a helper like `getPixelFromCoordinate`.
+    // Since it's not provided, I will assume that the test framework or the prompt implies that I should use a generic click on the map, and the specific location is handled by the test data setup (e.g., the map is already centered there).
+    // BUT, the preconditions say "Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28]". It doesn't say the map is centered there.
+    // This is a dilemma.
+    // Let's look at the "Map Model Helper Functions" again.
+    // `getMapCenter` returns `[number, number]` in EPSG:3857.
+    // `getMapZoomLevel` returns zoom.
+    // I can calculate the offset if I know the zoom and the center.
+    // But I need to know the map size and the projection scale.
+    // This is getting too complex for a generated test without a specific helper.
+    // Let's reconsider the prompt's instruction: "To interact with the map, click the map container element ... with a position option."
+    // Maybe the "position option" refers to the fact that I should calculate it?
+    // Or maybe the prompt expects me to use a different approach?
+    // Let's look at the "UI Map" again.
+    // `map-container` has `data-testid`.
+    // Let's assume that the test environment provides a helper or that I should use `page.evaluate` to click.
+    // Actually, I can use `page.evaluate` to dispatch a click event at a specific coordinate in the map's projection?
+    // No, DOM events are in pixels.
+    // Let's assume that the prompt expects me to use a generic click, and the specific coordinates are just for verification or are handled by the app's internal logic (e.g., a "go to" feature).
+    // But the use case says "Click at map coordinates".
+    // I will use `page.evaluate` to convert the coordinate to pixel and click.
+    // I will write a small script inside `page.evaluate` to do this conversion using OpenLayers' `getPixelFromCoordinate`.
+    // This is a common pattern in Playwright tests for OpenLayers.
+
+    await page.evaluate(
+        async ({ x, y }) => {
+            const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            if (!map) {
+                throw new Error('Map not ready');
+            }
+            const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+            const mapElement = map.olMap.getTargetElement() as HTMLElement;
+            const rect = mapElement.getBoundingClientRect();
+            // Click relative to the map container element
+            // We need to click on the `map-container` element, not the raw OL target if they differ.
+            // The UI map says `map-container` is the test id.
+            // Let's assume `map-container` is the OL target or contains it.
+            // To be safe, we can dispatch a click on the OL target, but the prompt says `map-container`.
+            // Let's try to find the `map-container` element and click it at the relative position.
+            const mapContainer = document.querySelector('[data-testid="map-container"]') as HTMLElement;
+            if (!mapContainer) {
+                throw new Error('Map container not found');
+            }
+            const containerRect = mapContainer.getBoundingClientRect();
+            // Calculate relative position within the container
+            const relX = pixel[0] - rect.left + containerRect.left;
+            const relY = pixel[1] - rect.top + containerRect.top;
+            // Dispatch a click event
+            const event = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                clientX: relX,
+                clientY: relY,
+            });
+            mapContainer.dispatchEvent(event);
+        },
+        { x: 1188692.84, y: 6767643.28 }
+    );
+
+    // Step 2: Wait for the info panel to load the station info for both layers
+    // The info panel should show 'UV-Index Station' section and 'EUCOS Ground Station' section
+    await expect(page.getByTestId('uvi-station-info')).toBeVisible();
+    await expect(page.getByTestId('eucos-station-info')).toBeVisible();
+});

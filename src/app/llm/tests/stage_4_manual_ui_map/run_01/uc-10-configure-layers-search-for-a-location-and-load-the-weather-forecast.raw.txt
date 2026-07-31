@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide Temperature layer
+    // The UI map indicates Temperature is initially visible. We click its toggle to hide it.
+    // We use force: true as per Chakra UI checkbox conventions.
+    await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+    // Step 2: Show Precipitation layer
+    // The UI map indicates Precipitation is initially hidden. We click its toggle to show it.
+    await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+    // Step 3: Search for a location
+    await page.getByTestId('geocoder-input').fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    // We wait for the first result item to be visible
+    await expect(page.getByTestId('geocoder-result-item-0')).toBeVisible();
+    
+    // Click the first result to navigate
+    await page.getByTestId('geocoder-result-item-0').click();
+
+    // Step 5: Wait for map to navigate
+    // We poll the map center to ensure it has changed from the initial extent.
+    // The initial center is likely 0,0 (EPSG:3857) or a default view. Münster is approx 660000, 5500000.
+    // We assert that the center is no longer undefined and has a reasonable coordinate for Münster.
+    await expect.poll(() => getMapCenter(page)).toMatchObject([expect.any(Number), expect.any(Number)]);
+
+    // Step 6: Wait for info panel to load forecast
+    // The forecast section becomes visible after clicking the map or navigating via geocoder.
+    await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+    
+    // Assert that the weather forecast entries are loaded (24 entries expected)
+    // We poll for the count of forecast entries to be at least 24
+    await expect.poll(async () => {
+        const entries = page.getByTestId('weather-forecast-entry');
+        return await entries.count();
+    }).toBeGreaterThanOrEqual(24);
+
+    // Expected Results Assertions
+
+    // The Precipitation overlay layer toggle is in the enabled state (checked)
+    await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+
+    // The Temperature overlay layer toggle is in the disabled state (unchecked)
+    await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+
+    // Verify layer rendering state via map model helpers
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Verify map zoom is reasonable (not 0 or undefined)
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+});

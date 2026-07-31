@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide the Temperature overlay layer
+    // The prompt states Temperature is initially visible. We click its toggle to hide it.
+    // Using force: true because Chakra UI checkboxes render the input visually hidden.
+    await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+    // Step 2: Show the Precipitation overlay layer
+    // The prompt states Precipitation is initially hidden. We click its toggle to show it.
+    await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+    // Step 3: Search for a location using the geocoder
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    // We wait for the first result item to be visible
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for the map to navigate to the selected location
+    // We poll the map center to ensure it has moved from the default view.
+    // We also verify the Precipitation layer is rendered.
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+    
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(async () => {
+        const center = await getMapCenter(page);
+        return center && (center[0] !== initialCenter?.[0] || center[1] !== initialCenter?.[1]);
+    }).toBe(true);
+
+    // Step 6: Wait for the info panel to load the forecast
+    // We expect the weather forecast section to be visible and contain 24 entries.
+    const weatherForecastSection = page.getByTestId('weather-forecast');
+    await expect(weatherForecastSection).toBeVisible();
+
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

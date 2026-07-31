@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Activate the measurement tool
+    // The measurement panel is toggled by the 'measurement-toggle' button.
+    // We assert visibility first to handle cases where it might already be open.
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    
+    // Ensure measurement panel is open. If it's already visible, don't click.
+    const isPanelVisible = await measurementPanel.isVisible();
+    if (!isPanelVisible) {
+        await measurementToggle.click();
+    }
+
+    // Step 2: Click several points on the map canvas to draw a line.
+    // We click distinct points within the map container area.
+    const mapContainer = page.getByTestId('map-container');
+    
+    // Click first point (approximate center-left)
+    await mapContainer.click({ position: { x: 300, y: 300 } });
+    
+    // Click second point (approximate center-right)
+    await mapContainer.click({ position: { x: 400, y: 300 } });
+    
+    // Click third point (approximate center-bottom)
+    await mapContainer.click({ position: { x: 350, y: 400 } });
+
+    // Step 3: Double-click to finish the measurement.
+    await mapContainer.dblclick({ position: { x: 350, y: 400 } });
+
+    // Expected results:
+    // 1. The measurement panel is visible.
+    await expect(measurementPanel).toBeVisible();
+
+    // 2. The measurement panel displays a length value with a unit.
+    // The measurement element inside the panel should contain text matching a number and a unit (e.g., "123 m", "1.2 km").
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Use expect.poll to wait for the measurement value to settle asynchronously.
+    await expect.poll(() => measurementElement.textContent()).toMatch(/\d+\.?\d*\s*(m|km|mi|ft)/i);
+});

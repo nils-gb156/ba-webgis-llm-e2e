@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Click the measurement button to open the measurement panel.
+  // The toggle button starts in an unpressed state (panel hidden).
+  // We assert visibility first to handle potential race conditions,
+  // then click if not already visible.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementPanel = page.getByTestId('measurement-panel');
+
+  // Click the toggle to open the panel
+  await measurementToggle.click();
+
+  // Assert the measurement panel is visible
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line.
+  // We need to click on the map container. The map is rendered on a canvas inside #map-container.
+  // We'll click at different positions to simulate drawing a line.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to click within it
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click first point (center-left)
+  await mapContainer.click({ position: { x: mapBox.width * 0.3, y: mapBox.height * 0.5 } });
+  
+  // Click second point (center)
+  await mapContainer.click({ position: { x: mapBox.width * 0.5, y: mapBox.height * 0.5 } });
+  
+  // Click third point (center-right)
+  await mapContainer.click({ position: { x: mapBox.width * 0.7, y: mapBox.height * 0.5 } });
+
+  // 3. Double-click to finish the measurement.
+  // Double-clicking on the map should finalize the measurement.
+  await mapContainer.dblclick({ position: { x: mapBox.width * 0.7, y: mapBox.height * 0.5 } });
+
+  // 4. Assert that the measurement result is shown.
+  // The measurement panel should display a length value with a unit.
+  // We look for text that looks like a measurement (e.g., "1.23 km" or similar).
+  // The measurement panel itself is visible, we need to find the specific measurement result.
+  // Based on typical UI patterns, the result might be inside the measurement panel.
+  // Let's check for a measurement result element or text within the measurement panel.
+  
+  // Wait for the measurement result to appear. It might be in an element with data-testid "measurement"
+  // or inside the panel. Let's try to find text matching a pattern.
+  // Since we don't have a specific test id for the result text, we'll look for a pattern.
+  // However, the ui-map says "measurement" is an element inside measurement-panel.
+  // Let's try to find any text that looks like a measurement.
+  
+  // A more robust way is to check if the measurement panel contains text that matches a measurement pattern.
+  // We'll use expect.poll to wait for the measurement result.
+  
+  const measurementResultText = await page.locator('[data-testid="measurement"]').innerText();
+  
+  // Assert that the measurement result is displayed and contains a number and a unit.
+  // Common units: m, km, mi, ft.
+  await expect.poll(() => page.locator('[data-testid="measurement"]').innerText()).toMatch(/[\d.]+\s*(m|km|mi|ft)/i);
+});

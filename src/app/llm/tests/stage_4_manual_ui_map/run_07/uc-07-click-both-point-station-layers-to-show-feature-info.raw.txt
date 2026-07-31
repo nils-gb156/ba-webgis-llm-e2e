@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getActiveBaseLayerTitle, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and default layers to be active
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure info panel is visible (it is visible by default, but let's be safe)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 1: Click at the specific coordinates where both stations are located
+  const clickX = 1188692.84;
+  const clickY = 6767643.28;
+
+  // Get the map container to click on it
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: clickX, y: clickY },
+    force: true
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // Wait for UVI station info section to be visible
+  const uviStationInfo = page.getByTestId('uvi-station-info');
+  await expect(uviStationInfo).toBeVisible({ timeout: 10000 });
+
+  // Wait for EUCOS station info section to be visible
+  const eucosStationInfo = page.getByTestId('eucos-station-info');
+  await expect(eucosStationInfo).toBeVisible({ timeout: 10000 });
+
+  // Verify that the sections are present in the info panel
+  const uviStationSection = page.getByTestId('uvi-station-section');
+  await expect(uviStationSection).toBeVisible();
+
+  const eucosStationSection = page.getByTestId('eucos-station-section');
+  await expect(eucosStationSection).toBeVisible();
+});

@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  const printingPanel = page.getByTestId('printing-panel');
+
+  // Ensure the printing panel is open.
+  // It might already be open or closed; we check its state and click if needed.
+  const isPrintingPanelVisible = await printingPanel.isVisible();
+  if (!isPrintingPanelVisible) {
+    await printToggle.click();
+  }
+
+  // Verify the printing panel is visible.
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // We look for an input field within the printing panel.
+  // Based on common patterns, it might be labeled "Title" or similar.
+  // Since no specific test-id is given for the title input in the UI map,
+  // we rely on the label or placeholder.
+  // Let's assume there is a text input for the title.
+  // If not explicitly defined, we might need to look for a label "Title" or similar.
+  // The UI map doesn't explicitly list the title input, but mentions "entering a title".
+  // We will search for a label or input that seems to be for the title.
+  // Often, it's a simple input. Let's try to find an input inside the printing panel.
+  const titleInput = printingPanel.locator('input[type="text"]').first();
+  // If the above is too generic, we might need to use getByLabel.
+  // Let's try getByLabel with a likely name.
+  const titleInputByLabel = printingPanel.getByLabel('Title').or(titleInput);
+  
+  // Fallback: if no label is found, try to find any visible text input.
+  const finalTitleInput = titleInputByLabel.isVisible() ? titleInputByLabel : titleInput;
+  
+  await finalTitleInput.fill('Test Map Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // We look for a radio button or dropdown for the format.
+  // Let's assume there's a radio group or dropdown.
+  // Since the UI map doesn't specify the exact control for format, we'll look for common patterns.
+  // Let's assume a radio button or a select element.
+  // We'll try to find a radio button with text "PNG" or a select option.
+  const pngFormatOption = printingPanel.getByRole('radio', { name: 'PNG' }).or(
+    printingPanel.getByRole('option', { name: 'PNG' })
+  );
+  
+  if (await pngFormatOption.isVisible()) {
+    await pngFormatOption.click();
+  } else {
+    // If no radio or option found, maybe it's a dropdown/select
+    const formatSelect = printingPanel.locator('select').first();
+    if (await formatSelect.isVisible()) {
+      await formatSelect.selectOption('png');
+    }
+  }
+
+  // Step 4: The user clicks the export/print button.
+  const exportButton = printingPanel.getByRole('button', { name: /Print|Export|Generate/i });
+  await expect(exportButton).toBeVisible();
+
+  // Prepare for download
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the file is downloaded and is a PNG
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+  // Clean up the downloaded file
+  const path = await download.path();
+  if (path) {
+    await page.context().storageState().then(() => {}); // Just to ensure context is valid
+    // Note: Playwright doesn't provide a direct way to delete files, but we can assert the download happened.
+    // The test passes if the download event was captured and the filename matches.
+  }
+});

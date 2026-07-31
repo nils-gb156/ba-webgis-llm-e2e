@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature layer
+  // The layer switcher is visible by default. We click the checkbox for "Temperature".
+  // Using force: true because Chakra UI checkboxes render the input visually hidden.
+  await page.getByRole('checkbox', { name: 'Temperature' }).click({ force: true });
+
+  // Step 2: Show Precipitation layer
+  // The layer switcher is visible by default. We click the checkbox for "Precipitation".
+  await page.getByRole('checkbox', { name: 'Precipitation' }).click({ force: true });
+
+  // Step 3: Search for a location
+  await page.getByTestId('geocoder-input').fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  // The results appear after typing. We wait for the first result item to be visible.
+  await expect(page.getByTestId('geocoder-result-item-0')).toBeVisible();
+  await page.getByTestId('geocoder-result-item-0').click();
+
+  // Step 5: Wait for map navigation
+  // The map center should change to the selected location. We poll the center to ensure it has settled.
+  // We expect the center to be different from the initial default (approx 0,0 or similar) and to be a valid coordinate.
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  
+  // Wait for the map to actually move by checking if the center coordinate changes from undefined (not ready)
+  // or simply wait for the highlight/feature info to appear which implies navigation.
+  // A robust check is to wait for the info panel to start loading data or for the map center to update.
+  // Since we don't have a direct "map moving" event, we wait for the weather forecast section to become visible,
+  // which is triggered by the map click/navigate.
+  
+  // Step 6: Wait for weather forecast to load
+  // The weather forecast section appears after clicking the map (which happens via geocoder selection).
+  // It contains 24 entries.
+  await expect(page.getByTestId('weather-forecast')).toBeVisible();
+  
+  // Verify the number of forecast entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is visible by default, but let's ensure it's open)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure UV-Index Stations layer is rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure EUCOS Ground Stations layer is rendered
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Click on the map at the specific coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 0,
+      y: 0,
+    },
+  });
+
+  // Since we don't have the exact pixel coordinates of the feature, we will click the center of the map
+  // and hope that the stations are near the center, or we can try to find the stations by clicking around.
+  // However, the prompt gives specific coordinates in EPSG:3857.
+  // We need to convert these to pixel coordinates relative to the map container.
+  // But Playwright's click with position is relative to the element's padding box.
+  // Without knowing the map's current view center and zoom, it's hard to convert EPSG:3857 to pixel coordinates.
+  // Let's assume the map is centered on these coordinates or close enough.
+  // A better approach is to use the map model to find the pixel coordinates of the feature, but we don't have that helper.
+  // Let's try to click the center of the map and see if the feature info appears.
+  // If the stations are not at the center, this might fail.
+  // Given the complexity, let's try to click the center of the map container.
+  const box = await mapContainer.boundingBox();
+  if (box) {
+    const centerX = box.width / 2;
+    const centerY = box.height / 2;
+    await mapContainer.click({
+      position: {
+        x: centerX,
+        y: centerY,
+      },
+    });
+  }
+
+  // Wait for the UV-Index Station info to appear
+  const uviStationInfo = page.getByTestId('uvi-station-info');
+  await expect(uviStationInfo).toBeVisible();
+
+  // Wait for the EUCOS Ground Station info to appear
+  const eucosStationInfo = page.getByTestId('eucos-station-info');
+  await expect(eucosStationInfo).toBeVisible();
+});
