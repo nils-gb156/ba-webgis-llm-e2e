@@ -31,8 +31,9 @@ import re
 import sys
 from pathlib import Path
 
-# Identische Klassifikationslogik wie Stufen 1-4 (gleiche Datei, gleicher Ordner)
-from app.llm.run_phase1_eval import classify_runtime_result, scan_for_truncation
+# Identische Klassifikationslogik wie Stufen 1-4 (gleiche Datei, gleicher Ordner).
+# Geschwister-Modul im selben Verzeichnis -> direkter Import (kein 'app'-Paket).
+from run_phase1_eval import classify_runtime_result, scan_for_truncation
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 STAGE_NAME = "stage_5_self_improvement_loop"

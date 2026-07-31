@@ -1,0 +1,2073 @@
+stage,run,uc_id,file,exec_category,duration_s,error_summary,needs_review,passed,iterations_used
+stage_5_self_improvement_loop,run_01,uc-01,tests/stage_5_self_improvement_loop/run_01/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_01,uc-02,tests/stage_5_self_improvement_loop/run_01/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_01,uc-03,tests/stage_5_self_improvement_loop/run_01/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_01,uc-04,tests/stage_5_self_improvement_loop/run_01/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_01,uc-05,tests/stage_5_self_improvement_loop/run_01/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_01,uc-06,tests/stage_5_self_improvement_loop/run_01/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_01,uc-07,tests/stage_5_self_improvement_loop/run_01/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_01,uc-08,tests/stage_5_self_improvement_loop/run_01/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-5-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,6
+stage_5_self_improvement_loop,run_01,uc-09,tests/stage_5_self_improvement_loop/run_01/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_01,uc-10,tests/stage_5_self_improvement_loop/run_01/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_02,uc-01,tests/stage_5_self_improvement_loop/run_02/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_02,uc-02,tests/stage_5_self_improvement_loop/run_02/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_02,uc-03,tests/stage_5_self_improvement_loop/run_02/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_02,uc-04,tests/stage_5_self_improvement_loop/run_02/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_02,uc-05,tests/stage_5_self_improvement_loop/run_02/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_02,uc-06,tests/stage_5_self_improvement_loop/run_02/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_02,uc-07,tests/stage_5_self_improvement_loop/run_02/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_02,uc-08,tests/stage_5_self_improvement_loop/run_02/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s*(km|m)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  47 |   // The panel initially shows ""Click in the map to start a measurement."" and after measurement
+  48 |   // it should show the distance value with a unit (e.g., ""229.83 km"")
+> 49 |   await expect.poll(() => measurementPanel.textCont",False,False,10
+stage_5_self_improvement_loop,run_02,uc-09,tests/stage_5_self_improvement_loop/run_02/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_02,uc-10,tests/stage_5_self_improvement_loop/run_02/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_03,uc-01,tests/stage_5_self_improvement_loop/run_03/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_03,uc-02,tests/stage_5_self_improvement_loop/run_03/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_03,uc-03,tests/stage_5_self_improvement_loop/run_03/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |   // Verify the zoom level is higher than before
+> 16 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoomValue!);
+     |                                                  ^
+  17 |
+  18 |   // Step 2: Click the 'Zoom out' button to decrease the zoom lev",False,False,10
+stage_5_self_improvement_loop,run_03,uc-04,tests/stage_5_self_improvement_loop/run_03/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_03,uc-05,tests/stage_5_self_improvement_loop/run_03/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_03,uc-06,tests/stage_5_self_improvement_loop/run_03/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_03,uc-07,tests/stage_5_self_improvement_loop/run_03/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,7
+stage_5_self_improvement_loop,run_03,uc-08,tests/stage_5_self_improvement_loop/run_03/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_03,uc-09,tests/stage_5_self_improvement_loop/run_03/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-9-print-the-current-map-view-as-a-png.spec.ts,ASSERTION_FAIL,,"Test timeout of 30000ms exceeded.
+
+---
+
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByRole('option', { name: 'PNG' })
+    - locator resolved to <option value=""png"">PNG</option>
+  - attempting click action
+    2 Ã— waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+    - waiting 20ms
+    2 Ã— waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying clic",False,False,10
+stage_5_self_improvement_loop,run_03,uc-10,tests/stage_5_self_improvement_loop/run_03/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_04,uc-01,tests/stage_5_self_improvement_loop/run_04/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_04,uc-02,tests/stage_5_self_improvement_loop/run_04/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_04,uc-03,tests/stage_5_self_improvement_loop/run_04/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_04,uc-04,tests/stage_5_self_improvement_loop/run_04/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-5-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,6
+stage_5_self_improvement_loop,run_04,uc-05,tests/stage_5_self_improvement_loop/run_04/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_04,uc-06,tests/stage_5_self_improvement_loop/run_04/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_04,uc-07,tests/stage_5_self_improvement_loop/run_04/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  30 |   await expect.poll(() =>
+  31 |     infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()
+> 32 |   ).toBe(true);
+     |     ^
+  33 |
+  34 |   // Wait for the EUCOS Ground Station section heading to appear.
+  35 |   await expect.poll(() =>
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\ll",False,False,10
+stage_5_self_improvement_loop,run_04,uc-08,tests/stage_5_self_improvement_loop/run_04/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+\.?\d*\s*(m|km|mi|ft)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  44 |     // We poll for text matching a number followed by a unit (m, km, mi, ft) inside the dialog
+  45 |     // Note: The dialog text may also contain other text, so we check for the presence of the pattern anywhere
+> 46 |     awai",False,False,10
+stage_5_self_improvement_loop,run_04,uc-09,tests/stage_5_self_improvement_loop/run_04/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_04,uc-10,tests/stage_5_self_improvement_loop/run_04/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_05,uc-01,tests/stage_5_self_improvement_loop/run_05/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_05,uc-02,tests/stage_5_self_improvement_loop/run_05/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_05,uc-03,tests/stage_5_self_improvement_loop/run_05/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has value: undefined
+
+  19 |   // - After clicking the 'Zoom in' button, the map zoom level is higher than before.
+  20 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+> 21 |   expect(zoomAfterIn).toBeGreaterThan(initialZoom);
+     |                       ^
+  22 |
+  23 |   // - After clicking the 'Zoom out' button, the map zoom level is lower",False,False,10
+stage_5_self_improvement_loop,run_05,uc-04,tests/stage_5_self_improvement_loop/run_05/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_05,uc-05,tests/stage_5_self_improvement_loop/run_05/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_05,uc-06,tests/stage_5_self_improvement_loop/run_05/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  17 |
+  18 |   // Expected: The clicked position is highlighted on the map.
+> 19 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+     |                                                           ^
+  20 |
+  21 |   // Expected: The info panel displays a weather forecast section.
+  22 |   await expect(page.getByTestId('weather-forecast-section')).t",False,False,10
+stage_5_self_improvement_loop,run_05,uc-07,tests/stage_5_self_improvement_loop/run_05/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,,"TypeError: pixelCoords is not iterable
+
+  54 |     }
+  55 |
+> 56 |     const [pixelX, pixelY] = pixelCoords;
+     |                              ^
+  57 |
+  58 |     // Click on the map at the calculated pixel coordinates
+  59 |     await mapContainer.click({
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_05\uc-07-click-both-point-station-layers-to-show-feature-info\uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",False,False,10
+stage_5_self_improvement_loop,run_05,uc-08,tests/stage_5_self_improvement_loop/run_05/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_05,uc-09,tests/stage_5_self_improvement_loop/run_05/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_05,uc-10,tests/stage_5_self_improvement_loop/run_05/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_06,uc-01,tests/stage_5_self_improvement_loop/run_06/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_06,uc-02,tests/stage_5_self_improvement_loop/run_06/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_06,uc-03,tests/stage_5_self_improvement_loop/run_06/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_06,uc-04,tests/stage_5_self_improvement_loop/run_06/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_06,uc-05,tests/stage_5_self_improvement_loop/run_06/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_06,uc-06,tests/stage_5_self_improvement_loop/run_06/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_06,uc-07,tests/stage_5_self_improvement_loop/run_06/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,7
+stage_5_self_improvement_loop,run_06,uc-08,tests/stage_5_self_improvement_loop/run_06/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s*(m|km|mi|ft)/
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  37 |   // The measurement panel displays a length value with a unit.
+  38 |   const measurementPanel = page.getByTestId('measurement-panel');
+> 39 |   await expect.poll(() => measurementPanel.textContent()).toMatch(/\d+(\.\d+)?\s*(m",False,False,10
+stage_5_self_improvement_loop,run_06,uc-09,tests/stage_5_self_improvement_loop/run_06/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_06,uc-10,tests/stage_5_self_improvement_loop/run_06/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 24
+Received:    0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  66 |     const count = await forecastEntries.count();
+  67 |     return count;
+> 68 |   }).toBeGreaterThanOrEqual(24);
+     |      ^
+  69 | });
+  70 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_06\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\uc-10-iter",False,False,10
+stage_5_self_improvement_loop,run_07,uc-01,tests/stage_5_self_improvement_loop/run_07/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_07,uc-02,tests/stage_5_self_improvement_loop/run_07/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_07,uc-03,tests/stage_5_self_improvement_loop/run_07/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_07,uc-04,tests/stage_5_self_improvement_loop/run_07/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-2-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_07,uc-05,tests/stage_5_self_improvement_loop/run_07/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_07,uc-06,tests/stage_5_self_improvement_loop/run_07/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: """"
+Received: ""Fehler beim Laden der Wetterdaten""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  31 |     const errorText = await forecastSection.getByText('Fehler beim Laden der Wetterdaten', { exact: false }).first().innerText().catch(() => '');
+  32 |     return errorText;
+> 33 |   }).toBe('');
+     |      ^
+  34 |
+  35 |   // Wait for the forecast heading to be present in the section
+  36 |   await",False,False,10
+stage_5_self_improvement_loop,run_07,uc-07,tests/stage_5_self_improvement_loop/run_07/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 2
++ Received  + 2
+
+  Object {
+-   ""eucosVisible"": true,
+-   ""uviVisible"": true,
++   ""eucosVisible"": false,
++   ""uviVisible"": false,
+  }
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  57 |     const eucosVisible = await eucosHeading.isVisible();
+  58 |     return { uviVisible, eucosVisible };
+> 59 |   }).toEqual({ uviVisible: true, eucosVisible: true });
+     |      ^
+  60 | });
+  61 |
+    at c:\User",False,False,10
+stage_5_self_improvement_loop,run_07,uc-08,tests/stage_5_self_improvement_loop/run_07/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: Timeout 5000ms exceeded while waiting on the predicate
+
+  32 |             .first()
+  33 |             .textContent()
+> 34 |     ).toMatch(/\d+(\.\d+)?\s*m/i);
+     |       ^
+  35 | });
+  36 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_07\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:34:7",False,False,10
+stage_5_self_improvement_loop,run_07,uc-09,tests/stage_5_self_improvement_loop/run_07/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_07,uc-10,tests/stage_5_self_improvement_loop/run_07/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(locator).toHaveCount(expected) failed
+
+Locator:  getByTestId('weather-forecast-section').locator('[class*=""ForecastEntry""]')
+Expected: 24
+Received: 0
+Timeout:  5000ms
+
+Call log:
+  - Expect ""toHaveCount"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast-section').locator('[class*=""ForecastEntry""]')
+    14 Ã— locator resolved to 0 elements
+       - unexpected value ""0""
+
+
+  46 |   // The entries are rendered as div elements with a class containing ""ForecastEntry"".
+  47",False,False,10
+stage_5_self_improvement_loop,run_08,uc-01,tests/stage_5_self_improvement_loop/run_08/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_08,uc-02,tests/stage_5_self_improvement_loop/run_08/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_08,uc-03,tests/stage_5_self_improvement_loop/run_08/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_08,uc-04,tests/stage_5_self_improvement_loop/run_08/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_08,uc-05,tests/stage_5_self_improvement_loop/run_08/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_08,uc-06,tests/stage_5_self_improvement_loop/run_08/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 24
+Received: 0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  37 |     // The forecast entries are rendered as divs with role 'row' within the section.
+  38 |     const forecastEntries = page.getByTestId('weather-forecast-section').getByRole('row');
+> 39 |     await expect.poll(() => forecastEntries.count()).toBe(24);
+     |                                                      ^
+  40 | });
+  41 |
+    ",False,False,10
+stage_5_self_improvement_loop,run_08,uc-07,tests/stage_5_self_improvement_loop/run_08/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  26 |   await expect.poll(() =>
+  27 |     page.getByTestId('info-panel').getByText('UV-Index Station').isVisible(),
+> 28 |   ).toBeTruthy();
+     |     ^
+  29 |
+  30 |   await expect.poll(() =>
+  31 |     page.getByTestId('info-panel').getByText('EUCOS Ground Station').isVisible(),
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_",False,False,10
+stage_5_self_improvement_loop,run_08,uc-08,tests/stage_5_self_improvement_loop/run_08/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,10
+stage_5_self_improvement_loop,run_08,uc-09,tests/stage_5_self_improvement_loop/run_08/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_08,uc-10,tests/stage_5_self_improvement_loop/run_08/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 24
+Received: 0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  58 |   await expect.poll(async () => {
+  59 |       return await forecastEntries.count();
+> 60 |   }).toBe(24);
+     |      ^
+  61 | });
+  62 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_08\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\uc-10-iter-9-config",False,False,10
+stage_5_self_improvement_loop,run_09,uc-01,tests/stage_5_self_improvement_loop/run_09/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_09,uc-02,tests/stage_5_self_improvement_loop/run_09/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_09,uc-03,tests/stage_5_self_improvement_loop/run_09/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_09,uc-04,tests/stage_5_self_improvement_loop/run_09/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_09,uc-05,tests/stage_5_self_improvement_loop/run_09/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_09,uc-06,tests/stage_5_self_improvement_loop/run_09/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 24
+Received: 1
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  23 |   // The forecast entries are rendered as paragraphs inside the forecast section.
+  24 |   const forecastEntries = page.getByTestId('weather-forecast-section').getByRole('paragraph');
+> 25 |   await expect.poll(() => forecastEntries.count()).toBe(24);
+     |                                                    ^
+  26 | });
+  27 |
+    at ",False,False,10
+stage_5_self_improvement_loop,run_09,uc-07,tests/stage_5_self_improvement_loop/run_09/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  49 |   await expect.poll(() =>
+  50 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()
+> 51 |   ).toBeGreaterThan(0);
+     |     ^
+  52 |   await expect.poll(() =>
+  53 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()
+  54 |   )",False,False,10
+stage_5_self_improvement_loop,run_09,uc-08,tests/stage_5_self_improvement_loop/run_09/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('tooltip', { name: /[\d.]+\s*(km|m)/ })
+Expected: visible
+Error: strict mode violation: getByRole('tooltip', { name: /[\d.]+\s*(km|m)/ }) resolved to 2 elements:
+    1) <div role=""tooltip"" class=""measurement-tooltip measurement-finished-tooltip"">â€¦</div> aka getByRole('tooltip', { name: 'km' })
+    2) <div role=""tooltip"" class=""map-overlay measurement-tooltip measurement-active-tooltip printing-hide"">â€¦</div> aka getByRole('toolti",False,False,10
+stage_5_self_improvement_loop,run_09,uc-09,tests/stage_5_self_improvement_loop/run_09/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-3-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_09,uc-10,tests/stage_5_self_improvement_loop/run_09/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_10,uc-01,tests/stage_5_self_improvement_loop/run_10/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_10,uc-02,tests/stage_5_self_improvement_loop/run_10/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_10,uc-03,tests/stage_5_self_improvement_loop/run_10/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""number""
+Received: ""object""
+
+  16 |   // Verify the zoom level is higher than before
+  17 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page));
+> 18 |   expect(typeof zoomAfterIn).toBe('number');
+     |                              ^
+  19 |   expect(zoomAfterIn).toBeGreaterThan(zoomBeforeIn!);
+  20 |
+  21 |   // Step 2: Click the 'Zoom out' button to decrease the zoom level
+    at c:\Users\n.beikel\repos\ba",False,False,10
+stage_5_self_improvement_loop,run_10,uc-04,tests/stage_5_self_improvement_loop/run_10/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_10,uc-05,tests/stage_5_self_improvement_loop/run_10/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_10,uc-06,tests/stage_5_self_improvement_loop/run_10/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_10,uc-07,tests/stage_5_self_improvement_loop/run_10/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 2
++ Received  + 2
+
+  Object {
+-   ""hasEcos"": true,
+-   ""hasUvi"": true,
++   ""hasEcos"": false,
++   ""hasUvi"": false,
+  }
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  38 |             hasUvi: await uviHeading.isVisible()
+  39 |         };
+> 40 |     }).toEqual({ hasEcos: true, hasUvi: true });
+     |        ^
+  41 | });
+  42 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_",False,False,10
+stage_5_self_improvement_loop,run_10,uc-08,tests/stage_5_self_improvement_loop/run_10/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  34 |       .locator('text=/\\d+\\s*(m|km|mi|ft)/i')
+  35 |       .count()
+> 36 |   ).toBeGreaterThan(0);
+     |     ^
+  37 | });
+  38 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_10\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the",False,False,10
+stage_5_self_improvement_loop,run_10,uc-09,tests/stage_5_self_improvement_loop/run_10/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_10,uc-10,tests/stage_5_self_improvement_loop/run_10/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_11,uc-01,tests/stage_5_self_improvement_loop/run_11/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_11,uc-02,tests/stage_5_self_improvement_loop/run_11/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_11,uc-03,tests/stage_5_self_improvement_loop/run_11/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_11,uc-04,tests/stage_5_self_improvement_loop/run_11/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_11,uc-05,tests/stage_5_self_improvement_loop/run_11/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_11,uc-06,tests/stage_5_self_improvement_loop/run_11/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeDefined()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  26 |
+  27 |     // Wait for the clicked position to be highlighted on the map
+> 28 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+     |                                                             ^
+  29 |
+  30 |     // Wait for the forecast to load by checking the info panel content changes
+  31 |     // The ""Click on the map..."" text is",False,False,10
+stage_5_self_improvement_loop,run_11,uc-07,tests/stage_5_self_improvement_loop/run_11/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  30 |   await expect.poll(() =>
+  31 |     infoPanel.getByRole('heading', { name: 'UV-Index Station' }).isVisible()
+> 32 |   ).toBeTruthy();
+     |     ^
+  33 |
+  34 |   // Wait for the EUCOS Ground Station section to appear
+  35 |   await expect.poll(() =>
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_11\uc-07-click-bo",False,False,10
+stage_5_self_improvement_loop,run_11,uc-08,tests/stage_5_self_improvement_loop/run_11/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /[\d.,]+\s*(m|km|mi|ft)/
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  52 |   await expect.poll(() =>
+  53 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()
+> 54 |   ).toMatch(/[\d.,]+\s*(m|km|mi|ft)/);
+     |     ^
+  55 | });
+  56 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\",False,False,10
+stage_5_self_improvement_loop,run_11,uc-09,tests/stage_5_self_improvement_loop/run_11/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-4-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_11,uc-10,tests/stage_5_self_improvement_loop/run_11/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,,"TypeError: expect.approximately is not a function
+
+  38 |     // The geocoder result may place the map center slightly off the exact integer values.
+  39 |     // We check that the center is within a reasonable tolerance of MÃ¼nster's coordinates.
+> 40 |     await expect.poll(() => getMapCenter(page)).toMatchObject([expect.approximately(848832, 1000), expect.approximately(6793350, 1000)]);
+     |                                                                       ^
+  41 |
+  42 |     // 6. Wait",False,False,10
+stage_5_self_improvement_loop,run_12,uc-01,tests/stage_5_self_improvement_loop/run_12/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_12,uc-02,tests/stage_5_self_improvement_loop/run_12/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_12,uc-03,tests/stage_5_self_improvement_loop/run_12/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""number""
+Received: ""object""
+
+  17 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page));
+  18 |     expect(zoomedInLevel).toBeDefined();
+> 19 |     expect(typeof zoomedInLevel).toBe('number');
+     |                                  ^
+  20 |     expect(zoomedInLevel as number).toBeGreaterThan(initialZoom as number);
+  21 |
+  22 |     // Step 2: Click the 'Zoom out' button to decrease the zoom level.
+    ",False,False,10
+stage_5_self_improvement_loop,run_12,uc-04,tests/stage_5_self_improvement_loop/run_12/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_12,uc-05,tests/stage_5_self_improvement_loop/run_12/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_12,uc-06,tests/stage_5_self_improvement_loop/run_12/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_12,uc-07,tests/stage_5_self_improvement_loop/run_12/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Test timeout of 30000ms exceeded.
+
+---
+
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByTestId('map-container')
+    - locator resolved to <div data-testid=""map-container"" class=""map-container-root css-1c3iy1v"">â€¦</div>
+  - attempting click action
+    2 Ã— waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <html lang=""en"">â€¦</html> interce",False,False,10
+stage_5_self_improvement_loop,run_12,uc-08,tests/stage_5_self_improvement_loop/run_12/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_12,uc-09,tests/stage_5_self_improvement_loop/run_12/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_12,uc-10,tests/stage_5_self_improvement_loop/run_12/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_13,uc-01,tests/stage_5_self_improvement_loop/run_13/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_13,uc-02,tests/stage_5_self_improvement_loop/run_13/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_13,uc-03,tests/stage_5_self_improvement_loop/run_13/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_13,uc-04,tests/stage_5_self_improvement_loop/run_13/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_13,uc-05,tests/stage_5_self_improvement_loop/run_13/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_13,uc-06,tests/stage_5_self_improvement_loop/run_13/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_13,uc-07,tests/stage_5_self_improvement_loop/run_13/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,8
+stage_5_self_improvement_loop,run_13,uc-08,tests/stage_5_self_improvement_loop/run_13/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(locator).not.toBeVisible() failed
+
+Locator:  getByTestId('measurement').getByRole('paragraph')
+Expected: not visible
+Received: visible
+Timeout:  5000ms
+
+Call log:
+  - Expect ""not toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('measurement').getByRole('paragraph')
+    14 Ã— locator resolved to <p class=""css-cdgtm1"">Click in the map to start a measurement.</p>
+       - unexpected value ""visible""
+
+
+  38 |   // so we need to wait for the paragraph to change to the measure",False,False,10
+stage_5_self_improvement_loop,run_13,uc-09,tests/stage_5_self_improvement_loop/run_13/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_13,uc-10,tests/stage_5_self_improvement_loop/run_13/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_14,uc-01,tests/stage_5_self_improvement_loop/run_14/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_14,uc-02,tests/stage_5_self_improvement_loop/run_14/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_14,uc-03,tests/stage_5_self_improvement_loop/run_14/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |   // Verify: After clicking the 'Zoom in' button, the map zoom level is higher than before.
+> 16 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);
+     |                                                                      ^
+  ",False,False,10
+stage_5_self_improvement_loop,run_14,uc-04,tests/stage_5_self_improvement_loop/run_14/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_14,uc-05,tests/stage_5_self_improvement_loop/run_14/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_14,uc-06,tests/stage_5_self_improvement_loop/run_14/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeDefined()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  18 |
+  19 |     // Wait for the highlighted coordinate to appear on the map.
+> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+     |                                                             ^
+  21 |
+  22 |     // Wait for the weather forecast section to appear in the info panel.
+  23 |     const weatherForecastSection = page.getByTe",False,False,10
+stage_5_self_improvement_loop,run_14,uc-07,tests/stage_5_self_improvement_loop/run_14/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+
+
+  27 |   await expect(
+  28 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+>",False,False,10
+stage_5_self_improvement_loop,run_14,uc-08,tests/stage_5_self_improvement_loop/run_14/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /[0-9]+\.?[0-9]*\s*(km|m|mi|ft)/
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  33 |   // The measurement panel should display a length value with a unit (e.g., ""12.5 km"")
+  34 |   // Use expect.poll with toMatch to assert on the text content of the panel
+> 35 |   await expect.poll(() => measurementPanel.te",False,False,10
+stage_5_self_improvement_loop,run_14,uc-09,tests/stage_5_self_improvement_loop/run_14/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_14,uc-10,tests/stage_5_self_improvement_loop/run_14/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-7-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,8
+stage_5_self_improvement_loop,run_15,uc-01,tests/stage_5_self_improvement_loop/run_15/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_15,uc-02,tests/stage_5_self_improvement_loop/run_15/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_15,uc-03,tests/stage_5_self_improvement_loop/run_15/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+  14 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page));
+  15 |   expect(zoomAfterIn).toBeDefined();
+> 16 |   expect(zoomAfterIn! > initialZoom!).toBe(true);
+     |                                       ^
+  17 |
+  18 |   await page.getByTestId('zoom-out-button').click();
+  19 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_15\uc-",False,False,10
+stage_5_self_improvement_loop,run_15,uc-04,tests/stage_5_self_improvement_loop/run_15/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_15,uc-05,tests/stage_5_self_improvement_loop/run_15/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_15,uc-06,tests/stage_5_self_improvement_loop/run_15/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_15,uc-07,tests/stage_5_self_improvement_loop/run_15/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,9
+stage_5_self_improvement_loop,run_15,uc-08,tests/stage_5_self_improvement_loop/run_15/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_15,uc-09,tests/stage_5_self_improvement_loop/run_15/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_15,uc-10,tests/stage_5_self_improvement_loop/run_15/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-8-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,9
+stage_5_self_improvement_loop,run_16,uc-01,tests/stage_5_self_improvement_loop/run_16/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_16,uc-02,tests/stage_5_self_improvement_loop/run_16/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_16,uc-03,tests/stage_5_self_improvement_loop/run_16/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has value: undefined
+
+  20 |   // - After clicking 'Zoom out', the zoom level is lower than after zooming in.
+  21 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+> 22 |   expect(zoomAfterIn).toBeGreaterThan(initialZoom);
+     |                       ^
+  23 |
+  24 |   const zoomAfterOut = await expect.poll(() => getMapZoomLevel(page)).toBeDef",False,False,10
+stage_5_self_improvement_loop,run_16,uc-04,tests/stage_5_self_improvement_loop/run_16/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_16,uc-05,tests/stage_5_self_improvement_loop/run_16/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_16,uc-06,tests/stage_5_self_improvement_loop/run_16/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_16,uc-07,tests/stage_5_self_improvement_loop/run_16/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,7
+stage_5_self_improvement_loop,run_16,uc-08,tests/stage_5_self_improvement_loop/run_16/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'Measurement' }).getByText(/[\d,.]+\s*(km|m|mi|ft)/)
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/[\d,.]+\s*(km|m|mi|ft)/)
+
+
+  39 |     // We look for a pattern matching a number followed by a unit (e.g., ""123.45 km"").
+  40 |     const measurementResult = measurementPanel.",False,False,10
+stage_5_self_improvement_loop,run_16,uc-09,tests/stage_5_self_improvement_loop/run_16/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_16,uc-10,tests/stage_5_self_improvement_loop/run_16/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_17,uc-01,tests/stage_5_self_improvement_loop/run_17/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_17,uc-02,tests/stage_5_self_improvement_loop/run_17/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_17,uc-03,tests/stage_5_self_improvement_loop/run_17/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_17,uc-04,tests/stage_5_self_improvement_loop/run_17/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_17,uc-05,tests/stage_5_self_improvement_loop/run_17/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_17,uc-06,tests/stage_5_self_improvement_loop/run_17/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  18 |
+  19 |     // The clicked position is highlighted on the map
+> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+     |                                                             ^
+  21 |
+  22 |     // The forecast contains 24 entries
+  23 |     const forecastSection = page.getByTestId('weather-forecast-section');
+    at c:\Users\n.be",False,False,10
+stage_5_self_improvement_loop,run_17,uc-07,tests/stage_5_self_improvement_loop/run_17/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  26 |   await expect.poll(() =>
+  27 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()
+> 28 |   ).toBeGreaterThan(0);
+     |     ^
+  29 |
+  30 |   await expect.poll(() =>
+  31 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).count()
+   ",False,False,10
+stage_5_self_improvement_loop,run_17,uc-08,tests/stage_5_self_improvement_loop/run_17/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement-panel').getByText(/[\d.]+ (km|m|cm|mm)/)
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByText(/[\d.]+ (km|m|cm|mm)/)
+
+
+  37 |   // Using a regex to match the measurement result text
+  38 |   const measurementResult = measurementPanel.getByText(/[\d.]+ (km|m|cm|mm)/);
+> 39 |   await expect(measure",False,False,10
+stage_5_self_improvement_loop,run_17,uc-09,tests/stage_5_self_improvement_loop/run_17/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_17,uc-10,tests/stage_5_self_improvement_loop/run_17/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_18,uc-01,tests/stage_5_self_improvement_loop/run_18/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_18,uc-02,tests/stage_5_self_improvement_loop/run_18/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_18,uc-03,tests/stage_5_self_improvement_loop/run_18/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_18,uc-04,tests/stage_5_self_improvement_loop/run_18/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_18,uc-05,tests/stage_5_self_improvement_loop/run_18/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_18,uc-06,tests/stage_5_self_improvement_loop/run_18/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-7-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,8
+stage_5_self_improvement_loop,run_18,uc-07,tests/stage_5_self_improvement_loop/run_18/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  31 |     await expect.poll(() =>
+  32 |         page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).count()
+> 33 |     ).toBeGreaterThan(0);
+     |       ^
+  34 |
+  35 |     await expect.poll(() =>
+  36 |         page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: tru",False,False,10
+stage_5_self_improvement_loop,run_18,uc-08,tests/stage_5_self_improvement_loop/run_18/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_18,uc-09,tests/stage_5_self_improvement_loop/run_18/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_18,uc-10,tests/stage_5_self_improvement_loop/run_18/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_19,uc-01,tests/stage_5_self_improvement_loop/run_19/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_19,uc-02,tests/stage_5_self_improvement_loop/run_19/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_19,uc-03,tests/stage_5_self_improvement_loop/run_19/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_19,uc-04,tests/stage_5_self_improvement_loop/run_19/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_19,uc-05,tests/stage_5_self_improvement_loop/run_19/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_19,uc-06,tests/stage_5_self_improvement_loop/run_19/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeDefined()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  17 |
+  18 |     // Verify the clicked position is highlighted on the map
+> 19 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+     |                                                             ^
+  20 |
+  21 |     // Verify the forecast contains 24 entries
+  22 |     const entries = page.getByTestId('weather-forecast-section').getByRole('li",False,False,10
+stage_5_self_improvement_loop,run_19,uc-07,tests/stage_5_self_improvement_loop/run_19/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_19,uc-08,tests/stage_5_self_improvement_loop/run_19/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s*(km|m|mi|ft)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  44 |     const text = await measurementPanel.textContent();
+  45 |     return text;
+> 46 |   }).toMatch(measurementResultPattern);
+     |      ^
+  47 | });
+  48 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\s",False,False,10
+stage_5_self_improvement_loop,run_19,uc-09,tests/stage_5_self_improvement_loop/run_19/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-3-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_19,uc-10,tests/stage_5_self_improvement_loop/run_19/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_20,uc-01,tests/stage_5_self_improvement_loop/run_20/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_20,uc-02,tests/stage_5_self_improvement_loop/run_20/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_20,uc-03,tests/stage_5_self_improvement_loop/run_20/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_20,uc-04,tests/stage_5_self_improvement_loop/run_20/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_20,uc-05,tests/stage_5_self_improvement_loop/run_20/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_20,uc-06,tests/stage_5_self_improvement_loop/run_20/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeDefined()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  25 |
+  26 |   // Verify the clicked position is highlighted on the map
+> 27 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+     |                                                           ^
+  28 |
+  29 |   // Verify the info panel displays a weather forecast section with 24 entries
+  30 |   // The forecast entries are rendered inside the we",False,False,10
+stage_5_self_improvement_loop,run_20,uc-07,tests/stage_5_self_improvement_loop/run_20/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('info-panel')
+Expected substring: ""UV-Index Station""
+Received string:    ""InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.54 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMfew cloudsTemperature17.65 Â°CHumidity81 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.45 Â°CHumidity75 %Wind direction262Â°Wind speed7.09 ",False,False,10
+stage_5_self_improvement_loop,run_20,uc-08,tests/stage_5_self_improvement_loop/run_20/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /(\d+(\.\d+)?)\s*(m|km|mi|ft)/
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  40 |   await expect.poll(() =>
+  41 |     page.getByRole('dialog', { name: 'Measurement' }).textContent()
+> 42 |   ).toMatch(/(\d+(\.\d+)?)\s*(m|km|mi|ft)/);
+     |     ^
+  43 | });
+  44 |
+    at c:\Users\n.beikel\repos\ba-webgis-",False,False,10
+stage_5_self_improvement_loop,run_20,uc-09,tests/stage_5_self_improvement_loop/run_20/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_20,uc-10,tests/stage_5_self_improvement_loop/run_20/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_21,uc-01,tests/stage_5_self_improvement_loop/run_21/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_21,uc-02,tests/stage_5_self_improvement_loop/run_21/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_21,uc-03,tests/stage_5_self_improvement_loop/run_21/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_21,uc-04,tests/stage_5_self_improvement_loop/run_21/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_21,uc-05,tests/stage_5_self_improvement_loop/run_21/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_21,uc-06,tests/stage_5_self_improvement_loop/run_21/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_21,uc-07,tests/stage_5_self_improvement_loop/run_21/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,6
+stage_5_self_improvement_loop,run_21,uc-08,tests/stage_5_self_improvement_loop/run_21/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+\.?\d*\s*(m|km|mi|ft)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  42 |       return text;
+  43 |     })
+> 44 |     .toMatch(/\d+\.?\d*\s*(m|km|mi|ft)/i);
+     |      ^
+  45 | });
+  46 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_21\uc-08-mea",False,False,10
+stage_5_self_improvement_loop,run_21,uc-09,tests/stage_5_self_improvement_loop/run_21/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_21,uc-10,tests/stage_5_self_improvement_loop/run_21/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_22,uc-01,tests/stage_5_self_improvement_loop/run_22/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_22,uc-02,tests/stage_5_self_improvement_loop/run_22/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_22,uc-03,tests/stage_5_self_improvement_loop/run_22/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeDefined()
+
+Received: undefined
+
+   9 |   // Wait for the map to be ready and get the initial zoom level
+  10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+> 11 |   expect(initialZoom).toBeDefined();
+     |                       ^
+  12 |   const initialZoomValue = initialZoom!;
+  13 |
+  14 |   // Step 1: Click the 'Zoom in' button to increase the zoom level
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_",False,False,10
+stage_5_self_improvement_loop,run_22,uc-04,tests/stage_5_self_improvement_loop/run_22/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_22,uc-05,tests/stage_5_self_improvement_loop/run_22/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_22,uc-06,tests/stage_5_self_improvement_loop/run_22/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,GENERATION_ERROR,,26/40 der letzten Zeilen sind reine Kommentare -> Verdacht auf Degeneration (Platzhalter-Loop),False,False,10
+stage_5_self_improvement_loop,run_22,uc-07,tests/stage_5_self_improvement_loop/run_22/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_22,uc-08,tests/stage_5_self_improvement_loop/run_22/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByRole('dialog', { name: 'Measurement' })
+Expected pattern: /[\d.]+\s*(km|m|mi|ft)/
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Measurement' })
+    14 Ã— locator resolved to <div role=""dialog"" aria-labelledby=""_r_0_"">â€¦</div>
+       - unexpected valu",False,False,10
+stage_5_self_improvement_loop,run_22,uc-09,tests/stage_5_self_improvement_loop/run_22/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_22,uc-10,tests/stage_5_self_improvement_loop/run_22/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_23,uc-01,tests/stage_5_self_improvement_loop/run_23/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_23,uc-02,tests/stage_5_self_improvement_loop/run_23/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_23,uc-03,tests/stage_5_self_improvement_loop/run_23/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""number""
+Received: ""undefined""
+
+  10 |   // Wait for the map to be ready and capture the initial zoom level
+  11 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+> 12 |   expect(typeof initialZoom).toBe('number');
+     |                              ^
+  13 |
+  14 |   // Step 1: Click the 'Zoom in' button
+  15 |   await page.getByTestId('zoom-in-button').click();
+    at c:\Users\n.beikel\r",False,False,10
+stage_5_self_improvement_loop,run_23,uc-04,tests/stage_5_self_improvement_loop/run_23/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_23,uc-05,tests/stage_5_self_improvement_loop/run_23/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_23,uc-06,tests/stage_5_self_improvement_loop/run_23/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_23,uc-07,tests/stage_5_self_improvement_loop/run_23/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_23,uc-08,tests/stage_5_self_improvement_loop/run_23/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /[\d.]+\s*(km|m|mi|ft)/
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  43 |   // The result is likely displayed as text like ""917.3 km"" inside the panel.
+  44 |   // We poll for the presence of a number followed by a unit.
+> 45 |   await expect.poll(() => measurementPanel.textContent()).toMatch(/[\d.]+\s*(k",False,False,10
+stage_5_self_improvement_loop,run_23,uc-09,tests/stage_5_self_improvement_loop/run_23/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_23,uc-10,tests/stage_5_self_improvement_loop/run_23/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_24,uc-01,tests/stage_5_self_improvement_loop/run_24/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_24,uc-02,tests/stage_5_self_improvement_loop/run_24/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_24,uc-03,tests/stage_5_self_improvement_loop/run_24/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""number""
+Received: ""object""
+
+  17 |   // Verify that the zoom level is higher than before
+  18 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page));
+> 19 |   expect(typeof zoomAfterIn).toBe('number');
+     |                              ^
+  20 |   expect(zoomAfterIn).toBeGreaterThan(initialZoom!);
+  21 |
+  22 |   // Step 2: Click the 'Zoom out' button to decrease the zoom level
+    at c:\Users\n.beikel\repo",False,False,10
+stage_5_self_improvement_loop,run_24,uc-04,tests/stage_5_self_improvement_loop/run_24/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_24,uc-05,tests/stage_5_self_improvement_loop/run_24/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_24,uc-06,tests/stage_5_self_improvement_loop/run_24/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_24,uc-07,tests/stage_5_self_improvement_loop/run_24/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  60 |   await expect.poll(() =>
+  61 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible(),
+> 62 |   ).toBe(true);
+     |     ^
+  63 |
+  64 |   await expect.poll(() =>
+  65 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).",False,False,10
+stage_5_self_improvement_loop,run_24,uc-08,tests/stage_5_self_improvement_loop/run_24/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  38 |     // the ""group"" element within the measurement panel.
+  39 |     const measurementGroup = measurementPanel.getByRole('group');
+> 40 |     await expect.poll(() => measurementGroup.locator('text=/\\d+(\\.\\d+)?\\s*(km|m)/').count()).toBeGreaterThan(0);
+     |                                                                                     ",False,False,10
+stage_5_self_improvement_loop,run_24,uc-09,tests/stage_5_self_improvement_loop/run_24/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_24,uc-10,tests/stage_5_self_improvement_loop/run_24/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_25,uc-01,tests/stage_5_self_improvement_loop/run_25/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_25,uc-02,tests/stage_5_self_improvement_loop/run_25/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_25,uc-03,tests/stage_5_self_improvement_loop/run_25/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |     // Expected result: After clicking the 'Zoom in' button, the map zoom level is higher than before.
+> 16 |     const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);
+     |                                                             ",False,False,10
+stage_5_self_improvement_loop,run_25,uc-04,tests/stage_5_self_improvement_loop/run_25/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_25,uc-05,tests/stage_5_self_improvement_loop/run_25/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_25,uc-06,tests/stage_5_self_improvement_loop/run_25/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_25,uc-07,tests/stage_5_self_improvement_loop/run_25/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: ""UV-Index Station""
+Received string:    ""InformationWeather ForecastLocation: Whitby, GBFri, Jul 24, 08:00 PMscattered cloudsTemperature18.03 Â°CHumidity83 %Wind direction158Â°Wind speed3.12 m/sFri, Jul 24, 11:00 PMscattered cloudsTemperature17.71 Â°CHumidity82 %Wind direction230Â°Wind speed5.14 m/sSat, Jul 25, 02:00 AMfew cloudsTemperature16.98 Â°CHumidity77 %Wind direction262Â°Wind speed7.09 m/sSat, Jul 25, 05:00 AMover",False,False,10
+stage_5_self_improvement_loop,run_25,uc-08,tests/stage_5_self_improvement_loop/run_25/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement-panel').getByText(/^[0-9.,]+\s*(m|km|mi|ft)$/i)
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByText(/^[0-9.,]+\s*(m|km|mi|ft)$/i)
+
+
+  33 |   // The measurement panel contains the measurement results. We look for text that matches a number followed by a unit (e.g., ""1.2 km"", ""1200 m"").
+  34 |   c",False,False,10
+stage_5_self_improvement_loop,run_25,uc-09,tests/stage_5_self_improvement_loop/run_25/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_25,uc-10,tests/stage_5_self_improvement_loop/run_25/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_26,uc-01,tests/stage_5_self_improvement_loop/run_26/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_26,uc-02,tests/stage_5_self_improvement_loop/run_26/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_26,uc-03,tests/stage_5_self_improvement_loop/run_26/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_26,uc-04,tests/stage_5_self_improvement_loop/run_26/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_26,uc-05,tests/stage_5_self_improvement_loop/run_26/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_26,uc-06,tests/stage_5_self_improvement_loop/run_26/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_26,uc-07,tests/stage_5_self_improvement_loop/run_26/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_26,uc-08,tests/stage_5_self_improvement_loop/run_26/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toContainEqual(expected) // deep equality
+
+Expected value: StringMatching /\d+(\.\d+)?\s+(km|m|mi|ft)/
+Received array: [""Click in the map to start a measurement.""]
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  31 |   await expect.poll(() =>
+  32 |     measurementPanel.getByRole('paragraph').allTextContents()
+> 33 |   ).toContainEqual(expect.stringMatching(/\d+(\.\d+)?\s+(km|m|mi|ft)/));
+     |     ^
+  34 | });
+  35 |
+    at c:\Users\n.beikel\repos",False,False,10
+stage_5_self_improvement_loop,run_26,uc-09,tests/stage_5_self_improvement_loop/run_26/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_26,uc-10,tests/stage_5_self_improvement_loop/run_26/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  46 |   await expect.poll(() => {
+  47 |     return getMapCenter(page).then((center) => center && center[0] < 800000);
+> 48 |   }).toBe(true);
+     |      ^
+  49 |
+  50 |   // Step 6: Wait for the info panel to load the forecast
+  51 |   const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    at c:\Users\n.beik",False,False,10
+stage_5_self_improvement_loop,run_27,uc-01,tests/stage_5_self_improvement_loop/run_27/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_27,uc-02,tests/stage_5_self_improvement_loop/run_27/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_27,uc-03,tests/stage_5_self_improvement_loop/run_27/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_27,uc-04,tests/stage_5_self_improvement_loop/run_27/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_27,uc-05,tests/stage_5_self_improvement_loop/run_27/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_27,uc-06,tests/stage_5_self_improvement_loop/run_27/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_27,uc-07,tests/stage_5_self_improvement_loop/run_27/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  43 |   // The info panel should contain sections for both 'UV-Index Station' and 'EUCOS Ground Station'.
+  44 |   // We will use getByTestId('info-panel') to scope our search to the info panel.
+> 45 |   await expect.poll(() => page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station' }).isVisible()).toBe(true);
+  ",False,False,10
+stage_5_self_improvement_loop,run_27,uc-08,tests/stage_5_self_improvement_loop/run_27/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s*(km|m|mi|ft)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  35 |     // The panel contains text like ""0 m"" or ""123.45 km"" after measurement.
+  36 |     // Use expect.poll to wait for the async measurement result to settle.
+> 37 |     await expect.poll(() => measurementPanel.textContent()).t",False,False,10
+stage_5_self_improvement_loop,run_27,uc-09,tests/stage_5_self_improvement_loop/run_27/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_27,uc-10,tests/stage_5_self_improvement_loop/run_27/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_28,uc-01,tests/stage_5_self_improvement_loop/run_28/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_28,uc-02,tests/stage_5_self_improvement_loop/run_28/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_28,uc-03,tests/stage_5_self_improvement_loop/run_28/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_28,uc-04,tests/stage_5_self_improvement_loop/run_28/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_28,uc-05,tests/stage_5_self_improvement_loop/run_28/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_28,uc-06,tests/stage_5_self_improvement_loop/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  19 |
+  20 |     // The clicked position is highlighted on the map.
+> 21 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+     |                                                             ^
+  22 |
+  23 |     // The info panel displays a weather forecast section.
+  24 |     await expect(page.getByRole('heading', { name: 'Weather Forecast', lev",False,False,10
+stage_5_self_improvement_loop,run_28,uc-07,tests/stage_5_self_improvement_loop/run_28/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('heading', { name: 'UV-Index Station', level: 2 })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByRole('heading', { name: 'UV-Index Station', level: 2 })
+
+
+  30 |     // Expected results: Info panel displays sections for both station types
+  31 |     // The headings inside the info panel are level 2 (h2).
+> 32 |     await expect(page.getByRol",False,False,10
+stage_5_self_improvement_loop,run_28,uc-08,tests/stage_5_self_improvement_loop/run_28/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  47 |     await expect.poll(() =>
+  48 |         measurementDialog.locator('p').filter({ hasText: /\d+(\.\d+)?\s+(km|m|mi|ft)/ }).first().isVisible()
+> 49 |     ).toBeTruthy();
+     |       ^
+  50 | });
+  51 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_28\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\uc-08-it",False,False,10
+stage_5_self_improvement_loop,run_28,uc-09,tests/stage_5_self_improvement_loop/run_28/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_28,uc-10,tests/stage_5_self_improvement_loop/run_28/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_29,uc-01,tests/stage_5_self_improvement_loop/run_29/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_29,uc-02,tests/stage_5_self_improvement_loop/run_29/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_29,uc-03,tests/stage_5_self_improvement_loop/run_29/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-2-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_29,uc-04,tests/stage_5_self_improvement_loop/run_29/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_29,uc-05,tests/stage_5_self_improvement_loop/run_29/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_29,uc-06,tests/stage_5_self_improvement_loop/run_29/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 24
+Received: 0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  21 |   // The forecast contains 24 entries. We check the weather-forecast-section for 24 list items.
+  22 |   // The forecast entries are rendered as div elements with the ""forecast-entry"" class.
+> 23 |   await expect.poll(() => forecastSection.locator('[class*=""forecast-entry""]').count()).toBe(24);
+     |                                   ",False,False,10
+stage_5_self_improvement_loop,run_29,uc-07,tests/stage_5_self_improvement_loop/run_29/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,9
+stage_5_self_improvement_loop,run_29,uc-08,tests/stage_5_self_improvement_loop/run_29/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-6-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,7
+stage_5_self_improvement_loop,run_29,uc-09,tests/stage_5_self_improvement_loop/run_29/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_29,uc-10,tests/stage_5_self_improvement_loop/run_29/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_30,uc-01,tests/stage_5_self_improvement_loop/run_30/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_30,uc-02,tests/stage_5_self_improvement_loop/run_30/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_30,uc-03,tests/stage_5_self_improvement_loop/run_30/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_30,uc-04,tests/stage_5_self_improvement_loop/run_30/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_30,uc-05,tests/stage_5_self_improvement_loop/run_30/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_30,uc-06,tests/stage_5_self_improvement_loop/run_30/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_30,uc-07,tests/stage_5_self_improvement_loop/run_30/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 2
++ Received  + 2
+
+  Object {
+-   ""eucos"": true,
+-   ""uvi"": true,
++   ""eucos"": false,
++   ""uvi"": false,
+  }
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  26 |         const eucosVisible = await eucosHeading.isVisible();
+  27 |         return { uvi: uviVisible, eucos: eucosVisible };
+> 28 |     }).toEqual({ uvi: true, eucos: true });
+     |        ^
+  29 | });
+  30 |
+    at c:\Users\n.beikel\repos\b",False,False,10
+stage_5_self_improvement_loop,run_30,uc-08,tests/stage_5_self_improvement_loop/run_30/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_30,uc-09,tests/stage_5_self_improvement_loop/run_30/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_30,uc-10,tests/stage_5_self_improvement_loop/run_30/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_31,uc-01,tests/stage_5_self_improvement_loop/run_31/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_31,uc-02,tests/stage_5_self_improvement_loop/run_31/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_31,uc-03,tests/stage_5_self_improvement_loop/run_31/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_31,uc-04,tests/stage_5_self_improvement_loop/run_31/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_31,uc-05,tests/stage_5_self_improvement_loop/run_31/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_31,uc-06,tests/stage_5_self_improvement_loop/run_31/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_31,uc-07,tests/stage_5_self_improvement_loop/run_31/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+Expected: visible
+Timeout: 10000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 10000ms
+  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+
+
+  22 |
+  23 |   // Wait for the UV-Index Station info
+> 24 |   await expect(infoPanel.getByRole('heading', { name: 'UV-Index Sta",False,False,10
+stage_5_self_improvement_loop,run_31,uc-08,tests/stage_5_self_improvement_loop/run_31/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: null
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  50 |         // Look for a pattern like ""422.18 km"" or ""1234 m""
+  51 |         return panelText?.match(/\d+(\.\d+)?\s*(km|m|mi|ft)/i);
+> 52 |     }).toBeTruthy();
+     |        ^
+  53 | });
+  54 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_31\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\uc-08-iter-9-measure-",False,False,10
+stage_5_self_improvement_loop,run_31,uc-09,tests/stage_5_self_improvement_loop/run_31/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_31,uc-10,tests/stage_5_self_improvement_loop/run_31/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_32,uc-01,tests/stage_5_self_improvement_loop/run_32/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_32,uc-02,tests/stage_5_self_improvement_loop/run_32/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_32,uc-03,tests/stage_5_self_improvement_loop/run_32/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |   // Verify the zoom level is higher than before
+> 16 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);
+     |                                                  ^
+  17 |
+  18 |   // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  ",False,False,10
+stage_5_self_improvement_loop,run_32,uc-04,tests/stage_5_self_improvement_loop/run_32/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_32,uc-05,tests/stage_5_self_improvement_loop/run_32/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_32,uc-06,tests/stage_5_self_improvement_loop/run_32/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_32,uc-07,tests/stage_5_self_improvement_loop/run_32/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_32,uc-08,tests/stage_5_self_improvement_loop/run_32/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /(\d+(\.\d+)?\s*(km|m|mi|ft))/
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  37 |   // Wait for the measurement result to be visible and match the pattern.
+  38 |   await expect(measurementResult).toBeVisible();
+> 39 |   await expect.poll(() => measurementResult.textContent()).toMatch(/(\d+(\.\d+)?\s*(km|m|mi|ft))/);",False,False,10
+stage_5_self_improvement_loop,run_32,uc-09,tests/stage_5_self_improvement_loop/run_32/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_32,uc-10,tests/stage_5_self_improvement_loop/run_32/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_33,uc-01,tests/stage_5_self_improvement_loop/run_33/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_33,uc-02,tests/stage_5_self_improvement_loop/run_33/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_33,uc-03,tests/stage_5_self_improvement_loop/run_33/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  18 |
+  19 |   // Verify that the zoom level is higher after zooming in
+> 20 |   await expect.poll(() => zoomLevel()).toBeGreaterThan(initialZoom);
+     |                                        ^
+  21 |
+  22 |   // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  23 |   awai",False,False,10
+stage_5_self_improvement_loop,run_33,uc-04,tests/stage_5_self_improvement_loop/run_33/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_33,uc-05,tests/stage_5_self_improvement_loop/run_33/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_33,uc-06,tests/stage_5_self_improvement_loop/run_33/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_33,uc-07,tests/stage_5_self_improvement_loop/run_33/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: ""UV-Index Station""
+Received string:    ""InformationWeather ForecastClick on the map to load a forecast.""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  20 |   await expect.poll(() =>
+  21 |     page.getByTestId('info-panel').textContent(),
+> 22 |   ).toContain('UV-Index Station');
+     |     ^
+  23 |   await expect.poll(() =>
+  24 |     page.getByTestId('info-panel').textContent(),
+  25 |   ).toCo",False,False,10
+stage_5_self_improvement_loop,run_33,uc-08,tests/stage_5_self_improvement_loop/run_33/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_33,uc-09,tests/stage_5_self_improvement_loop/run_33/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_33,uc-10,tests/stage_5_self_improvement_loop/run_33/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_34,uc-01,tests/stage_5_self_improvement_loop/run_34/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_34,uc-02,tests/stage_5_self_improvement_loop/run_34/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_34,uc-03,tests/stage_5_self_improvement_loop/run_34/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |   // Verify the zoom level is higher than before
+> 16 |   const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoomLevel);
+     |                                                                        ^
+  17 |
+  18 |   // Step 2: Click the",False,False,10
+stage_5_self_improvement_loop,run_34,uc-04,tests/stage_5_self_improvement_loop/run_34/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_34,uc-05,tests/stage_5_self_improvement_loop/run_34/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_34,uc-06,tests/stage_5_self_improvement_loop/run_34/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_34,uc-07,tests/stage_5_self_improvement_loop/run_34/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel')
+
+
+  14 |   await infoPanelToggle.click({ force: true });
+  15 |   const infoPanel = page.getByTestId('info-panel');
+> 16 |   await expect(infoPanel).toBeVisible();
+     |                           ^
+  17 |
+  18 |   // Precondition: Ensure measurement tool is N",False,False,10
+stage_5_self_improvement_loop,run_34,uc-08,tests/stage_5_self_improvement_loop/run_34/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  54 |       .allTextContents()
+  55 |       .then((texts) => texts.some((t) => /\d+\.?\d*\s*(km|m|mi|ft|cm|mm)/.test(t)))
+> 56 |   ).toBe(true);
+     |     ^
+  57 | });
+  58 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_34\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\uc-",False,False,10
+stage_5_self_improvement_loop,run_34,uc-09,tests/stage_5_self_improvement_loop/run_34/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_34,uc-10,tests/stage_5_self_improvement_loop/run_34/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_35,uc-01,tests/stage_5_self_improvement_loop/run_35/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_35,uc-02,tests/stage_5_self_improvement_loop/run_35/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_35,uc-03,tests/stage_5_self_improvement_loop/run_35/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |   // Verify the zoom level is higher than before
+> 16 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom!);
+     |                                                  ^
+  17 |
+  18 |   // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  ",False,False,10
+stage_5_self_improvement_loop,run_35,uc-04,tests/stage_5_self_improvement_loop/run_35/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_35,uc-05,tests/stage_5_self_improvement_loop/run_35/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_35,uc-06,tests/stage_5_self_improvement_loop/run_35/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-7-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,8
+stage_5_self_improvement_loop,run_35,uc-07,tests/stage_5_self_improvement_loop/run_35/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  35 |   await expect.poll(() =>
+  36 |     infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()
+> 37 |   ).toBe(true);
+     |     ^
+  38 |
+  39 |   await expect.poll(() =>
+  40 |     infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()
+    at c:\Users\n.beikel\repos\",False,False,10
+stage_5_self_improvement_loop,run_35,uc-08,tests/stage_5_self_improvement_loop/run_35/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_35,uc-09,tests/stage_5_self_improvement_loop/run_35/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_35,uc-10,tests/stage_5_self_improvement_loop/run_35/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,6
+stage_5_self_improvement_loop,run_36,uc-01,tests/stage_5_self_improvement_loop/run_36/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_36,uc-02,tests/stage_5_self_improvement_loop/run_36/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_36,uc-03,tests/stage_5_self_improvement_loop/run_36/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""number""
+Received: ""object""
+
+  19 |     const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page));
+  20 |     expect(zoomAfterIn).toBeDefined();
+> 21 |     expect(typeof zoomAfterIn).toBe('number');
+     |                                ^
+  22 |     expect(typeof initialZoom).toBe('number');
+  23 |     expect(zoomAfterIn).toBeGreaterThan(initialZoom);
+  24 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\l",False,False,10
+stage_5_self_improvement_loop,run_36,uc-04,tests/stage_5_self_improvement_loop/run_36/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-2-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_36,uc-05,tests/stage_5_self_improvement_loop/run_36/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_36,uc-06,tests/stage_5_self_improvement_loop/run_36/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_36,uc-07,tests/stage_5_self_improvement_loop/run_36/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_36,uc-08,tests/stage_5_self_improvement_loop/run_36/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  34 |   // after the double-click action completes.
+  35 |   const measurementValue = page.getByRole('dialog', { name: 'Measurement' }).getByText(/(\d+\.?\d*)\s*(m|km)/i);
+> 36 |   await expect.poll(() => measurementValue.isVisible()).toBe(true);
+     |                                                         ^
+  37 | });
+  38 |
+    at ",False,False,10
+stage_5_self_improvement_loop,run_36,uc-09,tests/stage_5_self_improvement_loop/run_36/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_36,uc-10,tests/stage_5_self_improvement_loop/run_36/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatchObject(expected)
+
+- Expected  - 2
++ Received  + 2
+
+  Array [
+-   NumberCloseTo 848832 (100000 digits),
+-   NumberCloseTo 6793350 (100000 digits),
++   848832.0342310311,
++   6793349.636132425,
+  ]
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  34 |   // MÃ¼nster is roughly at 7.62Â°E, 51.96Â°N, which is approx (848832, 6793350) in EPSG:3857.
+  35 |   // Use a generous tolerance to account for minor variations in geocoder resolution.
+> 36 |   ",False,False,10
+stage_5_self_improvement_loop,run_37,uc-01,tests/stage_5_self_improvement_loop/run_37/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_37,uc-02,tests/stage_5_self_improvement_loop/run_37/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_37,uc-03,tests/stage_5_self_improvement_loop/run_37/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |   // Verify zoom level is higher than before
+> 16 |   await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);
+     |                                                  ^
+  17 |
+  18 |   // Step 2: Click the 'Zoom out' button to decrease the zoom level
+  19 | ",False,False,10
+stage_5_self_improvement_loop,run_37,uc-04,tests/stage_5_self_improvement_loop/run_37/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_37,uc-05,tests/stage_5_self_improvement_loop/run_37/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_37,uc-06,tests/stage_5_self_improvement_loop/run_37/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  19 |
+  20 |   // Verify the clicked position is highlighted on the map
+> 21 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+     |                                                           ^
+  22 |
+  23 |   // Verify the forecast contains 24 entries
+  24 |   const forecastSection = page.getByTestId('weather-forecast-section');
+    at c:\Users\",False,False,10
+stage_5_self_improvement_loop,run_37,uc-07,tests/stage_5_self_improvement_loop/run_37/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_37,uc-08,tests/stage_5_self_improvement_loop/run_37/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s*(m|km|mi|ft|in|cm|mm|nm|yd)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  52 |         const text = await measurementPanel.textContent();
+  53 |         return text;
+> 54 |     }).toMatch(/\d+(\.\d+)?\s*(m|km|mi|ft|in|cm|mm|nm|yd)/i);
+     |        ^
+  55 | });
+  56 |
+    at c:\Users\n.bei",False,False,10
+stage_5_self_improvement_loop,run_37,uc-09,tests/stage_5_self_improvement_loop/run_37/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_37,uc-10,tests/stage_5_self_improvement_loop/run_37/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_38,uc-01,tests/stage_5_self_improvement_loop/run_38/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_38,uc-02,tests/stage_5_self_improvement_loop/run_38/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_38,uc-03,tests/stage_5_self_improvement_loop/run_38/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,INFRA_FAIL,,"TypeError: expect.poll(...).toBeNumber is not a function
+
+   8 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+   9 |
+> 10 |   const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();
+     |                                                                      ^
+  11 |
+  12 |   await page.getByTestId('zoom-in-button').click();
+  13 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page)).toBeNumber();
+    at c:\Users\n.beikel\repos\ba-webgis-",False,False,10
+stage_5_self_improvement_loop,run_38,uc-04,tests/stage_5_self_improvement_loop/run_38/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-2-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_38,uc-05,tests/stage_5_self_improvement_loop/run_38/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_38,uc-06,tests/stage_5_self_improvement_loop/run_38/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_38,uc-07,tests/stage_5_self_improvement_loop/run_38/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  20 |   // Wait for the info panel to load feature information.
+  21 |   const infoPanel = page.getByTestId('info-panel');
+> 22 |   await expect.poll(() => infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()).toBe(true);
+     |                                                                            ",False,False,10
+stage_5_self_improvement_loop,run_38,uc-08,tests/stage_5_self_improvement_loop/run_38/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: Timeout 5000ms exceeded while waiting on the predicate
+
+  39 |             .first()
+  40 |             .textContent()
+> 41 |     ).toMatch(/\d+(\.\d+)?\s*(km|m|mi|ft)/i);
+     |       ^
+  42 | });
+  43 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_38\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:41:7",False,False,10
+stage_5_self_improvement_loop,run_38,uc-09,tests/stage_5_self_improvement_loop/run_38/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_38,uc-10,tests/stage_5_self_improvement_loop/run_38/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  52 |         // and y coordinate is in the range (approx 6.5M)
+  53 |         return center[0] > 600000 && center[0] < 750000 && center[1] > 6500000 && center[1] < 6700000;
+> 54 |     }).toBe(true);
+     |        ^
+  55 |
+  56 |     // Step 6: Wait for the info panel to load the forecast.
+  57 |     // The expected result states ""24 e",False,False,10
+stage_5_self_improvement_loop,run_39,uc-01,tests/stage_5_self_improvement_loop/run_39/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_39,uc-02,tests/stage_5_self_improvement_loop/run_39/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_39,uc-03,tests/stage_5_self_improvement_loop/run_39/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-1-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_39,uc-04,tests/stage_5_self_improvement_loop/run_39/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_39,uc-05,tests/stage_5_self_improvement_loop/run_39/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_39,uc-06,tests/stage_5_self_improvement_loop/run_39/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 24
+Received:    0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  18 |   // The use case specifies 24 entries; we poll for the section to contain at least 24 list items.
+  19 |   const weatherSection = page.getByTestId('weather-forecast-section');
+> 20 |   await expect.poll(() => weatherSection.locator('li').count()).toBeGreaterThanOrEqual(24);
+     |                                                     ",False,False,10
+stage_5_self_improvement_loop,run_39,uc-07,tests/stage_5_self_improvement_loop/run_39/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_39,uc-08,tests/stage_5_self_improvement_loop/run_39/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Test timeout of 30000ms exceeded.
+
+---
+
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByTestId('map-container')
+    - locator resolved to <div data-testid=""map-container"" class=""map-container-root css-1c3iy1v"">â€¦</div>
+  - attempting click action
+    2 Ã— waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div dir=""ltr"" role=""option"" data-",False,False,10
+stage_5_self_improvement_loop,run_39,uc-09,tests/stage_5_self_improvement_loop/run_39/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-9-print-the-current-map-view-as-a-png.spec.ts,ASSERTION_FAIL,,"Error: locator.click: Element is not visible
+Call log:
+  - waiting for getByRole('dialog', { name: 'Print Map' }).getByRole('option', { name: 'PNG' })
+    - locator resolved to <option value=""png"">PNG</option>
+  - attempting click action
+    - scrolling into view if needed
+
+
+  27 |   const dialog = page.getByRole('dialog', { name: 'Print Map' });
+  28 |   const pngOption = dialog.getByRole('option', { name: 'PNG' });
+> 29 |   await pngOption.click({ force: true });
+     |                   ^
+  3",False,False,10
+stage_5_self_improvement_loop,run_39,uc-10,tests/stage_5_self_improvement_loop/run_39/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,5
+stage_5_self_improvement_loop,run_40,uc-01,tests/stage_5_self_improvement_loop/run_40/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_40,uc-02,tests/stage_5_self_improvement_loop/run_40/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_40,uc-03,tests/stage_5_self_improvement_loop/run_40/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has value: undefined
+
+  15 |     // Verify the zoom level increased.
+  16 |     const zoomedInLevel = await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+> 17 |     expect(zoomedInLevel).toBeGreaterThan(initialZoom);
+     |                           ^
+  18 |
+  19 |     // Step 2: Click the 'Zoom out' button to decrease the zoom level.
+  20 |     await page.getByTestId('",False,False,10
+stage_5_self_improvement_loop,run_40,uc-04,tests/stage_5_self_improvement_loop/run_40/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_40,uc-05,tests/stage_5_self_improvement_loop/run_40/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_40,uc-06,tests/stage_5_self_improvement_loop/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_40,uc-07,tests/stage_5_self_improvement_loop/run_40/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_40,uc-08,tests/stage_5_self_improvement_loop/run_40/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_40,uc-09,tests/stage_5_self_improvement_loop/run_40/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_40,uc-10,tests/stage_5_self_improvement_loop/run_40/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_41,uc-01,tests/stage_5_self_improvement_loop/run_41/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_41,uc-02,tests/stage_5_self_improvement_loop/run_41/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_41,uc-03,tests/stage_5_self_improvement_loop/run_41/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: ""number""
+Received: ""object""
+
+  16 |   // Verify: After clicking the 'Zoom in' button, the map zoom level is higher than before
+  17 |   const zoomAfterIn = await expect.poll(() => getMapZoomLevel(page));
+> 18 |   expect(typeof zoomAfterIn).toBe('number');
+     |                              ^
+  19 |   expect(zoomAfterIn).toBeGreaterThan(initialZoom!);
+  20 |
+  21 |   // Step 2: Click the 'Zoom out' button to decrease the zoo",False,False,10
+stage_5_self_improvement_loop,run_41,uc-04,tests/stage_5_self_improvement_loop/run_41/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-2-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_41,uc-05,tests/stage_5_self_improvement_loop/run_41/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_41,uc-06,tests/stage_5_self_improvement_loop/run_41/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_41,uc-07,tests/stage_5_self_improvement_loop/run_41/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,7
+stage_5_self_improvement_loop,run_41,uc-08,tests/stage_5_self_improvement_loop/run_41/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-7-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,8
+stage_5_self_improvement_loop,run_41,uc-09,tests/stage_5_self_improvement_loop/run_41/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_41,uc-10,tests/stage_5_self_improvement_loop/run_41/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_42,uc-01,tests/stage_5_self_improvement_loop/run_42/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_42,uc-02,tests/stage_5_self_improvement_loop/run_42/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_42,uc-03,tests/stage_5_self_improvement_loop/run_42/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  14 |
+  15 |     // Expected result: After clicking the 'Zoom in' button, the map zoom level is higher than before
+> 16 |     const zoomedInZoom = await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(initialZoom);
+     |                                                             ",False,False,10
+stage_5_self_improvement_loop,run_42,uc-04,tests/stage_5_self_improvement_loop/run_42/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_42,uc-05,tests/stage_5_self_improvement_loop/run_42/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_42,uc-06,tests/stage_5_self_improvement_loop/run_42/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  20 |
+  21 |     // Verify the clicked position is highlighted on the map
+> 22 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+     |                                                             ^
+  23 |
+  24 |     // Verify the forecast contains 24 entries
+  25 |     const forecastSection = page.getByTestId('weather-forecast-section');
+    at",False,False,10
+stage_5_self_improvement_loop,run_42,uc-07,tests/stage_5_self_improvement_loop/run_42/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_42,uc-08,tests/stage_5_self_improvement_loop/run_42/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  34 |   await expect.poll(() =>
+  35 |     measurementPanel.locator('text=/\\d+\\.?\\d*\\s*(km|m|mi|ft)/').first().isVisible()
+> 36 |   ).toBe(true);
+     |     ^
+  37 | });
+  38 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_42\uc-08-measure-a-distance-by-drawing-a-line-on-the-ma",False,False,10
+stage_5_self_improvement_loop,run_42,uc-09,tests/stage_5_self_improvement_loop/run_42/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_42,uc-10,tests/stage_5_self_improvement_loop/run_42/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_43,uc-01,tests/stage_5_self_improvement_loop/run_43/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_43,uc-02,tests/stage_5_self_improvement_loop/run_43/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_43,uc-03,tests/stage_5_self_improvement_loop/run_43/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_43,uc-04,tests/stage_5_self_improvement_loop/run_43/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_43,uc-05,tests/stage_5_self_improvement_loop/run_43/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_43,uc-06,tests/stage_5_self_improvement_loop/run_43/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_43,uc-07,tests/stage_5_self_improvement_loop/run_43/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 2
++ Received  + 2
+
+  Object {
+-   ""ecusVisible"": true,
+-   ""uviVisible"": true,
++   ""ecusVisible"": false,
++   ""uviVisible"": false,
+  }
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  37 |     const ecusVisible = await ecusHeading.isVisible();
+  38 |     return { uviVisible, ecusVisible };
+> 39 |   }).toEqual({ uviVisible: true, ecusVisible: true });
+     |      ^
+  40 | });
+  41 |
+    at c:\Users\n.be",False,False,10
+stage_5_self_improvement_loop,run_43,uc-08,tests/stage_5_self_improvement_loop/run_43/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+\.?\d*\s*(km|m|ft|mi)/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  41 |     const text = await measurementResultElement.textContent();
+  42 |     return text;
+> 43 |   }).toMatch(/\d+\.?\d*\s*(km|m|ft|mi)/i);
+     |      ^
+  44 | });
+  45 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\sta",False,False,10
+stage_5_self_improvement_loop,run_43,uc-09,tests/stage_5_self_improvement_loop/run_43/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_43,uc-10,tests/stage_5_self_improvement_loop/run_43/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_44,uc-01,tests/stage_5_self_improvement_loop/run_44/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_44,uc-02,tests/stage_5_self_improvement_loop/run_44/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_44,uc-03,tests/stage_5_self_improvement_loop/run_44/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_44,uc-04,tests/stage_5_self_improvement_loop/run_44/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_44,uc-05,tests/stage_5_self_improvement_loop/run_44/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_44,uc-06,tests/stage_5_self_improvement_loop/run_44/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_44,uc-07,tests/stage_5_self_improvement_loop/run_44/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true })
+
+
+  67 |   await expect(
+  68 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }),
+",False,False,10
+stage_5_self_improvement_loop,run_44,uc-08,tests/stage_5_self_improvement_loop/run_44/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,PASS,,,False,True,10
+stage_5_self_improvement_loop,run_44,uc-09,tests/stage_5_self_improvement_loop/run_44/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_44,uc-10,tests/stage_5_self_improvement_loop/run_44/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_45,uc-01,tests/stage_5_self_improvement_loop/run_45/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_45,uc-02,tests/stage_5_self_improvement_loop/run_45/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_45,uc-03,tests/stage_5_self_improvement_loop/run_45/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-0-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_45,uc-04,tests/stage_5_self_improvement_loop/run_45/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_45,uc-05,tests/stage_5_self_improvement_loop/run_45/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_45,uc-06,tests/stage_5_self_improvement_loop/run_45/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_45,uc-07,tests/stage_5_self_improvement_loop/run_45/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: ""UV-Index Station""
+Received string:    ""InformationWeather ForecastClick on the map to load a forecast.""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  35 |         const text = await infoPanel.textContent();
+  36 |         return text;
+> 37 |     }).toContain('UV-Index Station');
+     |        ^
+  38 |
+  39 |     await expect.poll(async () => {
+  40 |         const infoPanel = page.getByTestId('i",False,False,10
+stage_5_self_improvement_loop,run_45,uc-08,tests/stage_5_self_improvement_loop/run_45/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s+(km|m|mi|ft)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  38 |   // We can verify this by checking the panel content for a length value with a unit.
+  39 |   const measurementPanel = page.getByTestId('measurement-panel');
+> 40 |   await expect.poll(() => measurementPanel.textContent()).to",False,False,10
+stage_5_self_improvement_loop,run_45,uc-09,tests/stage_5_self_improvement_loop/run_45/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_45,uc-10,tests/stage_5_self_improvement_loop/run_45/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: Timeout 5000ms exceeded while waiting on the predicate
+
+  36 |     // The actual center is approximately [848832, 6793349].
+  37 |     // Use a broader tolerance since the exact center can vary slightly.
+> 38 |     await expect.poll(() => page.locator('#coordinate-viewer').textContent()).toMatch(/848/);
+     |                                                                               ^
+  39 |
+  40 |     // 6. Wait for the info panel to load the forecast.
+  41 |     // The info panel sh",False,False,10
+stage_5_self_improvement_loop,run_46,uc-01,tests/stage_5_self_improvement_loop/run_46/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_46,uc-02,tests/stage_5_self_improvement_loop/run_46/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_46,uc-03,tests/stage_5_self_improvement_loop/run_46/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_46,uc-04,tests/stage_5_self_improvement_loop/run_46/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_46,uc-05,tests/stage_5_self_improvement_loop/run_46/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_46,uc-06,tests/stage_5_self_improvement_loop/run_46/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_46,uc-07,tests/stage_5_self_improvement_loop/run_46/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  27 |   await expect.poll(() =>
+  28 |     page.getByTestId('info-panel').getByRole('heading', { name: 'UV-Index Station', exact: true }).isVisible()
+> 29 |   ).toBeTruthy();
+     |     ^
+  30 |   await expect.poll(() =>
+  31 |     page.getByTestId('info-panel').getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).isVisible()
+  32 |   ).toBeTruthy();
+    at c",False,False,10
+stage_5_self_improvement_loop,run_46,uc-08,tests/stage_5_self_improvement_loop/run_46/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'Measurement' }).getByText(/[\d,.]+\s*(m|km|mi|ft)/)
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Measurement' }).getByText(/[\d,.]+\s*(m|km|mi|ft)/)
+
+
+  32 |     // The dialog text changes from the instruction to the measurement result (e.g., ""74.11 km"")
+  33 |     const measurementResult = page.ge",False,False,10
+stage_5_self_improvement_loop,run_46,uc-09,tests/stage_5_self_improvement_loop/run_46/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_46,uc-10,tests/stage_5_self_improvement_loop/run_46/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,7
+stage_5_self_improvement_loop,run_47,uc-01,tests/stage_5_self_improvement_loop/run_47/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-1-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_47,uc-02,tests/stage_5_self_improvement_loop/run_47/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_47,uc-03,tests/stage_5_self_improvement_loop/run_47/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_47,uc-04,tests/stage_5_self_improvement_loop/run_47/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_47,uc-05,tests/stage_5_self_improvement_loop/run_47/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_47,uc-06,tests/stage_5_self_improvement_loop/run_47/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 24
+Received: 0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  41 |   // The entries are rendered as a list; wait for the list items to appear.
+  42 |   const forecastEntries = weatherForecastSection.getByRole('listitem');
+> 43 |   await expect.poll(() => forecastEntries.count()).toBe(24);
+     |                                                    ^
+  44 | });
+  45 |
+    at c:\Users\n.beikel\repos\ba-we",False,False,10
+stage_5_self_improvement_loop,run_47,uc-07,tests/stage_5_self_improvement_loop/run_47/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,8
+stage_5_self_improvement_loop,run_47,uc-08,tests/stage_5_self_improvement_loop/run_47/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toContainEqual(expected) // deep equality
+
+Expected value: StringMatching /\d+(\.\d+)?\s*(m|km)/
+Received array: [""Click in the map to start a measurement.""]
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  35 |   await expect.poll(() =>
+  36 |     measurementDialog.getByRole('paragraph').allTextContents()
+> 37 |   ).toContainEqual(expect.stringMatching(/\d+(\.\d+)?\s*(m|km)/));
+     |     ^
+  38 | });
+  39 |
+    at c:\Users\n.beikel\repos\ba-webgis-",False,False,10
+stage_5_self_improvement_loop,run_47,uc-09,tests/stage_5_self_improvement_loop/run_47/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_47,uc-10,tests/stage_5_self_improvement_loop/run_47/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 24
+Received:    1
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  56 |         const count = await weatherForecastSection.locator('p').count();
+  57 |         return count;
+> 58 |     }).toBeGreaterThanOrEqual(24);
+     |        ^
+  59 | });
+  60 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_47\uc-10-configure-layers-search-for-a-location-and-load",False,False,10
+stage_5_self_improvement_loop,run_48,uc-01,tests/stage_5_self_improvement_loop/run_48/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_48,uc-02,tests/stage_5_self_improvement_loop/run_48/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_48,uc-03,tests/stage_5_self_improvement_loop/run_48/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_48,uc-04,tests/stage_5_self_improvement_loop/run_48/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-0-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_48,uc-05,tests/stage_5_self_improvement_loop/run_48/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_48,uc-06,tests/stage_5_self_improvement_loop/run_48/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 24
+Received: 0
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  26 |     // The forecast section renders a list of entries; count them.
+  27 |     const forecastEntries = page.getByTestId('weather-forecast-section').locator('li');
+> 28 |     await expect.poll(() => forecastEntries.count()).toBe(24);
+     |                                                      ^
+  29 | });
+  30 |
+    at c:\Users\n.beikel\",False,False,10
+stage_5_self_improvement_loop,run_48,uc-07,tests/stage_5_self_improvement_loop/run_48/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_48,uc-08,tests/stage_5_self_improvement_loop/run_48/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement-panel').getByText(/\d+\.?\d*\s*(m|km)/)
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByText(/\d+\.?\d*\s*(m|km)/)
+
+
+  31 |   await expect(
+  32 |     measurementPanel.getByText(/\d+\.?\d*\s*(m|km)/)
+> 33 |   ).toBeVisible();
+     |     ^
+  34 | });
+  35 |
+    at c:\Users\n.beikel\repos\ba-webgis",False,False,10
+stage_5_self_improvement_loop,run_48,uc-09,tests/stage_5_self_improvement_loop/run_48/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-9-print-the-current-map-view-as-a-png.spec.ts,INFRA_FAIL,,"Test timeout of 30000ms exceeded.
+
+---
+
+Error: page.waitForEvent: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for event ""download""
+============================================================
+
+  29 |     // Wait for the download to start before clicking.
+  30 |     const [download] = await Promise.all([
+> 31 |         page.waitForEvent('download'),
+     |              ^
+  32 |         page.getByRole('button', { name: 'Print' }).click(),
+",False,False,10
+stage_5_self_improvement_loop,run_48,uc-10,tests/stage_5_self_improvement_loop/run_48/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
+stage_5_self_improvement_loop,run_49,uc-01,tests/stage_5_self_improvement_loop/run_49/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_49,uc-02,tests/stage_5_self_improvement_loop/run_49/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_49,uc-03,tests/stage_5_self_improvement_loop/run_49/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_49,uc-04,tests/stage_5_self_improvement_loop/run_49/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-2-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,3
+stage_5_self_improvement_loop,run_49,uc-05,tests/stage_5_self_improvement_loop/run_49/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_49,uc-06,tests/stage_5_self_improvement_loop/run_49/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  18 |     // Wait for the clicked position to be highlighted on the map.
+  19 |     // The helper returns undefined until the map is ready and a highlight exists.
+> 20 |     await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+     |                                                             ^
+  21 |
+  22 |     // Wait for the weather forecast section ",False,False,10
+stage_5_self_improvement_loop,run_49,uc-07,tests/stage_5_self_improvement_loop/run_49/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,,,False,True,6
+stage_5_self_improvement_loop,run_49,uc-08,tests/stage_5_self_improvement_loop/run_49/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(\.\d+)?\s*(m|km|mi|ft)/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  28 |
+  29 |     // Expected results: The measurement panel displays a length value with a unit
+> 30 |     await expect.poll(() => measurementPanel.textContent()).toMatch(/\d+(\.\d+)?\s*(m|km|mi|ft)/i, {
+     |                      ",False,False,10
+stage_5_self_improvement_loop,run_49,uc-09,tests/stage_5_self_improvement_loop/run_49/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_49,uc-10,tests/stage_5_self_improvement_loop/run_49/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,6
+stage_5_self_improvement_loop,run_50,uc-01,tests/stage_5_self_improvement_loop/run_50/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button/uc-01-iter-0-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_50,uc-02,tests/stage_5_self_improvement_loop/run_50/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,,,False,True,1
+stage_5_self_improvement_loop,run_50,uc-03,tests/stage_5_self_improvement_loop/run_50/uc-03-zoom-in-and-out-using-the-zoom-buttons/uc-03-iter-9-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has type:  object
+Received has value: {""not"": {""toBe"": [Function anonymous], ""toBeAttached"": [Function anonymous], ""toBeChecked"": [Function anonymous], ""toBeCloseTo"": [Function anonymous], ""toBeDefined"": [Function anonymous], ""toBeDisabled"": [Function anonymous], ""toBeEditable"": [Function anonymous], ""toBeEmpty"": [Function anonymous], ""toBeEnabled"": [Function anonymous], ""toBeFal",False,False,10
+stage_5_self_improvement_loop,run_50,uc-04,tests/stage_5_self_improvement_loop/run_50/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map/uc-04-iter-1-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_50,uc-05,tests/stage_5_self_improvement_loop/run_50/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-1-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_50,uc-06,tests/stage_5_self_improvement_loop/run_50/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_50,uc-07,tests/stage_5_self_improvement_loop/run_50/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 2
++ Received  + 2
+
+  Object {
+-   ""eucosVisible"": true,
+-   ""uviVisible"": true,
++   ""eucosVisible"": false,
++   ""uviVisible"": false,
+  }
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  29 |     const eucosVisible = await eucosHeading.isVisible();
+  30 |     return { uviVisible, eucosVisible };
+> 31 |   }).toEqual({ uviVisible: true, eucosVisible: true });
+     |      ^
+  32 | });
+  33 |
+    at c:\User",False,False,10
+stage_5_self_improvement_loop,run_50,uc-08,tests/stage_5_self_improvement_loop/run_50/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-9-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /[\d.,]+\s*(km|m)/i
+Received string:  ""Click in the map to start a measurement.""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  39 |   await expect.poll(() =>
+  40 |     measurementDialog.getByRole('paragraph').textContent()
+> 41 |   ).toMatch(/[\d.,]+\s*(km|m)/i);
+     |     ^
+  42 | });
+  43 |
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_50\uc-08-measure-",False,False,10
+stage_5_self_improvement_loop,run_50,uc-09,tests/stage_5_self_improvement_loop/run_50/uc-09-print-the-current-map-view-as-a-png/uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts,PASS,,,False,True,2
+stage_5_self_improvement_loop,run_50,uc-10,tests/stage_5_self_improvement_loop/run_50/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,,,False,True,4
