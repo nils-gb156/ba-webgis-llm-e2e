@@ -40,6 +40,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -50,6 +51,15 @@ STAGE_DIRS = {
     "stage3": "stage_3_generated_ui_map",
     "stage4": "stage_4_manual_ui_map",
     "stage5": "stage_5_self_improvement_loop",
+}
+
+# Anzeigenamen für Plot-Titel (konsistent mit der Benennung in der Arbeit)
+STAGE_LABELS = {
+    "stage1": "Stufe 1: Baseline (kein UI-Kontext)",
+    "stage2": "Stufe 2: Automatischer Accessibility-Snapshot",
+    "stage3": "Stufe 3: Automatisch generierte UI-Map",
+    "stage4": "Stufe 4: Manuell erstellte UI-Map",
+    "stage5": "Bonus-Stufe 5: Self-Improvement-Loop",
 }
 
 # feste Reihenfolge/Farben, damit alle Stages vergleichbar aussehen.
@@ -66,7 +76,21 @@ EXEC_COLORS = {
     "GENERATION_ERROR": "#000000", # schwarz -- hebt sich klar ab
     "TIMEOUT": "#999999",          # grau
 }
-SCORE_DIMS = ["selector_score", "coverage_score", "assertion_score"]
+# Reihenfolge in allen Plots: coverage -> selector -> map_interaction ->
+# assertion. map_interaction_score ist für Nicht-Karten-UCs "n/a" (siehe
+# MAP_UCS im Judge-Prompt) und wird beim Einlesen zu NaN -> in Mittelwerten/
+# Verteilungen ausgeklammert, in der Heatmap als neutrale n/a-Zelle.
+SCORE_DIMS = ["coverage_score", "selector_score", "map_interaction_score",
+              "assertion_score"]
+
+# Einheitliches Farbschema für die ordinalen Judge-Scores (1-4) in
+# score_distribution UND score_heatmap: sequenzieller Helligkeitsverlauf
+# einer Farbe (Blau), hell = niedriger Score, dunkel = hoher Score.
+# Sequenziell statt divergierend, weil die Skala ordinal ohne natürlichen
+# Mittelpunkt ist; ein Ein-Farben-Verlauf bleibt auch in Graustufen und
+# bei Farbfehlsichtigkeit eindeutig lesbar.
+SCORE_CMAP = "Blues"
+SCORE_LEVEL_COLORS = {1: "#DBE9F6", 2: "#9DC8E4", 3: "#4A97C9", 4: "#0B559F"}
 
 # Farbverlauf für die PASS-Iteration in Stage-5-Plots (früh = dunkelblau,
 # spät = hell), FAIL = vermilion. Colorblind-sicher gewählt.
@@ -95,13 +119,18 @@ def load_and_merge(stage_dir: Path) -> pd.DataFrame:
     df2_scores = df2.drop(columns=drop_cols)
     df = df1.merge(df2_scores, on=key, how="left")
 
+    missing = [d for d in SCORE_DIMS if d not in df.columns]
+    if missing:
+        print(f"[WARNUNG] Score-Spalte(n) fehlen in _phase2_judge.csv: "
+              f"{', '.join(missing)} -- Judge-Lauf mit altem Prompt? "
+              f"Plots werden ohne diese Dimension(en) erzeugt.")
     for dim in SCORE_DIMS:
         if dim in df.columns:
             df[dim] = pd.to_numeric(df[dim], errors="coerce")
     return df
 
 
-def plot_exec_by_uc(df: pd.DataFrame, out: Path):
+def plot_exec_by_uc(df: pd.DataFrame, out: Path, stage_label: str):
     ucs = sorted(df["uc_id"].unique())
     present = [c for c in EXEC_ORDER if c in df["exec_category"].unique()]
     counts = {c: [len(df[(df.uc_id == uc) & (df.exec_category == c)]) for uc in ucs]
@@ -116,7 +145,7 @@ def plot_exec_by_uc(df: pd.DataFrame, out: Path):
         bottom = [b + v for b, v in zip(bottom, counts[c])]
     ax.set_ylabel("Anzahl Testdateien")
     ax.set_xlabel("Use Case")
-    ax.set_title("Ausführungskategorien pro Use Case")
+    ax.set_title(f"Ausführungskategorien pro Use Case\n{stage_label}")
     # Legende in visueller Stapelreihenfolge (oben im Balken zuerst)
     legend_order = list(reversed(present))
     ax.legend([handles[c] for c in legend_order], legend_order,
@@ -128,12 +157,12 @@ def plot_exec_by_uc(df: pd.DataFrame, out: Path):
     plt.close(fig)
 
 
-def plot_score_distribution(df: pd.DataFrame, out: Path):
-    """Verteilung der ordinalen Scores (1-4) je Dimension als gestapelte
-    Balken. Passt zur 4-stufigen Rubrik besser als ein Boxplot, weil er
-    zeigt, wie viele Tests auf welcher Stufe liegen."""
-    # Farben Stufe 1 (schlecht) -> 4 (gut), colorblind-sicher, hell->dunkel
-    level_colors = {1: "#D55E00", 2: "#E69F00", 3: "#56B4E9", 4: "#0072B2"}
+def plot_score_distribution(df: pd.DataFrame, out: Path, stage_label: str):
+    """Verteilung der ordinalen Judge-Scores (1-4) je Dimension als
+    gestapelte Balken. Passt zur 4-stufigen Rubrik besser als ein Boxplot,
+    weil er zeigt, wie viele Tests auf welchem Score-Wert liegen.
+    Legende sagt bewusst "Score", nicht "Stufe" -- "Stufe" ist in der
+    Arbeit für die Kontextstufen (UV) reserviert."""
     dims = [d for d in SCORE_DIMS if d in df.columns]
     labels = [d.replace("_score", "") for d in dims]
 
@@ -142,48 +171,62 @@ def plot_score_distribution(df: pd.DataFrame, out: Path):
     for level in [1, 2, 3, 4]:
         heights = [int((df[d] == level).sum()) for d in dims]
         bars = ax.bar(labels, heights, bottom=bottom,
-                      label=f"Stufe {level}", color=level_colors[level])
-        # Zahl in jedes Segment schreiben, wenn groß genug
+                      label=f"Score {level}",
+                      color=SCORE_LEVEL_COLORS[level],
+                      edgecolor="white", linewidth=0.4)
+        # Zahl in jedes Segment schreiben, wenn groß genug; Schriftfarbe
+        # an Segmenthelligkeit anpassen (helle Segmente -> schwarze Schrift)
         for bar, h, b in zip(bars, heights, bottom):
             if h >= 3:
+                txt_color = "white" if level >= 3 else "black"
                 ax.text(bar.get_x() + bar.get_width() / 2, b + h / 2,
                         str(h), ha="center", va="center",
-                        color="white", fontsize=9, fontweight="bold")
+                        color=txt_color, fontsize=9, fontweight="bold")
         bottom = [b + h for b, h in zip(bottom, heights)]
 
     ax.set_ylabel("Anzahl Testdateien")
-    ax.set_title("Verteilung der Score-Stufen je Dimension (gesamt)")
+    ax.set_title(f"Verteilung der Judge-Scores je Dimension\n{stage_label}")
     handles, lbls = ax.get_legend_handles_labels()
-    ax.legend(reversed(handles), reversed(lbls), title="Score",
+    ax.legend(reversed(handles), reversed(lbls),
+              title="Judge-Score",
               loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=9)
     fig.tight_layout()
     fig.savefig(out, dpi=150)
     plt.close(fig)
 
 
-def plot_score_heatmap(df: pd.DataFrame, out: Path):
+def plot_score_heatmap(df: pd.DataFrame, out: Path, stage_label: str):
     ucs = sorted(df["uc_id"].unique())
-    matrix = [[df[df.uc_id == uc][dim].mean() for dim in SCORE_DIMS] for uc in ucs]
+    dims = [d for d in SCORE_DIMS if d in df.columns]
+    matrix = [[df[df.uc_id == uc][dim].mean() for dim in dims] for uc in ucs]
 
-    fig, ax = plt.subplots(figsize=(6, 7))
-    # RdBu: divergierend, colorblind-sicher (rot vs. blau auch bei Rotgrün-
-    # schwäche unterscheidbar). Rot = schlecht (1), Weiß = Mitte (2.5),
-    # Blau = gut (4). Weißpunkt liegt durch vmin/vmax auf der Skalenmitte.
-    im = ax.imshow(matrix, cmap="RdBu", vmin=1, vmax=4, aspect="auto")
-    ax.set_xticks(range(len(SCORE_DIMS)))
-    ax.set_xticklabels([d.replace("_score", "") for d in SCORE_DIMS])
+    fig, ax = plt.subplots(figsize=(6.5, 7))
+    # Sequenzieller Ein-Farben-Verlauf (Helligkeit kodiert den Score):
+    # hell = niedriger Score, dunkel = hoher Score. Gleiche Farblogik wie in
+    # score_distribution, dadurch sind beide Grafiken gemeinsam lesbar.
+    # map_interaction_score ist für Nicht-Karten-UCs "n/a" -> NaN im Mittel.
+    # Solche Zellen neutral grau (set_bad) statt als Score einfärben.
+    cmap = plt.get_cmap(SCORE_CMAP).copy()
+    cmap.set_bad(color="#E5E5E5")
+    matrix_ma = np.ma.masked_invalid(matrix)
+    im = ax.imshow(matrix_ma, cmap=cmap, vmin=1, vmax=4, aspect="auto")
+    ax.set_xticks(range(len(dims)))
+    ax.set_xticklabels([d.replace("_score", "") for d in dims])
     ax.set_yticks(range(len(ucs)))
     ax.set_yticklabels(ucs)
     for i in range(len(ucs)):
-        for j in range(len(SCORE_DIMS)):
+        for j in range(len(dims)):
             v = matrix[i][j]
             if pd.notna(v):
-                # kräftiges Rot/Blau an den Enden -> weiße Schrift,
-                # heller Bereich um die Mitte -> schwarze Schrift
-                txt_color = "white" if (v <= 1.7 or v >= 3.3) else "black"
+                # dunkle Zellen (hoher Score) -> weiße Schrift
+                txt_color = "white" if v >= 2.9 else "black"
                 ax.text(j, i, f"{v:.1f}", ha="center", va="center",
                         fontsize=8, color=txt_color)
-    ax.set_title("Mittlerer Score je UC × Dimension")
+            else:
+                # n/a (map_interaction für Nicht-Karten-UCs)
+                ax.text(j, i, "n/a", ha="center", va="center",
+                        fontsize=7, color="#888888")
+    ax.set_title(f"Mittlerer Score je UC × Dimension\n{stage_label}")
     fig.colorbar(im, ax=ax, label="Ø Score (1–4)")
     fig.tight_layout()
     fig.savefig(out, dpi=150)
@@ -199,6 +242,8 @@ def write_aggregates(df: pd.DataFrame, out: Path):
         for c in EXEC_ORDER:
             row[c] = int((sub.exec_category == c).sum())
         for dim in SCORE_DIMS:
+            if dim not in sub.columns:
+                continue
             vals = sub[dim].dropna()
             row[f"{dim}_mean"] = round(vals.mean(), 2) if len(vals) else ""
             row[f"{dim}_median"] = vals.median() if len(vals) else ""
@@ -239,7 +284,8 @@ def pass_iteration(entry: dict) -> int | None:
     return None
 
 
-def plot_loop_convergence(entries: list[dict], max_iters: int, out: Path):
+def plot_loop_convergence(entries: list[dict], max_iters: int, out: Path,
+                          stage_label: str):
     """Kumulierte PASS-Rate nach Iteration k über alle UC×Run-Einträge.
     Zeigt den Grenznutzen jeder weiteren Loop-Iteration."""
     n = len(entries)
@@ -259,14 +305,16 @@ def plot_loop_convergence(entries: list[dict], max_iters: int, out: Path):
     ax.set_xlabel("Iteration")
     ax.set_ylabel("Kumulierte PASS-Rate (%)")
     ax.set_ylim(0, 105)
-    ax.set_title(f"Loop-Konvergenz: kumulierte PASS-Rate nach Iteration (n={n})")
+    ax.set_title(f"Loop-Konvergenz: kumulierte PASS-Rate nach Iteration (n={n})"
+                 f"\n{stage_label}")
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
     fig.savefig(out, dpi=150)
     plt.close(fig)
 
 
-def plot_loop_iterations_by_uc(entries: list[dict], max_iters: int, out: Path):
+def plot_loop_iterations_by_uc(entries: list[dict], max_iters: int, out: Path,
+                               stage_label: str):
     """Pro UC gestapelte Balken: in welcher Iteration wurde bestanden
     (Farbverlauf frueh -> spaet), plus finale FAILs (vermilion)."""
     ucs = sorted({f"uc-{int(e['uc_id']):02d}" for e in entries})
@@ -291,7 +339,7 @@ def plot_loop_iterations_by_uc(entries: list[dict], max_iters: int, out: Path):
 
     ax.set_ylabel("Anzahl Läufe")
     ax.set_xlabel("Use Case")
-    ax.set_title("PASS-Iteration pro Use Case")
+    ax.set_title(f"PASS-Iteration pro Use Case\n{stage_label}")
     legend_labels = list(handles.keys())
     ax.legend([handles[l] for l in legend_labels], legend_labels,
               loc="upper center", bbox_to_anchor=(0.5, -0.22),
@@ -315,12 +363,14 @@ def main():
     plots_dir = stage_dir / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
 
+    stage_label = STAGE_LABELS[stage_key]
+
     df = load_and_merge(stage_dir)
     print(f"[INFO] {len(df)} Dateien geladen für {stage_name}")
 
-    plot_exec_by_uc(df, plots_dir / "exec_category_by_uc.png")
-    plot_score_distribution(df, plots_dir / "score_distribution.png")
-    plot_score_heatmap(df, plots_dir / "score_heatmap.png")
+    plot_exec_by_uc(df, plots_dir / "exec_category_by_uc.png", stage_label)
+    plot_score_distribution(df, plots_dir / "score_distribution.png", stage_label)
+    plot_score_heatmap(df, plots_dir / "score_heatmap.png", stage_label)
     write_aggregates(df, plots_dir / "aggregates.csv")
 
     if stage_key == "stage5":
@@ -332,9 +382,11 @@ def main():
                             max((int(e.get("max_iterations", 5)) for e in entries),
                                 default=5))
             plot_loop_convergence(entries, max_iters,
-                                  plots_dir / "loop_convergence.png")
+                                  plots_dir / "loop_convergence.png",
+                                  stage_label)
             plot_loop_iterations_by_uc(entries, max_iters,
-                                       plots_dir / "loop_iterations_by_uc.png")
+                                       plots_dir / "loop_iterations_by_uc.png",
+                                       stage_label)
             print("[INFO] Loop-Plots erzeugt (convergence, iterations_by_uc)")
 
     print(f"[FERTIG] Diagramme + aggregates.csv in {plots_dir}")
