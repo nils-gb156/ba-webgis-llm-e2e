@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify preconditions: at least one base layer and one operational layer are visible
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  // The toggle might already be pressed if the panel was open, but initially it should be closed.
+  // We click it to ensure the panel is open.
+  await printToggle.click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('Test Printout');
+
+  // Step 3: Select the PNG file format
+  const formatRadio = page.getByRole('radio', { name: 'PNG' });
+  await formatRadio.click({ force: true });
+  await expect(formatRadio).toBeChecked();
+
+  // Step 4: Click the export/print button
+  // Wait for the download to start before clicking the button
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Export' }).click()
+  ]);
+
+  // Verify the file was generated and downloaded
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+
+  // Clean up the downloaded file
+  await download.delete();
+});

@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from "../../../map-model-helpers";
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and the initial layer to be rendered
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the Measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  
+  // Ensure the measurement panel is closed before starting (if it was open from previous state)
+  const measurementPanel = page.getByTestId('measurement-panel');
+  const isPanelVisible = await measurementPanel.isVisible();
+  
+  if (isPanelVisible) {
+    // If already visible, the toggle might be in 'pressed' state. 
+    // We want to ensure it is open for measurement. If it's already open, we might not need to click,
+    // but typically toggles switch state. Let's check the aria-pressed state if possible, 
+    // or just assume we want it open. If it's open, clicking might close it.
+    // However, the prompt says "activate via measurement-toggle". 
+    // Let's check if the panel is visible. If it is, we assume the tool is active.
+    // If it's not, we click.
+  }
+
+  if (!isPanelVisible) {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Wait for the measurement panel to become visible
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2 & 3: Draw a line by clicking points and double-clicking to finish
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map to click within it
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or has no bounding box');
+  }
+
+  // Click first point (center-ish)
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  
+  // Click second point (to the right)
+  await page.mouse.click(box.x + box.width / 2 + 100, box.y + box.height / 2);
+  
+  // Click third point (to create a segment)
+  await page.mouse.click(box.x + box.width / 2 + 100, box.y + box.height / 2 - 100);
+
+  // Double-click to finish the measurement
+  await page.mouse.dblclick(box.x + box.width / 2 + 100, box.y + box.height / 2 - 100);
+
+  // Expected Result: The measurement panel displays a length value with a unit.
+  // We poll the measurement panel content for a pattern matching a number followed by a unit
+  const measurementElement = page.getByTestId('measurement');
+  
+  await expect.poll(async () => {
+    const text = await measurementElement.textContent();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft|in|cm|mm)/);
+});

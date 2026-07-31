@@ -1,0 +1,156 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map to be ready
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+    // Step 1: Hide Temperature overlay
+    // The layer switcher is visible by default. We need to find the toggle for "Temperature".
+    // Based on the UI map, we have layer-switcher panel. We assume standard Chakra UI structure
+    // where toggles are likely checkboxes or buttons.
+    // The prompt mentions "visibility toggle". Let's look for a checkbox or button labeled "Temperature".
+    // Since we don't have specific test IDs for layer items in the UI map provided, we use getByRole with exact name.
+    // Note: The UI map lists `layer-switcher` as a panel.
+    
+    // Let's assume the layer items have test IDs or accessible names. 
+    // The prompt says "UI context generated automatically... 39 unique data-testid values".
+    // However, the table doesn't show specific test IDs for layer items like "temperature-toggle".
+    // It lists `layer-switcher` and `legend`.
+    // Let's look for the layer switcher content.
+    
+    // We will use getByRole('checkbox', { name: 'Temperature' }) or similar if it's a checkbox.
+    // Or getByRole('button', { name: 'Temperature' }) if it's a toggle button.
+    // Given Chakra UI, checkboxes are common for layer visibility.
+    
+    // Step 1: Click Temperature toggle to hide it.
+    // We need to find the checkbox for Temperature.
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+    
+    // Assert Temperature is hidden
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Step 2: Show Precipitation overlay
+    // Precipitation is initially hidden.
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+
+    // Assert Precipitation is visible
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select first
+    // The results appear in `geocoder-results`.
+    // We wait for the first result item to appear.
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    
+    // Click the first result
+    await firstResult.click();
+
+    // Step 5: Wait for map to navigate
+    // We expect the center to change from the initial default (likely Germany/Europe center)
+    // to Münster's coordinates. Münster is approx 7.62, 51.96 lon/lat.
+    // In EPSG:3857, this is approx (848000, 6780000).
+    // We can just wait for the center to settle to a non-default value or specifically check if it's close to Münster.
+    // Since we don't know the exact initial center, we'll wait for the map to load new tiles/features.
+    // A simpler assertion: wait for the info panel to update or just wait a bit for navigation.
+    // The prompt says "Wait for the map to navigate".
+    // We can poll the center until it changes significantly or just wait for the next step's condition.
+    // Let's wait for the info panel to load the forecast, which implies navigation happened.
+
+    // Step 6: Wait for info panel to load forecast with 24 entries
+    // The info panel is visible by default.
+    // We look for weather forecast entries.
+    // The UI map mentions `weather-forecast-entry`.
+    // We expect 24 entries.
+    
+    // We can count the weather-forecast-entry elements.
+    await expect.poll(async () => {
+        const entries = page.getByTestId('weather-forecast-entry');
+        return await entries.count();
+    }).toBe(24);
+
+    // Final assertions from Expected Results:
+    // - Precipitation toggle is in disabled state? 
+    //   Wait, the prompt says "Precipitation overlay layer toggle is in the disabled state."
+    //   This might mean the checkbox is checked (active) or the UI indicates it's enabled/active.
+    //   Usually "disabled state" in UI testing might mean `disabled` attribute, but here it likely means "enabled/active" in terms of being visible/checked.
+    //   However, looking at the previous step: "Temperature overlay layer toggle is in the enabled state."
+    //   If "enabled state" means checked/visible, then "disabled state" might mean unchecked/hidden?
+    //   Let's re-read carefully.
+    //   "The Precipitation overlay layer toggle is in the disabled state."
+    //   "The Temperature overlay layer toggle is in the enabled state."
+    //   In Step 1, we hid Temperature. In Step 2, we showed Precipitation.
+    //   So Temperature is HIDDEN. Precipitation is VISIBLE.
+    //   If "enabled state" means the layer is active/visible, then Temperature should be enabled? But we hid it.
+    //   Maybe "enabled state" refers to the toggle button being clickable/functional? No, that's always true.
+    //   Let's look at standard terminology. A checkbox is "checked" or "unchecked".
+    //   Perhaps "enabled" means the layer is ON (checked) and "disabled" means the layer is OFF (unchecked).
+    //   If so:
+    //   Step 1: Hide Temperature -> Temperature toggle should be unchecked (disabled layer).
+    //   Step 2: Show Precipitation -> Precipitation toggle should be checked (enabled layer).
+    //   But the expected result says:
+    //   "Precipitation ... disabled"
+    //   "Temperature ... enabled"
+    //   This contradicts our actions if "enabled" = "visible".
+    //   Let's re-read the Use Case Description.
+    //   "The user clicks the visibility toggle of the Temperature overlay layer to hide it." -> Temperature is HIDDEN.
+    //   "The user clicks the visibility toggle of the Precipitation overlay layer to show it." -> Precipitation is VISIBLE.
+    //   Expected Results:
+    //   "The Precipitation overlay layer toggle is in the disabled state."
+    //   "The Temperature overlay layer toggle is in the enabled state."
+    //   This seems backwards if "enabled" means "visible".
+    //   Is it possible the test expects the *initial* state? No, it's the result of the steps.
+    //   Is it possible "disabled state" means the toggle itself is disabled (grayed out)? Unlikely for a visibility toggle.
+    //   Is it possible the labels are swapped in my understanding?
+    //   Let's assume "enabled state" means the layer is ACTIVE (checked) and "disabled state" means the layer is INACTIVE (unchecked).
+    //   If so, Temperature is Hidden -> Inactive/Disabled. Precipitation is Visible -> Active/Enabled.
+    //   This matches my actions.
+    //   BUT the Expected Result says: Precipitation -> Disabled, Temperature -> Enabled.
+    //   This is a contradiction.
+    //   Let's look at the UI Map again.
+    //   Maybe the toggle button text is different?
+    //   Or maybe I should assert the checkbox state directly.
+    //   Let's assert the checkbox state based on visibility.
+    //   Temperature is hidden -> Checkbox unchecked.
+    //   Precipitation is visible -> Checkbox checked.
+    //   If the expected result text is confusing, I will assert the factual state:
+    //   Temperature is not rendered. Precipitation is rendered.
+    //   And I will check the checkbox states.
+    
+    // Let's check the checkbox states.
+    // Temperature should be unchecked.
+    await expect(page.getByRole('checkbox', { name: 'Temperature' })).not.toBeChecked();
+    // Precipitation should be checked.
+    await expect(page.getByRole('checkbox', { name: 'Precipitation' })).toBeChecked();
+
+    // If the expected result literally means "disabled attribute", let's check that too.
+    // But usually, visibility toggles don't get disabled.
+    // I will stick to the checkbox state reflecting visibility.
+
+    // Assert map navigated.
+    // We can check if the center is roughly Münster.
+    // Münster, DE: 51.9606, 7.6261
+    // EPSG:3857: x = 7.6261 * 20037508.34 / 180 = 848,500 approx. y = log(tan(45+51.96/2)) * 20037508.34 / pi = 6,780,000 approx.
+    const center = await getMapCenter(page);
+    expect(center).toBeDefined();
+    if (center) {
+        // Check if center is within a reasonable distance of Münster
+        const munsterX = 848500;
+        const munsterY = 6780000;
+        const dist = Math.sqrt(Math.pow(center[0] - munsterX, 2) + Math.pow(center[1] - munsterY, 2));
+        // Allow 10km tolerance
+        expect(dist).toBeLessThan(10000);
+    }
+});

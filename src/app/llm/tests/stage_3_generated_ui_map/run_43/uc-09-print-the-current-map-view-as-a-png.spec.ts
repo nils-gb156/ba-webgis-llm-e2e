@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+  getActiveBaseLayerTitle,
+  isLayerRendered,
+} from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and at least one base layer and one operational layer to be rendered
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect
+    .poll(() => isLayerRendered(page, 'Temperature'))
+    .resolves.toBe(true);
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  // The print-toggle might already be in the correct state if we assume a fresh load,
+  // but the use case implies opening it. We check visibility first.
+  const printingPanel = page.getByTestId('printing-panel');
+  const isPanelVisible = await printingPanel.isVisible();
+
+  if (!isPanelVisible) {
+    await printToggle.click();
+  }
+
+  // Assert printing panel is visible
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // We need to find the title input inside the printing panel.
+  // Since no specific test id for the title input is provided in the UI map,
+  // we look for a label or input within the panel.
+  // Assuming a standard form structure, we might find a label "Title" or similar.
+  // Let's try to find an input field within the printing panel.
+  // If there's a specific test id, it would be better. Let's assume there's a label "Title"
+  // or an input with a placeholder.
+  // Looking at the UI map, there is no specific test id for the title input.
+  // We will use getByLabel or getByPlaceholder.
+  // Let's assume the label is "Title" or similar.
+  // To be safe, let's look for an input inside the printing panel.
+  const titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  // We need to find the format selector. It might be a radio group or a dropdown.
+  // Let's assume there is a radio button or select for format.
+  // If it's a radio, we look for "PNG". If it's a select, we select "PNG".
+  // Let's assume it's a radio button or a select option.
+  // Without a specific test id, we'll try to find a radio button or select option with "PNG".
+  // Let's assume it's a radio button group.
+  const pngOption = printingPanel.getByRole('radio', { name: 'PNG' });
+  // If the radio is not visible or doesn't exist, it might be a select.
+  // Let's try to click the PNG radio. If it fails, we might need to handle a select.
+  // However, often format selection is a radio group in such panels.
+  // Let's assume it exists and click it.
+  // If it's already selected, clicking might do nothing or deselect.
+  // We should ensure it's selected.
+  // Let's check if the PNG radio is checked.
+  const isPngSelected = await pngOption.isChecked();
+  if (!isPngSelected) {
+    await pngOption.click();
+  }
+
+  // Step 4: Click the export/print button
+  // We need to find the export button in the printing panel.
+  const exportButton = printingPanel.getByRole('button', { name: /export|print/i });
+  await expect(exportButton).toBeVisible();
+
+  // Wait for download before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Assert download
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  // Additional assertion: The printed image should show visible base map and overlay layers.
+  // Since we can't directly assert the image content, we rely on the fact that the map
+  // has the expected layers rendered.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+  await expect
+    .poll(() => isLayerRendered(page, 'Temperature'))
+    .resolves.toBe(true);
+});

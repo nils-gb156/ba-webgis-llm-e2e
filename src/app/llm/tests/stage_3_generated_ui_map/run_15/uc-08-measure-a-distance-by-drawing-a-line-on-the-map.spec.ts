@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for map to be ready and get initial center to click relative to it
+  await expect.poll(() => getMapCenter(page)).toBeDefined();
+  const initialCenter = await getMapCenter(page);
+  expect(initialCenter).toBeDefined();
+
+  // Step 1: Click the measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2 & 3: Draw a line by clicking points and double-clicking to finish
+  // Click first point (slightly offset from center to ensure interaction)
+  await page.getByTestId('map-container').click({
+    position: { x: initialCenter![0] - 100, y: initialCenter![1] - 100 }
+  });
+
+  // Click second point
+  await page.getByTestId('map-container').click({
+    position: { x: initialCenter![0] + 100, y: initialCenter![1] + 100 }
+  });
+
+  // Double-click to finish the measurement
+  await page.getByTestId('map-container').dblclick({
+    position: { x: initialCenter![0] + 100, y: initialCenter![1] + 100 }
+  });
+
+  // Wait for measurement result to appear and contain a length value with unit
+  // The measurement element should display text like "1.2 km" or similar
+  const measurementElement = page.getByTestId('measurement');
+  await expect.poll(() => measurementElement.textContent()).toMatch(/[\d.]+\s*(m|km|mi|ft)/);
+
+  // Final assertion: measurement panel is visible and contains the result
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+  await expect(measurementElement).toBeVisible();
+});

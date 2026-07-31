@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and have a zoom level before proceeding
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  await printToggle.click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('Test Printout');
+
+  // Step 3: Select the PNG file format
+  // Assuming the format selector is a radio group or dropdown with "PNG" option
+  const pngFormatOption = page.getByRole('radio', { name: 'PNG' }).or(page.getByRole('option', { name: 'PNG' }));
+  // If it's a radio button, click it. If it's a select, we might need to select.
+  // Given the UI map doesn't specify the exact control for format, we try common patterns.
+  // Often these are radio buttons in a group.
+  const pngRadio = page.getByRole('radio', { name: 'PNG' });
+  if (await pngRadio.isVisible()) {
+    await pngRadio.click();
+  } else {
+    // Fallback: try to find a select or other mechanism if radios aren't found
+    // For now, assuming radio based on typical form controls in such panels
+    await expect(pngRadio).toBeVisible();
+    await pngRadio.click();
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = page.getByRole('button', { name: /Export|Print|Download/i });
+  
+  // Wait for the download to start
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Await the download and verify it
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  
+  // Verify the file is a PNG
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

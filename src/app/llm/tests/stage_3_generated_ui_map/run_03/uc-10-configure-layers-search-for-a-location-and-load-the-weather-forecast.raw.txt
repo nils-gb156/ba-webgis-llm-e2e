@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Layer switcher is visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Precondition: Info panel is visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Step 1: Hide Temperature layer
+  // The Temperature layer is initially visible. We click its toggle to hide it.
+  // We look for the toggle within the layer switcher to avoid ambiguity.
+  const temperatureToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+
+  // Step 2: Show Precipitation layer
+  // The Precipitation layer is initially hidden. We click its toggle to show it.
+  const precipitationToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+
+  // Expected result: Precipitation is rendered, Temperature is not
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  // Step 3: Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select first
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // We poll the map center to ensure it has changed from the initial extent.
+  // We don't know the exact coordinates, but we know it shouldn't be undefined and
+  // should settle. We also check that the info panel is visible as it loads the forecast.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+  
+  // Wait for the map center to settle (indicating navigation is complete)
+  // We use a simple check that center is not undefined and then wait a bit for UI updates
+  await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+  // Step 6: Wait for weather forecast to load with 24 entries
+  // The info panel should contain a weather forecast section
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Count the forecast entries
+  const entries = page.getByTestId('weather-forecast-entry');
+  await expect(entries).toHaveCount(24);
+});

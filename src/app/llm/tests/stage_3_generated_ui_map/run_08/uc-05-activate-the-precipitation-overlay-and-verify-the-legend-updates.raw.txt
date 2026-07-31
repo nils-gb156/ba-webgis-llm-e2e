@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to settle
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Click the visibility toggle of the Precipitation overlay layer.
+    // The layer switcher is visible by default. We locate the Precipitation layer
+    // within the layer switcher panel and click its checkbox.
+    const layerSwitcher = page.getByRole('region', { name: /layer/i }); // Assuming standard ARIA role or testid
+    const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation' });
+    await precipitationToggle.click({ force: true });
+
+    // Verify the toggle is checked
+    await expect(precipitationToggle).toBeChecked();
+
+    // Verify the Precipitation layer is actually rendered on the map
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 2: View the legend and verify it displays an entry for the Precipitation layer.
+    const legend = page.getByTestId('legend');
+    await expect(legend).toBeVisible();
+
+    // Check if the legend contains an entry related to Precipitation.
+    // The legend might contain text or specific elements for the active layers.
+    // We look for the legend entry element or text associated with Precipitation.
+    const precipitationLegendEntry = legend.getByRole('listitem', { name: /precipitation/i, exact: false });
+    
+    // Alternatively, if the legend is a list of items, check if one contains "Precipitation"
+    // Since we don't have specific testids for legend items, we rely on text or role.
+    // Using expect.poll to wait for the legend to update with the new layer
+    await expect.poll(async () => {
+        // Check if the legend text or content includes "Precipitation"
+        const legendText = await legend.textContent();
+        return legendText?.toLowerCase().includes('precipitation') ?? false;
+    }).toBe(true);
+});

@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  await page.getByTestId('print-toggle').click();
+
+  // Step 2: Verify the printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 3: Enter a title for the printout
+  // Assuming the printing panel contains an input for the title.
+  // Since no specific testid for the title input is provided, we use a label or role.
+  // Based on common UI patterns, we look for an input within the printing panel.
+  const titleInput = page.getByTestId('printing-panel').getByRole('textbox', { name: /title/i });
+  await titleInput.fill('My Map Printout');
+
+  // Step 4: Select the PNG file format
+  // Assuming there is a radio group or select for format.
+  // We look for a radio button or option with 'PNG' inside the printing panel.
+  const pngFormatOption = page.getByTestId('printing-panel').getByRole('radio', { name: 'PNG' });
+  if (await pngFormatOption.isVisible()) {
+    await pngFormatOption.check();
+  } else {
+    // Fallback: If it's a select, we might need to select it differently.
+    // However, radio is common for format selection. If not found, we might try getByRole('option', { name: 'PNG' })
+    // or getByRole('combobox'). Let's assume radio for now as it's more explicit for "selecting a format".
+    // If the UI uses a select, the above check might fail silently.
+    // Let's try to find any element containing "PNG" that is interactive.
+    const pngSelect = page.getByTestId('printing-panel').getByRole('combobox');
+    if (await pngSelect.isVisible()) {
+        await pngSelect.selectOption({ label: 'PNG' });
+    }
+  }
+
+  // Step 5: Click the export/print button
+  // We look for a button inside the printing panel that says "Export" or "Print"
+  const exportButton = page.getByTestId('printing-panel').getByRole('button', { name: /export|print/i });
+  
+  // Wait for the download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Step 6: Assert the download occurred and is a PNG
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

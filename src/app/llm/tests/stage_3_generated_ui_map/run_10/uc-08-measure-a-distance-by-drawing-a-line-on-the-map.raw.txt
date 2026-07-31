@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and layers to render
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Activate the measurement tool
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const infoPanel = page.getByTestId('info-panel');
+
+    // Ensure info panel is closed so measurement panel can be seen clearly if needed,
+    // though the use case doesn't strictly require it, it helps isolate the measurement panel.
+    // The info panel is visible by default.
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const isInfoPanelVisible = await infoPanel.isVisible();
+    if (isInfoPanelVisible) {
+        await infoPanelToggle.click();
+    }
+
+    // Check current state of measurement toggle
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed') === 'true';
+    if (!isMeasurementActive) {
+        await measurementToggle.click();
+    }
+
+    // Step 2: Draw a line by clicking points on the map
+    const mapContainer = page.getByTestId('map-container');
+
+    // Click first point
+    await mapContainer.click({ position: { x: 200, y: 200 } });
+    // Click second point to define a segment
+    await mapContainer.click({ position: { x: 300, y: 300 } });
+    // Click third point to add another segment
+    await mapContainer.click({ position: { x: 400, y: 200 } });
+
+    // Step 3: Double-click to finish the measurement
+    await mapContainer.dblclick({ position: { x: 400, y: 200 } });
+
+    // Expected results:
+    // The measurement panel is visible.
+    await expect(measurementPanel).toBeVisible();
+
+    // The measurement panel displays a length value with a unit.
+    // We expect the measurement element inside the panel to contain text like "1.23 km" or similar.
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Use poll to wait for the measurement value to settle after the drawing action
+    await expect.poll(async () => {
+        const text = await measurementElement.textContent();
+        return text;
+    }).toMatch(/[\d,.]+\s*(m|km|mi|ft)/i);
+});

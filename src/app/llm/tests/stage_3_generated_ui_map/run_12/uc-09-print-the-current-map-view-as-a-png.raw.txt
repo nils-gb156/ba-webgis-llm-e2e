@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from "../../../map-model-helpers";
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure map is ready and has content
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print' });
+  await printToggle.click();
+
+  // Verify printing panel is visible
+  const printingPanel = page.getByTestId('printing-panel');
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const titleInput = page.getByLabel(/Title/i);
+  await titleInput.fill('Test Printout');
+
+  // Step 3: Select the PNG file format
+  // Assuming the format selector is a radio group or dropdown.
+  // Based on common patterns, we look for a radio button or option with "PNG".
+  const pngOption = page.getByRole('radio', { name: 'PNG' }).or(page.getByRole('option', { name: 'PNG' }));
+  if (await pngOption.count() > 0) {
+    await pngOption.click();
+  } else {
+    // Fallback: if it's a dropdown/select, we might need to interact differently.
+    // However, without specific UI map for the form controls inside the panel,
+    // we assume standard accessible roles. If "PNG" is a visible text, getByText is risky.
+    // Let's try to find a button or input that allows selecting PNG.
+    // Often these are radio buttons. Let's assume radio for now.
+    // If the above failed, we might need to look for a specific testid if available.
+    // Since no specific testid for format selection is in the UI map, we rely on role.
+    // If "PNG" is the only option or clearly labeled, getByRole('radio', { name: 'PNG' }) should work.
+    // If it's a select, we'd use getByRole('combobox', { name: 'Format' }).selectOption('png').
+    // Given the ambiguity, we'll try the radio button first, then fallback to select.
+    const formatSelect = page.getByRole('combobox', { name: /Format/i });
+    if (await formatSelect.count() > 0) {
+      await formatSelect.selectOption({ label: 'PNG' });
+    }
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = page.getByRole('button', { name: /Export|Print|Generate/i });
+  await expect(exportButton).toBeVisible();
+  
+  // Wait for download before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Verify download
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

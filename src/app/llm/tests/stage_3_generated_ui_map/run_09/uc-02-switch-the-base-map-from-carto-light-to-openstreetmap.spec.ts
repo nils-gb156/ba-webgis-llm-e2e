@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial base layer to be set
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Step 1: Open the base map selector in the layer switcher.
+  // The layer switcher is visible by default. We look for a base map selector within it.
+  // Based on typical layer switcher structures, there's usually a radio group or similar for base layers.
+  // Since no specific testid for base map selector is provided, we look for the layer switcher panel
+  // and interact with it. However, looking at the UI map, there isn't a specific testid for the base map selector.
+  // We will assume the layer switcher contains the base map options.
+  // Let's click on the layer switcher toggle to ensure it's open, although it is visible by default.
+  // The prompt says layer switcher is visible by default.
+  
+  // We need to find the base map selection control. Usually, this is a radio button or a list item.
+  // Since we don't have a specific testid, we'll try to find the "OpenStreetMap" option directly if it's visible,
+  // or look for a base map selector.
+  // Let's look for the layer switcher panel first.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Attempt to find and click the OpenStreetMap base map option.
+  // Since we don't have a direct testid for the base map list, we might need to look for a role or text.
+  // Often base maps are in a radio group. Let's try to find the "OpenStreetMap" text within the layer switcher.
+  // Or, if there's a specific base map selector, we might need to click that first.
+  // Given the UI map doesn't specify a base map selector testid, we'll try to interact with the layer switcher content.
+  // Let's assume there is a way to select base maps. If there's a "Base Maps" section, we might need to click it.
+  // However, without more specific UI details, we'll try to click the text "OpenStreetMap" within the layer switcher.
+  // If that fails due to strict mode or visibility, we might need to look for a radio button.
+  
+  // Let's try to find a radio button or checkbox for OpenStreetMap within the layer switcher.
+  // Or perhaps a button.
+  // Let's try getByText first within the layer switcher.
+  const osmOption = page.getByTestId('layer-switcher').getByText('OpenStreetMap', { exact: true });
+  
+  // If getByText doesn't work, we might need to look for a role.
+  // Let's try clicking the OSm option. If it's a radio button, it might have role radio.
+  // Let's try to find the radio button for OpenStreetMap.
+  const osmRadio = page.getByTestId('layer-switcher').getByRole('radio', { name: 'OpenStreetMap' });
+  
+  // Fallback: if radio is not found, try clicking the text.
+  // But let's assume there is a radio button or similar interactive element.
+  // If neither is found, we might need to look for a list item.
+  // Let's try to click the radio button if it exists, otherwise the text.
+  
+  // Since we don't know the exact implementation, let's try to click the layer switcher toggle if it's not already open,
+  // but it is visible by default.
+  
+  // Let's try to find the base map selector. If there's a "Base Maps" heading or similar, we might need to expand it.
+  // However, the prompt doesn't give us that detail.
+  // Let's assume the base maps are directly selectable in the layer switcher.
+  
+  // We'll try to click the OpenStreetMap option.
+  // If it's a radio button, we use getByRole. If it's a button or div, we use getByText.
+  // Let's try getByRole('radio') first.
+  if (await osmRadio.count() > 0) {
+    await osmRadio.click();
+  } else {
+    // Fallback to clicking the text if it's not a radio button
+    await osmOption.click();
+  }
+
+  // Step 2: Verify that OpenStreetMap is now the active base map.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

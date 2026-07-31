@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    isLayerRendered,
+} from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure the map is ready and layers are visible
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+
+    // Step 1: Open the printing panel by clicking the print toggle
+    const printToggle = page.getByRole('button', { name: 'Print' });
+    await printToggle.click();
+
+    // Verify the printing panel is visible
+    await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+    // Step 2: Enter a title for the printout
+    // Assuming the printing panel has an input for the title.
+    // Based on typical UI patterns, we look for a label or placeholder.
+    // If no specific test-id is provided for the title input, we use getByLabel or getByPlaceholder.
+    // Looking at the UI map, there isn't a specific test-id for the title input.
+    // We will assume there is a text input for the title.
+    const titleInput = page.getByLabel('Title').or(page.getByPlaceholder('Title'));
+    // Fallback: if getByLabel/Placeholder fails to find a unique element, we might need to scope it.
+    // Let's try to find an input inside the printing panel.
+    const printingPanel = page.getByTestId('printing-panel');
+    const titleInputScoped = printingPanel.getByRole('textbox', { name: /title/i });
+    
+    await titleInputScoped.fill('My Map Printout');
+
+    // Step 3: Select the PNG file format
+    // Assuming there is a radio group or select for format.
+    // We look for a radio button or option labeled 'PNG'.
+    const pngOption = printingPanel.getByRole('radio', { name: 'PNG' }).or(
+        printingPanel.getByRole('option', { name: 'PNG' })
+    );
+    
+    // If it's a radio button, we click it. If it's already selected, we skip.
+    // We check the current state.
+    const isPngSelected = await pngOption.isChecked();
+    if (!isPngSelected) {
+        await pngOption.click();
+    }
+
+    // Step 4: Click the export/print button
+    const exportButton = printingPanel.getByRole('button', { name: /export|print/i });
+    
+    // Wait for the download to start before clicking
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+
+    // Verify the download
+    const download = await downloadPromise;
+    const suggestedFilename = download.suggestedFilename();
+    
+    // The file should be a PNG
+    expect(suggestedFilename).toMatch(/\.png$/i);
+});

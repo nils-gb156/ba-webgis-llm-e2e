@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready by checking that zoom level is defined
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. We'll use approximate center coordinates
+  // and then move slightly to simulate drawing a line.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // First point
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+  
+  // Second point
+  await mapContainer.click({ position: { x: 350, y: 350 } });
+  
+  // Third point
+  await mapContainer.click({ position: { x: 400, y: 300 } });
+
+  // Step 3: Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 400, y: 300 } });
+
+  // Expected results:
+  // The measurement panel is visible (already asserted above).
+  // The measurement panel displays a length value with a unit.
+  // We look for text that looks like a number followed by a unit (e.g., "123.45 m")
+  // inside the measurement panel.
+  const measurementPanel = page.getByTestId('measurement-panel');
+  
+  // Wait for the measurement result to appear. It might take a moment to calculate.
+  await expect.poll(async () => {
+    const text = await measurementPanel.textContent();
+    return text;
+  }).toMatch(/\d+(\.\d+)?\s*(m|km|ft|mi)/);
+});

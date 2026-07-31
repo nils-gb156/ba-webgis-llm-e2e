@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Activate the measurement tool
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  // Ensure the toggle is in the correct state (pressed/active)
+  const isCurrentlyPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isCurrentlyPressed !== 'true') {
+    await measurementToggle.click();
+  }
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2 & 3: Draw a line and finish measurement
+  // Click multiple points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to calculate click positions
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Define points for a simple line (e.g., left-center to right-center)
+  const startX = box.x + box.width * 0.2;
+  const startY = box.y + box.height * 0.5;
+  const endX = box.x + box.width * 0.8;
+  const endY = box.y + box.height * 0.5;
+  const midX = box.x + box.width * 0.5;
+  const midY = box.y + box.height * 0.5;
+
+  // Click first point
+  await page.mouse.click(startX, startY);
+  
+  // Click second point (middle)
+  await page.mouse.click(midX, midY);
+
+  // Click third point (end)
+  await page.mouse.click(endX, endY);
+
+  // Double-click to finish the measurement
+  await page.mouse.dblClick(endX, endY);
+
+  // Wait for the measurement result to settle
+  await expect.poll(async () => {
+    const measurementElement = page.getByTestId('measurement');
+    const text = await measurementElement.innerText();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/);
+
+  // Expected result: The measurement panel displays a length value with a unit
+  const measurementText = await page.getByTestId('measurement').innerText();
+  expect(measurementText).toMatch(/[\d.]+\s*(m|km|mi|ft)/);
+});

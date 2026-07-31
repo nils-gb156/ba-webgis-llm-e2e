@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and interactive
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+    
+    // Wait for the map to be fully initialized (canvas rendered)
+    const canvas = mapContainer.locator('canvas');
+    await expect(canvas).toBeVisible();
+
+    // Step 1: Activate the measurement tool
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    await expect(measurementToggle).toBeVisible();
+    
+    // Check current state of the toggle to avoid toggling if already active
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive !== 'true') {
+        await measurementToggle.click();
+    }
+
+    // Verify the measurement panel is visible
+    const measurementPanel = page.getByTestId('measurement-panel');
+    await expect(measurementPanel).toBeVisible();
+
+    // Step 2 & 3: Draw a line on the map
+    // Get the bounding box of the map container to calculate click positions
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container bounding box not found');
+    }
+
+    // Calculate points within the map canvas area
+    // Point 1: Center of the map
+    const x1 = box.x + box.width / 2;
+    const y1 = box.y + box.height / 2;
+
+    // Point 2: A bit to the right and down
+    const x2 = box.x + box.width * 0.6;
+    const y2 = box.y + box.height * 0.6;
+
+    // Point 3: Further right and down to form a line
+    const x3 = box.x + box.width * 0.8;
+    const y3 = box.y + box.height * 0.4;
+
+    // Click the first point
+    await page.mouse.click(x1, y1);
+    
+    // Click the second point
+    await page.mouse.click(x2, y2);
+    
+    // Click the third point
+    await page.mouse.click(x3, y3);
+
+    // Double-click to finish the measurement
+    await page.mouse.dblclick(x3, y3);
+
+    // Wait for the measurement result to update
+    // The measurement element should display a length value with a unit
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Assert that the measurement element contains text indicating a length (e.g., "1.23 km" or "500 m")
+    // We use a regex to match a number followed by a unit
+    await expect(measurementElement).toContainText(/^[0-9.]+\s*(km|m|ft|mi)$/);
+});

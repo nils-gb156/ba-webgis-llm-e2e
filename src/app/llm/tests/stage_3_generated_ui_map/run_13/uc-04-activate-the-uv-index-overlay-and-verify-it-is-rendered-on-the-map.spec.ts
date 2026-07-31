@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to render
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // The UV-Index layer is initially hidden. We need to find its toggle in the layer switcher.
+  // Based on the UI map, the layer switcher is visible by default.
+  // We look for a checkbox or toggle associated with "UV-Index".
+  // Since specific test ids for layer toggles aren't listed, we use getByRole with exact name.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true }).or(
+    page.getByRole('switch', { name: 'UV-Index', exact: true })
+  );
+
+  // Check if the toggle exists and is unchecked before clicking
+  // Note: Some implementations might use a custom checkbox. If getByRole fails to find it,
+  // we might need to rely on the layer switcher panel's content.
+  // However, the prompt mentions Chakra UI forms use hidden inputs.
+  // Let's try to find the toggle within the layer switcher panel.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Try to find the UV-Index toggle inside the layer switcher
+  // Assuming the layer name is used as the accessible name or label
+  const uvIndexControl = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true }).first();
+  
+  // If checkbox is not found, try switch (Chakra UI often uses switches for toggles)
+  const uvIndexSwitch = layerSwitcher.getByRole('switch', { name: 'UV-Index', exact: true }).first();
+
+  let toggleToClick = uvIndexControl;
+  if (await uvIndexSwitch.isVisible().catch(() => false)) {
+    toggleToClick = uvIndexSwitch;
+  } else if (await uvIndexControl.isVisible().catch(() => false)) {
+    toggleToClick = uvIndexControl;
+  } else {
+    // Fallback: Look for text "UV-Index" and click the associated control
+    // This is less robust but handles cases where accessible names are missing
+    const uvIndexLabel = layerSwitcher.getByText('UV-Index', { exact: true }).first();
+    if (await uvIndexLabel.isVisible().catch(() => false)) {
+      // Try to find the nearest checkbox or switch relative to the label
+      // This is complex with Chakra UI. Let's assume standard roles are available.
+      // If not, we might need to click the container of the layer item.
+      // For now, we'll assume one of the roles above works.
+      throw new Error('Could not find UV-Index toggle control');
+    }
+  }
+
+  // Click the toggle to enable the layer
+  // Use force: true because Chakra UI controls might intercept clicks
+  await toggleToClick.click({ force: true });
+
+  // Verify the toggle is now checked/active
+  await expect(toggleToClick).toBeChecked();
+
+  // Wait for the layer to be rendered on the map
+  // Use the helper function to check if the UV-Index layer is rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

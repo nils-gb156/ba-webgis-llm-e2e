@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Verify map is loaded with base and operational layers
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print' });
+  // Ensure the panel is not already open to avoid toggling it closed
+  const printingPanel = page.getByRole('region', { name: /Print/i, exact: false }).or(page.getByTestId('printing-panel'));
+  const isPanelOpen = await printingPanel.isVisible().catch(() => false);
+  if (isPanelOpen) {
+    await printToggle.click({ force: true });
+  }
+  await printToggle.click({ force: true });
+  
+  // Verify printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // Assuming there is an input field for the title within the printing panel
+  // Using a generic label or test id if available. Based on common patterns, looking for a text input.
+  const titleInput = page.getByTestId('printing-panel').getByLabel(/Title/i, { exact: true }).or(page.getByTestId('print-title-input'));
+  // Fallback if specific test id or label isn't found, try getting by placeholder or role
+  const fallbackTitleInput = page.getByTestId('printing-panel').getByRole('textbox', { name: /title/i });
+  const targetTitleInput = titleInput.count() > 0 ? titleInput : fallbackTitleInput;
+  
+  await targetTitleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  // Looking for a radio button or select for format
+  const pngOption = page.getByTestId('printing-panel').getByRole('radio', { name: 'PNG', exact: true }).or(page.getByTestId('format-png'));
+  const fallbackPngOption = page.getByTestId('printing-panel').getByRole('radio', { name: /PNG/i });
+  const targetPngOption = pngOption.count() > 0 ? pngOption : fallbackPngOption;
+  
+  // Check current state to avoid toggling if already selected
+  const isPngSelected = await targetPngOption.isChecked();
+  if (!isPngSelected) {
+    await targetPngOption.click({ force: true });
+  }
+
+  // Step 4: Trigger the export/print
+  const exportButton = page.getByTestId('printing-panel').getByRole('button', { name: /Export|Print|Generate/i, exact: true }).or(page.getByTestId('print-export-button'));
+  const fallbackExportButton = page.getByTestId('printing-panel').getByRole('button', { name: /Export|Print|Generate/i });
+  const targetExportButton = exportButton.count() > 0 ? exportButton : fallbackExportButton;
+
+  // Wait for download before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    targetExportButton.click()
+  ]);
+
+  // Expected result: A PNG file is downloaded
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

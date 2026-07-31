@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByTestId('print-toggle');
+  
+  // Ensure the printing panel is open. The toggle might already be pressed if previous tests ran,
+  // but in a fresh load it should be false. We assert visibility of the panel.
+  const printingPanel = page.getByTestId('printing-panel');
+  
+  // If the panel is not visible, click the toggle to open it
+  const isPanelVisible = await printingPanel.isVisible();
+  if (!isPanelVisible) {
+    await printToggle.click();
+  }
+  
+  // Assert the printing panel is visible
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // We look for a text input within the printing panel. Based on common UI patterns, 
+  // it might be labeled "Title" or similar. We'll try to find a text input inside the panel.
+  const titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+  await titleInput.fill('Test Map Print');
+
+  // Step 3: The user selects the PNG file format.
+  // We look for a radio button or select option for PNG.
+  // Assuming a radio group or select for format. Let's look for a radio button labeled PNG.
+  const pngFormatRadio = printingPanel.getByRole('radio', { name: /PNG/i });
+  await pngFormatRadio.check();
+
+  // Step 4: The user clicks the export/print button.
+  // We expect a download to happen.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printingPanel.getByRole('button', { name: /print|export|generate/i }).click()
+  ]);
+
+  // Assert that a file was downloaded
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toBeTruthy();
+  expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+});

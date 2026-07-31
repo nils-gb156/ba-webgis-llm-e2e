@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is visible by default, but we wait for it to be stable)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure UV-Index Stations layer is rendered (it is active by default per UI map)
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure EUCOS Ground Stations layer is rendered (it is active by default per UI map)
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (it is not active by default)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Click on the map at the specified coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28,
+    },
+  });
+
+  // Wait for the info panel to load feature information for both layers
+  // We poll for the presence of the specific sections in the info panel
+  const infoPanel = page.getByTestId('info-panel');
+
+  // Wait for UV-Index Station section to appear
+  await expect.poll(async () => {
+    const content = await infoPanel.textContent();
+    return content?.includes('UV-Index Station');
+  }).toBe(true);
+
+  // Wait for EUCOS Ground Station section to appear
+  await expect.poll(async () => {
+    const content = await infoPanel.textContent();
+    return content?.includes('EUCOS Ground Station');
+  }).toBe(true);
+
+  // Assert that the info panel contains text indicating both station types are present
+  const infoContent = await infoPanel.textContent();
+  expect(infoContent).toContain('UV-Index Station');
+  expect(infoContent).toContain('EUCOS Ground Station');
+});

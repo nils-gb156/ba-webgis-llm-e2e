@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to settle
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+    // Step 1: Hide the Temperature overlay layer
+    // The layer switcher is visible by default. We locate the Temperature layer toggle.
+    // Based on typical Chakra UI patterns in this app, the toggle is likely a checkbox-like button.
+    // We use force: true as per conventions for Chakra form controls.
+    const tempToggle = page.getByRole('button', { name: 'Temperature' }).first();
+    await expect(tempToggle).toBeVisible();
+    await tempToggle.click({ force: true });
+
+    // Step 2: Show the Precipitation overlay layer
+    const precipToggle = page.getByRole('button', { name: 'Precipitation' }).first();
+    await expect(precipToggle).toBeVisible();
+    await precipToggle.click({ force: true });
+
+    // Verify layer states via map model helpers
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for a location
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for the map to navigate
+    // We poll for the center to change from the initial default.
+    // The initial center is likely around Berlin or center of Germany. Münster is in the North West.
+    // We simply wait for the map center to settle to a new value.
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        return currentCenter && (currentCenter[0] !== initialCenter?.[0] || currentCenter[1] !== initialCenter?.[1]);
+    }).toBeTruthy();
+
+    // Step 6: Wait for the info panel to load the forecast
+    // The info panel is visible by default. We look for the weather forecast section.
+    const weatherSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherSection).toBeVisible();
+
+    // Verify the forecast has 24 entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

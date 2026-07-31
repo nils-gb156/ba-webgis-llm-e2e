@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify preconditions: Layers are active and info panel is visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (precondition)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Step 1: Click at the specific coordinates where both stations are located
+  // Coordinates are in EPSG:3857
+  const x = 1188692.84;
+  const y = 6767643.28;
+  await page.getByTestId('map-container').click({
+    position: { x, y }
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // The info panel should contain sections for both UV-Index Station and EUCOS Ground Station
+  
+  // Wait for the info panel to be visible (it should already be, but ensure it's updated)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Check for UV-Index Station section
+  // Looking for a section or heading containing "UV-Index Station"
+  const uvStationSection = page.getByRole('region', { name: /UV-Index Station/i }).first();
+  await expect(uvStationSection).toBeVisible();
+
+  // Check for EUCOS Ground Station section
+  // Looking for a section or heading containing "EUCOS Ground Station"
+  const eucosStationSection = page.getByRole('region', { name: /EUCOS Ground Station/i }).first();
+  await expect(eucosStationSection).toBeVisible();
+});

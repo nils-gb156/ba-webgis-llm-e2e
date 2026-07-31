@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and the initial layers to be rendered
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Click the measurement button to open the measurement panel
+    // The measurement-toggle button might already be in an inactive state.
+    // We click it to ensure the measurement mode/panel is active.
+    await page.getByTestId('measurement-toggle').click();
+
+    // Wait for the measurement panel to become visible
+    await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+    // Step 2: Click several points on the map canvas to draw a line
+    // We need to click on the map container. We'll pick some arbitrary coordinates
+    // within the viewport. The map center is roughly the center of the viewport.
+    // Let's click three points to form a simple line/shape.
+    const mapContainer = page.getByTestId('map-container');
+    const box = await mapContainer.boundingBox();
+
+    if (!box) {
+        throw new Error('Map container bounding box not found');
+    }
+
+    // Click first point (near center)
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(100); // Small delay to ensure click registers
+
+    // Click second point (to the right)
+    await page.mouse.click(box.x + box.width / 2 + 50, box.y + box.height / 2);
+    await page.waitForTimeout(100);
+
+    // Click third point (above second)
+    await page.mouse.click(box.x + box.width / 2 + 50, box.y + box.height / 2 - 50);
+    await page.waitForTimeout(100);
+
+    // Step 3: Double-click to finish the measurement
+    await page.mouse.dblclick(box.x + box.width / 2 + 50, box.y + box.height / 2 - 50);
+
+    // Wait a bit for the measurement calculation to complete
+    await page.waitForTimeout(500);
+
+    // Expected results:
+    // 1. The measurement panel is visible (already asserted above, but good to re-verify)
+    await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+    // 2. The measurement panel displays a length value with a unit
+    // We look for text inside the measurement panel that looks like a number followed by a unit (e.g., "1.2 km", "500 m")
+    const measurementPanel = page.getByTestId('measurement-panel');
+    await expect.poll(() => measurementPanel.locator('text=/[0-9]+\\s*(m|km|mi|ft)/i').first().textContent()).toMatch(/[0-9]+/);
+});

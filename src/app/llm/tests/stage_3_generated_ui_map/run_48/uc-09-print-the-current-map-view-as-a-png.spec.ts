@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be rendered
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  const printingPanel = page.getByTestId('printing-panel');
+
+  // Ensure the printing panel is open
+  await expect(printingPanel).not.toBeVisible();
+  await printToggle.click();
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const titleInput = printingPanel.getByLabel('Title');
+  await titleInput.fill('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  const formatSelect = printingPanel.getByLabel('Format');
+  await formatSelect.selectOption('png');
+
+  // Step 4: Trigger the export
+  // Wait for the download event before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printingPanel.getByRole('button', { name: /export|print/i }).click()
+  ]);
+
+  // Verify the download
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

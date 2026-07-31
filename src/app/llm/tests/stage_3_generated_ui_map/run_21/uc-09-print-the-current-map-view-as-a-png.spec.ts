@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be active
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+
+  // Verify preconditions: at least one base map and one overlay layer are visible
+  const activeBaseLayer = await getActiveBaseLayerTitle(page);
+  expect(activeBaseLayer).toBeDefined();
+  expect(await isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  const printingPanel = page.getByTestId('printing-panel');
+
+  // Ensure the printing panel is visible
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const titleInput = page.getByLabel('Title').or(page.getByTestId('printing-title-input'));
+  // Fallback to finding the input within the printing panel if specific test id is missing
+  const titleInputInPanel = printingPanel.getByRole('textbox', { name: /title/i, exact: false }).first();
+  const targetTitleInput = titleInputInPanel.count() > 0 ? titleInputInPanel : titleInput;
+  
+  await targetTitleInput.fill('My Map Printout');
+  await expect(targetTitleInput).toHaveValue('My Map Printout');
+
+  // Step 3: Select the PNG file format
+  const formatSelect = printingPanel.getByRole('combobox', { name: /format/i, exact: false }).first();
+  await formatSelect.selectOption('png');
+  await expect(formatSelect).toHaveValue('png');
+
+  // Step 4: Click the export/print button
+  const downloadPromise = page.waitForEvent('download');
+  const exportButton = printingPanel.getByRole('button', { name: /print|export|generate/i, exact: false }).first();
+  await exportButton.click();
+
+  // Wait for download to complete
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename().toLowerCase();
+  
+  // Expected result: A PNG file containing the current map view is generated and downloaded
+  expect(suggestedFilename).toContain('.png');
+});

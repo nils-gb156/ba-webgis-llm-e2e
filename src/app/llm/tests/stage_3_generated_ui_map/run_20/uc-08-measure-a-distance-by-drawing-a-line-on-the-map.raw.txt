@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map to be ready and layers to render
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Activate the measurement tool
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    // Ensure the toggle is not already pressed (if it is, clicking it would close the panel)
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive !== 'true') {
+        await measurementToggle.click();
+    }
+
+    // Verify the measurement panel is visible
+    const measurementPanel = page.getByTestId('measurement-panel');
+    await expect(measurementPanel).toBeVisible();
+
+    // Step 2: Click several points on the map to draw a line
+    // We click in the center area of the map container
+    const mapContainer = page.getByTestId('map-container');
+    
+    // Click first point
+    await mapContainer.click({ position: { x: 300, y: 300 } });
+    
+    // Click second point
+    await mapContainer.click({ position: { x: 400, y: 300 } });
+    
+    // Click third point
+    await mapContainer.click({ position: { x: 400, y: 400 } });
+
+    // Step 3: Double-click to finish the measurement
+    // We double-click near the last point to finish the line
+    await mapContainer.dblclick({ position: { x: 400, y: 400 } });
+
+    // Expected results: The measurement panel displays a length value with a unit
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // The measurement element should contain text that looks like a number followed by a unit (e.g., "123 m")
+    await expect(measurementElement).toContainText(/^[0-9]+(\.[0-9]+)?\s+(mm|cm|m|km|in|ft|yd|mi|nm|m²|km²|ha|acres)$/i);
+});

@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map to be ready and zoom level to be defined
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    // 1. Activate measurement tool
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    await expect(measurementToggle).toBeVisible();
+    
+    // Ensure measurement panel is not already open
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const isPanelInitiallyVisible = await measurementPanel.isVisible().catch(() => false);
+    
+    if (!isPanelInitiallyVisible) {
+        await measurementToggle.click();
+    }
+
+    // Verify measurement panel is visible
+    await expect(measurementPanel).toBeVisible();
+
+    // 2. Click several points on the map to draw a line
+    const mapContainer = page.getByTestId('map-container');
+    
+    // Click first point (center of map roughly)
+    await mapContainer.click({ position: { x: 300, y: 300 } });
+    
+    // Click second point
+    await mapContainer.click({ position: { x: 400, y: 300 } });
+    
+    // Click third point
+    await mapContainer.click({ position: { x: 400, y: 400 } });
+
+    // 3. Double-click to finish the measurement
+    await mapContainer.dblclick({ position: { x: 400, y: 400 } });
+
+    // Wait a bit for the measurement calculation to complete
+    await page.waitForTimeout(500);
+
+    // Expected results: Measurement panel displays a length value with a unit
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Assert that the measurement element contains text with a number and a unit (e.g., "123 m", "1.2 km")
+    await expect(measurementElement).toHaveText(/\d+(\.\d+)?\s+(m|km|mi|ft)/);
+});

@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Activate the measurement tool
+  // The measurement toggle might already be in the correct state, so we check first.
+  // However, for a fresh load, it's likely off. We force click to ensure it's on.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementPanelVisible = page.getByTestId('measurement-panel').isVisible();
+
+  if (!(await isMeasurementPanelVisible)) {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+
+  // Get the bounding box of the map container to calculate click positions
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click first point (center of map)
+  await mapContainer.click({ position: { x: box.width / 2, y: box.height / 2 } });
+
+  // Click second point (offset from first)
+  await mapContainer.click({ position: { x: box.width / 2 + 50, y: box.height / 2 - 50 } });
+
+  // Click third point (further offset)
+  await mapContainer.click({ position: { x: box.width / 2 + 100, y: box.height / 2 } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: box.width / 2 + 100, y: box.height / 2 } });
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit.
+  // We poll because the measurement calculation might take a moment after the double-click.
+  await expect.poll(async () => {
+    const panel = page.getByTestId('measurement-panel');
+    const text = await panel.innerText();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/i);
+});

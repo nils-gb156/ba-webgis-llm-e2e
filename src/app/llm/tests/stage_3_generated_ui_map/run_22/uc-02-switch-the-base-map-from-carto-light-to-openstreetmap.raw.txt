@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and initial base layer to be set
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    // 1. The user opens the base map selector in the layer switcher.
+    // The layer switcher is visible by default. We look for the base map selection area.
+    // Based on typical Chakra/Trail patterns, base maps are often in a specific section.
+    // We'll look for the "OpenStreetMap" option directly within the layer switcher panel.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    
+    // Try to find the base map selection. Often there's a specific toggle or list.
+    // If there's no specific "base map selector" button, we might need to look for the list items.
+    // Let's assume there is a way to see base maps. Often they are radio buttons or list items.
+    // Let's look for "OpenStreetMap" text within the layer switcher to ensure it's accessible.
+    const osmOption = layerSwitcher.getByRole('option', { name: 'OpenStreetMap' });
+    
+    // If 'option' role doesn't work, try button or listitem
+    const osmButton = layerSwitcher.getByRole('button', { name: 'OpenStreetMap' });
+    const osmListItem = layerSwitcher.getByRole('listitem', { name: 'OpenStreetMap' });
+
+    // We'll attempt to click the most likely interactive element for selecting a base map.
+    // In many GIS apps, base maps are selected via radio buttons or buttons within a group.
+    // Let's try clicking the button first, if not found, fallback to listitem.
+    if (await osmButton.isVisible()) {
+        await osmButton.click();
+    } else if (await osmListItem.isVisible()) {
+        await osmListItem.click();
+    } else {
+        // Fallback: try to find any element with the text "OpenStreetMap" inside the layer switcher
+        // and click it if it looks interactive (e.g. has role button or is a link)
+        const osmElement = layerSwitcher.getByText('OpenStreetMap', { exact: true }).first();
+        if (await osmElement.isVisible()) {
+            await osmElement.click();
+        } else {
+            // If none of the above, we might need to look for a specific base map selector component
+            // which might not have a test id. We'll look for a button that says "Base map" or similar
+            // or just try to click the first available interactive element that mentions OpenStreetMap.
+            // Given the UI map, there isn't a specific test id for base map selector.
+            // We will assume the layer switcher contains the options directly.
+            // Let's try to find the "OpenStreetMap" text and click its parent if it's a button.
+            const osmText = layerSwitcher.getByText('OpenStreetMap');
+            await osmText.scrollIntoViewIfNeeded();
+            // Try clicking the text itself if it's interactive, or its closest button
+            const closestButton = osmText.locator('..').locator('button').first();
+            if (await closestButton.isVisible()) {
+                await closestButton.click();
+            } else {
+                // Last resort: click the text element itself, forcing if necessary
+                await osmText.click({ force: true });
+            }
+        }
+    }
+
+    // 2. The user selects 'OpenStreetMap' as the base map.
+    // Wait for the map model to update to reflect the new base layer.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+
+    // Expected results:
+    // - The OpenStreetMap base map is selected.
+    // - The Carto Light base map is no longer selected.
+    // The poll assertion above confirms OpenStreetMap is active.
+    // We can also assert that Carto Light is NOT the active base layer.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+});

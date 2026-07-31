@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure map is ready and layers are rendered before clicking
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // Ensure measurement tool is inactive (it should be by default, but we ensure state)
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive === 'true') {
+        await measurementToggle.click({ force: true });
+    }
+
+    // Click at the specific coordinates where both stations are located
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: 300, y: 300 } // Approximate center, actual coordinate mapping handled by OL map click
+    });
+
+    // The use case specifies coordinates [1188692.84, 6767643.28].
+    // Playwright's click on canvas uses page coordinates.
+    // We need to convert map coordinates to page coordinates or click directly if we know the offset.
+    // Since we don't have a helper to convert, we assume the user knows the visual location or we click the center
+    // and rely on the map's existing center being near that area, OR we use the map's internal coordinate system.
+    // However, Playwright `click` on a canvas element takes page coordinates.
+    // To click at specific map coordinates, we need to calculate the page position.
+    // Let's assume the map is centered such that the click position needs to be calculated.
+    // A simpler approach for E2E when coordinates are given in EPSG:3857 is to use the map's `click` event if exposed,
+    // but here we only have `getByTestId('map-container')`.
+    // We will click the center of the map container, assuming the map is centered on the target area or close enough.
+    // If precise coordinate clicking is required without a helper, we might need to estimate.
+    // Let's try to click the center of the map view.
+    const box = await mapContainer.boundingBox();
+    if (box) {
+        // Click center of the map container
+        await mapContainer.click({
+            position: { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+        });
+    }
+
+    // Wait for the info panel to update with feature info
+    // The info panel is visible by default. We need to check for the presence of the specific sections.
+    // We look for text content indicating the station types.
+    
+    // Wait for UV-Index Station info to appear
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        const text = await infoPanel.textContent();
+        return text?.includes('UV-Index Station') || text?.includes('UV-Index');
+    }).toBe(true);
+
+    // Wait for EUCOS Ground Station info to appear
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        const text = await infoPanel.textContent();
+        return text?.includes('EUCOS Ground Station') || text?.includes('EUCOS');
+    }).toBe(true);
+});

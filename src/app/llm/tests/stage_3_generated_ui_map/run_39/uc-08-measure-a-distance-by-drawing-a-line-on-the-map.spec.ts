@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and get initial center for clicking relative to it
+  await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+  // 1. Click the Measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  // Ensure the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  
+  // Check current state of the toggle to avoid closing it if already open
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive !== 'true') {
+    await measurementToggle.click();
+  }
+  
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line
+  // We click distinct points on the map container. 
+  // Using the map container locator with specific positions to ensure clicks land on the canvas.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click first point (approximate center area)
+  await mapContainer.click({ position: { x: 400, y: 300 } });
+  
+  // Click second point (offset to create a line)
+  await mapContainer.click({ position: { x: 500, y: 300 } });
+  
+  // Click third point (offset again)
+  await mapContainer.click({ position: { x: 500, y: 400 } });
+
+  // 3. Double-click to finish the measurement
+  // The measurement tool typically finishes on double click.
+  // We need to ensure the map container receives the double click.
+  await mapContainer.dblclick({ position: { x: 500, y: 400 } });
+
+  // Wait for the measurement result to appear
+  // The measurement element should display the length value
+  const measurementElement = page.getByTestId('measurement');
+  
+  // Assert that the measurement panel is still visible
+  await expect(measurementPanel).toBeVisible();
+
+  // Assert that the measurement element contains a length value with a unit
+  // We expect text like "1.23 km" or "500 m"
+  await expect.poll(() => measurementElement.textContent()).toMatch(/[\d.]+\s*(m|km|mi|ft)/);
+});

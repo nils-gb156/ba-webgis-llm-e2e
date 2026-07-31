@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to settle
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+    await expect(page.getByTestId('legend')).toBeVisible();
+
+    // Step 1: Activate the Precipitation overlay
+    // The Precipitation layer is initially hidden (visible by default: false).
+    // We need to click its visibility toggle in the layer switcher.
+    // Based on the UI map, we have a layer-switcher panel. We need to find the specific layer item.
+    // Since dynamic test ids like 'geocoder-result-item-${index}' are shown, layer items likely follow a pattern or are accessible via role/text.
+    // Let's look for a checkbox or toggle related to "Precipitation" inside the layer switcher.
+    // The layer switcher is a panel. We can scope our search to it.
+    // We assume the layer items have a checkbox or a toggle button.
+    // Let's try to find the "Precipitation" text within the layer switcher and click its associated control.
+    // Given Chakra UI patterns, it might be a checkbox.
+    
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    
+    // Attempt to find the Precipitation layer toggle. 
+    // If there's no specific test id for the layer item, we use getByRole with name.
+    // We look for a checkbox (or switch) named "Precipitation" inside the layer switcher.
+    const precipToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+    
+    // Assert it is initially unchecked (hidden)
+    await expect(precipToggle).not.toBeChecked();
+
+    // Click the toggle to enable the layer
+    await precipToggle.click({ force: true });
+
+    // Step 2: Verify the layer is rendered on the map
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Verify the legend updates to show the Precipitation layer entry
+    const legend = page.getByTestId('legend');
+    
+    // Check if the precipitation legend is visible
+    // The UI map lists 'precipitation-legend' as a test id.
+    const precipLegend = page.getByTestId('precipitation-legend');
+    await expect(precipLegend).toBeVisible();
+});

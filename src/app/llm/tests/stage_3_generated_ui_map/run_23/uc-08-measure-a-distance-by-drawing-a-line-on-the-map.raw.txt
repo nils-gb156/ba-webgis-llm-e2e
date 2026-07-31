@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and layers to render
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    // Step 1: Click the measurement button to open the measurement panel
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    
+    // Ensure measurement panel is visible
+    const measurementPanel = page.getByTestId('measurement-panel');
+    await expect(measurementPanel).toBeVisible();
+
+    // Step 2: Click several points on the map canvas to draw a line
+    // We click at different positions to create a line segment
+    const mapContainer = page.getByTestId('map-container');
+    
+    // Get the bounding box of the map to calculate click positions
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container not found or not visible');
+    }
+
+    // Click first point (center-left)
+    await mapContainer.click({ position: { x: box.x + box.width * 0.3, y: box.y + box.height * 0.5 } });
+    // Click second point (center)
+    await mapContainer.click({ position: { x: box.x + box.width * 0.5, y: box.y + box.height * 0.5 } });
+    // Click third point (center-right)
+    await mapContainer.click({ position: { x: box.x + box.width * 0.7, y: box.y + box.height * 0.5 } });
+
+    // Step 3: Double-click to finish the measurement
+    await mapContainer.dblclick({ position: { x: box.x + box.width * 0.7, y: box.y + box.height * 0.5 } });
+
+    // Expected results:
+    // The measurement panel is visible (already asserted above)
+    await expect(measurementPanel).toBeVisible();
+
+    // The measurement panel displays a length value with a unit
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Assert that the measurement element contains text that looks like a number followed by a unit (e.g., "100 m", "1.5 km")
+    await expect(measurementElement).toContainText(/^[0-9.,]+\s(m|km|mi|ft)$/);
+});

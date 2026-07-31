@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready by checking that zoom level is defined
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    // Step 1: Activate the measurement tool
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    
+    // Ensure the measurement panel is closed initially, then open it
+    // The panel might already be open if it's persisted, so we check state
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const isPanelVisible = await measurementPanel.isVisible();
+    
+    if (isPanelVisible) {
+        // If already visible, click to ensure we are in the correct state (or just proceed if it's already open)
+        // However, the use case says "activate... to open", implying we start closed.
+        // If it's open, we might need to close it first or just proceed. 
+        // Let's assume we want to ensure it is open. If it is already open, we don't need to click.
+        // But to be safe and follow the "activate" step, we click if it's not in the desired 'open' state.
+        // Since the use case expects it to be visible after step 1, and it might be visible by default,
+        // we just ensure it's visible.
+    } else {
+        await measurementToggle.click();
+    }
+
+    // Step 2: Click several points on the map canvas to draw a line
+    const mapContainer = page.getByTestId('map-container');
+    
+    // Get a center point to start drawing from, ensuring we are within the viewport
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container not found or not visible');
+    }
+
+    // Click point 1
+    await mapContainer.click({ position: { x: box.width / 2, y: box.height / 2 } });
+    
+    // Click point 2
+    await mapContainer.click({ position: { x: box.width / 2 + 50, y: box.height / 2 + 50 } });
+    
+    // Click point 3
+    await mapContainer.click({ position: { x: box.width / 2 - 50, y: box.height / 2 + 50 } });
+
+    // Step 3: Double-click to finish the measurement
+    await mapContainer.dblclick({ position: { x: box.width / 2, y: box.height / 2 } });
+
+    // Expected results:
+    // 1. The measurement panel is visible.
+    await expect(measurementPanel).toBeVisible();
+
+    // 2. The measurement panel displays a length value with a unit.
+    // We look for text that matches a number followed by a unit (e.g., "123 m", "1.2 km")
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Assert that the measurement element contains text resembling a length value
+    await expect.poll(() => measurementElement.textContent()).toMatch(/\d+(\.\d+)?\s+(m|km|mi|ft)/i);
+});

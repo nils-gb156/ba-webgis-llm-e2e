@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready and required layers are rendered before interacting
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is inactive (reset state if necessary)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementPanel = page.getByTestId('measurement-panel');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Wait for the map to be fully initialized and ready for interaction
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click at the specific coordinates where both stations are located
+  // Coordinates are in EPSG:3857 (map projection)
+  const clickX = 1188692.84;
+  const clickY = 6767643.28;
+  await page.getByTestId('map-container').click({
+    position: { x: clickX, y: clickY }
+  });
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // The info panel is visible by default, but we need to wait for the content to appear
+  await expect.poll(
+    () =>
+      page.getByTestId('info-panel').locator('text=UV-Index Station').isVisible()
+  ).toBe(true);
+
+  await expect.poll(
+    () =>
+      page.getByTestId('info-panel').locator('text=EUCOS Ground Station').isVisible()
+  ).toBe(true);
+
+  // Verify that the info panel displays sections for both layers
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel.locator('text=UV-Index Station')).toBeVisible();
+  await expect(infoPanel.locator('text=EUCOS Ground Station')).toBeVisible();
+});

@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for initial map state to settle
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // 1. Click the 'Print Map' button to open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print' });
+  const printPanel = page.getByTestId('printing-panel');
+
+  // Ensure the print panel is opened
+  await expect(printPanel).not.toBeVisible();
+  await printToggle.click();
+  await expect(printPanel).toBeVisible();
+
+  // 2. Enter a title for the printout
+  // Assuming there is a title input in the printing panel.
+  // Since no specific testid for title input is in the UI map, we look for a label or role.
+  // Common pattern: an input with label "Title" or similar inside the printing panel.
+  const titleInput = page.getByTestId('printing-panel').getByLabel(/title/i);
+  await titleInput.fill('Test Map Print');
+
+  // 3. Select the PNG file format
+  // Assuming there is a radio group or select for format.
+  // Looking for a radio button or option for PNG.
+  const pngOption = page.getByTestId('printing-panel').getByRole('radio', { name: 'PNG' });
+  // Check if PNG is already selected, if not click it
+  if (!(await pngOption.isChecked())) {
+    await pngOption.click();
+  }
+
+  // 4. Click the export/print button
+  // Assuming there is an export button in the printing panel.
+  const exportButton = page.getByTestId('printing-panel').getByRole('button', { name: /export|print/i });
+  
+  // Wait for the download to start
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Assert that a file was downloaded
+  expect(download.suggestedFilename()).toBeTruthy();
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

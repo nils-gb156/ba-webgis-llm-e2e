@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+  getActiveBaseLayerTitle,
+  isLayerRendered,
+} from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready and layers are visible
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  const printToggle = page.getByTestId('print-toggle');
+  const printingPanel = page.getByTestId('printing-panel');
+
+  // The print toggle might be in active state if the panel was open,
+  // but based on the UI map, printing-panel is not visible by default.
+  // We click the toggle to ensure the panel is open.
+  await printToggle.click();
+
+  // Verify the printing panel is visible
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // The printing panel likely contains an input for the title.
+  // We look for a text input within the printing panel.
+  const titleInput = printingPanel.getByLabel(/title/i, { exact: true });
+  if (titleInput) {
+    await titleInput.fill('Test Map Print');
+  } else {
+    // Fallback: try to find an input by placeholder or test id if available
+    // Since no specific test id for title input is in the map, we try getByRole
+    const inputs = printingPanel.getByRole('textbox');
+    if (inputs) {
+      await inputs.first().fill('Test Map Print');
+    }
+  }
+
+  // Step 3: Select the PNG file format
+  // Look for a radio button or select element for format within the printing panel
+  const formatRadio = printingPanel.getByRole('radio', { name: 'PNG' });
+  if (formatRadio) {
+    await formatRadio.check();
+  } else {
+    // Fallback: check if there is a checkbox or other control
+    const pngCheckbox = printingPanel.getByRole('checkbox', { name: 'PNG' });
+    if (pngCheckbox) {
+      await pngCheckbox.check({ force: true });
+    }
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = printingPanel.getByRole('button', { name: /export|print/i, exact: true });
+  
+  // Wait for the download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  
+  await exportButton.click();
+
+  // Wait for the download to complete
+  const download = await downloadPromise;
+  
+  // Verify the downloaded file
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure map is ready and center is not undefined before proceeding
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+    // Verify preconditions: UV-Index Stations and EUCOS Ground Stations layers are rendered
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // Ensure measurement tool is inactive (it is by default, but we assert the panel is not visible)
+    const measurementPanel = page.getByTestId('measurement-panel');
+    await expect(measurementPanel).not.toBeVisible();
+
+    // Step 1: Click at the specific map coordinates where both stations are located
+    // Coordinates are in EPSG:3857
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: 1188692.84, y: 6767643.28 },
+        force: true
+    });
+
+    // Step 2: Wait for the info panel to load the station info for both layers
+    // The info panel should be visible and contain sections for both layer types
+    
+    // Wait for the UV-Index Station section to appear in the info panel
+    // We look for a section or heading containing "UV-Index Station"
+    const uvInfoSection = page.getByRole('region', { name: /UV-Index Station/i }).first();
+    await expect(uvInfoSection).toBeVisible();
+
+    // Wait for the EUCOS Ground Station section to appear in the info panel
+    // We look for a section or heading containing "EUCOS Ground Station"
+    const eucosInfoSection = page.getByRole('region', { name: /EUCOS Ground Station/i }).first();
+    await expect(eucosInfoSection).toBeVisible();
+
+    // Additional assertion: Ensure the info panel itself is visible
+    const infoPanel = page.getByTestId('info-panel');
+    await expect(infoPanel).toBeVisible();
+});

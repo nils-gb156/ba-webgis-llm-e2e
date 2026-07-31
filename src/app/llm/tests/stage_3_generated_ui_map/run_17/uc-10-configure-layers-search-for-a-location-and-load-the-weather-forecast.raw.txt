@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from "@playwright/test";
+import { getMapCenter, getMapZoomLevel } from "../../../map-model-helpers";
+
+test("UC10: Configure layers, search for a location and load the weather forecast", async ({
+    page,
+}) => {
+    await page.goto("http://localhost:5173/ba-webgis-llm-e2e/");
+
+    // Wait for the map to be ready and initial layers to settle
+    await expect.poll(() => getMapCenter(page)).toBeDefined();
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    // 1. Hide the Temperature overlay layer
+    // Locate the Temperature layer in the layer switcher and click its visibility toggle
+    const temperatureLayer = page
+        .getByRole("treeitem", { name: "Temperature" })
+        .first();
+    const temperatureToggle = temperatureLayer.getByRole("checkbox", {
+        name: "Temperature",
+    });
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+    await expect(temperatureToggle).not.toBeChecked();
+
+    // Verify Temperature is no longer rendered on the map
+    await expect.poll(() =>
+        page.evaluate((title) => {
+            const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            if (!map) return false;
+            const layer = map.layers
+                .getOperationalLayers()
+                .find((entry: any) => entry.title === title);
+            return layer?.visible === true;
+        }, "Temperature")
+    ).toBe(false);
+
+    // 2. Show the Precipitation overlay layer
+    const precipitationLayer = page
+        .getByRole("treeitem", { name: "Precipitation" })
+        .first();
+    const precipitationToggle = precipitationLayer.getByRole("checkbox", {
+        name: "Precipitation",
+    });
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+    await expect(precipitationToggle).toBeChecked();
+
+    // Verify Precipitation is rendered on the map
+    await expect.poll(() =>
+        page.evaluate((title) => {
+            const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            if (!map) return false;
+            const layer = map.layers
+                .getOperationalLayers()
+                .find((entry: any) => entry.title === title);
+            return layer?.visible === true;
+        }, "Precipitation")
+    ).toBe(true);
+
+    // 3. Search for a location using the geocoder
+    const geocoderInput = page.getByTestId("geocoder-input");
+    await geocoderInput.click();
+    await geocoderInput.fill("Münster");
+
+    // 4. Wait for the result list to appear and select the first result
+    const firstResult = page.getByTestId("geocoder-result-item-0");
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // 5. Wait for the map to navigate to the selected location
+    // We check that the map center has changed from the initial value
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(() => getMapCenter(page)).not.toEqual(initialCenter);
+
+    // 6. Wait for the info panel to load the weather forecast
+    // The info panel should contain a weather forecast section with 24 entries
+    const weatherForecastSection = page.getByTestId("weather-forecast-section");
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Count the number of weather forecast entries
+    const weatherEntries = page.getByTestId("weather-forecast-entry");
+    await expect(weatherEntries).toHaveCount(24);
+});

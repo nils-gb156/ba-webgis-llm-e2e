@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map model to be available and Carto Light to be active
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+    // Open the layer switcher if it is not already visible (it is visible by default, but we ensure the panel is open)
+    // The layer switcher is visible by default, so we just need to interact with it.
+    // We need to find the base map selector within the layer switcher.
+    // Based on typical patterns, we look for a radio group or similar inside the layer switcher.
+    // Since no specific test id for base map selector is provided in the UI Map, we rely on the layer switcher panel.
+    
+    // The layer switcher panel is visible by default.
+    // We need to select 'OpenStreetMap' from the base maps.
+    // Assuming the base maps are presented as radio buttons or similar selectable items within the layer switcher.
+    // We will look for an element with text 'OpenStreetMap' inside the layer switcher panel.
+    
+    const layerSwitcherPanel = page.getByTestId('layer-switcher');
+    
+    // Click on the OpenStreetMap base map option.
+    // Since it's a base map, it's likely a radio button or a selectable item.
+    // We use getByRole('radio') or getByRole('option') if available, or getByText if necessary.
+    // Given the UI map doesn't specify the exact role for base map items, we try to find the text.
+    // However, strict mode might complain if there are multiple matches.
+    // Let's assume there is a specific test id or role for the base map selection list items.
+    // If not, we fall back to text.
+    
+    // Attempting to click 'OpenStreetMap' within the layer switcher.
+    // We use force: true if it's a custom control, but let's try standard interaction first.
+    // If the base maps are rendered as a list of radio buttons, we can target them.
+    
+    // Let's look for a radio button with name 'OpenStreetMap' or similar inside the layer switcher.
+    // Or a button/text element.
+    
+    // Since the prompt doesn't give specific test ids for base map items, we use text.
+    // We scope it to the layer switcher to avoid ambiguity.
+    await layerSwitcherPanel.getByText('OpenStreetMap', { exact: true }).click();
+
+    // Wait for the map to update and assert the new base layer
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+});

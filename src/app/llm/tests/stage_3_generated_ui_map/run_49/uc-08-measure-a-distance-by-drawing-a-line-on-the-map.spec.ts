@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map to be ready and visible
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    
+    // Capture initial map state to calculate click positions later
+    const initialCenter = await expect.poll(() => getMapCenter(page)).toBeTruthy();
+    const initialZoom = await expect.poll(() => getMapZoomLevel(page)).toBeTruthy();
+
+    // 1. Activate the measurement tool
+    // The toolbar toggle might be in the active state already if the app restores state,
+    // but typically it starts inactive. We click it to ensure the panel opens.
+    // We check visibility after to confirm the action had the intended effect.
+    await page.getByTestId('measurement-toggle').click();
+    await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+    // 2. Draw a line by clicking points on the map
+    // We click relative to the center of the map to ensure we stay within visible bounds.
+    // Click 1: Center
+    await page.getByTestId('map-container').click({ position: { x: 50, y: 50 } });
+    
+    // Click 2: Offset from center to create a line segment
+    // Using a position slightly to the right and down to ensure a distinct click
+    await page.getByTestId('map-container').click({ position: { x: 150, y: 150 } });
+
+    // 3. Double-click to finish the measurement
+    await page.getByTestId('map-container').dblclick({ position: { x: 150, y: 150 } });
+
+    // Expected results:
+    // - The measurement panel is visible (already asserted above, but good to re-assert state)
+    await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+    // - The measurement panel displays a length value with a unit
+    // The measurement element contains the result. We look for text that matches a number followed by a unit.
+    const measurementElement = page.getByTestId('measurement');
+    await expect(measurementElement).toBeVisible();
+    
+    // Use a regex to assert that there is a length value with a unit (e.g., "1.2 km", "500 m")
+    // Since the exact value depends on the map center and click positions, we check for the pattern.
+    await expect.poll(async () => {
+        const text = await measurementElement.textContent();
+        return text;
+    }).toMatch(/\d+(\.\d+)?\s*(m|km|mi|ft)/i);
+});

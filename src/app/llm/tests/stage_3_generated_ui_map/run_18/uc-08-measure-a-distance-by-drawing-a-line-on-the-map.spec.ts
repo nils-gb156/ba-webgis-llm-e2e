@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and loaded
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 1: Click the measurement button to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  
+  // Ensure the measurement panel is closed before starting, so we test the open flow
+  const measurementPanel = page.getByTestId('measurement-panel');
+  if (await measurementPanel.isVisible().catch(() => false)) {
+    await measurementToggle.click({ force: true });
+    await expect(measurementPanel).toBeHidden();
+  }
+
+  // Click to open the measurement tool
+  await measurementToggle.click({ force: true });
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to calculate click positions
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Calculate center and offset points to draw a line
+  const centerX = box.x + box.width / 2;
+  const centerY = box.y + box.height / 2;
+  
+  // Point 1: Center
+  await mapContainer.click({ position: { x: centerX, y: centerY } });
+  
+  // Point 2: Offset slightly to the right and up
+  await mapContainer.click({ position: { x: centerX + 100, y: centerY - 100 } });
+  
+  // Point 3: Offset further right and down
+  await mapContainer.click({ position: { x: centerX + 200, y: centerY + 50 } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: centerX + 200, y: centerY + 50 } });
+
+  // Expected results: The measurement panel displays a length value with a unit
+  const measurementElement = page.getByTestId('measurement');
+  await expect(measurementElement).toBeVisible();
+  
+  // Assert that the measurement text contains a number and a unit (e.g., "1.23 km" or "123.45 m")
+  const measurementText = await measurementElement.textContent();
+  expect(measurementText).toMatch(/\d+\.?\d*\s*(m|km|ft|mi)/i);
+});

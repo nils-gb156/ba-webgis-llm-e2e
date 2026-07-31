@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready and layers are active
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (toggle it off if it is)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.evaluate((el) => el.getAttribute('aria-pressed') === 'true');
+  if (isMeasurementActive) {
+    await measurementToggle.click();
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  // Coordinates are in EPSG:3857
+  await page.getByTestId('map-container').click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Wait for the info panel to load feature information for both layers
+  // The info panel is visible by default, so we just need to wait for the content to appear
+  const uviSection = page.getByText('UV-Index Station', { exact: false });
+  const eucosSection = page.getByText('EUCOS Ground Station', { exact: false });
+
+  await expect(uviSection).toBeVisible({ timeout: 10000 });
+  await expect(eucosSection).toBeVisible({ timeout: 10000 });
+});

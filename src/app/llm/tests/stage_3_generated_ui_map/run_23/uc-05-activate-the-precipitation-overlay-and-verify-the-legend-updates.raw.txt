@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and layer switcher to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer.
+  // The layer switcher is visible by default. We locate the Precipitation layer item.
+  // Based on the UI map, we need to find the toggle for "Precipitation".
+  // Since specific layer item test ids are not listed in the summary, we use getByRole with the layer name.
+  // The layer switcher panel is likely the container.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation' });
+
+  // Ensure the toggle is not already checked (precondition says it's initially hidden)
+  // If it is already checked, we don't need to click, but we assert the state after.
+  await expect(precipitationToggle).not.toBeChecked();
+
+  // Click the toggle to enable the layer
+  await precipitationToggle.click({ force: true });
+
+  // Wait for the layer to be rendered on the map via the helper
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 2: View the legend and verify it reflects the newly active layer.
+  // The legend is visible by default.
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  // Expected result 1: The Precipitation overlay layer toggle is in the enabled (checked) state.
+  await expect(precipitationToggle).toBeChecked();
+
+  // Expected result 2: The legend displays an entry corresponding to the Precipitation layer.
+  // We look for text "Precipitation" within the legend element.
+  await expect(page.getByTestId('legend').getByText('Precipitation')).toBeVisible();
+});

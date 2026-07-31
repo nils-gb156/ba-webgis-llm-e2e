@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure map is ready and layers are rendered before interacting
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // Ensure measurement tool is inactive (it might be active by default or from previous state)
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive === 'true') {
+        await measurementToggle.click({ force: true });
+    }
+
+    // Ensure info panel is visible
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const infoPanelVisible = await infoPanelToggle.getAttribute('aria-pressed');
+    if (infoPanelVisible !== 'true') {
+        await infoPanelToggle.click({ force: true });
+    }
+
+    // Wait for info panel to be visible
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Click on the map at the specified coordinates where both stations are located
+    // Coordinates are in EPSG:3857
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: 100, y: 100 } // Placeholder position, we need to calculate offset or use a known center
+    });
+
+    // The map click needs to happen at the specific coordinate.
+    // Since we can't easily convert EPSG:3857 to pixel coordinates without the map view,
+    // we will use the map model helper to get the center and zoom, then calculate.
+    // However, a simpler approach for E2E is to rely on the map's internal coordinate conversion
+    // if we had a helper, but we don't have a "clickAtCoordinate" helper.
+    // We must calculate the pixel position from the EPSG:3857 coordinate.
+    
+    // Let's get the current map view state to calculate the click position
+    const mapCenter = await page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+        if (!map) return null;
+        const view = map.olMap.getView();
+        return {
+            center: view.getCenter(),
+            zoom: view.getZoom(),
+            resolution: view.getResolution()
+        };
+    });
+
+    if (!mapCenter) {
+        throw new Error('Map model not available');
+    }
+
+    // Target coordinate
+    const targetX = 1188692.84;
+    const targetY = 6767643.28;
+
+    // Calculate pixel position relative to the map container
+    // This assumes the map is centered and we are clicking relative to the top-left of the viewport
+    // We need the map container's bounding box to get the absolute pixel position
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container not found or not visible');
+    }
+
+    // Calculate the offset from the map center to the target coordinate in pixels
+    const dx = (targetX - mapCenter.center![0]) / mapCenter.resolution!;
+    const dy = (targetY - mapCenter.center![1]) / mapCenter.resolution!;
+
+    // Calculate the click position relative to the map container
+    const clickX = mapBox.x + mapBox.width / 2 + dx;
+    const clickY = mapBox.y + mapBox.height / 2 + dy;
+
+    // Click on the map
+    await mapContainer.click({
+        position: {
+            x: clickX - mapBox.x,
+            y: clickY - mapBox.y
+        }
+    });
+
+    // Wait for the info panel to update with feature info
+    // The info panel should now contain sections for both layers
+    
+    // Wait for UV-Index Station info to appear
+    // We look for a section or text that indicates UV-Index Station info
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        const text = await infoPanel.textContent();
+        return text?.includes('UV-Index Station');
+    }).toBe(true);
+
+    // Wait for EUCOS Ground Station info to appear
+    await expect.poll(async () => {
+        const infoPanel = page.getByTestId('info-panel');
+        const text = await infoPanel.textContent();
+        return text?.includes('EUCOS Ground Station');
+    }).toBe(true);
+});

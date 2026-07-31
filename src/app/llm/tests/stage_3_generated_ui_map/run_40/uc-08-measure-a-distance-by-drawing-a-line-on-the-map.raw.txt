@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The measurement toggle might be in an inactive state. We force click to activate it.
+  await page.getByTestId('measurement-toggle').click({ force: true });
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map container. We'll pick some arbitrary coordinates
+  // relative to the map container to simulate drawing a line.
+  const mapContainer = page.getByTestId('map-container');
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container bounding box not found');
+  }
+
+  // Calculate some points within the map container
+  const startPoint = { x: box.x + 100, y: box.y + 100 };
+  const middlePoint = { x: box.x + 200, y: box.y + 200 };
+  const endPoint = { x: box.x + 300, y: box.y + 100 };
+
+  // Click the first point
+  await page.mouse.click(startPoint.x, startPoint.y);
+  // Click the second point
+  await page.mouse.click(middlePoint.x, middlePoint.y);
+
+  // Step 3: Double-click to finish the measurement.
+  // Double-clicking at the end point should finish the measurement.
+  await page.mouse.dblClick(endPoint.x, endPoint.y);
+
+  // Expected results:
+  // The measurement panel is visible (already asserted above).
+  // The measurement panel displays a length value with a unit.
+  // We will poll the measurement element to wait for the result to appear.
+  await expect.poll(() => page.getByTestId('measurement').innerText()).toMatch(/.*\s*km\s*/i);
+});

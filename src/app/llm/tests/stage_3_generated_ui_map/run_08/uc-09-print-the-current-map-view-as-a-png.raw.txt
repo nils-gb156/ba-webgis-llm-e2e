@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for map to be ready and layers to render
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  await page.getByTestId('print-toggle').click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout.
+  const printTitle = 'Test Printout';
+  // Assuming there is an input field for the title within the printing panel.
+  // Since no specific testid for the title input is in the UI map, we use getByRole.
+  // The printing panel likely contains a text input labeled "Title" or similar.
+  // If no label is present, we might need to look for a text input inside the panel.
+  // Let's assume a standard label "Title" exists for the input.
+  const titleInput = page.getByRole('textbox', { name: /title/i, exact: true });
+  if (titleInput.count() > 0) {
+    await titleInput.fill(printTitle);
+  } else {
+    // Fallback: if no accessible name, try to find an input inside the panel
+    const panel = page.getByTestId('printing-panel');
+    const input = panel.getByRole('textbox').first();
+    if (await input.isVisible()) {
+      await input.fill(printTitle);
+    }
+  }
+
+  // Step 3: Select the PNG file format.
+  // Assuming there is a radio group or dropdown for format selection.
+  // Let's look for a radio button or option labeled "PNG".
+  const pngOption = page.getByRole('radio', { name: 'PNG', exact: true }).first();
+  if (await pngOption.isVisible()) {
+    await pngOption.check();
+  } else {
+    // Fallback: look for a checkbox or other control
+    const pngControl = page.getByTestId('printing-panel').getByRole('checkbox', { name: 'PNG' }).first();
+    if (await pngControl.isVisible()) {
+      await pngControl.check();
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  // Assuming there is a button labeled "Export" or "Print" or "Download"
+  const exportButton = page.getByRole('button', { name: /export|print|download/i, exact: true }).first();
+  
+  // Wait for download to start
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify download happened
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+});

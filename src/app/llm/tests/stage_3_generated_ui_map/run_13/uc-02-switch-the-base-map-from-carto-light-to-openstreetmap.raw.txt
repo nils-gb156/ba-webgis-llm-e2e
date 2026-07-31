@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and Carto Light to be active by default
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+  // Open the layer switcher if it's not already visible (it is visible by default, but ensure stability)
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // The layer switcher is visible by default. We need to find the base map selector.
+  // Based on typical Chakra UI patterns and the UI map, we look for the base layer options.
+  // Since there's no specific test-id for the base map radio group in the UI map provided,
+  // we will look for the "OpenStreetMap" text within the layer switcher panel to select it.
+  // However, the prompt says "The user opens the base map selector".
+  // Often, base maps are toggled via radio buttons or a dropdown.
+  // Let's look for "OpenStreetMap" within the layer switcher.
+  
+  // If there's a specific toggle or dropdown for base maps, we'd click it first.
+  // Given the UI map doesn't specify a "base-map-selector" test id, but lists "layer-switcher",
+  // we assume the base map options are inside the layer switcher.
+  
+  // Let's try to click on the text "OpenStreetMap" inside the layer switcher.
+  // If it's a radio button, getByRole('radio', { name: 'OpenStreetMap' }) is best.
+  const osmRadio = page.getByRole('radio', { name: 'OpenStreetMap' });
+  
+  // If the radio doesn't exist directly, it might be a button or link.
+  // Let's try getByTestId if we can infer it, but we can't.
+  // Let's try getByText inside the layer switcher.
+  const osmOption = page.getByTestId('layer-switcher').getByText('OpenStreetMap');
+  
+  // Click the option to switch the base map.
+  // If it's a radio button, clicking it selects it.
+  await osmOption.click();
+
+  // Assert that OpenStreetMap is now the active base layer
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+});

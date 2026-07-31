@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible by default.
+  // The info panel is visible by default according to the UI map.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas.
+  // The map container is interactive. We click near the center.
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 300, y: 300 } });
+
+  // Wait for the highlighted coordinate to appear on the map.
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  // Wait for the weather forecast section to become visible in the info panel.
+  await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+  // Wait for the weather forecast entries to load.
+  // The expected result states 24 entries.
+  // We assert that the weather-forecast element contains 24 weather-forecast-entry children.
+  await expect.poll(async () => {
+    const forecastElement = page.getByTestId('weather-forecast');
+    const entries = await forecastElement.getByTestId(/weather-forecast-entry-\d+/).all();
+    return entries.length;
+  }).toBe(24);
+});

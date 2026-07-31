@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for initial map readiness
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+    // Step 1: Hide Temperature overlay
+    // Temperature is visible by default. We click its toggle to hide it.
+    // We assume the layer switcher is already visible (precondition).
+    // We need to find the specific toggle for "Temperature".
+    // Based on standard naming, we look for the layer item and its toggle.
+    // Since specific layer item IDs aren't listed in the UI map, we use text/role.
+    // However, the UI map lists `layer-switcher` as a panel.
+    // We will look for the checkbox/switch associated with "Temperature".
+    // Note: Chakra UI checkboxes are tricky. We use force: true.
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' }).first();
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+    
+    // Verify Temperature is no longer rendered
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Step 2: Show Precipitation overlay
+    // Precipitation is hidden by default.
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' }).first();
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+
+    // Verify Precipitation is now rendered
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    // The results panel appears when there are results
+    const geocoderResults = page.getByTestId('geocoder-results');
+    await expect(geocoderResults).toBeVisible();
+
+    // Select the first result
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for map to navigate
+    // The map center should change from the initial default to Münster's coordinates.
+    // Münster, Germany approx center in EPSG:3857 is around [7.6, 51.96] -> [675000, 6580000]
+    // We just assert that the center has changed significantly or is within a reasonable range.
+    // A simple check is that the map center is no longer the initial default (often 0,0 or a specific start).
+    // Let's poll for a specific coordinate range for Münster.
+    await expect.poll(async () => {
+        const center = await getMapCenter(page);
+        if (!center) return false;
+        // Münster is approx longitude 7.6, latitude 51.96
+        // EPSG:3857 x: ~7.6 * 20037508.34 / 180 * Math.PI = ~845000
+        // EPSG:3857 y: 51.96 * 20037508.34 / 180 * Math.PI = ~6580000
+        // Allow some margin
+        return center[0] > 800000 && center[0] < 900000 && center[1] > 6500000 && center[1] < 6700000;
+    }).toBe(true);
+
+    // Step 6: Wait for info panel to load the forecast
+    // The info panel should be visible (it is by default)
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+    
+    // The forecast section should appear with 24 entries
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Check for 24 entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

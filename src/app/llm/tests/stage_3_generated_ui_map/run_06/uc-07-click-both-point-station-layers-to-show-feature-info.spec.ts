@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready and layers are rendered before interacting
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure info panel is visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure measurement tool is not active (it should be off by default, but verify)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Click at the specified coordinates on the map canvas
+  // Coordinates are in EPSG:3857
+  const x = 1188692.84;
+  const y = 6767643.28;
+
+  // Convert EPSG:3857 to pixel coordinates for clicking
+  // We need to get the map view to calculate the position
+  const pixel = await page.evaluate(({ x, y }) => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    if (!map) return null;
+    const view = map.olMap.getView();
+    const resolution = view.getResolution();
+    const center = view.getCenter();
+    if (!center || !resolution) return null;
+    
+    // Calculate pixel position relative to the map container top-left
+    const pixelX = (x - center[0]) / resolution + (map.olMap.getSize()[0] / 2);
+    const pixelY = -(y - center[1]) / resolution + (map.olMap.getSize()[1] / 2);
+    
+    return { x: pixelX, y: pixelY };
+  }, { x, y });
+
+  if (!pixel) {
+    throw new Error('Could not calculate pixel coordinates for click');
+  }
+
+  await page.locator('[data-testid="map-container"]').click({
+    position: { x: pixel.x, y: pixel.y }
+  });
+
+  // Wait for the info panel to update with feature info
+  // The info panel content will change to show the station details
+  await expect.poll(async () => {
+    const infoPanel = page.getByTestId('info-panel');
+    const text = await infoPanel.textContent();
+    return text;
+  }).toContain('UV-Index Station');
+  
+  await expect.poll(async () => {
+    const infoPanel = page.getByTestId('info-panel');
+    const text = await infoPanel.textContent();
+    return text;
+  }).toContain('EUCOS Ground Station');
+
+  // Verify the specific sections are present in the info panel
+  // Using getByText or getByRole to find the section headers
+  // Since the exact text might vary, we check for the presence of the station names in the panel
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel.getByText(/UV-Index Station/i)).toBeVisible();
+  await expect(infoPanel.getByText(/EUCOS Ground Station/i)).toBeVisible();
+});

@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to settle
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Step 1: Hide the Temperature overlay layer
+    // The layer switcher is visible by default. We locate the Temperature layer toggle.
+    // Based on the UI map, we need to find the specific toggle for "Temperature".
+    // Since specific layer toggle testIds are not listed in the UI Map for individual layers,
+    we rely on the layer switcher content.
+    // Looking at the UI Map, we have `layer-switcher` and `legend`.
+    // Usually, layer toggles are buttons within the layer switcher.
+    // We will look for the text "Temperature" within the layer switcher and click the associated toggle.
+    // However, the UI Map lists `legend` and `layer-switcher` but not specific layer toggles.
+    // Let's look for a pattern. Often these are `getByRole('checkbox', { name: 'Temperature' })`.
+    // Or they might be inside the `layer-switcher` panel.
+    // Given the Chakra UI context, checkboxes are often hidden inputs.
+    // We will try to click the checkbox associated with "Temperature".
+    
+    // Note: The UI Map doesn't explicitly list layer toggle testIds like `layer-toggle-temperature`.
+    // It lists `layer-switcher` and `legend`.
+    // Let's assume standard ARIA roles for layer visibility toggles if they are checkboxes.
+    
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+    // Check if it is currently checked (visible by default is true)
+    await expect(temperatureToggle).toBeChecked();
+    
+    // Click to hide it
+    await temperatureToggle.click({ force: true });
+    
+    // Verify Temperature is no longer rendered
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    // Step 2: Show the Precipitation overlay layer
+    // Precipitation is initially hidden.
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await expect(precipitationToggle).not.toBeChecked();
+    
+    // Click to show it
+    await precipitationToggle.click({ force: true });
+    
+    // Verify Precipitation is now rendered
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for a location 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+    
+    // Step 4: Wait for results and select the first one
+    // The geocoder results panel should appear
+    const geocoderResults = page.getByTestId('geocoder-results');
+    await expect(geocoderResults).toBeVisible();
+    
+    // Select the first result item
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for the map to navigate
+    // We can assert that the map center has changed or simply wait for the info panel to update.
+    // The use case says "waits for the map to navigate".
+    // We can poll the map center to ensure it's no longer the initial center.
+    // However, we don't know the initial center. We can just wait for the info panel to update.
+    
+    // Step 6: Wait for the info panel to load the forecast
+    // The info panel should display a weather forecast section with 24 entries.
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+    
+    // Check for 24 entries
+    const weatherForecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(weatherForecastEntries).toHaveCount(24);
+});

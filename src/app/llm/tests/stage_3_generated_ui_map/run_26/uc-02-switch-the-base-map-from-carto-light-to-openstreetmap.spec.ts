@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Verify Carto Light is active initially
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+  // Step 1: Open the base map selector in the layer switcher.
+  // The layer switcher is visible by default. We look for a control within it that allows
+  // selecting base layers. Typically this is a select or a radio group.
+  // Since no specific test id is given for the base layer selector, we use the layer-switcher container.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Attempt to find a select element or a button that opens the base map options.
+  // Often base maps are switched via a select or radio buttons inside the layer switcher.
+  // Let's try to find a select first.
+  const baseMapSelect = layerSwitcher.getByRole('combobox');
+  if (await baseMapSelect.isVisible().catch(() => false)) {
+    await baseMapSelect.click();
+    // Wait for options to appear
+    await expect(layerSwitcher.getByRole('option', { name: 'OpenStreetMap' })).toBeVisible({ timeout: 5000 });
+  } else {
+    // Fallback: Look for radio buttons or buttons with base layer names
+    const osmButton = layerSwitcher.getByRole('button', { name: 'OpenStreetMap' });
+    if (await osmButton.isVisible().catch(() => false)) {
+      await osmButton.click();
+    } else {
+      // Fallback 2: Look for a radio group or list of base maps
+      const osmRadio = layerSwitcher.getByRole('radio', { name: 'OpenStreetMap' });
+      if (await osmRadio.isVisible().catch(() => false)) {
+        await osmRadio.click();
+      } else {
+        // If no specific interaction is found, we might need to look for a generic "Base Map" toggle
+        // or assume the layer switcher has a specific structure. 
+        // Given the UI map doesn't specify the exact interaction for base maps inside layer-switcher,
+        // we try a common pattern: a select or radio buttons.
+        // Let's try clicking the layer-switcher-toggle if it wasn't already open, but it is visible by default.
+        // Let's try to find any interactive element that might reveal base maps.
+        // Often there is a "Base Map" section header or a dropdown.
+        const baseMapSection = layerSwitcher.getByText('Base Map').first();
+        if (await baseMapSection.isVisible().catch(() => false)) {
+          // If there's a section, it might be expandable or contain the controls.
+          // Let's look for a select inside this section.
+          const selectInSection = baseMapSection.locator('..').getByRole('combobox');
+          if (await selectInSection.isVisible().catch(() => false)) {
+            await selectInSection.click();
+          } else {
+             // Try radio buttons in the section
+             const radioInSection = baseMapSection.locator('..').getByRole('radio', { name: 'OpenStreetMap' });
+             if (await radioInSection.isVisible().catch(() => false)) {
+                await radioInSection.click();
+             } else {
+                // Last resort: try to find the text "OpenStreetMap" and click it if it's interactive
+                const osmText = layerSwitcher.getByText('OpenStreetMap', { exact: true }).first();
+                if (await osmText.isVisible().catch(() => false)) {
+                   await osmText.click();
+                }
+             }
+          }
+        } else {
+           // If we can't find a specific UI element, we might have to rely on the fact that 
+           // the layer switcher is open and look for a select or radio buttons directly.
+           const select = layerSwitcher.getByRole('combobox');
+           if (await select.isVisible().catch(() => false)) {
+              await select.click();
+           } else {
+              const radio = layerSwitcher.getByRole('radio', { name: 'OpenStreetMap' });
+              if (await radio.isVisible().catch(() => false)) {
+                 await radio.click();
+              } else {
+                 // If still not found, we might need to look for a button that opens a modal or panel.
+                 // However, based on the UI map, the layer-switcher is a panel.
+                 // Let's assume there is a select or radio buttons.
+                 // If none of the above works, this test will fail, which is acceptable if the UI is ambiguous.
+                 // But let's try one more common pattern: a button group for base maps.
+                 const osmBtn = layerSwitcher.getByRole('button', { name: 'OpenStreetMap' });
+                 if (await osmBtn.isVisible().catch(() => false)) {
+                    await osmBtn.click();
+                 }
+              }
+           }
+        }
+      }
+    }
+  }
+
+  // Step 2: Verify the OpenStreetMap base map is selected.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+
+  // Verify Carto Light is no longer selected.
+  await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.not.toBe('Carto Light');
+});

@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // The UV-Index overlay is initially hidden.
+  // We need to find its toggle in the layer switcher.
+  // Based on the UI map, the layer switcher is visible by default.
+  // We look for the checkbox/label associated with "UV-Index".
+  // Since specific test ids for individual layer toggles are not provided in the UI map,
+  // we use getByRole with an exact name inside the layer switcher.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Try to find the UV-Index layer toggle. It's likely a checkbox or a button.
+  // Chakra UI often renders checkboxes with a hidden input and a visible div.
+  // We force click the role locator as per guidelines.
+  const uvIndexToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Check if it's currently unchecked (it should be, based on preconditions)
+  // If it's already checked, we don't need to click.
+  const isChecked = await uvIndexToggle.isChecked();
+  
+  if (!isChecked) {
+    await uvIndexToggle.click({ force: true });
+  }
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Verify that the UV-Index overlay tiles are rendered on the map canvas.
+  // Using the helper function to check map state.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

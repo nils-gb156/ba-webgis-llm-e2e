@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // The UV-Index layer is initially hidden.
+  // We need to find its toggle in the layer switcher.
+  // Based on standard layer switcher patterns, the toggle is likely a checkbox or button
+  // associated with the layer name "UV-Index".
+  // We scope the lookup to the layer-switcher panel to avoid ambiguity.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Locate the UV-Index layer toggle. It's often a checkbox input.
+  // Since we don't have a specific test-id for the individual layer toggles,
+  // we use getByRole with the layer name.
+  const uvIndexToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Assert it is initially unchecked
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Click the toggle to enable the layer
+  await uvIndexToggle.click({ force: true });
+
+  // Wait for the layer to be rendered on the map
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+});

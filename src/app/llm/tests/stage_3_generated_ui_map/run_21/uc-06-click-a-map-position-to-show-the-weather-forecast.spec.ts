@@ -1,0 +1,29 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure the info panel is visible (it is visible by default, but let's be explicit)
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Click on the map canvas at a specific position
+    // Using a central position to ensure we are over land/valid area
+    await page.getByTestId('map-container').click({ position: { x: 300, y: 300 } });
+
+    // Wait for the highlighted coordinate to appear on the map
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+    // Wait for the weather forecast section to appear in the info panel
+    await expect(page.getByTestId('weather-forecast-section')).toBeVisible();
+
+    // Wait for the weather forecast entries to load
+    // The expected result is 24 entries. We wait until we see at least one, then poll for the count.
+    await expect(page.getByTestId('weather-forecast-entry')).toBeVisible();
+
+    // Assert that there are exactly 24 forecast entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect.poll(() => forecastEntries.count()).toBe(24);
+});

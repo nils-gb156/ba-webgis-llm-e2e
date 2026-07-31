@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to settle
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Click the visibility toggle of the Precipitation overlay layer
+    // The layer switcher is visible by default. We locate the Precipitation layer entry.
+    // Based on the UI map, we need to find the toggle for "Precipitation".
+    // Since specific layer toggle test ids aren't listed in the generic UI map,
+    // we rely on the accessible name within the layer switcher panel.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation' });
+
+    // Ensure the checkbox is not already checked (precondition says it's hidden)
+    const isChecked = await precipitationToggle.isChecked();
+    if (!isChecked) {
+        await precipitationToggle.click({ force: true });
+    }
+
+    // Step 2: Verify the Precipitation overlay is rendered on the map
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Verify the toggle is in the enabled (checked) state
+    await expect(precipitationToggle).toBeChecked();
+
+    // Verify the legend displays an entry corresponding to the Precipitation layer
+    // The UI map mentions 'precipitation-legend' as a specific element.
+    const precipitationLegend = page.getByTestId('precipitation-legend');
+    await expect(precipitationLegend).toBeVisible();
+});

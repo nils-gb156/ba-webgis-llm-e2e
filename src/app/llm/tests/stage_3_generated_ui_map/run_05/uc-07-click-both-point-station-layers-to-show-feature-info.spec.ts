@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible (it is visible by default)
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure UV-Index Stations layer is rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure EUCOS Ground Stations layer is rendered
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active
+  const measurementPanel = page.getByTestId('measurement-panel');
+  if (await measurementPanel.isVisible()) {
+    await page.getByTestId('measurement-toggle').click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28
+    }
+  });
+
+  // Wait for the info panel to update with feature info
+  // The info panel should now display sections for both layers
+  await expect.poll(async () => {
+    const infoPanel = page.getByTestId('info-panel');
+    const uvIndexSection = await infoPanel.getByText('UV-Index Station').isVisible();
+    const eucosSection = await infoPanel.getByText('EUCOS Ground Station').isVisible();
+    return { uvIndexSection, eucosSection };
+  }).toEqual({ uvIndexSection: true, eucosSection: true });
+});

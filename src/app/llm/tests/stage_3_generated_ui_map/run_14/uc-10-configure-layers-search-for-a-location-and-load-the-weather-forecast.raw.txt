@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({
+  page,
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for map to be ready
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // 1. Hide Temperature overlay
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+
+  // 2. Show Precipitation overlay
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+
+  // Verify layer visibility state via map model
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // 3. Search for 'Münster'
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // 4. Wait for results and select first
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // 5. Wait for map navigation
+  // The center should change from the default to Münster's coordinates
+  const initialCenter = await getMapCenter(page);
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    return center && (center[0] !== initialCenter?.[0] || center[1] !== initialCenter?.[1]);
+  }).toBe(true);
+
+  // 6. Wait for weather forecast to load in info panel
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Check for 24 entries
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

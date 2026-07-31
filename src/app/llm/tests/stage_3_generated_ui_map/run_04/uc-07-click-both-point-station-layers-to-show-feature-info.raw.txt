@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure map is ready and layers are rendered before interacting
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    // Ensure info panel is visible (it is visible by default, but we wait for stability)
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Click on the map at the specific coordinates where both stations are located
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: 100, y: 100 },
+        force: true,
+    });
+
+    // The click triggers a GetFeatureInfo request. We need to wait for the response
+    // and then for the info panel to update with the new content.
+    // Register listener for the request before triggering if needed, but here we just wait for UI update.
+    // Since the click is on the map, we wait for the info panel content to change.
+    // We use expect.poll to wait for the specific sections to appear.
+
+    // Wait for UV-Index Station section to appear in the info panel
+    await expect.poll(() => page.getByTestId('info-panel').getByText('UV-Index Station').isVisible()).toBeTruthy();
+
+    // Wait for EUCOS Ground Station section to appear in the info panel
+    await expect.poll(() => page.getByTestId('info-panel').getByText('EUCOS Ground Station').isVisible()).toBeTruthy();
+
+    // Verify that the info panel contains sections for both layers
+    const uvSection = page.getByTestId('info-panel').getByText('UV-Index Station').first();
+    const eucosSection = page.getByTestId('info-panel').getByText('EUCOS Ground Station').first();
+
+    await expect(uvSection).toBeVisible();
+    await expect(eucosSection).toBeVisible();
+});

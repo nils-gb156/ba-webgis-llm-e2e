@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to be ready
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Click the visibility toggle of the Precipitation overlay layer
+    // The layer switcher is visible by default. We locate the Precipitation layer item.
+    // Based on the UI map, we likely need to find the specific layer control.
+    // Since specific layer toggle test-ids aren't listed in the generic map, we look for the layer name in the layer switcher.
+    // However, looking at the UI map, there isn't a specific `data-testid` for individual layer toggles listed.
+    // We will assume the layer switcher contains the layers. If not, we might need to look for a specific pattern.
+    // Let's look for a button or checkbox associated with "Precipitation".
+    // Often these are rendered as checkboxes or buttons within the layer switcher panel.
+    // We will try to find the element by text "Precipitation" inside the layer switcher.
+    
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true }).or(
+        layerSwitcher.getByRole('button', { name: 'Precipitation', exact: true })
+    );
+
+    // It's possible the checkbox is visually hidden (Chakra UI), so we use force: true if it's a checkbox
+    // But first, let's see if we can find it. If it's a button, we click it. If it's a checkbox, we click it with force.
+    // Let's try clicking the checkbox first as per conventions for form controls.
+    
+    // Check if the checkbox exists and is unchecked. If it's a button, we click the button.
+    // To be robust, we'll find the locator that matches "Precipitation" inside the layer switcher.
+    const precControl = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true }).first();
+    
+    // If the checkbox doesn't exist, try button
+    const precButton = layerSwitcher.getByRole('button', { name: 'Precipitation', exact: true }).first();
+    
+    // Determine which one to click
+    if (await precControl.isVisible()) {
+        await precControl.click({ force: true });
+    } else if (await precButton.isVisible()) {
+        await precButton.click();
+    } else {
+        // Fallback: try to find any element with text Precipitation in the layer switcher
+        // This is less ideal but handles cases where roles are ambiguous
+        const fallback = layerSwitcher.getByText('Precipitation', { exact: true }).first();
+        await fallback.click();
+    }
+
+    // Step 2: Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+    // We re-locate the control to check its state
+    const checkedPrecControl = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true }).first();
+    const checkedPrecButton = layerSwitcher.getByRole('button', { name: 'Precipitation', exact: true }).first();
+
+    // Check if the checkbox is checked
+    if (await checkedPrecControl.isVisible()) {
+        await expect(checkedPrecControl).toBeChecked();
+    } else if (await checkedPrecButton.isVisible()) {
+        // For buttons, we might check for an "active" class or aria-pressed if it's a toggle
+        // Or we rely on the map rendering check below.
+        // Let's assume if it's a button, the click worked.
+    }
+
+    // Verify the layer is actually rendered on the map
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 2 continued: The user views the legend.
+    // Verify the legend displays an entry corresponding to the Precipitation layer.
+    // The legend is visible by default. We look for "Precipitation" in the legend.
+    const legend = page.getByTestId('legend');
+    await expect(legend.getByText('Precipitation', { exact: true })).toBeVisible();
+});

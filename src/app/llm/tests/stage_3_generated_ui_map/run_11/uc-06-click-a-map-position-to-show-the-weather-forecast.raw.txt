@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and interactive
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+
+    // Click on the map canvas at a specific position (center-ish)
+    await mapContainer.click({ position: { x: 300, y: 200 } });
+
+    // Wait for the info panel to be visible (it is visible by default, but we wait for content to settle)
+    const infoPanel = page.getByTestId('info-panel');
+    await expect(infoPanel).toBeVisible();
+
+    // Wait for the weather forecast section to appear in the info panel
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Wait for the weather forecast entries to appear
+    // The prompt says "The forecast contains 24 entries".
+    // We check that the weather-forecast element is visible and has children or specific content.
+    // Since we don't have a direct count locator, we check the section visibility and maybe the first entry.
+    const weatherForecast = page.getByTestId('weather-forecast');
+    await expect(weatherForecast).toBeVisible();
+
+    // Wait for at least some forecast entries to be rendered
+    const forecastEntries = page.getByTestId(/weather-forecast-entry/);
+    await expect(forecastEntries.first()).toBeVisible();
+
+    // Assert that the clicked position is highlighted on the map
+    // We use the helper to check if a highlight exists.
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+    // Verify that the weather forecast section contains multiple entries
+    // We can't easily count them directly with a single locator if they are dynamic,
+    // but we can check that the list is populated.
+    // Let's check the text content of the weather-forecast-section to ensure it has data.
+    // Or we can check the number of forecast-entry elements.
+    const entryCount = await forecastEntries.count();
+    expect(entryCount).toBeGreaterThanOrEqual(24);
+});

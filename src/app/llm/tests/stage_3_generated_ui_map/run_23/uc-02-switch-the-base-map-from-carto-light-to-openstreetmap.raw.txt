@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map to be ready and the initial base layer to be active
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    // The layer switcher is visible by default.
+    // Click on the base layer selector to open the list of base maps.
+    // Based on typical Chakra UI patterns and the context, the base layer selector
+    // is likely a button or the layer switcher itself contains the base map options.
+    // Since the prompt mentions "layer-switcher" is visible, we look for a way to select base maps.
+    // Often, base maps are selected via a specific control within the layer switcher or a separate toggle.
+    // Given the UI map doesn't explicitly list a "base-layer-selector" button, but lists "layer-switcher" and "layer-switcher-toggle",
+    // and the layer switcher is visible, we assume the base map selection is accessible within the visible layer switcher or via a dedicated control.
+    // However, looking at the layers list, "Carto Light", "Carto Dark", "OpenStreetMap" are base layers.
+    // Usually, there's a radio button group or similar for base maps.
+    // Let's assume there is a way to interact with the layer switcher to change base maps.
+    // If "layer-switcher" is the panel, we might need to look for the base map options inside it.
+    // Without a specific test id for the base map selector, we might need to use getByRole or getByText.
+    // Let's try to find the base map selection control. Often it's a "Base map" label or similar.
+    // If no specific control is found, we might need to click on the layer switcher if it's not open, but it is open.
+    // Let's assume there is a clickable element for base maps.
+    // A common pattern is a "Base map" button or section.
+    // Let's try to locate the OpenStreetMap option directly if possible, or the control to switch.
+    // Since the prompt says "The user opens the base map selector", we need to find that selector.
+    // If it's not explicitly named, we might look for a button with text "Base map" or similar.
+    // Alternatively, the layer switcher might show base maps as radio buttons.
+    // Let's try to click on the "OpenStreetMap" text if it's visible, or find the base map selector.
+    // Given the ambiguity, a safe bet is to look for the base map options within the layer switcher.
+    // Let's assume there is a "Base map" section or button.
+    // If not, we might need to look for the specific radio button for OpenStreetMap.
+    // Let's try to find the OpenStreetMap base layer option.
+    
+    // Attempt 1: Look for a base map selector button/section
+    const baseMapSelector = page.getByRole('button', { name: /Base map/i });
+    if (await baseMapSelector.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await baseMapSelector.click();
+    } else {
+        // Fallback: If no explicit base map selector button, maybe the layer switcher itself is the control
+        // or the base maps are listed directly.
+        // Let's try to find the OpenStreetMap option directly.
+        const osmOption = page.getByRole('option', { name: 'OpenStreetMap' }).first();
+        if (await osmOption.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await osmOption.click();
+        } else {
+            // Last resort: Try to find any clickable element with "OpenStreetMap" text
+            const osmText = page.getByText('OpenStreetMap').first();
+            if (await osmText.isVisible({ timeout: 1000 }).catch(() => false)) {
+                await osmText.click();
+            } else {
+                throw new Error('Could not find OpenStreetMap base map option');
+            }
+        }
+    }
+
+    // Wait for the base layer to change
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for map to be ready
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  // Step 1: Activate measurement tool
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  // Ensure toggle is in the desired state (pressed/active)
+  const isCurrentlyPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (isCurrentlyPressed !== 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Verify measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+
+  // Click first point
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+  // Click second point
+  await mapContainer.click({ position: { x: 200, y: 100 } });
+  // Click third point
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: 200, y: 200 } });
+
+  // Wait for measurement result to appear
+  await expect.poll(async () => {
+    const measurementElement = page.getByTestId('measurement');
+    const text = await measurementElement.innerText();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|ft|mi)/);
+});

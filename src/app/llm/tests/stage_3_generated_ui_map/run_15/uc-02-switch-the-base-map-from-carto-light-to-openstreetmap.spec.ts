@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Precondition: Verify Carto Light is active by default
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+    // Step 1: The user opens the base map selector in the layer switcher.
+    // The layer switcher is visible by default. We look for the base map selection area.
+    // Usually, base maps are selected via radio buttons or a specific section in the TOC.
+    // Based on the UI map, we have a layer-switcher panel.
+    // We need to find the radio button or clickable element for 'OpenStreetMap' or 'Carto Light' within the layer switcher.
+    // Assuming standard Chakra UI RadioGroup for base layers inside the layer switcher.
+    const layerSwitcherPanel = page.getByRole('region', { name: /layer switcher/i }).first();
+    
+    // Step 2: The user selects 'OpenStreetMap' as the base map.
+    // We look for a radio button or similar control labeled 'OpenStreetMap' within the layer switcher.
+    const openStreetMapOption = layerSwitcherPanel.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+    await openStreetMapOption.click();
+
+    // Expected results: The OpenStreetMap base map is selected.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+
+    // The Carto Light base map is no longer selected.
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.not.toBe('Carto Light');
+});

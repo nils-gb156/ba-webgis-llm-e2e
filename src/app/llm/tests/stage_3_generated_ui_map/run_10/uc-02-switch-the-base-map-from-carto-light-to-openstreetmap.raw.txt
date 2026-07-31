@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Verify initial state: Carto Light is active
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    // The layer switcher is visible by default.
+    // We need to find the base map selector within the layer switcher.
+    // Based on typical Chakra UI structures in this app, the base map options are likely
+    // radio buttons or buttons inside the layer switcher panel.
+    // Let's look for a radio group or button group related to base maps.
+    // Since no specific test id for base map selector is given in the UI Map,
+    // we rely on the layer-switcher panel and look for the specific option.
+    
+    // The layer switcher panel is visible.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+
+    // Select 'OpenStreetMap' base map.
+    // In many GIS apps, base maps are selected via radio buttons.
+    // We will try to find a radio button with the name 'OpenStreetMap' inside the layer switcher.
+    // If it's a button, getByRole('button', { name: 'OpenStreetMap' }) would work.
+    // Let's try radio first as it's semantically correct for mutually exclusive base maps.
+    const osmRadio = page.getByRole('radio', { name: 'OpenStreetMap' });
+    if (await osmRadio.isVisible()) {
+        await osmRadio.click();
+    } else {
+        // Fallback to button if radio is not found (some implementations use buttons)
+        const osmButton = page.getByRole('button', { name: 'OpenStreetMap' });
+        await expect(osmButton).toBeVisible();
+        await osmButton.click();
+    }
+
+    // Verify the base map has switched to OpenStreetMap
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

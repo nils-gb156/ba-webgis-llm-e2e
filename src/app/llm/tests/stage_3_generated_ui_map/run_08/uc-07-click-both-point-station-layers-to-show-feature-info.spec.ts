@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure measurement tool is not active (it might be toggled on by default or previous state)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure UV-Index Stations layer is active and rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure EUCOS Ground Stations layer is active and rendered
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Click at the specific coordinates where both stations are located
+  // Coordinates are in EPSG:3857. We need to convert them to pixel coordinates relative to the map container.
+  // However, Playwright's click on a canvas usually expects pixel offsets.
+  // Since we don't have the exact pixel conversion logic here, we rely on the map container's click event
+  // which OpenLayers handles. But OpenLayers click events are in pixel coordinates.
+  // We need to convert EPSG:3857 to pixel coordinates.
+  // Let's use page.evaluate to get the pixel coordinates from the map model.
+  const pixelCoords = await page.evaluate(async () => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    if (!map) return null;
+    const olMap = map.olMap;
+    const view = olMap.getView();
+    const center = view.getCenter();
+    const resolution = view.getResolution();
+    // Target coordinates in EPSG:3857
+    const targetX = 1188692.84;
+    const targetY = 6767643.28;
+    // Calculate pixel coordinates relative to the map center
+    // pixelX = (targetX - center[0]) / resolution + width/2
+    // pixelY = (targetY - center[1]) / resolution + height/2
+    // We need the map container dimensions
+    const container = olMap.getTargetElement() as HTMLElement;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const pixelX = (targetX - center[0]) / resolution + width / 2;
+    const pixelY = (targetY - center[1]) / resolution + height / 2;
+    return { x: pixelX, y: pixelY };
+  });
+
+  if (!pixelCoords) {
+    throw new Error('Map model not available or coordinates could not be calculated');
+  }
+
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: {
+      x: pixelCoords.x,
+      y: pixelCoords.y,
+    },
+  });
+
+  // Wait for the info panel to load feature info for both layers
+  // The info panel is already visible by default
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Wait for the UV-Index Station section to appear in the info panel
+  // We look for a section or heading that mentions "UV-Index Station"
+  await expect.poll(() => page.getByText('UV-Index Station').count()).toBeGreaterThan(0);
+
+  // Wait for the EUCOS Ground Station section to appear in the info panel
+  // We look for a section or heading that mentions "EUCOS Ground Station"
+  await expect.poll(() => page.getByText('EUCOS Ground Station').count()).toBeGreaterThan(0);
+});

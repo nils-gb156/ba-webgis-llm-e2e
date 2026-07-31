@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Precondition: Ensure map is loaded and has content
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+
+    // Step 1: Click the 'Print Map' button to open the printing panel
+    const printToggle = page.getByTestId('print-toggle');
+    await printToggle.click();
+
+    // Expected: The printing panel is visible
+    const printingPanel = page.getByTestId('printing-panel');
+    await expect(printingPanel).toBeVisible();
+
+    // Step 2: Enter a title for the printout
+    // We look for a text input inside the printing panel.
+    // Assuming standard accessible name or test id for the title input.
+    // If no specific test id for the input is provided in the UI map, we use getByRole('textbox') scoped to the panel.
+    const titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    await titleInput.fill('Test Printout');
+
+    // Step 3: Select the PNG file format
+    // Assuming a radio group or select for format. We look for a radio or option labeled "PNG".
+    const pngOption = printingPanel.getByRole('radio', { name: 'PNG' }).or(printingPanel.getByRole('option', { name: 'PNG' }));
+    
+    // Check if PNG is already selected
+    const isPngSelected = await pngOption.isChecked();
+    if (!isPngSelected) {
+        await pngOption.click();
+    }
+
+    // Step 4: Click the export/print button
+    // Assuming a button labeled "Export", "Print", or "Download" inside the printing panel.
+    const exportButton = printingPanel.getByRole('button', { name: /export|print|download/i, exact: true });
+    
+    // Wait for the download to start before clicking
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+
+    // Expected: A PNG file containing the current map view is generated and downloaded.
+    const download = await downloadPromise;
+    const suggestedFilename = download.suggestedFilename();
+    
+    // Assert that a file was downloaded and it has a PNG extension
+    expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+    // Clean up the downloaded file to avoid cluttering the test environment
+    await download.delete();
+
+    // Additional verification: Ensure the printing panel is still visible or closed gracefully
+    // Depending on implementation, it might stay open or close. We just ensure no errors occurred.
+    await expect(page).toHaveURL('http://localhost:5173/ba-webgis-llm-e2e/');
+});

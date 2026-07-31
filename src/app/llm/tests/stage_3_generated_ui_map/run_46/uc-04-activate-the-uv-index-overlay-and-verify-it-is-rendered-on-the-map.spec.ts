@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to load
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer to show it.
+  // The layer switcher is visible by default. We need to find the UV-Index layer item.
+  // Based on the UI map, we don't have a specific test id for the layer item itself,
+  // but we can use the layer switcher panel and look for the text "UV-Index".
+  // Since "UV-Index" might be ambiguous, we scope it to the layer-switcher panel.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const uvIndexToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // The UV-Index layer is initially hidden (visible by default: false).
+  // We click the checkbox to enable it.
+  await uvIndexToggle.click({ force: true });
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We verify that the UV-Index overlay tiles are rendered on the map canvas.
+  // Using the helper function isLayerRendered which checks the map model.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+
+  // Expected result: The UV-Index overlay layer toggle is in the enabled (checked) state.
+  await expect(uvIndexToggle).toBeChecked();
+});

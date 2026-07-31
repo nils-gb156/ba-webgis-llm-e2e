@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer.
+  // The Precipitation layer is initially hidden according to the UI Map.
+  // We locate the toggle within the layer switcher panel to ensure we target the correct control.
+  const precipitationToggle = page
+    .getByTestId('layer-switcher')
+    .getByRole('checkbox', { name: 'Precipitation' });
+
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(precipitationToggle).toBeChecked();
+
+  // Verify the layer is actually rendered on the map via the helper
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  // Step 2: View the legend and verify it displays an entry for the Precipitation layer.
+  // The legend should now contain an entry corresponding to the newly active layer.
+  await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+});

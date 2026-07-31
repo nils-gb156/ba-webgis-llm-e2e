@@ -1,0 +1,236 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for map and initial layers to be ready
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect(page.getByTestId('map-container')).toBeVisible();
+
+    // 1. Hide Temperature layer
+    // The layer switcher is visible by default. We locate the Temperature layer toggle.
+    // Since "Temperature" is a substring of other potential texts, we scope to the layer switcher.
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const temperatureToggle = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+    // Ensure it is currently checked (visible) before toggling
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+
+    // 2. Show Precipitation layer
+    const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+    // Ensure it is currently unchecked (hidden) before toggling
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+
+    // Wait for Precipitation to be rendered on the map
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // 3. Search for 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // 4. Wait for results and select the first one
+    await expect(page.getByTestId('geocoder-results')).toBeVisible();
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // 5. Wait for map to navigate
+    // We poll for the map center to change from the initial state, or simply wait for the
+    // geocoder panel to close and the map to settle. A robust way is to wait for a specific
+    // zoom/center if known, but here we just wait for the UI to settle and the info panel
+    // to start loading.
+    await expect(page.getByTestId('geocoder-results')).not.toBeVisible();
+
+    // 6. Wait for info panel to load the forecast
+    // The info panel is visible by default. We wait for the weather forecast section to appear
+    // and contain the expected number of entries.
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // The expected result states 24 entries. We count the forecast entries.
+    const weatherEntries = page.getByTestId('weather-forecast-entry');
+    await expect(weatherEntries).toHaveCount(24);
+
+    // Verify final layer states via assertions on the UI toggles
+    // Temperature should be enabled (checked)
+    await expect(temperatureToggle).toBeChecked();
+    // Precipitation should be disabled (unchecked) - wait for it to settle if it was just toggled off or if the state reflects the "disabled" requirement
+    // Note: The use case says "disabled state" for Precipitation. In the UI map, Precipitation was initially hidden.
+    // Step 2 showed it. Step 1 hid Temperature.
+    // The expected result says: "The Precipitation overlay layer toggle is in the disabled state."
+    // This likely means it is unchecked (hidden) or the toggle is disabled.
+    // However, Step 2 explicitly says "click ... to show it".
+    // Let's re-read carefully: "Expected results: The Precipitation overlay layer toggle is in the disabled state."
+    // And "The Temperature overlay layer toggle is in the enabled state."
+    // This contradicts Step 2 if "disabled" means "unchecked/hidden" immediately after showing it.
+    // Usually "disabled" in UI terms means the input is `disabled=true`.
+    // But in the context of layer visibility toggles, it might mean "not visible".
+    // Let's look at Step 1: Hide Temperature. Step 2: Show Precipitation.
+    // If the expected result says Precipitation is disabled, maybe it means the toggle button itself is disabled?
+    // Or maybe the use case description implies a final state where Precipitation is NOT shown?
+    // "The user clicks the visibility toggle of the Precipitation overlay layer to show it." -> It is shown.
+    // "Expected results: The Precipitation overlay layer toggle is in the disabled state."
+    // This is ambiguous. Let's look at the "Complexity: hard" tag.
+    // Perhaps "disabled state" refers to the fact that it was initially hidden and now is shown? No, that's "enabled/checked".
+    // Let's assume "disabled" means the checkbox is unchecked (layer hidden) and "enabled" means checked (layer visible).
+    // If so, Step 2 shows it, but the expected result says it's disabled (hidden)? That's a contradiction.
+    // Alternative interpretation: "disabled" means the toggle button is disabled (grayed out).
+    // Let's check the UI map: `layer-switcher` is a panel. Toggles are checkboxes.
+    // Let's assume the standard ARIA pattern: Checked = Enabled/Visible. Unchecked = Disabled/Hidden.
+    // If Step 2 shows it, it should be checked.
+    // Why would the expected result say "disabled"?
+    // Maybe the user clicks it to HIDE it? "click ... to show it".
+    // Let's look at Step 1: "click ... to hide it".
+    // So Step 1: Temp (was visible) -> click -> hidden.
+    // Step 2: Precip (was hidden) -> click -> visible.
+    // Expected: Temp enabled (visible/checked). Precip disabled (hidden/unchecked).
+    // This implies the user HID Precipitation? But Step 2 says "show it".
+    // There is a contradiction between Steps and Expected Results for Precipitation.
+    // "Steps: ... click ... to show it."
+    // "Expected: ... Precipitation ... disabled state."
+    // If "disabled" means "unchecked", then the step and expected result contradict.
+    // If "disabled" means "the toggle button is disabled", that's a different UI state.
+    // Let's look at the "Temperature ... enabled state".
+    // If Temp is hidden by step 1, why is it "enabled"?
+    // Maybe "enabled" means the toggle is active/available, not the layer visibility?
+    // Or maybe "enabled" means the layer is VISIBLE?
+    // If Temp is hidden (Step 1), and Expected says "enabled", then "enabled" != "visible".
+    // This suggests "enabled" might mean "the toggle is not disabled/blocked".
+    // And "disabled" means "the toggle is blocked/disabled".
+    // But Step 1 says "click ... to hide it". You can click it.
+    // Let's reconsider the standard terminology.
+    // Often, "Enabled" = Layer Visible. "Disabled" = Layer Hidden.
+    // If so:
+    // Step 1: Hide Temp. Expected: Temp Enabled? Contradiction.
+    // Step 2: Show Precip. Expected: Precip Disabled? Contradiction.
+    // Maybe the steps are:
+    // 1. Hide Temp.
+    // 2. Show Precip.
+    // And the Expected Results describe the state of the TOGGLES themselves?
+    // No, that doesn't make sense either.
+
+    // Let's look at the provided UI Map again.
+    // `layer-switcher` is visible.
+    // `layer-switcher-toggle` is a button to open/close the panel.
+    // The layers inside are checkboxes.
+
+    // Let's assume the "Expected results" text has a typo or I am misinterpreting "disabled/enabled".
+    // Let's look at the "Complexity: hard".
+    // Maybe the "disabled state" refers to the fact that the layer is NOT selected in the TOC?
+    // Let's try to interpret "enabled" as "Checked/Visible" and "disabled" as "Unchecked/Hidden".
+    // If so, the Expected Results contradict the Steps.
+    // Step 1: Hide Temp. (Temp becomes Unchecked). Expected: Temp Enabled (Checked). CONTRADICTION.
+    // Step 2: Show Precip. (Precip becomes Checked). Expected: Precip Disabled (Unchecked). CONTRADICTION.
+
+    // Alternative: The Steps are what the user DOES. The Expected Results are what is TRUE at the end.
+    // If the user HID Temp, Temp should be Unchecked.
+    // If the Expected Result says Temp is "Enabled", maybe "Enabled" means "The toggle is NOT disabled"?
+    // And "Disabled" means "The toggle IS disabled"?
+    // Why would a toggle be disabled? Maybe if the layer doesn't exist? But it does.
+
+    // Let's look at the prompt again.
+    // "The user clicks the visibility toggle of the Temperature overlay layer to hide it."
+    // "The user clicks the visibility toggle of the Precipitation overlay layer to show it."
+    // "Expected results: The Precipitation overlay layer toggle is in the disabled state."
+    // "The Temperature overlay layer toggle is in the enabled state."
+
+    // Is it possible "disabled" means "Checked" and "enabled" means "Unchecked"? No, that's backwards.
+    // Is it possible the user HID Precipitation and SHOWN Temp?
+    // Step 1: Hide Temp.
+    // Step 2: Show Precip.
+    // No.
+
+    // Let's assume the "Expected results" are correct and the Steps are misleading or I should follow the Steps and the Expected Results are describing the INITIAL state? No, "After selecting...".
+
+    // Let's look at the "Info panel" step.
+    // Step 6: Wait for info panel to load forecast.
+    // Expected: Info panel displays weather forecast with 24 entries.
+
+    // Let's ignore the confusing "disabled/enabled" toggle text for a moment and focus on the layer visibility.
+    // Step 1: Hide Temp.
+    // Step 2: Show Precip.
+    // So at the end: Temp is Hidden, Precip is Visible.
+    // Let's check the map model helpers.
+    // `isLayerRendered(page, 'Temperature')` should be false.
+    // `isLayerRendered(page, 'Precipitation')` should be true.
+
+    // Now, back to the toggle states.
+    // If Temp is Hidden, the checkbox is Unchecked.
+    // If Precip is Visible, the checkbox is Checked.
+    // If the Expected Result says "Temp Enabled" and "Precip Disabled", and we assume Enabled=Checked, Disabled=Unchecked, then it contradicts.
+    // If we assume Enabled=Unchecked, Disabled=Checked, then:
+    // Temp (Hidden/Unchecked) -> Enabled. Matches.
+    // Precip (Visible/Checked) -> Disabled. Matches.
+    // This interpretation (Enabled=Unchecked, Disabled=Checked) is non-standard for "Enabled/Disabled" but might be how the test author thinks about "Layer State":
+    // "Layer is Enabled" = Layer is Active/On? No, that would be Checked.
+    // "Layer is Disabled" = Layer is Off? That would be Unchecked.
+    // So "Temp Enabled" = Temp On? But Step 1 hid it.
+    // "Precip Disabled" = Precip Off? But Step 2 showed it.
+
+    // Let's try one more interpretation.
+    // Maybe "Enabled" means the toggle button is interactive (not grayed out).
+    // Maybe "Disabled" means the toggle button is grayed out.
+    // Why would Precip be grayed out? Maybe because it's a base layer? No, it's operational.
+    // Why would Temp be grayed out?
+
+    // Given the ambiguity, I will assert the VISIBILITY of the layers via the map model, which is the ground truth for the map.
+    // I will also assert the CHECKED state of the checkboxes based on the Steps.
+    // Step 1: Hide Temp -> Unchecked.
+    // Step 2: Show Precip -> Checked.
+    // I will NOT assert "Enabled/Disabled" text on the toggle button itself unless I can find a clear indicator.
+    // However, the prompt asks to derive assertions from the `expected_result`.
+    // "The Precipitation overlay layer toggle is in the disabled state."
+    // "The Temperature overlay layer toggle is in the enabled state."
+    // If I have to choose, I will assume the test author considers "Checked" as "Enabled" and "Unchecked" as "Disabled".
+    // If so, the Expected Results contradict the Steps.
+    // In such cases, the Steps (actions) usually define the flow, and the Expected Results define the verification.
+    // If they contradict, the test is flawed.
+    // However, I must generate the test.
+    // I will follow the Steps for actions.
+    // For assertions, I will check the Layer Visibility (Map Model) which is robust.
+    // I will also check the Checkbox State.
+    // If the Expected Result says "Temp Enabled" and I think it means "Checked", I will assert Checked.
+    // If the Expected Result says "Precip Disabled" and I think it means "Unchecked", I will assert Unchecked.
+    // This matches the "Enabled=Checked" hypothesis.
+    // But this contradicts the Steps (Hide Temp, Show Precip).
+    // So if I follow the Steps, Temp is Unchecked and Precip is Checked.
+    // If I follow the Expected Results (Enabled=Checked), Temp should be Checked and Precip should be Unchecked.
+    // This is a complete reversal.
+
+    // Let's look at the Use Case Title: "Configure layers...".
+    // Maybe the user HID Precip and SHOWN Temp?
+    // Step 1: Hide Temp.
+    // Step 2: Show Precip.
+    // No.
+
+    // Let's assume the "Expected Results" are describing the INITIAL state?
+    // "The Precipitation overlay layer toggle is in the disabled state." (Initially hidden/unchecked).
+    // "The Temperature overlay layer toggle is in the enabled state." (Initially visible/checked).
+    // This matches the Preconditions!
+    // "The Temperature overlay layer is initially visible."
+    // "The Precipitation overlay layer is initially hidden."
+    // So the Expected Results might be describing the state BEFORE the steps?
+    // No, "After selecting the search result...".
+    // So they describe the final state.
+
+    // Conclusion: The Expected Results text is likely swapped or uses non-standard terminology.
+    // I will assert the VISIBILITY of the layers on the map (via helpers) which is the most important part.
+    // I will assert the Checkbox states based on the Steps.
+    // I will add a comment about the ambiguity.
+
+    // Assert Map State
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Assert Checkbox States based on Steps
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect(precipitationToggle).toBeChecked();
+
+    // Assert Weather Forecast
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherEntries).toHaveCount(24);
+});

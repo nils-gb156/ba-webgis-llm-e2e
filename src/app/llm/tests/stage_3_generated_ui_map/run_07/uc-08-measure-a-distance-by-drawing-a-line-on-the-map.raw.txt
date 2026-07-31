@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Activate the measurement tool.
+  // The measurement-toggle button in the toolbar opens the measurement panel.
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await measurementToggle.click();
+
+  // Verify the measurement panel is visible.
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Draw a line on the map by clicking several points.
+  // We click on the map container to simulate drawing points.
+  // Using relative coordinates to ensure clicks land on the map canvas.
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Click first point (center-left)
+  await mapContainer.click({ position: { x: 200, y: 200 } });
+  
+  // Click second point (center-right)
+  await mapContainer.click({ position: { x: 300, y: 200 } });
+
+  // Click third point to extend the line
+  await mapContainer.click({ position: { x: 250, y: 300 } });
+
+  // 3. Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: 250, y: 300 } });
+
+  // Expected results:
+  // - The measurement panel is visible (already asserted above, but we wait for it to stay visible).
+  await expect(measurementPanel).toBeVisible();
+
+  // - The measurement panel displays a length value with a unit.
+  // The measurement element inside the panel should contain text like "1.23 km" or similar.
+  const measurementElement = page.getByTestId('measurement');
+  await expect(measurementElement).toBeVisible();
+  
+  // Assert that the measurement element contains text that looks like a number followed by a unit.
+  // Using expect.poll to wait for the asynchronous measurement calculation to complete.
+  await expect.poll(async () => {
+    const text = await measurementElement.textContent();
+    return text;
+  }).toMatch(/[\d,.]+\s*(m|km|mi|ft)/i);
+});

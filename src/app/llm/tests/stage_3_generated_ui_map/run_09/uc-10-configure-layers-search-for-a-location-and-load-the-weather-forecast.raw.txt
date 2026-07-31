@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial layers to settle
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    // Step 1: Hide the Temperature overlay layer
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+    await temperatureToggle.click({ force: true });
+
+    // Step 2: Show the Precipitation overlay layer
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+    await precipitationToggle.click({ force: true });
+
+    // Wait for layer visibility state to settle
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for a location
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for the map to navigate (poll for a change in center or zoom, or just wait for the info panel to update)
+    // We verify the info panel updates with the forecast in the next step.
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // Step 6: Wait for the info panel to load the forecast with 24 entries
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Count the forecast entries
+    const entries = page.getByTestId('weather-forecast-entry');
+    await expect(entries).toHaveCount(24);
+});

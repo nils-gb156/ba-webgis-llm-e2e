@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+  getActiveBaseLayerTitle,
+  isLayerRendered,
+  getMapZoomLevel,
+  getMapCenter,
+} from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be rendered
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeDefined();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Capture the initial map state to verify it appears in the printout
+  const initialZoom = await expect.poll(() => getMapZoomLevel(page)).resolves.toBeDefined();
+  const initialCenter = await expect.poll(() => getMapCenter(page)).resolves.toBeDefined();
+
+  // Step 1: Open the printing panel
+  const printToggle = page.getByRole('button', { name: 'Print' });
+  const isPrintTogglePressed = await printToggle.getAttribute('aria-pressed');
+  if (isPrintTogglePressed !== 'true') {
+    await printToggle.click({ force: true });
+  }
+
+  // Verify the printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const printingPanel = page.getByTestId('printing-panel');
+  const titleInput = printingPanel.getByLabel('Title');
+  await titleInput.fill('Map Export Test');
+
+  // Step 3: Select the PNG file format
+  const formatSelect = printingPanel.getByLabel('Format');
+  await formatSelect.selectOption('PNG');
+
+  // Step 4: Trigger the export
+  // Register for the download event before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printingPanel.getByRole('button', { name: /Export|Print|Generate/i }).click(),
+  ]);
+
+  // Verify the download occurred and has the correct filename
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+
+  // Verify the map state was captured (implicitly verified by the download succeeding,
+  // as the server renders the current map state).
+  // We assert that the map was in a valid state during the export.
+  await expect.poll(() => getMapZoomLevel(page)).resolves.toBe(initialZoom);
+  await expect.poll(() => getMapCenter(page)).resolves.toEqual(initialCenter);
+});

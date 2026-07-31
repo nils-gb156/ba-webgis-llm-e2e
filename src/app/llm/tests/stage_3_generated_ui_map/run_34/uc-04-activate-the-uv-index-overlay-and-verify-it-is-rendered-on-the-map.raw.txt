@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready before interacting
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // 1. The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+  // The layer switcher is visible by default. We need to find the UV-Index layer toggle.
+  // Based on the UI map, we have a layer-switcher panel. The layers are listed inside.
+  // We look for the UV-Index layer entry and click its checkbox/switch.
+  // Since test ids for specific layers aren't explicitly listed in the UI map table,
+  // we rely on the accessible name within the layer switcher.
+  
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  // Locate the UV-Index layer toggle. It's likely a checkbox or switch role.
+  // We scope it to the layer switcher to avoid ambiguity.
+  const uvIndexToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Click the toggle. Using force: true as per Chakra UI checkbox conventions.
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexToggle).toBeChecked();
+
+  // 2. The user waits for the map to load the layer tiles.
+  // We verify that the UV-Index layer is rendered on the map canvas using the helper.
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

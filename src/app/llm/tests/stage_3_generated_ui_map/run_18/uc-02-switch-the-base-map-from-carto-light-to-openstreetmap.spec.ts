@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and Carto Light to be active
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Open the layer switcher if it is not already visible
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher' });
+  const layerSwitcherPanel = page.getByTestId('layer-switcher');
+
+  if (!(await layerSwitcherPanel.isVisible())) {
+    await layerSwitcherToggle.click();
+  }
+
+  // Click the base map selector button within the layer switcher
+  // The layer switcher panel contains the base map selection controls
+  const baseMapSelectorButton = page.getByTestId('layer-switcher').getByRole('button', {
+    name: 'Base Map',
+  });
+  await baseMapSelectorButton.click();
+
+  // Select OpenStreetMap from the list
+  const openStreetMapOption = page.getByTestId('layer-switcher').getByRole('option', {
+    name: 'OpenStreetMap',
+  });
+  await openStreetMapOption.click();
+
+  // Assert that OpenStreetMap is now the active base layer
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

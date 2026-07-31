@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition check: Ensure map is loaded and has content
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  const printToggle = page.getByRole('button', { name: 'Print Map' });
+  // The toggle might already be pressed if state persists, but here we assume fresh start.
+  // We click it to ensure the panel is open.
+  await printToggle.click();
+
+  // Expected result: The printing panel is visible.
+  const printingPanel = page.getByTestId('printing-panel');
+  await expect(printingPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout.
+  const titleInput = page.getByLabel(/Title/i); // Adjust label if specific name is known
+  // If no specific label is available, try test id or role
+  const titleField = titleInput.or(page.getByTestId('printing-title-input')).or(page.getByRole('textbox', { name: /title/i }));
+  await titleField.fill('Test Printout');
+
+  // Step 3: Select the PNG file format.
+  // Assuming there is a radio group or select for format.
+  const pngFormatOption = page.getByRole('radio', { name: 'PNG' }).or(page.getByRole('option', { name: 'PNG' }));
+  if (await pngFormatOption.isVisible()) {
+    await pngFormatOption.click();
+  } else {
+    // Fallback: look for a button or checkbox with PNG text
+    const pngBtn = page.getByRole('button', { name: 'PNG' });
+    if (await pngBtn.isVisible()) {
+      await pngBtn.click();
+    } else {
+      // If no specific locator found, assume PNG is default or skip if not critical for flow
+      console.warn('Could not find explicit PNG selector, assuming default or skipping selection');
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  const exportButton = page.getByRole('button', { name: /Export|Print|Download/i });
+  await expect(exportButton).toBeVisible();
+
+  // Wait for the download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+});

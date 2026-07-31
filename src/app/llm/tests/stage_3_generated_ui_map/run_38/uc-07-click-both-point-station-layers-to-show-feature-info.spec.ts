@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and verify initial state
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Ensure the Info Panel is visible (it is visible by default, but let's be explicit)
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure measurement tool is not active (it is inactive by default)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Ensure UV-Index Stations layer is active (it is active by default)
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  // Ensure EUCOS Ground Stations layer is active (it is active by default)
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Click on the map at the specified coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 0, y: 0 }, // Click at the center of the map container
+    force: true,
+  });
+
+  // Wait for the map to process the click and potentially fetch feature info
+  // We need to wait for the info panel to update with the feature info
+  // Since the coordinates are specific, we wait for the info panel to contain the expected sections
+
+  // Wait for the UV-Index Station section to appear
+  await expect(page.getByText('UV-Index Station')).toBeVisible({ timeout: 10000 });
+
+  // Wait for the EUCOS Ground Station section to appear
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible({ timeout: 10000 });
+
+  // Verify that the info panel displays the UV-Index Station section with feature information
+  const uvIndexStationSection = page.getByText('UV-Index Station').locator('..');
+  await expect(uvIndexStationSection).toBeVisible();
+
+  // Verify that the info panel displays the EUCOS Ground Station section with feature information
+  const eucosStationSection = page.getByText('EUCOS Ground Station').locator('..');
+  await expect(eucosStationSection).toBeVisible();
+});

@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is loaded and interactive
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Click on the map to trigger the weather forecast
+  // We click near the center of the visible map area
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container bounding box is null');
+  }
+  const clickX = box.x + box.width / 2;
+  const clickY = box.y + box.height / 2;
+
+  await page.mouse.click(clickX, clickY);
+
+  // Wait for the click to be processed and the info panel to update
+  // The info panel is visible by default, but we need to wait for the forecast data
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear in the info panel
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the weather forecast entries to load
+  // The expected result is 24 entries
+  const weatherForecastEntries = page.getByTestId(/weather-forecast-entry-\d+/);
+  await expect(weatherForecastEntries).toHaveCount(24);
+
+  // Verify the clicked position is highlighted on the map
+  const highlightedCoord = await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+  expect(highlightedCoord).toBeDefined();
+
+  // Verify that the temperature layer is rendered (as per preconditions/layers)
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

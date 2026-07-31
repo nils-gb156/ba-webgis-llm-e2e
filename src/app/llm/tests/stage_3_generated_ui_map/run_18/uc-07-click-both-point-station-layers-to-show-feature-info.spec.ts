@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure map is ready and operational layers are rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure no measurement tool is active
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 400, y: 300 }, // Approximate center of viewport, actual coordinates handled by OL map click event
+  });
+
+  // Since we need to click at specific EPSG:3857 coordinates, we use evaluate to simulate the click
+  await page.evaluate(
+    async (coords) => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      if (!map) return;
+      const pixel = map.olMap.getPixelFromCoordinate(coords);
+      if (!pixel) return;
+      const element = map.olMap.getTargetElement() as HTMLElement;
+      const rect = element.getBoundingClientRect();
+      const x = pixel[0] - rect.left;
+      const y = pixel[1] - rect.top;
+      element.dispatchEvent(
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          clientX: x + rect.left,
+          clientY: y + rect.top,
+        })
+      );
+    },
+    [1188692.84, 6767643.28]
+  );
+
+  // Wait for the info panel to load feature information
+  // The info panel is visible by default, so we just need to wait for content to appear
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Check for UV-Index Station section
+  // Assuming the info panel contains sections with test ids or text for each layer's feature info
+  // Since specific test ids for feature info sections are not provided, we look for text content
+  await expect(page.getByText('UV-Index Station')).toBeVisible({ timeout: 10000 });
+
+  // Check for EUCOS Ground Station section
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible({ timeout: 10000 });
+});

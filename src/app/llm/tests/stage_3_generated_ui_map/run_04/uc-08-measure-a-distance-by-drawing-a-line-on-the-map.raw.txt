@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the measurement toggle to open the measurement panel
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  
+  // Check current state of the toggle to ensure we open the panel
+  const isMeasurementPanelVisible = page.getByTestId('measurement-panel').isVisible();
+  const isTogglePressed = await measurementToggle.getAttribute('aria-pressed');
+  
+  // If the panel is not visible, or the toggle is not pressed, click it
+  if (!isMeasurementPanelVisible || isTogglePressed === 'false') {
+    await measurementToggle.click();
+  }
+
+  // Wait for the measurement panel to become visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line
+  const mapContainer = page.getByTestId('map-container');
+  
+  // Get the bounding box of the map container to click within it
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click three points to form a line
+  // Point 1: Center of the map
+  const point1X = box.x + box.width / 2;
+  const point1Y = box.y + box.height / 2;
+  await mapContainer.click({ position: { x: point1X, y: point1Y } });
+
+  // Point 2: Offset to the right
+  const point2X = point1X + 100;
+  const point2Y = point1Y - 50;
+  await mapContainer.click({ position: { x: point2X, y: point2Y } });
+
+  // Point 3: Further offset
+  const point3X = point2X + 50;
+  const point3Y = point2Y + 100;
+  await mapContainer.click({ position: { x: point3X, y: point3Y } });
+
+  // Step 3: Double-click to finish the measurement
+  await mapContainer.dblclick({ position: { x: point3X, y: point3Y } });
+
+  // Expected results:
+  // 1. The measurement panel is visible (already asserted above)
+  // 2. The measurement panel displays a length value with a unit
+  
+  // Wait for the measurement element to contain text (length value)
+  const measurementElement = page.getByTestId('measurement');
+  
+  // Use poll to wait for the measurement text to appear and contain a number and unit
+  await expect.poll(() => measurementElement.textContent()).toMatch(/[\d.]+\s*(m|km|ft|mi)/);
+});

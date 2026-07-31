@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial base layer to be ready
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Step 1: Open the base map selector in the layer switcher.
+  // The layer switcher is visible by default. We look for a button or control within it
+  // that allows switching base maps. Based on typical UI patterns and the provided UI map,
+  // the layer switcher panel itself might contain the base map selector.
+  // If there's no explicit "base map selector" button, the base layers might be listed directly
+  // in the layer switcher or accessed via a specific toggle.
+  // Given the UI map doesn't explicitly list a "base-map-selector" button, but lists "layer-switcher" panel,
+  // we assume the base map selection is part of the layer switcher's content.
+  // Often, base maps are selected via radio buttons or a dropdown within the layer switcher.
+  // Let's assume there's a way to interact with base layers. If not explicitly listed, we might need to
+  // look for a specific interaction. However, the UI map is auto-generated.
+  // Let's assume the layer switcher contains the base map options. We'll try to find an element to click
+  // that represents the base map selection control or directly interact with the layer list if it's visible.
+  // Since "layer-switcher" is a panel and "layer-switcher-toggle" is a button, and the panel is visible by default,
+  // the base map selector should be inside it.
+  // Let's look for a common pattern: a radio group or a list of base maps.
+  // If no specific test id is available for the base map selector, we might use getByRole or getByText.
+  // However, the instructions say to prefer getByTestId.
+  // Let's assume there is a test id for the base map selection area or the specific base map items.
+  // If not, we fall back. Let's try to find a button or role that indicates base map selection.
+  // Without explicit test ids for base map items, we might use getByText('OpenStreetMap') inside the layer switcher.
+
+  // Attempt 1: Look for a specific base map selector control if it exists.
+  // If not found, we'll assume the base maps are listed in the layer switcher.
+  // Let's try to click on the layer switcher panel to ensure it's focused or expanded if needed,
+  // though it's visible by default.
+  
+  // Let's assume there is a radio button or similar for base maps.
+  // We will try to find "OpenStreetMap" text within the layer switcher and click it.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Step 2: Select 'OpenStreetMap' as the base map.
+  // We look for the text 'OpenStreetMap' within the layer switcher.
+  const openStreetMapOption = layerSwitcher.getByText('OpenStreetMap', { exact: true });
+  
+  // It might be a button or a radio label. We'll try to click it.
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+  
+  // Assert the active base layer title is now OpenStreetMap
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+
+  // Assert that Carto Light is no longer the active base layer
+  await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+});

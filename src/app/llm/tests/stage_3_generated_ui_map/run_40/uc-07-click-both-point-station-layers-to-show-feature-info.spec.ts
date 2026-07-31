@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Verify preconditions: relevant layers are rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (it might be toggled on by default in some states)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  // Convert EPSG:3857 coordinates to pixel position on the map canvas
+  // Since we don't have a direct transform helper in the prompt's map-model-helpers for pixel conversion,
+  // we use the map's view to calculate the position.
+  // However, Playwright's click on a canvas element with a position option works relative to the element's bounding box.
+  // We need to find the pixel coordinates corresponding to the map coordinates.
+  // A simpler approach for this specific use case, if the map model exposes the view, is to use page.evaluate to click.
+  // But the prompt says "click the map container element ... with a position option".
+  // To get the position, we can calculate it using the map's view transformation inside the browser context.
+  
+  const pixelPosition = await page.evaluate(({ x, y }: { x: number; y: number }) => {
+    const map = (globalThis as { __open pioneerMap?: any }).__openPioneerMap;
+    if (!map) return { x: 0, y: 0 };
+    const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+    return { x: pixel[0], y: pixel[1] };
+  }, { x: 1188692.84, y: 6767643.28 });
+
+  await mapContainer.click({
+    position: {
+      x: pixelPosition.x,
+      y: pixelPosition.y
+    }
+  });
+
+  // Wait for the info panel to update with feature info
+  // The info panel is visible by default. We need to check for the presence of the section headers or content.
+  // The prompt mentions "UV-Index Station" and "EUCOS Ground Station" sections.
+  // We will look for text indicating these stations.
+  
+  // Wait for the info panel to show UV-Index Station info
+  await expect(page.getByText('UV-Index Station', { exact: false })).toBeVisible({ timeout: 10000 });
+  
+  // Wait for the info panel to show EUCOS Ground Station info
+  await expect(page.getByText('EUCOS Ground Station', { exact: false })).toBeVisible({ timeout: 10000 });
+});

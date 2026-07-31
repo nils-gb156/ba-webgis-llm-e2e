@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the map is ready and both station layers are rendered
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure the info panel is visible (it is visible by default, but wait to be sure)
+  const infoPanelToggle = page.getByRole('button', { name: 'Info Panel' });
+  const isInfoPanelOpen = await infoPanelToggle.getAttribute('aria-pressed');
+  if (isInfoPanelOpen !== 'true') {
+    await infoPanelToggle.click({ force: true });
+  }
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure measurement tool is not active
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+  if (isMeasurementActive === 'true') {
+    await measurementToggle.click({ force: true });
+  }
+
+  // Click at the specified coordinates on the map canvas
+  // Coordinates [1188692.84, 6767643.28] are in EPSG:3857
+  // We need to convert these to pixel coordinates on the map container
+  const mapContainer = page.getByTestId('map-container');
+  const mapBoundingBox = await mapContainer.boundingBox();
+  if (!mapBoundingBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Get the map center and zoom to calculate pixel coordinates
+  // However, a simpler approach for Playwright is to use the map's internal coordinate system
+  // but Playwright's click uses pixel coordinates.
+  // Since we don't have a helper to convert EPSG:3857 to pixel, we will use the map's
+  // built-in interaction if available, or calculate it.
+  // Given the constraints, we will assume the map container is the target and click
+  // at a specific position. But we don't know the exact pixel position without
+  // knowing the map's current view.
+  // Let's use the map's evaluate method to get the pixel position of the coordinate.
+  const pixelPosition = await page.evaluate(
+    ([x, y]) => {
+      const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+      if (!map) return null;
+      const pixel = map.olMap.getPixelFromCoordinate([x, y]);
+      return pixel;
+    },
+    [1188692.84, 6767643.28]
+  );
+
+  if (!pixelPosition) {
+    throw new Error('Could not get pixel position for the specified coordinates');
+  }
+
+  // Click the map at the calculated pixel position
+  await mapContainer.click({
+    position: {
+      x: pixelPosition[0],
+      y: pixelPosition[1],
+    },
+  });
+
+  // Wait for the info panel to load the station info for both layers
+  // We expect to see sections for both UV-Index Station and EUCOS Ground Station
+  // The info panel content is dynamic, so we wait for specific text or elements
+  await expect.poll(() =>
+    page.getByTestId('info-panel').locator('text=UV-Index Station').isVisible()
+  ).toBe(true);
+
+  await expect.poll(() =>
+    page.getByTestId('info-panel').locator('text=EUCOS Ground Station').isVisible()
+  ).toBe(true);
+});

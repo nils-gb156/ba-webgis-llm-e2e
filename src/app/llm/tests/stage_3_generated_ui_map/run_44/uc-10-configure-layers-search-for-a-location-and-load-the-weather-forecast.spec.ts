@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and initial layers to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+  // Step 1: Hide the Temperature overlay layer
+  // The layer switcher is visible by default. We need to find the Temperature layer toggle.
+  // Based on the UI map, we have a layer-switcher panel. We need to click the specific layer toggle.
+  // Since specific layer toggles don't have explicit testids in the provided map, we use the layer-switcher container.
+  // However, the UI map lists `layer-switcher` as a panel. Usually, layers are items within it.
+  // Let's assume standard Chakra/Aria structure or look for text.
+  // The prompt says "temperature-legend" exists, implying "Temperature" is the name.
+  // We will click the toggle associated with "Temperature".
+  // Since we don't have a specific testid for the layer item, we rely on the layer-switcher panel content.
+  // Let's try to find the toggle by role and name within the layer switcher.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Click Temperature toggle to hide it.
+  // Note: The prompt implies we need to assert the state *after* the action.
+  // We click the toggle.
+  const tempToggle = layerSwitcher.getByRole('checkbox', { name: 'Temperature' });
+  await expect(tempToggle).toBeChecked(); // It is initially visible/checked
+  await tempToggle.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipToggle).not.toBeChecked(); // It is initially hidden
+  await precipToggle.click({ force: true });
+
+  // Assert layer states
+  // "The Precipitation overlay layer toggle is in the disabled state." -> This likely means the layer is active/rendered, but the toggle might look "pressed" or "enabled". 
+  // Wait, "disabled state" usually means `disabled` attribute. But here it likely means "active/checked". 
+  // Let's check the layer rendered state via helper.
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  // Step 3: Search for a location
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await expect(geocoderInput).toBeVisible();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for results and select the first one
+  const geocoderResults = page.getByTestId('geocoder-results');
+  await expect(geocoderResults).toBeVisible();
+  
+  // The first result item
+  const firstResult = page.getByTestId('geocoder-result-item-0');
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // We poll the zoom level or center to ensure the map has finished animating/navigating.
+  // The center should change from the initial view to Münster's coordinates (approx EPSG:3857).
+  // Münster is roughly 7.6, 51.9 lon/lat. In 3857: x~850000, y~6600000.
+  const initialCenter = await getMapCenter(page);
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    return center && (center[0] !== initialCenter?.[0] || center[1] !== initialCenter?.[1]);
+  }).toBe(true);
+
+  // Step 6: Wait for info panel to load the forecast
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+  
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Assert 24 entries
+  const weatherForecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(weatherForecastEntries).toHaveCount(24);
+});

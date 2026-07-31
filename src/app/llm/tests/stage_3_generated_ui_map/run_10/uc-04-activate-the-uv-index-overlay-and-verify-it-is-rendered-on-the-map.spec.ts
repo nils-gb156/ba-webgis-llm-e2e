@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to load
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // The UV-Index layer is initially hidden. We need to find its toggle in the layer switcher.
+  // Based on the UI map, the layer switcher panel is visible by default.
+  // We look for the checkbox/switch associated with "UV-Index".
+  // Since "UV-Index" might be ambiguous (e.g. "UV-Index" vs "UV-Index Stations"), we scope to the layer switcher.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Find the specific toggle for the "UV-Index" operational layer.
+  // Chakra UI checkboxes render the input visually hidden. We must click the role with force.
+  // We use exact name matching to distinguish from "UV-Index Stations".
+  const uvIndexToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Ensure the toggle is currently unchecked before clicking (defensive, though precondition says it's hidden)
+  const isInitiallyChecked = await uvIndexToggle.isChecked();
+  if (isInitiallyChecked) {
+    // If it's already checked, the precondition might be violated or state changed.
+    // However, the use case says it is initially hidden. If it's checked, we assume it's visible.
+    // But to be safe and follow the flow:
+    await expect(uvIndexToggle).toBeChecked();
+  } else {
+    // Click the toggle to enable the layer
+    await uvIndexToggle.click({ force: true });
+  }
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the UV-Index layer tiles to be rendered on the map canvas
+  // Using the helper function to check map model state
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

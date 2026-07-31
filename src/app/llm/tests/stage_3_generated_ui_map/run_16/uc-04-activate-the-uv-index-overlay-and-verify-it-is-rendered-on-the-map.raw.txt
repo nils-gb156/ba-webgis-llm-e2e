@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({
+  page,
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial layers to load
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // The layer switcher is visible by default.
+  // Locate the UV-Index layer toggle. Based on the UI map, we need to find the specific toggle.
+  // Since the UI map doesn't list a specific testid for the layer toggle, we use the layer name.
+  // The layer switcher panel contains the list of layers.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  // Try to find the UV-Index layer entry. Often these have a testid or accessible name.
+  // Assuming the layer name is used as the accessible name or text content.
+  const uvIndexLayerToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // If getByRole with name fails due to ambiguity, fallback to text or testid if available.
+  // Given the UI map doesn't specify the exact toggle testid, we assume the checkbox role with exact name works.
+  // If not, we might need to rely on the visible text "UV-Index".
+  // Let's try clicking the checkbox.
+  await uvIndexLayerToggle.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexLayerToggle).toBeChecked();
+
+  // Verify the UV-Index layer is rendered on the map canvas
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Wait for the map and initial UI to be ready
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+    await expect(page.getByTestId('info-panel')).toBeVisible();
+
+    // 1. Hide the Temperature overlay layer
+    // The Temperature layer is visible by default. We click its toggle to hide it.
+    // We use force: true as Chakra UI checkboxes/switches may have overlaying elements.
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' }).first();
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+    await expect(temperatureToggle).not.toBeChecked();
+
+    // 2. Show the Precipitation overlay layer
+    // The Precipitation layer is hidden by default. We click its toggle to show it.
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' }).first();
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+    await expect(precipitationToggle).toBeChecked();
+
+    // Verify layer states via DOM toggles
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect(precipitationToggle).toBeChecked();
+
+    // 3. Search for a location
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    // 4. Wait for results and select the first one
+    await expect(page.getByTestId('geocoder-results')).toBeVisible();
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // 5. Wait for the map to navigate
+    // We poll the map center to ensure the map has actually moved from its initial state.
+    const initialCenter = await getMapCenter(page);
+    await expect.poll(() => getMapCenter(page)).not.toEqual(initialCenter);
+    await expect.poll(() => getMapZoomLevel(page)).not.toBe(undefined);
+
+    // 6. Wait for the info panel to load the weather forecast
+    // The expected result is a weather forecast section with 24 entries.
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Count the forecast entries
+    const entries = page.getByTestId('weather-forecast-entry');
+    await expect(entries).toHaveCount(24);
+});

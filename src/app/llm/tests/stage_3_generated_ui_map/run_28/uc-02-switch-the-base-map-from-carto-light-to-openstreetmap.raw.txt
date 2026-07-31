@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // The layer switcher is visible by default. We look for the base layer selector
+  // within the layer switcher panel. Based on typical Chakra UI structures,
+  // we might need to interact with a specific part of the layer switcher.
+  // Assuming there's a way to expand/switch base layers.
+  // Let's look for a button or section that allows base map switching.
+  // Often this is a distinct section or button within the layer switcher.
+  // If not explicitly provided in the UI map for base switching, we might need to
+  // infer from "layer-switcher" and look for base layer options.
+  // However, the UI map doesn't explicitly list a "base-map-selector" component.
+  // Let's assume the layer switcher contains the base map options directly or via a toggle.
+  // A common pattern is a radio group or a list for base maps.
+  // Let's try to find the OpenStreetMap option within the layer switcher.
+
+  // Since the UI map doesn't give a specific test id for the base map selector button,
+  // we'll look for the layer switcher and then try to find the base map options.
+  // The layer switcher is `layer-switcher`.
+  // Let's assume the base maps are listed within it.
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // We need to click on 'OpenStreetMap' within the layer switcher.
+  // Since we don't have a specific test id for the base map item, we'll use getByText or getByRole.
+  // The layer switcher is visible.
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  
+  // Try to find the OpenStreetMap base map option.
+  // It might be a radio button, a button, or a text element.
+  // Let's try clicking on the text "OpenStreetMap" within the layer switcher.
+  // To avoid ambiguity, we scope it to the layer switcher.
+  const osmOption = layerSwitcher.getByText('OpenStreetMap');
+  
+  // Check if the option exists and click it.
+  // If it's not visible, it might be hidden or the UI structure is different.
+  // Let's assume it's visible or can be made visible.
+  await expect(osmOption).toBeVisible();
+  await osmOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Assert the active base layer title is now OpenStreetMap
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+
+  // Assert that the OpenStreetMap layer is rendered
+  await expect.poll(() => isLayerRendered(page, 'OpenStreetMap')).toBe(true);
+
+  // Assert that Carto Light is no longer the active base layer (implicitly covered by the title check)
+  // But we can also check if it's not rendered if it's completely swapped out.
+  // Usually, base layers are mutually exclusive.
+  await expect.poll(() => isLayerRendered(page, 'Carto Light')).toBe(false);
+});

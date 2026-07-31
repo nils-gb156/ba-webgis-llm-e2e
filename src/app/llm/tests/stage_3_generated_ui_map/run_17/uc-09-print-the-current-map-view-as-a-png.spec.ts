@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for map to be ready
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the 'Print Map' button to open the printing panel
+  await page.getByTestId('print-toggle').click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByTestId('printing-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  // Assuming there is an input field for the title inside the printing panel.
+  // Since no specific test id for the title input is provided, we look for a label or placeholder.
+  // Common patterns: "Title", "Print Title", etc. We'll try to find an input within the printing panel.
+  const titleInput = page.getByTestId('printing-panel').getByRole('textbox', { name: /title/i });
+  await titleInput.fill('Test Print Map PNG');
+
+  // Step 3: Select the PNG file format
+  // Assuming there is a radio group or select for format.
+  // We look for a radio button or option labeled "PNG".
+  const pngFormatOption = page.getByTestId('printing-panel').getByRole('radio', { name: /PNG/i });
+  // If PNG is not the default, we click it. If it is, we might skip, but to be safe we ensure it's selected.
+  // Using force: true as radio buttons in Chakra UI are often hidden inputs.
+  await pngFormatOption.click({ force: true });
+
+  // Step 4: Click the export/print button
+  // Assuming there is a button labeled "Export", "Print", or "Download" inside the printing panel.
+  const exportButton = page.getByTestId('printing-panel').getByRole('button', { name: /export|print|download/i });
+  
+  // Wait for the download to start before clicking
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  // Wait for the download to complete
+  const download = await downloadPromise;
+  
+  // Verify the file was downloaded and has a PNG extension
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+});

@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Ensure measurement tool is not active (precondition)
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const isMeasurementActive = await measurementToggle.getAttribute('aria-pressed');
+    if (isMeasurementActive === 'true') {
+        await measurementToggle.click();
+    }
+
+    // Ensure info panel is visible (precondition)
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+    const isInfoPanelVisible = await infoPanel.isVisible();
+    if (!isInfoPanelVisible) {
+        await infoPanelToggle.click();
+    }
+
+    // Verify preconditions: UV-Index Stations and EUCOS Ground Stations are rendered
+    await expect.poll(() => getMapCenter(page)).toBeDefined();
+    await expect.poll(() => page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+        if (!map) return false;
+        const uviLayer = map.layers.getOperationalLayers().find((l: any) => l.title === 'UV-Index Stations');
+        const eucosLayer = map.layers.getOperationalLayers().find((l: any) => l.title === 'EUCOS Ground Stations');
+        return uviLayer?.visible === true && eucosLayer?.visible === true;
+    })).toBe(true);
+
+    // Step 1: Click at the specific coordinates where both stations are located
+    const clickX = 1188692.84;
+    const clickY = 6767643.28;
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({
+        position: { x: clickX, y: clickY }
+    });
+
+    // Step 2: Wait for the info panel to load the station info for both layers
+    // The info panel updates asynchronously after the click and GetFeatureInfo requests complete.
+    // We poll for the presence of the specific sections in the info panel.
+    
+    // Wait for UV-Index Station section to appear
+    await expect.poll(() => page.getByTestId('info-panel').getByText('UV-Index Station').isVisible()).toBe(true);
+
+    // Wait for EUCOS Ground Station section to appear
+    await expect.poll(() => page.getByTestId('info-panel').getByText('EUCOS Ground Station').isVisible()).toBe(true);
+
+    // Verify that the highlighted coordinate matches the clicked location (optional but good for verification)
+    await expect.poll(() => getHighlightedCoordinate(page)).toEqual([clickX, clickY]);
+});

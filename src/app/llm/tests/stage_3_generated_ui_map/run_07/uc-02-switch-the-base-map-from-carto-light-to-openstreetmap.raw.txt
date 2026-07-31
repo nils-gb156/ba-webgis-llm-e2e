@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Verify initial state: Carto Light is active
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('Carto Light');
+
+    // The layer switcher is visible by default.
+    // We need to find the base map selector within the layer switcher.
+    // Based on typical Chakra UI structures and the provided UI map, the layer switcher panel contains the base map options.
+    // We look for a radio group or list within the layer switcher panel that contains "OpenStreetMap".
+    
+    // Locate the layer switcher panel
+    const layerSwitcherPanel = page.getByRole('panel', { name: /layer/i });
+    await expect(layerSwitcherPanel).toBeVisible();
+
+    // Click on the base map selector area or the specific radio/button for OpenStreetMap.
+    // Since we don't have a specific test id for the base map radio buttons, we use getByRole with exact name.
+    // Assuming the base map options are exposed as radio buttons or similar interactive elements with accessible names.
+    // If they are not directly accessible by role, we might need to look for text within the panel.
+    // However, the prompt says to prefer getByRole. Let's try to find "OpenStreetMap" within the layer switcher.
+    
+    // If the base map options are rendered as a list of radio buttons:
+    const osmOption = layerSwitcherPanel.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+    
+    // If radio is not found, it might be a button or just a clickable text.
+    // Let's try clicking the text "OpenStreetMap" inside the layer switcher if radio fails, but strictly speaking,
+    // we should use the most semantic role. Let's assume there is a radio group for base maps.
+    // If the UI uses a custom component, it might expose a button.
+    // Given the ambiguity, we'll try to click the element containing the text "OpenStreetMap" inside the layer switcher.
+    // But wait, the instructions say: "Fall back to ... getByText ... only for elements without a test id. Prefer getByRole ... over getByText".
+    // If "OpenStreetMap" is a radio button, getByRole('radio', { name: 'OpenStreetMap' }) is best.
+    
+    // Let's try to locate the base map selector first. Often it's a toggle or a dropdown.
+    // The UI map lists `layer-switcher` as a panel. It doesn't list a specific base-map-selector component.
+    // We will assume the base map options are inside the `layer-switcher` panel.
+    
+    // Attempt to click the OpenStreetMap option.
+    // If it's a radio button:
+    await osmOption.click({ force: true });
+
+    // Assert that OpenStreetMap is now active
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.toBe('OpenStreetMap');
+    
+    // Assert that Carto Light is no longer selected
+    await expect.poll(() => getActiveBaseLayerTitle(page)).resolves.not.toBe('Carto Light');
+});

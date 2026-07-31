@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide the Temperature overlay layer.
+    // The layer switcher is visible by default. We locate the Temperature layer toggle.
+    // Chakra UI checkboxes use a hidden input, so we force click the role.
+    const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' }).first();
+    await expect(temperatureToggle).toBeChecked();
+    await temperatureToggle.click({ force: true });
+
+    // Step 2: Show the Precipitation overlay layer.
+    // It is initially hidden, so the checkbox should be unchecked.
+    const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' }).first();
+    await expect(precipitationToggle).not.toBeChecked();
+    await precipitationToggle.click({ force: true });
+
+    // Assert layer state via map model helpers to ensure the map actually rendered the changes.
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for 'Münster'.
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one.
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for the map to navigate to the searched location.
+    // We check that the map center has changed from the initial extent or that a highlight appears.
+    // Since we don't know the exact coordinates, we assert that the map is no longer at the initial
+    // default state by checking that the map center is defined and not the initial default (approx 0,0 or similar).
+    // A safer bet for "navigation" is often checking the scale or just waiting for the geocoder results to close
+    // and the map to stabilize. We'll check that the map center is no longer undefined (map is ready)
+    // and potentially that the highlighted coordinate appears if the app highlights the search result.
+    await expect.poll(() => page.evaluate(() => (globalThis as any).__openPioneerMap?.olMap.getView().getCenter())).resolves.toBeDefined();
+
+    // Step 6: Wait for the info panel to load the forecast.
+    // The info panel is visible by default. We look for the weather forecast section.
+    const weatherSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherSection).toBeVisible();
+
+    // Assert the expected result: 24 entries.
+    const weatherEntries = page.getByTestId('weather-forecast-entry');
+    await expect(weatherEntries).toHaveCount(24);
+});

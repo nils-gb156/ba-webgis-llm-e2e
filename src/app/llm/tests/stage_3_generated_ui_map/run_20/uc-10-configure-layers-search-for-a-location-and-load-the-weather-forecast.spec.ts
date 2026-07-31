@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    // Step 1: Hide Temperature overlay
+    // The layer switcher is visible by default. We need to find the Temperature layer toggle.
+    // Based on the UI map, we don't have a specific test id for individual layer toggles,
+    // so we rely on the layer switcher panel content.
+    const layerSwitcher = page.getByRole('button', { name: 'Layer Switcher' }).first(); // Assuming toggle exists or panel is visible
+    // Actually, the layer switcher is visible by default, so we might not need to click the toggle.
+    // We look for the Temperature layer item within the layer switcher.
+    const tempLayerItem = page.getByRole('checkbox', { name: 'Temperature' }).first();
+    await expect(tempLayerItem).toBeChecked();
+    await tempLayerItem.click({ force: true });
+    await expect(tempLayerItem).not.toBeChecked();
+
+    // Step 2: Show Precipitation overlay
+    const precipLayerItem = page.getByRole('checkbox', { name: 'Precipitation' }).first();
+    await expect(precipLayerItem).not.toBeChecked();
+    await precipLayerItem.click({ force: true });
+    await expect(precipLayerItem).toBeChecked();
+
+    // Verify layer rendering state via map model
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    // Step 3: Search for 'Münster'
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await geocoderInput.fill('Münster');
+
+    // Step 4: Wait for results and select the first one
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Step 5: Wait for map navigation
+    // The map should zoom to the location. We can check if the center has changed or just wait for the geocoder to clear.
+    // Since we don't know the exact center, we'll wait for the geocoder results to disappear or the input to clear.
+    await expect(geocoderInput).toHaveValue('');
+    await expect(page.getByTestId('geocoder-results')).not.toBeVisible();
+
+    // Step 6: Wait for info panel to load the forecast
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    // Verify the weather forecast has 24 entries
+    const forecastEntries = page.getByTestId('weather-forecast-entry');
+    await expect(forecastEntries).toHaveCount(24);
+});

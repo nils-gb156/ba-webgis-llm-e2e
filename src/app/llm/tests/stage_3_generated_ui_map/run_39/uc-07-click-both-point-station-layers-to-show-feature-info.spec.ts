@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be rendered
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+  // Ensure measurement tool is not active (reset state if necessary)
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if (await measurementToggle.getAttribute('aria-pressed') === 'true') {
+    await measurementToggle.click();
+  }
+
+  // Click on the map at the specified coordinates where both stations are located
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 400, y: 300 } // Approximate center, actual coordinates handled by OL interaction
+  });
+
+  // Since we don't know the exact pixel coordinates for [1188692.84, 6767643.28] in EPSG:3857
+  // relative to the viewport without knowing the current zoom and center, we rely on the
+  // application's GetFeatureInfo mechanism which is triggered by clicking.
+  // However, the prompt specifies clicking at specific EPSG:3857 coordinates.
+  // Playwright's click on the map container uses viewport coordinates.
+  // We need to convert EPSG:3857 to viewport coordinates or use a more robust method.
+  // Given the constraints, we will click the map and assume the test environment
+  // is set up such that the click triggers the feature info for the stations at that location.
+  // A more precise way would be to use page.evaluate to convert coordinates, but let's stick to the prompt's instruction.
+  // The prompt says "click at map coordinates [1188692.84, 6767643.28]".
+  // We will use page.evaluate to perform the click at the correct map coordinates.
+
+  await page.evaluate(() => {
+    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+    if (!map) return;
+    const olMap = map.olMap;
+    const coordinate = olMap.getCoordinateFromPixel([0, 0]); // Just to get the view
+    // We need to convert EPSG:3857 to pixel coordinates
+    const pixel = olMap.getPixelFromCoordinate([1188692.84, 6767643.28]);
+    if (pixel) {
+      const element = document.querySelector('.ol-viewport');
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        const x = pixel[0] + rect.left;
+        const y = pixel[1] + rect.top;
+        // Dispatch a click event at the calculated position
+        element.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y
+        }));
+      }
+    }
+  });
+
+  // Wait for the info panel to update with feature information
+  // The info panel is visible by default
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the UV-Index Station section to appear in the info panel
+  // We look for a section or heading that contains "UV-Index Station"
+  // Since the exact structure is not provided, we'll look for text content
+  await expect.poll(async () => {
+    const content = await page.getByTestId('info-panel').textContent();
+    return content?.includes('UV-Index Station');
+  }).toBe(true);
+
+  // Wait for the EUCOS Ground Station section to appear in the info panel
+  await expect.poll(async () => {
+    const content = await page.getByTestId('info-panel').textContent();
+    return content?.includes('EUCOS Ground Station');
+  }).toBe(true);
+});
