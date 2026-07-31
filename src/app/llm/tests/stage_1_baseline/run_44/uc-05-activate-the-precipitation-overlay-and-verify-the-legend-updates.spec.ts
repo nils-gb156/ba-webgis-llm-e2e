@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher and legend to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  // Locate the Precipitation layer in the layer switcher.
+  // We assume the layer item has a test id or is identifiable by its label.
+  // If a specific test id exists for the precipitation layer item, use it.
+  // Otherwise, we look for the checkbox associated with "Precipitation".
+  const precipitationLayerItem = page.getByTestId('layer-item-precipitation');
+  
+  // Check if the layer item exists and find its checkbox
+  if (await precipitationLayerItem.isVisible()) {
+    const checkbox = precipitationLayerItem.getByRole('checkbox', { name: 'Precipitation' });
+    
+    // Ensure the checkbox is initially hidden (unchecked) as per preconditions
+    await expect(checkbox).not.toBeChecked();
+
+    // Click the visibility toggle to show the layer
+    await checkbox.click({ force: true });
+
+    // Verify the toggle is now in the enabled (checked) state
+    await expect(checkbox).toBeChecked();
+  } else {
+    // Fallback: try to find the checkbox by role and name directly if test id is not available
+    // This assumes the layer name is unique enough or scoped correctly
+    const checkbox = page.getByRole('checkbox', { name: 'Precipitation' });
+    
+    // Ensure the checkbox is initially hidden (unchecked)
+    await expect(checkbox).not.toBeChecked();
+
+    // Click the visibility toggle
+    await checkbox.click({ force: true });
+
+    // Verify the toggle is now in the enabled (checked) state
+    await expect(checkbox).toBeChecked();
+  }
+
+  // Verify the legend displays an entry corresponding to the Precipitation layer
+  // The legend container should now contain text or an element related to Precipitation
+  await expect(page.getByTestId('legend')).toContainText('Precipitation');
+});

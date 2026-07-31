@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the application base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the TOC to be visible
+  const tocLocator = page.getByTestId('layer-switcher');
+  await expect(tocLocator).toBeVisible();
+
+  // Step 1: Hide the Temperature overlay layer
+  // The toggle is a checkbox-like control. We click it with force to bypass the decorative element.
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' }).first();
+  // Ensure it is currently checked before clicking to hide it
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  // First, ensure it is currently unchecked
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' }).first();
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+
+  // Expected result check: Precipitation toggle should be disabled (checked) and Temperature should be enabled (unchecked)
+  // Note: The prompt says "disabled state" for Precipitation but context implies "enabled/checked" state for visibility.
+  // Standard ARIA checkbox: checked=true means visible/enabled. unchecked=false means hidden/disabled.
+  // However, sometimes "disabled" refers to the HTML `disabled` attribute.
+  // Given "Initially hidden" -> "show it", the toggle should become checked.
+  // Let's assert the checked state.
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 3: Click the search field and type a place name
+  const searchField = page.getByRole('combobox', { name: /search/i }).first();
+  // Or if no specific role/name is available, use test id if provided, or label
+  // Assuming standard geocoder input
+  if (!searchField.count()) {
+    // Fallback to a more generic search input if role/name is ambiguous
+    const searchInput = page.locator('input[placeholder*="Search"]').first();
+    await searchInput.click();
+    await searchInput.fill('Münster');
+  } else {
+    await searchField.click();
+    await searchField.fill('Münster');
+  }
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The result list is typically a dropdown or list associated with the search input
+  // We wait for the first result item to be visible
+  const firstResult = page.getByRole('option', { name: 'Münster' }).first();
+  // Or if it's a list item
+  const firstResultListItem = page.getByRole('listitem').first();
+  
+  // Wait for some result to appear
+  const resultList = page.locator('[role="listbox"]').first();
+  await expect(resultList).toBeVisible();
+
+  // Select the first result
+  // Using the most likely structure: clicking the first option in the listbox
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // Since we don't have map helpers, we wait for the info panel to start loading or change
+  const infoPanel = page.getByTestId('info-panel');
+  // We assume the info panel updates or shows loading state
+  // Let's wait for the forecast section to start appearing or for the panel to update
+  // A simple wait for the panel to be visible (if it was hidden) or stable
+  await expect(infoPanel).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast
+  // Expected result: Info panel displays a weather forecast section with 24 entries
+  // We look for a container with 24 items or a specific forecast grid/list
+  const forecastSection = page.getByRole('region', { name: /forecast/i }).first();
+  // Or a specific test id if available
+  const forecastContainer = page.getByTestId('weather-forecast').first();
+  
+  // We need to assert that 24 entries are present.
+  // Let's look for a list or grid of forecast entries.
+  const forecastEntries = page.locator('[data-testid="forecast-entry"]').all();
+  
+  // Use expect.poll to wait for the 24 entries to appear
+  await expect.poll(async () => {
+    const entries = await page.locator('[data-testid="forecast-entry"]').count();
+    return entries;
+  }).toBe(24);
+});

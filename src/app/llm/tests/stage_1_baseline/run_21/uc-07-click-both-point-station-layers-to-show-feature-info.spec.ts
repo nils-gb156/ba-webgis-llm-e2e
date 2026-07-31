@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map to be ready
+  await page.waitForSelector('[data-testid="map-container"]');
+  
+  // Ensure the info panel is visible. If it's not visible, we might need to toggle it or wait for it.
+  // Based on preconditions, it should be visible. We'll wait for it to be present.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure both layers are active.
+  // We need to find the layer tree or layer controls.
+  // Assuming standard Open Pioneer Trails layer tree structure.
+  // We will look for the layer items and ensure they are checked/active.
+  
+  // Locate UV-Index Stations layer
+  const uvIndexLayer = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  // If not found by exact name, try partial or find within layer tree
+  const uvIndexLayerLocator = uvIndexLayer.count() > 0 ? uvIndexLayer : page.getByText('UV-Index Stations').locator('..').locator('input[type="checkbox"]');
+  
+  // Locate EUCOS Ground Stations layer
+  const eucosLayer = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  const eucosLayerLocator = eucosLayer.count() > 0 ? eucosLayer : page.getByText('EUCOS Ground Stations').locator('..').locator('input[type="checkbox"]');
+
+  // Ensure UV-Index layer is checked
+  if (!await uvIndexLayerLocator.isChecked()) {
+    await uvIndexLayerLocator.click({ force: true });
+  }
+
+  // Ensure EUCOS layer is checked
+  if (!await eucosLayerLocator.isChecked()) {
+    await eucosLayerLocator.click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28]
+  // The map container is identified by data-testid="map-container"
+  const mapContainer = page.locator('[data-testid="map-container"]');
+  
+  // Convert EPSG:3857 coordinates to pixel coordinates on the map canvas.
+  // Since we don't have the exact map projection helper in the prompt, we assume the map
+  // is centered or we need to pan to these coordinates first? 
+  // The prompt says "No measurement tool is active" and "info panel is visible".
+  // It implies the map is already at a state where these stations are visible or we just click.
+  // However, clicking arbitrary EPSG:3857 coordinates requires knowing the map's current view.
+  // In many E2E tests, if the map isn't panned, clicking specific coordinates might not hit the target.
+  // But the prompt says "The user clicks at map coordinates...".
+  // Playwright's click with position is relative to the element's top-left.
+  // We need to ensure the map is panned to these coordinates or the click lands on them.
+  // Without a helper to pan, we might assume the map is already there or we need to use a different approach.
+  // Let's assume the map is already centered or the coordinates are within the visible area.
+  // If the map is not centered, we might need to use `page.mouse.click` with calculated pixel positions.
+  // However, calculating pixel positions from EPSG:3857 without map state helpers is impossible.
+  // The prompt mentions "Map state via helper functions (only if provided in the prompt)".
+  // Since no helpers are provided, we cannot programmatically pan to the coordinates.
+  // We must assume the map is already positioned such that these coordinates are within the viewport.
+  // Or, we can try to click the center of the map if we assume the map is centered on these coordinates.
+  // Let's try to click the center of the map container, assuming the map is centered on the target.
+  // If this fails, it would be due to lack of map state helpers.
+  
+  // Alternative: The prompt says "Click both point station layers to show feature info".
+  // It doesn't explicitly say we need to pan. It says "The user clicks at map coordinates...".
+  // This implies the user has already navigated to the location or the test setup ensures it.
+  // Given the complexity "hard", and no helpers, we assume the map is ready and the coordinates are valid clicks.
+  // We will click the center of the map container as a proxy, assuming the map is centered on the target.
+  // If the map is not centered, this test might fail. But without helpers, we can't do better.
+  
+  // Let's get the bounding box of the map container to click the center
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+  
+  const centerX = box.x + box.width / 2;
+  const centerY = box.y + box.height / 2;
+
+  // Click the map at the center (assuming it's centered on the target coordinates)
+  await page.mouse.click(centerX, centerY);
+
+  // Wait for the info panel to update with feature info for both layers
+  // We expect to see sections for 'UV-Index Station' and 'EUCOS Ground Station'
+  
+  // Wait for UV-Index Station info
+  await expect(page.getByText('UV-Index Station')).toBeVisible({ timeout: 10000 });
+  
+  // Wait for EUCOS Ground Station info
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible({ timeout: 10000 });
+
+  // Additional assertion: Ensure the info panel contains both sections
+  const uvIndexSection = page.getByText('UV-Index Station').first();
+  const eucosSection = page.getByText('EUCOS Ground Station').first();
+  
+  await expect(uvIndexSection).toBeVisible();
+  await expect(eucosSection).toBeVisible();
+});

@@ -1,0 +1,90 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the map to be ready
+  await page.waitForLoadState('networkidle');
+
+  // Ensure the info panel is visible
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure measurement tool is not active (reset if necessary)
+  // The prompt states "No measurement tool is active" as a precondition.
+  // We assume the default state is correct or that clicking the map doesn't interfere.
+  // If there was a specific "measurement tool" toggle, we would ensure it's off.
+  // Since no specific test ID is provided for the measurement tool toggle in the prompt,
+  // we proceed with the assumption that the default state is correct.
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28] (EPSG:3857)
+  // We need to find the map canvas element. Typically, OpenLayers uses a canvas inside a container.
+  // Without a specific test ID for the map container, we'll use a common class or role if available.
+  // However, the prompt mentions using a scoped CSS class selector as a last resort.
+  // Let's assume the map container has a test ID or a specific class.
+  // Since no test ID is provided for the map, we'll try to locate the canvas.
+  // In many OpenLayers setups, the canvas is inside a div with a specific class.
+  // Let's try to find the canvas by role or text if possible, but canvas doesn't have text.
+  // We'll use a common OpenLayers map container class if known, or fallback to a generic locator.
+  // Given the constraints, we'll assume there's a way to click the map.
+  // Let's try to find the map container by its test ID if it exists, otherwise by class.
+  // Since no test ID is provided, we'll use a generic approach.
+  // In Ba-WebGIS, the map container might have a test ID like 'map-container'.
+  // Let's assume 'map-container' is the test ID for the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Click on the map at the specified coordinates
+  // The coordinates are in EPSG:3857. We need to convert them to pixel coordinates if the map library requires it.
+  // However, Playwright's click method with position option expects relative coordinates within the element.
+  // We need to calculate the pixel position based on the map's extent and zoom level.
+  // Since we don't have the map model helper functions, we'll assume the click method can handle EPSG:3857 coordinates directly if the map library supports it.
+  // Alternatively, we might need to use a specific method to click on the map at geographic coordinates.
+  // For now, we'll try to click on the map container with the given coordinates, assuming the map library translates them.
+  // If this fails, we might need to use a different approach, such as using the map's internal API.
+  // Let's try clicking on the map container with the given coordinates.
+  // Note: The position option in click() expects {x, y} in pixels relative to the element.
+  // We need to convert the EPSG:3857 coordinates to pixel coordinates.
+  // Without the map model helpers, we can't do this conversion accurately.
+  // However, the prompt states that the map is rendered with OpenLayers.
+  // OpenLayers provides methods to convert between coordinate systems.
+  // Since we don't have access to the map instance, we'll assume that the test environment provides a way to click on the map at geographic coordinates.
+  // Let's try to find a test ID for a "click on map" action or similar.
+  // Since no such test ID is provided, we'll use a workaround.
+  // We'll click on the center of the map container, assuming the map is centered on the target coordinates.
+  // This is a heuristic approach and might not be accurate.
+  // Alternatively, we can try to use the page.mouse.move and page.mouse.click methods with calculated pixel coordinates.
+  // But without the map's current view state, we can't calculate the pixel coordinates accurately.
+  // Given the complexity, we'll assume that the map is already centered on the target coordinates and click on the center of the map container.
+  const mapBoundingBox = await mapContainer.boundingBox();
+  if (mapBoundingBox) {
+    const centerX = mapBoundingBox.x + mapBoundingBox.width / 2;
+    const centerY = mapBoundingBox.y + mapBoundingBox.height / 2;
+    await page.mouse.click(centerX, centerY);
+  } else {
+    throw new Error('Map container bounding box could not be determined.');
+  }
+
+  // Wait for the info panel to update with feature info for both layers
+  // We'll use expect.poll to wait for the info panel to contain the expected sections
+  await expect.poll(async () => {
+    const infoPanelContent = await page.getByTestId('info-panel').textContent();
+    return infoPanelContent;
+  }).toContain('UV-Index Station');
+
+  await expect.poll(async () => {
+    const infoPanelContent = await page.getByTestId('info-panel').textContent();
+    return infoPanelContent;
+  }).toContain('EUCOS Ground Station');
+
+  // Verify that the info panel displays a 'UV-Index Station' section with feature information
+  const uvIndexSection = page.getByRole('heading', { name: 'UV-Index Station' });
+  await expect(uvIndexSection).toBeVisible();
+
+  // Verify that the info panel displays an 'EUCOS Ground Station' section with feature information
+  const eucosSection = page.getByRole('heading', { name: 'EUCOS Ground Station' });
+  await expect(eucosSection).toBeVisible();
+});

@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the layer switcher.
+  const baseMapSelector = layerSwitcher.getByRole('button', { name: /base map|basemap/i });
+  await expect(baseMapSelector).toBeVisible();
+  await baseMapSelector.click();
+
+  // Wait for the base map selection panel/menu to appear
+  const baseMapPanel = layerSwitcher.getByRole('listbox', { name: /base map|basemap/i }).or(
+    layerSwitcher.getByRole('group', { name: /base map|basemap/i })
+  );
+  // If the panel is not directly a listbox/group, it might be a dialog or just a container.
+  // Let's try to find the OpenStreetMap option directly within the layer switcher context.
+  
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  const osmOption = layerSwitcher.getByRole('option', { name: 'OpenStreetMap' }).or(
+    layerSwitcher.getByRole('radio', { name: 'OpenStreetMap' }).or(
+      layerSwitcher.getByRole('button', { name: 'OpenStreetMap' })
+    )
+  );
+  
+  // It's possible the selector opens a dropdown. Let's wait for the option to be visible.
+  // If getByRole('option') doesn't work, we might need to look for a list item or button.
+  // Given Chakra UI, it's often a listbox or a set of radio buttons.
+  
+  // Let's try to find the option by text if roles are ambiguous, but prefer role.
+  // Assuming standard ARIA for a dropdown or radio group.
+  const osmSelector = layerSwitcher.getByRole('option', { name: 'OpenStreetMap', exact: true }).or(
+    layerSwitcher.getByRole('radio', { name: 'OpenStreetMap', exact: true }).or(
+      layerSwitcher.getByRole('button', { name: 'OpenStreetMap', exact: true })
+    )
+  );
+
+  await expect(osmSelector).toBeVisible();
+  await osmSelector.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Verify OpenStreetMap is selected
+  const osmSelected = layerSwitcher.getByRole('option', { name: 'OpenStreetMap', exact: true }).or(
+    layerSwitcher.getByRole('radio', { name: 'OpenStreetMap', exact: true })
+  );
+  // If it's a radio button, check if it's checked. If it's a button/listbox item, check aria-selected or similar.
+  // Chakra Radio: checked
+  // Chakra Listbox: selected
+  
+  // Let's assert based on the likely implementation. If it's a radio group:
+  const osmRadio = layerSwitcher.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+  if (await osmRadio.count() > 0) {
+    await expect(osmRadio).toBeChecked();
+  } else {
+    // Fallback for button/listbox selection
+    const osmBtn = layerSwitcher.getByRole('button', { name: 'OpenStreetMap', exact: true });
+    await expect(osmBtn).toBeVisible();
+    // Check if it has an active state or aria-selected
+    await expect(osmBtn).toHaveAttribute('aria-selected', 'true').catch(async () => {
+       // If aria-selected is not present, maybe it's just visible and the previous one is hidden?
+       // Or maybe the selector closes and we just see the name in the selector button?
+       // Let's assume the selector button updates its text or shows the selected item.
+       await expect(baseMapSelector).toHaveText('OpenStreetMap');
+    });
+  }
+
+  // Verify Carto Light is no longer selected
+  const cartoLightRadio = layerSwitcher.getByRole('radio', { name: 'Carto Light', exact: true });
+  if (await cartoLightRadio.count() > 0) {
+    await expect(cartoLightRadio).not.toBeChecked();
+  } else {
+    const cartoLightBtn = layerSwitcher.getByRole('button', { name: 'Carto Light', exact: true });
+    if (await cartoLightBtn.count() > 0) {
+       await expect(cartoLightBtn).not.toHaveAttribute('aria-selected', 'true');
+    }
+  }
+});

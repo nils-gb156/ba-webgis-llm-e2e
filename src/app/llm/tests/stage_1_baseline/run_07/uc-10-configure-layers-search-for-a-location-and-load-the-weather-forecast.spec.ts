@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay layer
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show Precipitation overlay layer
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Search for a location
+  const searchField = page.getByLabel('Search');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate (verify map canvas exists/updated)
+  // Since we can't assert map coordinates directly without helpers, we assert
+  // that the info panel starts updating or that the search result is cleared/processed.
+  // We rely on the info panel loading the forecast as the primary indicator of navigation completion.
+
+  // Step 6: Wait for info panel to load forecast with 24 entries
+  // The info panel should contain a list or grid of forecast entries.
+  // We poll for the presence of at least 24 forecast items.
+  const forecastContainer = page.locator('[data-testid="forecast-container"]').first();
+  await expect(forecastContainer).toBeVisible();
+
+  // Poll for the number of forecast entries to reach 24
+  await expect.poll(async () => {
+    return forecastContainer.locator('.forecast-entry').count();
+  }).toBe(24);
+});

@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Identify the UV-Index overlay toggle.
+  // Assuming the layer switcher contains checkboxes for each layer with test ids or accessible names.
+  // We look for the checkbox associated with "UV-Index".
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Verify the layer is initially hidden (unchecked)
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Click the visibility toggle to show the UV-Index overlay
+  // Chakra UI checkboxes require force: true due to overlaying control elements
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // Since map content is rendered on a canvas and not DOM elements, we rely on the network request
+  // for the WMS tile or the visual presence if we had a specific canvas assertion.
+  // However, the prompt implies verifying it is rendered. Without specific map helper functions
+  // provided in the prompt for canvas pixel analysis, we can assert the network request
+  // for the tile was made.
+  
+  // Listen for the WMS GetMap request which typically loads tile data for overlays.
+  // The exact URL pattern depends on the WMS service, but usually involves 'GetMap' and the layer name.
+  const wmsRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('GetMap') && url.includes('UV-Index');
+  });
+
+  // Triggering the click above should have initiated the request. 
+  // If the request was already in flight or completed, waitForRequest might fail if not set up early enough.
+  // To be safe, we set up the listener before the click if we weren't sure, but here we did it after.
+  // Let's refine: The click triggers the state change, which triggers the map update.
+  // We should have set up the listener before the click to catch the initial request.
+  // However, since we already clicked, let's assume the request is in progress or completed.
+  // A better approach for "verifying it is rendered" without canvas helpers is often to wait for a specific
+  // network response if we know the URL.
+  
+  // Let's restart the logic to ensure we catch the request properly.
+  // 1. Navigate
+  // 2. Setup listener
+  // 3. Click
+  // 4. Assert DOM state (checkbox)
+  // 5. Assert network state (request/response)
+  
+  // Since I cannot rewrite the already executed steps in the previous block, I will rely on the fact that
+  // Playwright's waitForRequest is async and waits for the next matching request if none have occurred yet.
+  // If the request happened before the listener was attached, it won't catch it.
+  // Therefore, I must attach the listener BEFORE the click.
+  
+  // Corrected flow:
+  // 1. Navigate
+  // 2. Find toggle
+  // 3. Assert initial state
+  // 4. Setup listener for WMS GetMap request for UV-Index
+  // 5. Click toggle
+  // 6. Wait for listener promise
+  // 7. Assert checkbox state
+
+  // Re-implementing the test body with the correct order:
+});
+
+// The above test block was incomplete. Here is the correct full implementation:
+
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Identify the UV-Index overlay toggle.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Verify the layer is initially hidden (unchecked)
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Set up a listener for the WMS GetMap request for the UV-Index layer
+  // This ensures we catch the request triggered by enabling the layer.
+  const wmsResponsePromise = page.waitForResponse((response) => {
+    const url = response.url();
+    return url.includes('GetMap') && url.includes('UV-Index');
+  });
+
+  // Click the visibility toggle to show the UV-Index overlay
+  // Chakra UI checkboxes require force: true due to overlaying control elements
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the WMS GetMap response to confirm the layer tiles are being loaded
+  const wmsResponse = await wmsResponsePromise;
+  expect(wmsResponse.status()).toBe(200);
+});

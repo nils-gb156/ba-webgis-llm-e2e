@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  // We need to read the initial zoom level via the helper if provided, 
+  // but since no helpers were provided in the prompt, we rely on DOM/ARIA state or assume default.
+  // However, the prompt says "Map state... is NOT represented as DOM elements".
+  // Without helper functions provided in the prompt, we cannot programmatically assert zoom levels via JS state.
+  // But we can verify the buttons are visible and clickable.
+  // Let's look for the zoom buttons. Usually they have test ids or accessible names.
+  // Assuming standard Chakra UI or similar, they might be buttons with icons.
+  // Let's try to find them by role and name.
+  
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out' });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  // Click Zoom In
+  await zoomInButton.click();
+  
+  // Since we don't have map helpers, we can't assert the zoom level change directly.
+  // However, the use case implies we should verify the action happened.
+  // In a real scenario with helpers, we would use expect.poll with the helper.
+  // Without helpers, we can only assume the UI updates or rely on visual regression (not covered here).
+  // Let's assume there might be a tooltip or some state change we can catch, 
+  // or simply that the click succeeded. 
+  // Given the constraints, we will perform the clicks. 
+  // If the prompt implies we MUST verify the result, and we have no helpers, 
+  // we might be stuck. But usually, prompts like this provide helpers if needed.
+  // Let's re-read: "If the prompt provides map model helper functions...". It did NOT.
+  // So we cannot assert zoom level changes programmatically.
+  // We will just ensure the buttons are clicked.
+  
+  // Click Zoom Out
+  await zoomOutButton.click();
+});

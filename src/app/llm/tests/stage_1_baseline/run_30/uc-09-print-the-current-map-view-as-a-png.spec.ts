@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and map to be ready
+  // Assuming a main map container or loading indicator exists.
+  // We'll wait for the map canvas to appear as a sign of readiness.
+  await page.locator('canvas').first().waitFor({ state: 'visible' });
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  // Locate the print button in the toolbar.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await printButton.click();
+
+  // Verify the printing panel is visible
+  // Assuming the panel has a specific test id or role.
+  // If no specific ID, we look for a dialog or panel that appears.
+  const printPanel = page.getByRole('dialog', { name: /Print/i });
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // Locate the title input field.
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('Test Printout');
+
+  // Step 3: The user selects the PNG file format.
+  // Locate the format selector. It might be a radio group, dropdown, or select.
+  // Assuming a select dropdown or radio buttons for format.
+  // Let's try a select first.
+  const formatSelect = page.getByLabel('Format');
+  if (await formatSelect.isVisible()) {
+    await formatSelect.selectOption('png');
+  } else {
+    // Fallback to radio buttons if select is not found
+    const pngRadio = page.getByRole('radio', { name: 'PNG' });
+    await pngRadio.check();
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Locate the export button within the print panel.
+  const exportButton = page.getByRole('button', { name: /Export|Print/i });
+  
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download started
+  expect(download.suggestedFilename()).toMatch(/\.png$/);
+
+  // Clean up the download
+  await download.cancel();
+
+  // Verify the printing panel is still visible or closed depending on app behavior
+  // Usually, after triggering a download, the panel might stay open or close.
+  // We'll assert it was visible during the action, which we did.
+});

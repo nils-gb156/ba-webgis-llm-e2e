@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map to be ready
+  // We assume the info panel is visible and layers are active as per preconditions.
+  // We need to ensure the map is interactive.
+  const mapContainer = page.locator('#map-canvas'); // Assuming standard map container ID or class
+  await expect(mapContainer).toBeVisible();
+
+  // Click on the map at the specified coordinates
+  // Coordinates: [1188692.84, 6767643.28] (EPSG:3857)
+  await page.mouse.click(1188692.84, 6767643.28);
+
+  // Wait for the info panel to load and display feature info for both layers
+  // We expect to see sections for 'UV-Index Station' and 'EUCOS Ground Station'
+  
+  // Wait for UV-Index Station section to appear
+  await expect(page.getByRole('heading', { name: 'UV-Index Station' })).toBeVisible({ timeout: 10000 });
+
+  // Wait for EUCOS Ground Station section to appear
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station' })).toBeVisible({ timeout: 10000 });
+
+  // Verify that the info panel contains information for both layers
+  // We can check for specific text or elements within these sections if needed
+  // For now, visibility of the headings is sufficient to confirm the feature info is displayed
+});

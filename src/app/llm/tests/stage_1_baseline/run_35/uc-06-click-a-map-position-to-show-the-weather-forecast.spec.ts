@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and the map to be ready
+  await page.waitForLoadState('networkidle');
+
+  // Identify the map canvas container to click on it.
+  // Assuming the map container has a test id or accessible role.
+  // Since no specific test id is provided in the prompt for the map canvas,
+  // we will try to find the canvas element or a container around it.
+  // Often, maps are inside a div with a specific class or test id.
+  // Let's assume there is a test id for the map container, e.g., 'map-container'.
+  // If not, we might need to use getByRole('graphics') or similar.
+  // For this example, let's assume the map canvas is accessible via a test id.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Click on a position on the map canvas.
+  // We need to click on a specific coordinate within the map container.
+  // Let's click near the center of the map container.
+  const box = await mapContainer.boundingBox();
+  if (box) {
+    const clickX = box.x + box.width / 2;
+    const clickY = box.y + box.height / 2;
+    await page.mouse.click(clickX, clickY);
+  }
+
+  // Wait for the info panel to load the forecast.
+  // Assuming the info panel has a test id, e.g., 'info-panel'.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear in the info panel.
+  // Assuming the weather forecast section has a test id, e.g., 'weather-forecast'.
+  const weatherForecast = infoPanel.getByTestId('weather-forecast');
+  await expect(weatherForecast).toBeVisible();
+
+  // Verify that the clicked position is highlighted on the map.
+  // This might be represented by a marker or a specific element on the map.
+  // Assuming there is a test id for the highlighted position, e.g., 'highlighted-position'.
+  const highlightedPosition = page.getByTestId('highlighted-position');
+  await expect(highlightedPosition).toBeVisible();
+
+  // Verify that the forecast contains 24 entries.
+  // Assuming each forecast entry has a test id, e.g., 'forecast-entry'.
+  const forecastEntries = infoPanel.getByTestId('forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

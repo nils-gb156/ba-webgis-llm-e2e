@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  // Assuming standard test IDs for the TOC container or layer switcher
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Locate the UV-Index overlay layer item in the layer switcher
+  // We look for a checkbox or toggle associated with "UV-Index"
+  // Using getByRole with exact name to avoid ambiguity if other elements contain "UV-Index"
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // Verify the UV-Index overlay is initially hidden (unchecked)
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Click the visibility toggle to show the UV-Index layer
+  await uvIndexToggle.click();
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // Since we cannot assert DOM elements for map tiles, we wait for a network response
+  // that typically corresponds to the WMS tile request for the UV-Index layer.
+  // We assume the layer name or ID is part of the URL or parameters.
+  // A common pattern for WMS is having the layer name in the URL query params.
+  // We listen for requests that likely contain the UV-Index layer identifier.
+  // Note: The exact URL pattern depends on the specific WMS service configuration.
+  // We'll wait for a request that includes 'UV-Index' in the URL or parameters.
+  
+  const uvIndexTileResponse = page.waitForResponse(response => {
+    const url = response.url();
+    return url.includes('UV-Index') || url.includes('uv_index');
+  }, { timeout: 10000 });
+
+  // Wait for the response to complete
+  await uvIndexTileResponse;
+
+  // Verify that the map canvas exists and has content.
+  // While we can't easily assert the specific tiles visually without complex image comparison,
+  // we can assert that the map container is present and likely has drawn content.
+  // A simple assertion is that the map canvas is visible.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Optional: Assert that the map canvas is not empty by checking its width/height or context
+  // However, standard Playwright assertions on canvas content are limited.
+  // The successful retrieval of the tile response is the primary indicator of layer activation.
+});

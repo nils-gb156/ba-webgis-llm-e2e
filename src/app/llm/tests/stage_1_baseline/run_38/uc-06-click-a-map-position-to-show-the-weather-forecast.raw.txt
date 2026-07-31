@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map canvas to be interactive
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on a position on the map canvas (center of the visible area)
+  const box = await mapCanvas.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  // Wait for the info panel to load the forecast
+  // The info panel is typically identified by a test id or role
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Verify the clicked position is highlighted on the map
+  // Since map state is not in DOM, we rely on the info panel content as primary assertion
+  // However, we can check if there's any marker or highlight indicator if available
+  // For now, we assume the info panel content is the primary indicator of success
+
+  // Wait for the weather forecast section to appear in the info panel
+  const weatherForecastSection = infoPanel.getByText(/Weather Forecast/i);
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Verify the forecast contains 24 entries
+  // Assuming each entry is a row or item in a list
+  const forecastEntries = infoPanel.locator('[data-testid="forecast-entry"]');
+  await expect(forecastEntries).toHaveCount(24);
+});

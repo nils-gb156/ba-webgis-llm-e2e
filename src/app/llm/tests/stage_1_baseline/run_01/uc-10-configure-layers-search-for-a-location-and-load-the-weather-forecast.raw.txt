@@ -1,0 +1,113 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and initial preconditions to be met
+  // The layer switcher (TOC) should be visible
+  const toc = page.getByRole('region', { name: /layer/i, includeHidden: true });
+  await expect(toc).toBeVisible({ timeout: 10000 });
+
+  // Locate the Temperature overlay layer toggle
+  // Assuming test ids or accessible names are available for layer items
+  const temperatureLayerToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  // Verify it is initially checked (visible)
+  await expect(temperatureLayerToggle).toBeChecked();
+
+  // Locate the Precipitation overlay layer toggle
+  const precipitationLayerToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  // Verify it is initially unchecked (hidden)
+  await expect(precipitationLayerToggle).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle of the Temperature overlay layer to hide it.
+  await temperatureLayerToggle.click({ force: true });
+
+  // Step 2: Click the visibility toggle of the Precipitation overlay layer to show it.
+  await precipitationLayerToggle.click({ force: true });
+
+  // Verify Expected Results for layers:
+  // The Precipitation overlay layer toggle is in the disabled state (checked/active means visible/loaded)
+  // Note: "disabled state" in the prompt likely means "checked/active" in UI terms for visibility toggles,
+  // or it might mean the layer is loaded. Given the context of "show it", we expect it to be checked.
+  // However, if "disabled" refers to the visual state of the checkbox being checked, we assert checked.
+  // Let's assume "disabled state" for a toggle switch often implies the "off" position in some contexts,
+  // but for a checkbox "show it" implies checked. Let's look at the wording again.
+  // "Precipitation overlay layer toggle is in the disabled state." This is ambiguous.
+  // Usually, a toggle "on" means visible. If the layer is "hidden", the toggle is "off".
+  // If the layer is "shown", the toggle is "on".
+  // If the prompt says "show it" then expects "disabled state", it might mean the toggle is effectively
+  // disabled because the layer is active? Or perhaps it's a translation issue and means "active/checked".
+  // Let's assume standard behavior: Clicking to show makes it checked.
+  // Wait, re-reading: "The Precipitation overlay layer toggle is in the disabled state."
+  // If it's a checkbox, "disabled" usually means `disabled` attribute. But we just enabled it.
+  // Let's look at the Temperature one: "Temperature overlay layer toggle is in the enabled state."
+  // This suggests a binary state. Let's assume "enabled" = checked/visible and "disabled" = unchecked/hidden?
+  // No, we hid Temperature, so it should be unchecked. We showed Precipitation, so it should be checked.
+  // If "enabled" means "checked", then Temperature should be unchecked.
+  // If "disabled" means "unchecked", then Precipitation should be unchecked.
+  // This contradicts "show it" for Precipitation.
+  // Alternative interpretation: The toggle button itself might be disabled/enabled based on layer availability.
+  // But the step is "click the visibility toggle... to show it".
+  // Let's stick to the most logical UI pattern:
+  // Checked = Visible. Unchecked = Hidden.
+  // Step 1: Hide Temp -> Temp unchecked.
+  // Step 2: Show Precip -> Precip checked.
+  // Expected: Temp "enabled" (maybe means available/checked?), Precip "disabled" (maybe means available/checked?).
+  // This is confusing. Let's look at the Chakra UI hint.
+  // Chakra Checkbox: `getByRole('checkbox')`.
+  // Let's assume the prompt means:
+  // Temperature (hidden) -> Checkbox is unchecked.
+  // Precipitation (shown) -> Checkbox is checked.
+  // And "enabled/disabled" refers to the *layer's* active state in the map model, not the DOM attribute.
+  // Or, it refers to the visual appearance of the toggle.
+  // Let's assert the checked state directly as it's the most reliable indicator of visibility.
+  
+  await expect(precipitationLayerToggle).toBeChecked();
+  await expect(temperatureLayerToggle).not.toBeChecked();
+
+  // Step 3: Click the search field and type a place name (e.g. 'Münster').
+  const searchInput = page.getByRole('searchbox', { name: /search/i }).first();
+  await searchInput.click();
+  await searchInput.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  // Assuming the first result has a test id or is the first item in a list
+  const firstResult = page.getByRole('option').first(); // Often search results are in a listbox
+  // Fallback if it's a list item
+  const firstResultFallback = page.getByRole('listitem').first();
+  
+  // Try to wait for the search results container to be visible
+  const searchResults = page.locator('[data-testid="search-results"]').first();
+  await expect(searchResults).toBeVisible({ timeout: 10000 });
+
+  // Select the first result
+  // Using getByRole('option') is standard for comboboxes
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location.
+  // We can't assert map position directly via DOM, but we can assert the info panel updates
+  // or wait for a network response related to geocoding/map navigation if available.
+  // Since we don't have map helpers, we rely on the info panel update as proof of navigation/selection.
+
+  // Step 6: Wait for the info panel to load the forecast.
+  const infoPanel = page.getByRole('region', { name: /info panel/i, includeHidden: true });
+  await expect(infoPanel).toBeVisible();
+
+  // Expected Result: The info panel displays a weather forecast section with 24 entries.
+  // We need to find the forecast section and count the entries.
+  // Assuming the forecast entries are in a list or grid within the info panel.
+  const forecastSection = infoPanel.locator('[data-testid="weather-forecast"]').first();
+  await expect(forecastSection).toBeVisible();
+
+  // Count the forecast entries. Assuming each entry has a test id or is a list item.
+  const forecastEntries = forecastSection.locator('[data-testid="forecast-entry"]');
+  
+  // Use expect.poll to wait for the count to settle to 24
+  await expect.poll(async () => {
+    const count = await forecastEntries.count();
+    return count;
+  }).toBe(24);
+});

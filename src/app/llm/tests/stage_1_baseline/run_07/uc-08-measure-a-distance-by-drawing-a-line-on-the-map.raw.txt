@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. The user clicks the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. The user clicks several points on the map canvas to draw a line.
+  // Find the map container. We assume a standard map container test id or role.
+  // Since no specific test id for the map container was provided in the prompt,
+  // we look for the canvas or a common map container pattern.
+  // Open Pioneer maps often use a div wrapping the canvas.
+  const mapContainer = page.locator('div:has(> canvas)').first();
+  await expect(mapContainer).toBeVisible();
+
+  // Get the bounding box of the map container to click within it
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or has no bounding box');
+  }
+
+  // Click three points to draw a line (start, middle, end)
+  // Point 1: Center-left
+  const point1X = mapBox.x + mapBox.width * 0.3;
+  const point1Y = mapBox.y + mapBox.height * 0.5;
+  await page.mouse.click(point1X, point1Y);
+
+  // Point 2: Center
+  const point2X = mapBox.x + mapBox.width * 0.5;
+  const point2Y = mapBox.y + mapBox.height * 0.5;
+  await page.mouse.click(point2X, point2Y);
+
+  // Point 3: Center-right
+  const point3X = mapBox.x + mapBox.width * 0.7;
+  const point3Y = mapBox.y + mapBox.height * 0.5;
+  await page.mouse.click(point3X, point3Y);
+
+  // 3. The user double-clicks to finish the measurement.
+  await page.mouse.dblclick(point3X, point3Y);
+
+  // Wait for the measurement result to appear and settle
+  // The result is likely displayed in the measurement panel
+  const measurementResult = measurementPanel.locator('[data-testid="measurement-result"]');
+  
+  // Poll for the result to be visible and contain a length value with a unit
+  await expect.poll(async () => {
+    const text = await measurementResult.textContent();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|ft|mi)/);
+
+  // Final assertion: Ensure the panel is still visible and has a result
+  await expect(measurementPanel).toBeVisible();
+  await expect(measurementResult).toBeVisible();
+});

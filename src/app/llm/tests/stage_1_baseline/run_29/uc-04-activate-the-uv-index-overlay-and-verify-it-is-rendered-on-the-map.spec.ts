@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Locate the UV-Index overlay toggle in the layer switcher
+  // The toggle is a checkbox within the layer switcher
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // Ensure the toggle is currently unchecked (hidden) before clicking
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Click the visibility toggle to show the UV-Index layer
+  await uvIndexToggle.click({ force: true });
+
+  // Assert that the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // Since map content is rendered on a canvas, we verify the network request
+  // for the WMS tile or feature data associated with the UV-Index layer.
+  // We listen for requests to the WMS endpoint that would contain the UV-Index layer name.
+  const wmsResponsePromise = page.waitForResponse(response => {
+    const url = response.url();
+    return url.includes('WMS') && url.includes('UV-Index');
+  });
+
+  // Wait for the response to ensure the layer tiles are requested and loaded
+  await wmsResponsePromise;
+
+  // Verify that the map canvas has content (indicating tiles were rendered).
+  // We check that the canvas is not empty by asserting it is visible and has dimensions.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+  const boundingBox = await mapCanvas.boundingBox();
+  expect(boundingBox).toBeTruthy();
+  expect(boundingBox!.width).toBeGreaterThan(0);
+  expect(boundingBox!.height).toBeGreaterThan(0);
+});

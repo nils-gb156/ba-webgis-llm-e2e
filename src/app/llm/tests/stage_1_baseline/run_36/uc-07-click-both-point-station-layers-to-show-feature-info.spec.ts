@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and the info panel to be visible
+  // The info panel is typically identified by a test id or role.
+  // Assuming standard Open Pioneer Trails structure, we wait for the map container.
+  const mapContainer = page.locator('[data-testid="map-container"]');
+  await expect(mapContainer).toBeVisible();
+
+  // Ensure the info panel is visible.
+  // In many Open Pioneer apps, the info panel might be hidden initially or toggled.
+  // The preconditions state "The info panel is visible", so we assume it is already visible or becomes visible upon interaction.
+  // We will wait for the info panel container to be present and visible.
+  const infoPanel = page.locator('[data-testid="info-panel"]');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure no measurement tool is active.
+  // We can check for the absence of a measurement tool indicator or simply proceed.
+  // Since the preconditions guarantee no measurement tool is active, we skip explicit check unless necessary.
+
+  // Ensure UV-Index Stations layer (WMS) is active.
+  // We assume the layer list is visible and the layer is checked.
+  // If the layer list is not visible, we might need to open it, but preconditions say layers are active.
+  // We will proceed to click the map.
+
+  // Ensure EUCOS Ground Stations layer (WFS) is active.
+  // Similarly, we assume it is active.
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28] (EPSG:3857).
+  // The map canvas is the target element.
+  // We need to convert EPSG:3857 coordinates to pixel coordinates on the map canvas.
+  // However, Playwright's click method with position option clicks relative to the element's top-left corner.
+  // We need to calculate the pixel position or use a helper if provided.
+  // Since no helper is provided, we must assume the map canvas covers the viewport or we need to find the map center.
+  // Alternatively, we can use the map's coordinate system if we have access to the map object, but we don't.
+  // A common approach is to click on the center of the map if the features are known to be near the center.
+  // However, the coordinates are specific.
+  // Let's assume the map container is the element to click and we need to calculate the position.
+  // Without a helper, we might need to rely on the map's current view.
+  // Let's try to click at a specific position if we can determine it.
+  // Since we don't have the map's extent or size, we will click at the center of the map container as a best guess,
+  // or we might need to use a more robust method.
+  // Given the constraints, we will click on the map container at a position that is likely to trigger the feature info.
+  // If the features are at specific coordinates, we might need to pan to them first.
+  // However, the preconditions do not mention panning.
+  // Let's assume the map is already centered on the location or the click will work regardless.
+  // We will click on the map container.
+
+  // To click at specific coordinates, we need to know the map's pixel dimensions and the coordinate to pixel conversion.
+  // This is complex without a helper.
+  // Let's try clicking on the map container at a relative position.
+  // If the map is full screen, the center might be a good guess.
+  // Let's get the bounding box of the map container and click at the center.
+  const mapBox = await mapContainer.boundingBox();
+  if (mapBox) {
+    const centerX = mapBox.x + mapBox.width / 2;
+    const centerY = mapBox.y + mapBox.height / 2;
+    await page.mouse.click(centerX, centerY);
+  } else {
+    // Fallback: click on the map container using getByTestId
+    await page.getByTestId('map-container').click();
+  }
+
+  // Wait for the info panel to load the station info for both layers.
+  // We expect to see 'UV-Index Station' and 'EUCOS Ground Station' sections in the info panel.
+  // We will use expect.poll to wait for the text to appear.
+  await expect.poll(async () => {
+    const infoPanelContent = await page.getByTestId('info-panel').textContent();
+    return infoPanelContent;
+  }).toContain('UV-Index Station');
+
+  await expect.poll(async () => {
+    const infoPanelContent = await page.getByTestId('info-panel').textContent();
+    return infoPanelContent;
+  }).toContain('EUCOS Ground Station');
+});

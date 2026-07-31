@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay layer
+  const temperatureToggle = page.getByTestId('layer-temperature-toggle');
+  await expect(temperatureToggle).toBeVisible();
+  await temperatureToggle.click();
+
+  // Step 2: Show Precipitation overlay layer
+  const precipitationToggle = page.getByTestId('layer-precipitation-toggle');
+  await expect(precipitationToggle).toBeVisible();
+  await precipitationToggle.click();
+
+  // Step 3: Search for a location
+  const searchField = page.getByTestId('geocoder-search-field');
+  await expect(searchField).toBeVisible();
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const firstResult = page.getByTestId('geocoder-result-item').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate (we assume map navigation is implicit via geocoder selection)
+  // Since map state is not in DOM, we rely on the info panel loading as the primary indicator
+  // that navigation and data loading are complete.
+
+  // Step 6: Wait for info panel to load the forecast with 24 entries
+  // The info panel should display a weather forecast section with 24 entries.
+  // We look for a list or container with 24 items.
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect.poll(() => forecastEntries.count()).toBe(24);
+
+  // Verify expected results for layer states
+  // Temperature toggle should be enabled (checked/visible)
+  await expect(temperatureToggle).toBeChecked(); // Assuming toggle reflects state via checked attribute or similar
+  // Precipitation toggle should be disabled (hidden/unchecked)
+  await expect(precipitationToggle).not.toBeChecked();
+});

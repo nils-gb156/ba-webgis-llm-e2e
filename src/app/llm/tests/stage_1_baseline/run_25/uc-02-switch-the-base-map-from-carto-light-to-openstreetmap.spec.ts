@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the layer switcher/TOC is visible and contains a base map selector.
+  // We look for a button or toggle that opens the base map selection.
+  // Often this is a button with text like "Base map" or an icon.
+  // Let's assume there's a test id for the base map selector or we use text.
+  // Since no specific test ids are provided in the prompt, we rely on accessible names.
+  // A common pattern is a button labeled "Base map" or similar.
+  const baseMapSelectorButton = page.getByRole('button', { name: 'Base map' });
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // After clicking the selector, a list or dialog with base map options should appear.
+  // We look for an option or button labeled 'OpenStreetMap'.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  
+  // Wait for the option to be visible (it might appear in a dropdown or list)
+  await expect(openStreetMapOption).toBeVisible();
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  // We verify that OpenStreetMap is now the active selection.
+  // Assuming the selection is reflected in the UI, e.g., the button text changes or the option is highlighted.
+  // Let's check if the base map selector button now reflects OpenStreetMap or if the option is marked as selected.
+  
+  // If the button text updates to show the current base map:
+  await expect(baseMapSelectorButton).toHaveText('OpenStreetMap');
+
+  // Alternatively, if there's a specific indicator for the selected base map:
+  // const selectedBaseMapIndicator = page.getByTestId('base-map-selected-indicator');
+  // await expect(selectedBaseMapIndicator).toHaveText('OpenStreetMap');
+  
+  // Since we don't have specific test ids, we rely on the button text update or the option being checked/selected.
+  // Let's also ensure Carto Light is not selected if it was previously.
+  // If there's a list of options, Carto Light should not be highlighted/selected.
+  const cartoLightOption = page.getByRole('option', { name: 'Carto Light' });
+  // It might still be in the list, but not selected. We can check if it's not highlighted or if the selected state is different.
+  // Without specific test ids, checking the active button text is the most robust way.
+});

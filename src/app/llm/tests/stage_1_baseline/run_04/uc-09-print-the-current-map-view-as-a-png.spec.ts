@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and be ready
+  // Assuming a main container or specific loading indicator
+  await expect(page.getByRole('main')).toBeVisible({ timeout: 30000 });
+
+  // 1. The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  // Locate the print button in the toolbar. Using getByRole('button') with name 'Print Map'
+  // or a test id if available. Let's assume a test id for stability.
+  const printButton = page.getByTestId('toolbar-print-button');
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // The printing panel should now be visible.
+  // Assuming the panel has a test id or a specific role/title.
+  const printPanel = page.getByRole('dialog', { name: /Print/ }).or(page.getByTestId('print-panel'));
+  await expect(printPanel).toBeVisible({ timeout: 10000 });
+
+  // 2. The user enters a title for the printout.
+  // Locate the title input field.
+  const titleInput = page.getByTestId('print-title-input');
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Test Printout');
+
+  // 3. The user selects the PNG file format.
+  // Locate the format selector (likely a radio group or select).
+  // Assuming radio buttons for format selection.
+  const pngFormatRadio = page.getByRole('radio', { name: 'PNG' }).or(page.getByTestId('print-format-png'));
+  await expect(pngFormatRadio).toBeVisible();
+  
+  // Check if PNG is already selected. If not, click it.
+  // Using force: true for Chakra UI radios/checkboxes if needed, but let's try standard click first.
+  // If it's a select, we'd use selectOption. Assuming radio for simplicity as per common patterns.
+  // If it's a select:
+  // const formatSelect = page.getByTestId('print-format-select');
+  // await formatSelect.selectOption('png');
+  
+  // Let's assume a select for format as it's common in print dialogs.
+  const formatSelect = page.getByTestId('print-format-select');
+  if (await formatSelect.isVisible()) {
+    await formatSelect.selectOption('png');
+  } else {
+    // Fallback to radio
+    if (!(await pngFormatRadio.isChecked())) {
+      await pngFormatRadio.click({ force: true });
+    }
+  }
+
+  // 4. The user clicks the export/print button.
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByTestId('print-export-button').click()
+  ]);
+
+  // Verify the download
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+  // Verify the file was saved (optional but good practice)
+  const filePath = await download.path();
+  expect(filePath).toBeTruthy();
+});

@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Locate the UV-Index overlay toggle. Based on typical Open Pioneer Trails conventions,
+  // layer toggles are often checkboxes or switches with a specific test id or accessible name.
+  // We assume a test id exists for the UV-Index layer toggle. If not, we fall back to role.
+  // Using force: true as per guidelines for Chakra UI form controls.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' }).or(page.getByTestId('layer-toggle-uv-index'));
+  
+  // Check if the toggle is already checked (it shouldn't be based on preconditions)
+  const isChecked = await uvIndexToggle.isChecked();
+  if (!isChecked) {
+    await uvIndexToggle.click({ force: true });
+  }
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // Since map content is on a canvas, we cannot assert DOM elements for the tiles.
+  // However, we can assert that the map canvas exists and potentially wait for a network request
+  // if we knew the specific WMS tile URL pattern. Without specific network knowledge,
+  // we wait for the map container to be visible and stable.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // To verify the tiles are rendered, we can check that the map canvas has non-zero dimensions
+  // and potentially capture a screenshot to visually verify (though programmatic verification of canvas content is hard).
+  // A common heuristic is to ensure the canvas is not empty or has changed.
+  // Since we cannot easily assert pixel content, we rely on the successful interaction and visibility.
+  // If a specific test id for the map container exists, we would use that.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+});

@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible and layers are active before proceeding.
+  // We use force: true for checkboxes as they are Chakra UI controls that
+  // intercept pointer events.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+
+  // Ensure UV-Index Stations layer is active
+  if (!(await uvIndexCheckbox.isChecked())) {
+    await uvIndexCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is active
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Wait for layers to be potentially loaded/ready
+  await page.waitForLoadState('networkidle');
+
+  // Click on the map at the specified coordinates where both stations are located.
+  // The map container is typically identified by a specific role or test id.
+  // Assuming the map canvas is the main interactive element.
+  const mapCanvas = page.locator('canvas').first();
+  await mapCanvas.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28,
+    },
+  });
+
+  // Wait for the info panel to load the station info for both layers.
+  // We poll for the presence of the specific section headers in the info panel.
+  await expect
+    .poll(async () => {
+      const uvIndexSection = page.getByRole('heading', { name: 'UV-Index Station', level: 2 }).first();
+      const eucosSection = page.getByRole('heading', { name: 'EUCOS Ground Station', level: 2 }).first();
+      
+      const uvVisible = await uvIndexSection.isVisible().catch(() => false);
+      const eucosVisible = await eucosSection.isVisible().catch(() => false);
+      
+      return {
+        uvIndex: uvVisible,
+        eucos: eucosVisible,
+      };
+    })
+    .toEqual({
+      uvIndex: true,
+      eucos: true,
+    });
+
+  // Final assertions to confirm both sections are visible
+  await expect(page.getByRole('heading', { name: 'UV-Index Station', level: 2 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station', level: 2 })).toBeVisible();
+});

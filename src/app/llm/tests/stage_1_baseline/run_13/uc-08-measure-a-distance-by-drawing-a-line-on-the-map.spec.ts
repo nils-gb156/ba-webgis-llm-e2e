@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and map to be ready
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Locate the map canvas container for interaction
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the map canvas to determine click coordinates
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas bounding box not found');
+  }
+
+  // Define points to draw a line on the map
+  // Point 1: Center-ish
+  const point1 = { x: mapBox.x + mapBox.width / 2, y: mapBox.y + mapBox.height / 2 };
+  // Point 2: Offset to create a visible line
+  const point2 = { x: mapBox.x + mapBox.width / 2 + 100, y: mapBox.y + mapBox.height / 2 - 50 };
+  // Point 3: Another offset point
+  const point3 = { x: mapBox.x + mapBox.width / 2 + 200, y: mapBox.y + mapBox.height / 2 + 50 };
+
+  // Step 2: Click several points on the map canvas to draw a line
+  await page.mouse.click(point1.x, point1.y);
+  await page.mouse.click(point2.x, point2.y);
+  await page.mouse.click(point3.x, point3.y);
+
+  // Step 3: Double-click to finish the measurement
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Expected results: The measurement panel displays a length value with a unit
+  // Wait for the measurement result to appear in the panel
+  // Assuming the result is displayed in an element with a specific test id or role
+  // If no specific test id is known, we look for text that resembles a measurement (e.g., "123.45 m")
+  const measurementResult = page.getByTestId('measurement-result');
+  
+  // Use poll to wait for the result to be populated with a length value
+  await expect.poll(async () => {
+    const text = await measurementResult.textContent();
+    return text;
+  }).toMatch(/\d+(\.\d+)?\s*(m|km|ft|mi)/);
+});

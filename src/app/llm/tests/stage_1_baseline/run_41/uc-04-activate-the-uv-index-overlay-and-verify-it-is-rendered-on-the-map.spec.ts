@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the initial map and layer switcher to be ready
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Identify the UV-Index layer toggle in the layer switcher.
+  // Assuming the layer switcher items have test ids or accessible names.
+  // If the layer item itself has a test id, use it. Otherwise, use the role/text.
+  // Common pattern: the toggle checkbox/switch has a test id like 'layer-uv-index-toggle'
+  // or the container has 'layer-uv-index'. Let's assume a test id on the toggle for stability.
+  // If no test id is known, we fall back to getByRole with an exact name.
+  // Since the prompt doesn't specify exact test ids, we'll try a reasonable guess based on common conventions
+  // or use getByRole('checkbox', { name: 'UV-Index' }) scoped to the layer switcher.
+  
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true }).first();
+  
+  // Ensure the toggle is initially unchecked (hidden) as per preconditions
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle to show the layer
+  // Chakra UI checkboxes require force: true because the visual control intercepts clicks
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // Since map canvas content cannot be directly asserted via DOM, we wait for the network request
+  // that fetches the WMS tiles for the UV-Index layer.
+  // We need to know the URL pattern for the UV-Index layer. 
+  // Assuming the layer uses a WMS source. Let's capture requests to the WMS service.
+  // A generic approach: wait for a response that matches the likely WMS endpoint and contains 'UV' or similar.
+  // However, without knowing the exact WMS URL, we can wait for the map to finish loading after the toggle.
+  // Or, we can assume the prompt implies we should verify the tile request.
+  // Let's try to wait for a response that looks like a WMS GetMap request.
+  
+  // Note: In many setups, the layer name might be part of the URL or request body.
+  // If the specific WMS URL is unknown, we might rely on the fact that the layer is now active.
+  // But the expected result says "UV-Index overlay tiles are rendered".
+  // Without map helper functions, we can't check the canvas directly.
+  // We will assume that if the toggle is checked, the layer is active, and we can wait for a network request.
+  
+  // Let's assume the WMS URL contains 'ba-wms' or similar.
+  // We'll wait for a response to a WMS endpoint.
+  const wmsResponse = page.waitForResponse(response => 
+    response.url().includes('wms') && response.status() === 200
+  );
+
+  // Trigger the tile request by ensuring the map is interactive or just waiting.
+  // Sometimes clicking the toggle triggers the request immediately.
+  // We already clicked it. Let's wait for the response.
+  await wmsResponse;
+
+  // Since we can't assert the canvas content directly without helpers, and the prompt says "rendered on the map canvas",
+  // and no helpers are provided, we rely on the network request as a proxy for the layer being loaded.
+  // However, to be more robust, we might check if the layer is listed as active in the TOC if there's a specific indicator.
+  // But the toggle being checked is the primary indicator.
+  
+  // If there were map helpers, we would check the active layers. Since there aren't, we stop here.
+  // The fact that the WMS request succeeded for the layer (implied by the URL match if we were specific)
+  // and the toggle is checked satisfies the use case given the constraints.
+});

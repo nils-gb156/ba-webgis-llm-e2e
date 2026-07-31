@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and toolbar to be ready
+  await page.getByTestId('map-container').waitFor({ state: 'visible' });
+  await page.getByRole('toolbar').waitFor({ state: 'visible' });
+
+  // 1. The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Verify the printing panel is visible
+  const printPanel = page.getByRole('dialog', { name: /Print/ }).or(page.getByTestId('print-panel'));
+  // Try to find the panel by common test ids or role if available, otherwise fallback to visible dialog
+  let panelLocator = page.getByTestId('print-panel');
+  if (await panelLocator.count() === 0) {
+    panelLocator = page.getByRole('dialog', { name: /Print/ });
+  }
+  await expect(panelLocator).toBeVisible();
+
+  // 2. The user enters a title for the printout.
+  const titleInput = panelLocator.getByLabel(/Title/);
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Test Map Printout');
+
+  // 3. The user selects the PNG file format.
+  const formatSelect = panelLocator.getByRole('combobox', { name: /Format/ });
+  await expect(formatSelect).toBeVisible();
+  await formatSelect.selectOption('png');
+
+  // 4. The user clicks the export/print button.
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    panelLocator.getByRole('button', { name: /Print|Export|OK/ }).click()
+  ]);
+
+  // Verify the download was successful
+  expect(download.suggestedFilename()).toMatch(/\.png$/);
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

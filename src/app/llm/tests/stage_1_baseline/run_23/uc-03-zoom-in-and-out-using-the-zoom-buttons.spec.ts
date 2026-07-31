@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and the zoom controls to be visible
+  await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible();
+
+  // Get initial zoom level using the helper
+  // Assuming a helper module is provided as per instructions, but since none is in the prompt,
+  // we must rely on DOM or other indicators if available. However, the prompt says "Map state ... is NOT represented as DOM elements".
+  // And "If the prompt provides map model helper functions...".
+  // Since NO helper functions were provided in the prompt, I cannot use `expect.poll` with a helper.
+  // However, the use case requires verifying zoom level changes.
+  // Without a helper or DOM representation, this is tricky.
+  // Let's re-read carefully: "If no helpers are provided, this section is irrelevant — do not invent or import any helper module."
+  // But how do I assert the zoom level?
+  // Usually, in these E2E tests, if no helper is provided, there might be a visible zoom level indicator or we assume the action works.
+  // Let's look for a visible zoom level indicator. Often maps show the current zoom.
+  // If not, we might just assert that the buttons are clickable and perhaps the map canvas changes (hard to assert).
+  // Let's check if there's a common test id for zoom level display.
+  // If I can't assert the value, I can at least assert the interaction doesn't crash.
+  // But the expected result explicitly says "zoom level is higher/lower".
+  // Let's assume there is a visible element showing the zoom level, e.g., a label or text.
+  // Common patterns: `getByText` or `getByRole` for the zoom level display.
+  // If not, I will click the buttons and assume success, but that doesn't meet "Expected results".
+  // Let's look for a test id that might exist in the application for the zoom level.
+  // Since I don't have access to the app code, I'll try to find a reasonable locator.
+  // Often, the zoom level is displayed near the zoom controls.
+  // Let's try to find an element that displays the zoom level.
+  // If I can't find one, I might have to skip the assertion or use a generic one.
+  // However, the instructions say "Derive the assertions from the expected_result field".
+  // Let's assume there is a `data-testid="zoom-level"` or similar.
+  // Or maybe the zoom level is part of the tooltip or aria-label.
+  // Let's try to locate the zoom level display.
+  // If no such element exists, this test case might be impossible to fully verify without helpers.
+  // But wait, the prompt says "If the prompt provides map model helper functions...". It did NOT.
+  // So I am in a bind.
+  // Let's look at the "Locators" section again. "If an element has no accessible role, label, visible text, or test id, a scoped CSS class selector may be used as a last resort."
+  // Let's assume there is a visible text showing the zoom level, e.g., "Zoom: 10".
+  // I will try to get the initial zoom level text, click zoom in, get new zoom level, click zoom out, get new zoom level.
+  
+  // Let's try to find the zoom level indicator. It might be a `span` or `div` with a specific role or text pattern.
+  // Let's assume the zoom level is displayed in an element with `data-testid="map-zoom-level"`.
+  // If that fails, I'll try `getByText(/Zoom level:/)` or similar.
+  
+  // Let's try a generic approach: find an element that likely contains the zoom level.
+  // Often it's near the zoom buttons.
+  // Let's get the zoom level locator.
+  const zoomLevelLocator = page.getByTestId('map-zoom-level');
+  
+  // Wait for the zoom level to be visible
+  await expect(zoomLevelLocator).toBeVisible();
+  
+  // Get initial zoom level
+  const initialZoomText = await zoomLevelLocator.textContent();
+  const initialZoom = parseInt(initialZoomText || '0', 10);
+  
+  // Step 1: Click 'Zoom in'
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+  await zoomInButton.click();
+  
+  // Wait for zoom level to update
+  await expect(zoomLevelLocator).toHaveText(/\d+/);
+  const zoomedInText = await zoomLevelLocator.textContent();
+  const zoomedInZoom = parseInt(zoomedInText || '0', 10);
+  
+  // Assert zoom level is higher
+  expect(zoomedInZoom).toBeGreaterThan(initialZoom);
+  
+  // Step 2: Click 'Zoom out'
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out' });
+  await zoomOutButton.click();
+  
+  // Wait for zoom level to update
+  await expect(zoomLevelLocator).toHaveText(/\d+/);
+  const zoomedOutText = await zoomLevelLocator.textContent();
+  const zoomedOutZoom = parseInt(zoomedOutText || '0', 10);
+  
+  // Assert zoom level is lower than after zooming in
+  expect(zoomedOutZoom).toBeLessThan(zoomedInZoom);
+});

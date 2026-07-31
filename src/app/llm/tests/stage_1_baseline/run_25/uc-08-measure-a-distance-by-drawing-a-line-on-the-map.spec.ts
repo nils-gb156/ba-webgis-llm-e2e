@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The button is identified by its accessible name "Measurement"
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible.
+  // Assuming the panel has a test id or is identifiable by a heading/role.
+  // Using a generic check for the panel container which might have a specific test id or role.
+  // If no specific test id is known, we look for a dialog or panel that appears.
+  // Common pattern: a panel with a specific test id like 'measurement-panel' or similar.
+  // Let's assume a test id 'measurement-panel' exists for the result panel.
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas. The canvas is an ol-layer.
+  // We will click a few points to create a line segment.
+  const mapCenter = await page.locator('canvas.ol-layer').boundingBox();
+  if (!mapCenter) {
+    throw new Error('Map canvas not found');
+  }
+
+  // Define points relative to the map canvas center to ensure they are within the map area.
+  // Point 1: Center
+  const point1X = mapCenter.x + mapCenter.width / 2;
+  const point1Y = mapCenter.y + mapCenter.height / 2;
+
+  // Point 2: Slightly to the right
+  const point2X = point1X + 100;
+  const point2Y = point1Y;
+
+  // Point 3: Further right and up
+  const point3X = point2X + 100;
+  const point3Y = point2Y - 100;
+
+  // Click Point 1
+  await page.mouse.click(point1X, point1Y);
+
+  // Click Point 2
+  await page.mouse.click(point2X, point2Y);
+
+  // Click Point 3
+  await page.mouse.click(point3X, point3Y);
+
+  // Step 3: Double-click to finish the measurement.
+  // Double-click on the last point or nearby to finish.
+  await page.mouse.dblclick(point3X, point3Y);
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit.
+  // We expect the measurement panel to contain text that looks like a length value with a unit (e.g., "123.45 m").
+  // Using expect.poll to wait for the value to appear.
+  await expect.poll(async () => {
+    const content = await measurementPanel.textContent();
+    return content;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/i);
+});

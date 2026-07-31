@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 1: Show and hide the layer switcher via the toolbar button', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be initially visible
+  const layerSwitcher = page.getByRole('complementary', { name: 'Layer Switcher' });
+  await expect(layerSwitcher).toBeVisible();
+
+  // Step 1: Click the 'Layer Switcher' button in the toolbar to hide the panel.
+  // We need to find the toolbar button. It likely has a test id or accessible name.
+  // Assuming a test id for the toggle button or finding it by role/name in the toolbar.
+  // Let's look for a button that controls the layer switcher.
+  // Often these are in a toolbar. Let's try to find the button by its accessible name or test id.
+  // If no specific test id is known, we might use getByRole('button', { name: 'Layer Switcher' })
+  // However, the prompt mentions "toolbar button". Let's assume there's a specific test id or we can scope it.
+  // Since no test ids are provided in the prompt, we rely on accessible names.
+  // The button might be named "Layer Switcher" or similar.
+  
+  // Let's try to click the button that toggles the layer switcher.
+  // We'll assume the button has an accessible name like "Layer Switcher" or "Toggle Layer Switcher".
+  // To avoid ambiguity, we might need to scope it if there are multiple.
+  // Let's assume the toolbar is distinct.
+  
+  // Let's try getting the button by role and name.
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher', exact: true });
+  
+  // Click to hide
+  await layerSwitcherToggle.click();
+  
+  // Assert the layer switcher is no longer visible
+  await expect(layerSwitcher).not.toBeVisible();
+
+  // Step 2: Click the 'Layer Switcher' button again to show the panel.
+  await layerSwitcherToggle.click();
+
+  // Assert the layer switcher is visible again
+  await expect(layerSwitcher).toBeVisible();
+});

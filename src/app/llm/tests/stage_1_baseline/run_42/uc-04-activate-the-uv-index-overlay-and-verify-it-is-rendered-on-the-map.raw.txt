@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Locate the UV-Index overlay toggle.
+  // Assuming the layer switcher uses test ids for individual layers or a structure
+  // like 'layer-switcher-item-{layer-id}'. If not available, we rely on accessible name.
+  // Chakra UI checkboxes are visually hidden, so we must use force: true.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' });
+  
+  // Verify initial state: UV-Index should be hidden (unchecked)
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle to show the layer
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // Since map content is on a canvas, we can't directly assert tile visibility via DOM.
+  // However, we can assert that the layer request was made or that the map canvas has changed.
+  // A common pattern for WMS/Tile layers is to wait for the network request.
+  
+  // Register listener for the WMS GetMap or Tile request
+  const uvIndexRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    // Assuming WMS or Tile service URL contains 'uv' or 'index' or matches a known pattern
+    // Adjust the filter based on actual service URLs. 
+    // Often WMS layers have a 'layers' parameter.
+    return url.includes('uv') || url.includes('index') || url.includes('wms');
+  });
+
+  // Trigger the request by interacting with the map or waiting for auto-update.
+  // Sometimes enabling a layer triggers an immediate request. If not, we might need to move the map.
+  // However, simply enabling the layer often suffices if the map view is already centered.
+  
+  // Wait for the request to complete
+  const request = await uvIndexRequestPromise;
+  
+  // Verify the request was actually for the UV-Index layer
+  const url = request.url();
+  // Check if the request URL contains parameters indicating the UV-Index layer
+  expect(url).toContain('uv'); // Or whatever the layer name/identifier is in the URL
+
+  // Since we cannot assert canvas content directly, we rely on the successful network request
+  // and the UI state (checked toggle) as sufficient evidence for this medium complexity test.
+  // If map helpers were provided, we would poll them here.
+});

@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Get the map canvas bounding box to calculate click positions
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas not found');
+  }
+
+  // 2. Click several points on the map canvas to draw a line.
+  // Calculate points relative to the map canvas
+  const startX = mapBox.x + mapBox.width * 0.2;
+  const startY = mapBox.y + mapBox.height * 0.2;
+  const endX = mapBox.x + mapBox.width * 0.8;
+  const endY = mapBox.y + mapBox.height * 0.8;
+  const midX = mapBox.x + mapBox.width * 0.5;
+  const midY = mapBox.y + mapBox.height * 0.5;
+
+  // Click first point
+  await page.mouse.click(startX, startY);
+  // Click second point (middle)
+  await page.mouse.click(midX, midY);
+  // Click third point (end)
+  await page.mouse.click(endX, endY);
+
+  // 3. Double-click to finish the measurement.
+  await page.mouse.dblClick(endX, endY);
+
+  // Expected results:
+  // - The measurement panel is visible (already asserted above, but ensure it stays visible)
+  await expect(measurementPanel).toBeVisible();
+
+  // - The measurement panel displays a length value with a unit.
+  // Look for text that resembles a measurement (e.g., "123.45 m", "1.2 km")
+  // We use a regex to match numbers followed by a unit like 'm' or 'km'
+  const lengthRegex = /\d+(\.\d+)?\s*(m|km|mi|ft)/i;
+  
+  // Use expect.poll to wait for the measurement result to appear
+  await expect.poll(async () => {
+    const text = await measurementPanel.textContent();
+    return text;
+  }).toMatch(lengthRegex);
+});

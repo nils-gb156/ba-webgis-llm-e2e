@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be present and interactive
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on the map to trigger the weather forecast request
+  // Using the center of the viewport as a safe position to click
+  const mapBoundingBox = await mapCanvas.boundingBox();
+  if (!mapBoundingBox) {
+    throw new Error('Map canvas bounding box not found');
+  }
+
+  const clickX = mapBoundingBox.x + mapBoundingBox.width / 2;
+  const clickY = mapBoundingBox.y + mapBoundingBox.height / 2;
+
+  await page.mouse.click(clickX, clickY);
+
+  // Wait for the info panel to load the forecast
+  // Assuming the info panel has a test id or is identifiable by role
+  // Since specific test ids are not provided in the prompt, we rely on common patterns
+  // Let's assume the info panel is a dialog or a specific panel region
+  // We will look for a container that likely holds the forecast data
+  // Often, weather forecasts might be in a list or grid
+  
+  // Wait for some indication that the forecast is loading or present
+  // We'll wait for a specific element that indicates weather data is present
+  // If there's a specific test id for the forecast section, we'd use it.
+  // Without it, we might wait for the info panel to update or a specific text.
+  
+  // Let's assume there's a container for the weather forecast with a test-id like 'weather-forecast'
+  // If not, we might need to look for a heading or a list item count.
+  
+  // Since the prompt mentions "info panel displays a weather forecast section",
+  // we can try to find a section with text "Weather" or similar.
+  
+  // Let's assume the info panel is identified by a test id 'info-panel'
+  // And the weather forecast section within it has a test id 'weather-forecast'
+  
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to be visible
+  const weatherForecastSection = infoPanel.getByTestId('weather-forecast');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Assert that the clicked position is highlighted on the map
+  // This is tricky as map highlights are not DOM elements.
+  // We can't directly assert on the map canvas content easily without helper functions.
+  // However, the prompt says "The clicked position is highlighted on the map."
+  // Without map helper functions provided in the prompt, we cannot programmatically verify the highlight.
+  // We will skip this assertion as it's not feasible with standard DOM locators for canvas.
+  // In a real scenario with map helpers, we would use them here.
+
+  // Assert that the forecast contains 24 entries
+  // Assuming the forecast entries are list items or similar elements within the weather forecast section
+  // Let's assume each entry has a test id or is a distinct element like a list item
+  // We'll count the number of forecast entries
+  
+  // Let's assume the forecast entries are rendered as a list of items with test id 'forecast-entry'
+  const forecastEntries = weatherForecastSection.getByTestId('forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

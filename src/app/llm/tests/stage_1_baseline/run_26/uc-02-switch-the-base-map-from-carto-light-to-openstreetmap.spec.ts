@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the layer switcher (TOC) to be visible
+  const layerSwitcher = page.getByRole('button', { name: 'Layers' });
+  await expect(layerSwitcher).toBeVisible();
+
+  // Open the layer switcher if it's not already open
+  // Assuming the TOC is a button that toggles the panel
+  const tocPanel = page.getByTestId('layer-switcher-panel');
+  if (!await tocPanel.isVisible()) {
+    await layerSwitcher.click();
+    await expect(tocPanel).toBeVisible();
+  }
+
+  // Open the base map selector within the layer switcher
+  // Assuming there is a button or section for base maps
+  const baseMapSelectorButton = page.getByRole('button', { name: 'Base Map' }).first();
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Wait for the base map options to appear
+  const baseMapOptionsContainer = page.getByTestId('base-map-selector-list');
+  await expect(baseMapOptionsContainer).toBeVisible();
+
+  // Select 'OpenStreetMap'
+  const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  await expect(osmOption).toBeVisible();
+  await osmOption.click();
+
+  // Verify that OpenStreetMap is now selected
+  await expect(osmOption).toHaveAttribute('aria-selected', 'true');
+
+  // Verify that Carto Light is no longer selected
+  const cartoLightOption = page.getByRole('option', { name: 'Carto Light' });
+  await expect(cartoLightOption).toHaveAttribute('aria-selected', 'false');
+});

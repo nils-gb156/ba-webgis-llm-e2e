@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 1: Show and hide the layer switcher via the toolbar button', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // The layer switcher (TOC) is initially visible as per preconditions.
+  // We wait for it to be visible to ensure the app is fully loaded and ready.
+  const layerSwitcherToggle = page.getByRole('button', { name: 'Layer Switcher' });
+  const layerSwitcherPanel = page.getByTestId('layer-switcher');
+
+  await expect(layerSwitcherPanel).toBeVisible();
+
+  // Step 1: Click the 'Layer Switcher' button to hide the panel.
+  await layerSwitcherToggle.click();
+
+  // Expected result: After the first click, the layer switcher panel is no longer visible.
+  await expect(layerSwitcherPanel).not.toBeVisible();
+
+  // Step 2: Click the 'Layer Switcher' button again to show the panel.
+  await layerSwitcherToggle.click();
+
+  // Expected result: After the second click, the layer switcher panel is visible again.
+  await expect(layerSwitcherPanel).toBeVisible();
+});

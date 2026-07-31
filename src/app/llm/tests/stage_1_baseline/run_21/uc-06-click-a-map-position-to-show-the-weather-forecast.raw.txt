@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and the map to be ready
+  // Assuming the map canvas has a test id or we can locate it by role/type
+  // Since no specific test ids are provided for the map container, we wait for the page load
+  // and assume the map becomes interactive.
+  await expect(page.locator('canvas')).toBeVisible();
+
+  // Click on a position on the map canvas.
+  // We click roughly in the center of the canvas.
+  const canvas = page.locator('canvas');
+  const box = await canvas.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  // Wait for the info panel to load the forecast.
+  // We assume the info panel has a test id or we can locate it.
+  // Let's assume there is an info panel container. If not, we might look for specific content.
+  // Since the expected result mentions a weather forecast section with 24 entries,
+  // we can assert on that.
+
+  // Wait for the weather forecast section to appear.
+  // We'll look for a list or grid with 24 items, or a specific text indicating forecast.
+  // Without specific test ids, we might rely on the structure.
+  // Let's assume the info panel is visible and contains the forecast.
+  
+  // Wait for some content in the info panel to indicate the forecast is loaded.
+  // We'll wait for the page to stabilize after the click.
+  await page.waitForTimeout(2000); // Fallback wait if no specific event is available
+
+  // Assert that the clicked position is highlighted on the map.
+  // This is hard to assert directly on the canvas without helper functions.
+  // We might assume that if the info panel updates, the map also updated.
+  // Without helper functions for map state, we cannot directly assert the highlight.
+  // We will skip this assertion if no helper is provided, as per instructions.
+
+  // Assert that the info panel displays a weather forecast section.
+  // And that the forecast contains 24 entries.
+  
+  // We need to locate the forecast entries.
+  // Let's assume the forecast entries are in a list or grid.
+  // We'll count the number of forecast items.
+  
+  // Since we don't have specific test ids for the forecast items,
+  // we might need to use a generic selector.
+  // Let's assume the forecast items have a common class or role.
+  // For example, they might be divs with a certain class.
+  
+  // We will poll for the number of forecast entries to be 24.
+  await expect.poll(async () => {
+    // Try to find elements that look like forecast entries.
+    // This is a guess based on common UI patterns.
+    // Let's assume they are in a container with a specific text "Weather Forecast"
+    const forecastContainer = page.locator('text=Weather Forecast').first().locator('..').locator('..');
+    // Or maybe the info panel itself has the forecast.
+    // Let's try to find any list items or cards that represent forecast entries.
+    // We'll look for a common pattern, e.g., divs with a specific class or structure.
+    // Since we don't know the exact structure, we'll try to count elements that might be forecast entries.
+    // Let's assume there's a list with id or class related to forecast.
+    const forecastItems = page.locator('[data-testid*="forecast-item"], .forecast-item, [class*="forecast"]');
+    return forecastItems.count();
+  }).toBe(24);
+});

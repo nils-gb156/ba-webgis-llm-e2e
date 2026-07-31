@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map canvas to be interactive
+  // Assuming the map canvas has a specific test id or role. 
+  // If not specified, we wait for a generic map container or just the page load.
+  // Based on typical Open Pioneer setups, the map might be in a container.
+  // Let's assume there's a map container we can interact with.
+  // If no specific test id is known, we might need to find the canvas or a container.
+  // However, the prompt says "The map canvas is interactive" as a precondition.
+  // We will try to find the map container. Often it's a div.
+  // Let's assume a common test id for the map if available, or wait for page load stability.
+  // Since no specific test ids are provided in the prompt for the map container,
+  // we will rely on waiting for the page to be stable and then clicking on a central position.
+  
+  // Wait for the info panel to be visible as per preconditions
+  // Assuming the info panel has a test id. Let's guess a common one or look for a panel.
+  // If no test id, we might look for a role.
+  // Let's assume the info panel is visible. We'll wait for it.
+  // Common test id for info panel might be 'info-panel' or similar.
+  // Without specific test ids, we might have to use getByRole or getByText.
+  // Let's assume there is a test id for the info panel: 'info-panel'
+  // And for the map: 'map'
+  
+  // If we don't know the test ids, we might fail. But the prompt implies we should use getByTestId.
+  // Let's assume standard test ids exist for this use case context.
+  // Info Panel: 'info-panel'
+  // Map: 'map'
+  
+  // Wait for info panel to be visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the map canvas at a specific position (e.g., center)
+  // The map is a canvas, so we need to click on the container or the canvas element.
+  // Using getByTestId('map') to locate the map container
+  const mapLocator = page.getByTestId('map');
+  await expect(mapLocator).toBeVisible();
+  
+  // Click on the center of the map
+  await mapLocator.click({ position: { x: 100, y: 100 } });
+
+  // Wait for the forecast to load. 
+  // The expected result is that the forecast contains 24 entries.
+  // We need to find where the forecast entries are displayed.
+  // Assuming there is a list or grid of forecast items with a test id like 'forecast-entry'
+  // Or we might need to count elements inside the info panel.
+  
+  // Let's assume forecast entries have a test id 'forecast-entry'
+  // We will poll for the count of forecast entries to be 24.
+  
+  await expect.poll(async () => {
+    return page.locator('[data-testid="forecast-entry"]').count();
+  }).toBe(24);
+
+  // Verify the clicked position is highlighted on the map.
+  // This might be a feature or a marker.
+  // Assuming there is a test id for the highlighted position or marker.
+  // Let's assume 'highlighted-position' or similar.
+  // If no specific test id, we might look for a specific role or text.
+  // However, map highlights are often visual and not easily testable via DOM unless there's a marker.
+  // Let's assume there is a marker with test id 'map-marker'
+  await expect(page.getByTestId('map-marker')).toBeVisible();
+});

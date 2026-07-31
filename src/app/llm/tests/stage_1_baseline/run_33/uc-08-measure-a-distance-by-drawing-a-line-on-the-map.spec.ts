@@ -1,0 +1,110 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready by checking for the canvas
+  await page.waitForSelector('canvas');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // The measurement tool is typically a toggle or button in the toolbar.
+  // We look for a button with the text "Measurement" or similar.
+  const measurementButton = page.getByRole('button', { name: /measurement/i });
+  await measurementButton.click();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas. We'll identify the canvas and click relative positions.
+  const canvas = page.locator('canvas');
+  await canvas.waitForElementState('visible');
+
+  // Get the bounding box of the canvas to calculate click positions
+  const box = await canvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  // Calculate three points to form a simple line shape (e.g., L-shape or straight line)
+  // Point 1: Start near the top-left of the canvas
+  const point1X = box.x + box.width * 0.2;
+  const point1Y = box.y + box.height * 0.2;
+
+  // Point 2: Middle of the canvas
+  const point2X = box.x + box.width * 0.5;
+  const point2Y = box.y + box.height * 0.5;
+
+  // Point 3: End near the bottom-right of the canvas
+  const point3X = box.x + box.width * 0.8;
+  const point3Y = box.y + box.height * 0.8;
+
+  // Click the first point
+  await page.mouse.click(point1X, point1Y);
+
+  // Click the second point
+  await page.mouse.click(point2X, point2Y);
+
+  // Click the third point
+  await page.mouse.click(point3X, point3Y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3X, point3Y);
+
+  // Expected results:
+  // The measurement panel is visible.
+  // The measurement panel displays a length value with a unit.
+
+  // Wait for the measurement panel to be visible.
+  // Assuming the panel has a test id or can be identified by role/text.
+  // Since no specific test id is provided for the panel, we look for a dialog or panel with measurement results.
+  // Often, measurement results appear in a specific container. Let's assume there's a panel with "Measurement" in the title or similar.
+  // Or we can look for the result text directly.
+
+  // Let's try to find the measurement result container.
+  // It might be a div with a specific class or role.
+  // We'll wait for some text that indicates a measurement result, e.g., a number followed by a unit like "m" or "km".
+  
+  // We'll poll for a measurement result to appear.
+  // The result might be in a tooltip, a panel, or a status bar.
+  // Let's assume the result is displayed in the measurement panel.
+  
+  // We will look for any element containing a number and a unit, which is likely the measurement result.
+  // This is a heuristic, but it's robust for this use case.
+  
+  // First, ensure the measurement panel is visible.
+  // We can check for a panel that appears after clicking the measurement tool.
+  // Let's assume the panel is a dialog or a side panel.
+  // We'll wait for a dialog with "Measurement" in its name, or a panel with specific content.
+  
+  // Since we don't have exact test ids, we'll rely on the presence of measurement data.
+  // Let's wait for a text that looks like a measurement result.
+  // Example: "123.45 m" or "1.23 km"
+  
+  await expect.poll(async () => {
+    // Try to find text that matches a number followed by a unit
+    // This is a bit fragile, but without specific locators, it's a common approach.
+    // We'll look for any text on the page that matches this pattern.
+    const bodyText = await page.locator('body').innerText();
+    // Regex for a number (integer or decimal) followed by a space and a unit (m, km, ft, mi, etc.)
+    const measurementRegex = /\d+(\.\d+)?\s+(m|km|ft|mi|in|cm|mm|yd)/i;
+    return measurementRegex.test(bodyText);
+  }).toBeTruthy();
+
+  // Alternatively, if there's a specific panel, we could check for its visibility.
+  // Let's assume the measurement panel is visible and contains the result.
+  // We can also check for a specific role if the panel is a dialog.
+  // But the above poll is more robust for the "displays a length value with a unit" requirement.
+
+  // Let's also assert that the measurement panel is visible if we can identify it.
+  // If the measurement tool opens a panel, it might have a test id or a specific role.
+  // Without more info, we rely on the result text.
+
+  // Final assertion: The measurement result is displayed.
+  // We've already asserted this via the poll.
+  // Let's add a more specific assertion if possible.
+  // If the measurement panel is a dialog, we can check for it.
+  // Let's assume the measurement panel is a dialog with the name "Measurement".
+  const measurementPanel = page.getByRole('dialog', { name: /measurement/i });
+  await expect(measurementPanel).toBeVisible();
+});

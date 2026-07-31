@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Hide the Temperature overlay layer
+  // The Temperature layer toggle is initially enabled (checked). We click it to hide it.
+  const temperatureToggle = page.getByTestId('layer-toggle-temperature');
+  await expect(temperatureToggle).toBeChecked(); // Verify precondition
+  await temperatureToggle.click();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer
+  // The Precipitation layer toggle is initially hidden (unchecked). We click it to show it.
+  const precipitationToggle = page.getByTestId('layer-toggle-precipitation');
+  await expect(precipitationToggle).not.toBeChecked(); // Verify precondition
+  await precipitationToggle.click();
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Click the search field and type a place name
+  const searchField = page.getByTestId('geocoder-search-input');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The result list is typically rendered in a dropdown associated with the search input
+  const firstResult = page.getByTestId('geocoder-result-item').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We verify navigation by checking that the info panel updates or by waiting for a network response
+  // associated with the map center change or feature info fetch.
+  // Since map state is not in DOM, we rely on the info panel updating in Step 6 as a proxy for navigation,
+  // or we can wait for a specific network request if available.
+  // For this test, we will proceed to Step 6 and assert the final state which implies navigation occurred.
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The info panel should display a weather forecast section with 24 entries.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // The forecast entries are likely listed items within the info panel
+  const forecastEntries = infoPanel.getByTestId('weather-forecast-entry');
+  await expect.poll(() => forecastEntries.count()).toBe(24);
+});

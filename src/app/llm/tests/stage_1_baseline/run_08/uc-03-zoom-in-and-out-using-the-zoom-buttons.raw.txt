@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out' });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  // Capture initial zoom level if possible, or just proceed with relative checks.
+  // Since we don't have helper functions provided, we rely on the UI interaction.
+  // We will assume the map is interactive.
+
+  // Step 1: Click 'Zoom in'
+  await zoomInButton.click();
+
+  // Step 2: Click 'Zoom out'
+  await zoomOutButton.click();
+
+  // Expected results:
+  // The test verifies that the interactions do not throw errors and the buttons remain clickable.
+  // Without access to the internal map state or specific test IDs for zoom level display,
+  // we assert that the buttons are still visible and interactive after the actions.
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+});

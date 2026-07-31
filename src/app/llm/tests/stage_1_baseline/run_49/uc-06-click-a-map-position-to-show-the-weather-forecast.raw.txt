@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the info panel to be visible
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Locate the map canvas container
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on the center of the map canvas
+  const box = await mapCanvas.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  // Wait for the info panel to update with weather forecast content
+  // We poll for the presence of a weather forecast section or specific text
+  await expect.poll(async () => {
+    const forecastSection = page.getByTestId('weather-forecast');
+    if (await forecastSection.isVisible().catch(() => false)) {
+      return true;
+    }
+    // Fallback: check if the info panel contains text related to forecast
+    const infoPanelContent = page.getByTestId('info-panel');
+    const text = await infoPanelContent.textContent();
+    return text?.toLowerCase().includes('forecast') ?? false;
+  }).toBeTruthy();
+
+  // Verify that the clicked position is highlighted on the map
+  // Since we can't assert DOM elements on the canvas directly, we assume
+  // the map interaction triggers a state change that might be reflected
+  // in the info panel or a specific highlight layer if exposed via testid.
+  // If there's no specific testid for the highlight, we rely on the info panel update.
+  // However, the prompt says "The clicked position is highlighted on the map".
+  // Without a helper or testid, we can't strictly assert this via DOM.
+  // We will assume the info panel update is the primary indicator.
+
+  // Verify the forecast contains 24 entries
+  // Assuming the forecast entries have a specific testid or role
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to be ready, TOC visible, and initial layer states
+  const temperatureToggle = page.getByTestId('layer-temperature-visibility-toggle');
+  const precipitationToggle = page.getByTestId('layer-precipitation-visibility-toggle');
+
+  // Preconditions: Temperature initially visible, Precipitation initially hidden
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  // Step 1: Hide Temperature overlay
+  await temperatureToggle.click();
+
+  // Step 2: Show Precipitation overlay
+  await precipitationToggle.click();
+
+  // Expected results: Precipitation disabled (checked), Temperature enabled (unchecked)
+  // Note: "disabled state" in the prompt likely refers to the toggle being in the "on" position
+  // indicating the layer is active/visible, while "enabled" means the toggle allows interaction
+  // or is in the "on" position. Given the context of visibility toggles:
+  // - "Precipitation overlay layer toggle is in the disabled state" -> Likely means the layer is active/visible (toggle ON).
+  // - "Temperature overlay layer toggle is in the enabled state" -> This phrasing is ambiguous.
+  // Let's re-read carefully: "toggle is in the disabled state" usually means the control is not interactive.
+  // However, in Chakra UI, a checkbox being checked is "checked", not "disabled".
+  // Let's look at the expected results again:
+  // "The Precipitation overlay layer toggle is in the disabled state."
+  // "The Temperature overlay layer toggle is in the enabled state."
+  // This is very strange phrasing for visibility toggles.
+  // Alternative interpretation: Maybe the prompt means the *layer* is disabled/hidden?
+  // No, Step 2 says "click ... to show it". So Precipitation should be visible.
+  // Let's assume "disabled state" for a toggle might be a mistranslation or specific UI state where the layer is locked?
+  // Or perhaps it means the *checkbox* is checked (which visually looks like a toggle switch "on").
+  // Let's stick to the visual state of the checkbox/switch.
+  // If Precipitation is shown, its toggle should be checked.
+  // If Temperature is hidden, its toggle should be unchecked.
+  // The prompt says: "Precipitation ... disabled", "Temperature ... enabled".
+  // This contradicts standard terminology. Let's look at the steps.
+  // Step 1: Click Temperature to hide. -> Temperature unchecked.
+  // Step 2: Click Precipitation to show. -> Precipitation checked.
+  // Expected: Precipitation toggle "disabled", Temperature toggle "enabled".
+  // This might refer to the *layer* being disabled in the backend? Unlikely for a frontend test.
+  // Let's assume the prompt meant:
+  // "Precipitation overlay layer is VISIBLE" (Toggle Checked)
+  // "Temperature overlay layer is HIDDEN" (Toggle Unchecked)
+  // But the expected results say "toggle is in the disabled state".
+  // In some UIs, a checked toggle might be described as "disabled" if it cannot be unchecked? No.
+  // Let's look at Chakra UI. A `Switch` component.
+  // Maybe the prompt implies that after clicking, the toggle becomes "disabled" (not interactive)?
+  // No, usually toggles remain interactive.
+  // Let's assume "disabled state" = Checked (On) and "enabled state" = Unchecked (Off)?
+  // That is highly non-standard.
+  // Let's try another interpretation: The *layer* is disabled/hidden.
+  // "Precipitation ... disabled" -> Hidden? But Step 2 says "show it". Contradiction.
+  // "Temperature ... enabled" -> Visible? But Step 1 says "hide it". Contradiction.
+
+  // Let's look at the German original if possible? No.
+  // Let's assume the prompt has a typo and means:
+  // "Precipitation ... VISIBLE"
+  // "Temperature ... HIDDEN"
+  // And the "disabled/enabled" refers to the *checkbox state* in a confusing way.
+  // Or, perhaps, "disabled" means the toggle is visually "on" (like a power switch, where ON is the default "active" state, and OFF is "disabled" power)?
+  // Let's assume:
+  // Precipitation Checked (Visible)
+  // Temperature Unchecked (Hidden)
+
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 3: Search for 'Münster'
+  const searchField = page.getByPlaceholder('Search'); // Or getByTestId if available
+  if (!searchField.count()) {
+    // Fallback to a common test id or label
+    const searchInput = page.getByLabel('Search');
+    await searchInput.click();
+    await searchInput.fill('Münster');
+  } else {
+    await searchField.click();
+    await searchField.fill('Münster');
+  }
+
+  // Step 4: Wait for result list and select first result
+  const firstResult = page.getByRole('option', { name: 'Münster' }).first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // Since we don't have map helpers, we wait for the info panel to start loading or a specific network request
+  // We'll wait for the info panel to show content related to the location
+  const infoPanel = page.getByTestId('info-panel'); // Assuming test id
+  if (!infoPanel.count()) {
+     // Fallback to visible text or role
+     await expect(page.getByText('Münster')).toBeVisible();
+  } else {
+     await expect(infoPanel).toBeVisible();
+  }
+
+  // Step 6: Wait for info panel to load the forecast (24 entries)
+  // We need to find the forecast section and count entries
+  // Assuming the forecast entries have a test id or specific role
+  // Let's poll for the presence of 24 forecast items
+  await expect.poll(async () => {
+    const forecastItems = page.locator('[data-testid="forecast-entry"]');
+    if (!forecastItems) return 0;
+    return await forecastItems.count();
+  }).toBe(24);
+});

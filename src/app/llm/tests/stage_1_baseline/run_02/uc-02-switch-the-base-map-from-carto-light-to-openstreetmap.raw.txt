@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the TOC.
+  // We look for a button that likely controls the base map view.
+  // Often this is a button with an icon or text like "Base Map" or a globe icon.
+  // Let's assume there's a specific test id or role for the base map selector button.
+  // If not explicitly provided, we might look for a button inside the TOC that opens a list.
+  // Common pattern: A button labeled "Base Map" or similar.
+  const baseMapSelectorButton = page.getByRole('button', { name: 'Base Map' });
+  await baseMapSelectorButton.click();
+
+  // Wait for the base map selection list/dialog to appear
+  // Assuming the selector opens a list or a panel. Let's look for the list items.
+  // Often, the base map options are presented as radio buttons or list items.
+  // Let's assume they are list items or buttons within a container.
+  const osmOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  // If 'option' is not used, it might be a list item or a button.
+  // Let's try getByText if getByRole doesn't fit, but prefer role.
+  // If the UI uses a combobox or similar, 'option' is correct.
+  // If it's a list of radio buttons, 'radio' might be the role.
+  // Let's assume standard accessible pattern for selecting a base map.
+  // If the previous click opened a dropdown/panel, we wait for it.
+  await expect(osmOption).toBeVisible();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  await osmOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Verify OpenStreetMap is selected
+  await expect(osmOption).toBeChecked(); // If it's a radio button
+  // Or if it's just highlighted/active:
+  // await expect(osmOption).toHaveAttribute('aria-selected', 'true');
+  
+  // Verify Carto Light is no longer selected
+  const cartoLightOption = page.getByRole('option', { name: 'Carto Light' });
+  await expect(cartoLightOption).not.toBeChecked();
+  // Or if highlighted:
+  // await expect(cartoLightOption).not.toHaveAttribute('aria-selected', 'true');
+});

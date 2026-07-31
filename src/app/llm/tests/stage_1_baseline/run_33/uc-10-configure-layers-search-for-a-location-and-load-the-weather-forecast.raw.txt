@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click();
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click();
+
+  // Step 3: Search for a location
+  const searchField = page.getByLabel('Search');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select the first result
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate (poll map center if helpers provided, otherwise assume DOM updates)
+  // Since no helpers were provided in the prompt, we rely on the info panel loading as a proxy for navigation success.
+  // We wait for the info panel to update, indicating the location change has been processed.
+
+  // Step 6: Wait for the info panel to load the forecast with 24 entries
+  // The forecast section should contain 24 items. We look for a list or grid of forecast entries.
+  // Assuming the forecast entries are rendered as a list of items with a specific role or test-id.
+  // If no specific test-id is known, we might look for a container and count children.
+  // Let's assume the forecast entries have a role of 'listitem' inside a list with id 'forecast' or similar.
+  // Without specific test-ids, we use a robust locator strategy.
+  
+  // Wait for the forecast list to appear and have 24 items.
+  // We poll for the count of forecast items to be 24.
+  await expect.poll(async () => {
+    // Try to find forecast items. They might be in a specific container.
+    // Let's assume they are list items in a list.
+    const listItems = page.locator('ul li'); // Generic fallback
+    // This is too generic. Let's try to find a specific container if possible.
+    // Since we don't have test-ids, we look for the info panel content.
+    const infoPanel = page.getByRole('region', { name: /Info|Details/i }); // Adjust name as needed
+    if (!await infoPanel.isVisible()) {
+      return 0;
+    }
+    // Assume forecast items are in a list within the info panel
+    const forecastItems = infoPanel.locator('li');
+    return await forecastItems.count();
+  }).toBe(24);
+
+  // Verify final layer states
+  await expect(temperatureToggle).not.toBeChecked();
+  await expect(precipitationToggle).toBeChecked();
+});

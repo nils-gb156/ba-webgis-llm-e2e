@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be visible and interactive
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on a position on the map canvas
+  // Using a central position on the canvas to ensure we click within the visible area
+  await mapCanvas.click({ position: { x: 200, y: 200 } });
+
+  // Wait for the info panel to load the forecast
+  // We expect the info panel to contain a weather forecast section with 24 entries
+  // Assuming the forecast entries are rendered as list items or similar elements within the info panel
+  
+  // First, ensure the info panel is visible
+  const infoPanel = page.getByRole('region', { name: /info panel/i, includeHidden: true });
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the forecast entries to appear. 
+  // We assume the forecast entries have a specific test id or role. 
+  // Since specific test ids are not provided, we look for a pattern that indicates 24 forecast entries.
+  // Let's assume the forecast entries are inside a container with a specific class or role.
+  // If no specific locator is known, we might wait for any significant content change in the info panel.
+  // However, the requirement is to check for 24 entries.
+  
+  // Let's assume there is a container for forecast entries. 
+  // If we don't have a specific test id, we might use a generic approach.
+  // But to be precise, let's assume the forecast entries are list items or divs with a certain structure.
+  
+  // Since the prompt mentions "weather forecast section", let's look for that.
+  // We'll wait for the info panel to contain text or elements that indicate a forecast.
+  
+  // A robust way is to wait for the number of forecast entries to be 24.
+  // We need a locator for the forecast entries. Let's assume they are inside a container with data-testid="forecast-entries"
+  // If not, we might need to infer. Let's try to find a container that likely holds the forecast.
+  
+  // Alternative: Wait for the info panel to have a certain number of child elements that look like forecast entries.
+  // Without specific test ids, this is tricky. Let's assume the forecast entries are rendered as a list.
+  
+  // Let's try to find a container that is likely to contain the forecast.
+  // We'll wait for the info panel to contain a specific text or element that indicates the forecast is loaded.
+  
+  // Since the complexity is hard, we might need to wait for a specific network response or state.
+  // But let's start with DOM-based assertions.
+  
+  // Assume the forecast entries are in a container with data-testid="forecast-container"
+  // and each entry has data-testid="forecast-entry"
+  
+  const forecastContainer = page.getByTestId('forecast-container');
+  await expect(forecastContainer).toBeVisible();
+  
+  // Wait for 24 forecast entries to be present
+  const forecastEntries = forecastContainer.locator('[data-testid="forecast-entry"]');
+  await expect(forecastEntries).toHaveCount(24);
+
+  // Verify that the clicked position is highlighted on the map
+  // This is harder to assert without specific test ids for the marker.
+  // We can assume that if the forecast is displayed, the map interaction was successful.
+  // However, to be thorough, we might look for a marker or highlight.
+  // Since the map is a canvas, we can't directly assert on DOM elements for the marker.
+  // We'll rely on the forecast appearing as a proxy for the map click being processed.
+});

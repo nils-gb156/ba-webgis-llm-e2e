@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and initial state to settle
+  // The layer switcher (TOC) should be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Hide the Temperature overlay layer
+  // Locate the Temperature layer toggle in the TOC and click it
+  const temperatureToggle = page.getByTestId('layer-temperature-toggle');
+  await expect(temperatureToggle).toBeVisible();
+  await temperatureToggle.click();
+
+  // Step 2: Show the Precipitation overlay layer
+  // Locate the Precipitation layer toggle in the TOC and click it
+  const precipitationToggle = page.getByTestId('layer-precipitation-toggle');
+  await expect(precipitationToggle).toBeVisible();
+  await precipitationToggle.click();
+
+  // Step 3: Search for a location
+  // Locate the search field (geocoder)
+  const searchField = page.getByLabel('Search');
+  await expect(searchField).toBeVisible();
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The search results are typically displayed in a dropdown or list
+  // We wait for the first result item to be visible
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // We can assert this by checking if the info panel updates or by waiting for a network request
+  // Since map state is not in DOM, we rely on the info panel update as a proxy for navigation
+  // Or we can wait for the geocoder request to complete and the map to settle
+  // Let's wait for the info panel to start loading or update
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The expected result is that the info panel displays a weather forecast section with 24 entries
+  // We need to locate the weather forecast section and check for 24 entries
+  // Assuming the forecast entries have a specific test id or role
+  // Let's assume forecast entries are listed with a specific class or role
+  // We will poll for the presence of 24 forecast entries
+
+  // Wait for the forecast section to appear
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  await expect(forecastSection).toBeVisible();
+
+  // Wait for 24 forecast entries to be present
+  // Assuming each forecast entry has a test id like 'forecast-entry' or similar
+  // If no specific test id, we might need to count elements by role or text
+  // Let's assume there's a container for forecast entries
+  const forecastEntries = page.getByTestId('forecast-entry');
+  
+  // Use expect.poll to wait until there are 24 entries
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+
+  // Additional assertions from Expected Results:
+  // - The Precipitation overlay layer toggle is in the disabled state (meaning the layer is active/visible)
+  //   In Chakra UI, a "disabled" toggle often means the switch is on (checked).
+  //   We need to check the state of the precipitation toggle.
+  //   If it's a checkbox/switch, we check if it's checked.
+  //   The prompt says "disabled state" for the toggle, which might refer to the visual state of the switch being "on".
+  //   Let's assume the toggle itself becomes visually disabled or checked.
+  //   We'll check if the precipitation toggle is checked.
+  await expect(precipitationToggle).toBeChecked();
+
+  // - The Temperature overlay layer toggle is in the enabled state (meaning the layer is hidden)
+  //   Similarly, we check if the temperature toggle is unchecked.
+  await expect(temperatureToggle).not.toBeChecked();
+});

@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be interactive and visible
+  const mapCanvas = page.getByRole('img', { name: /map/i }).first();
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on a position on the map canvas.
+  // We click roughly in the center of the map container.
+  const mapBox = await page.locator('canvas').first().boundingBox();
+  if (mapBox) {
+    await page.mouse.click(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+  } else {
+    // Fallback if canvas is not immediately findable by role, try by tag
+    const canvas = page.locator('canvas').first();
+    await canvas.click({ force: true });
+  }
+
+  // Wait for the info panel to load the forecast.
+  // The forecast contains 24 entries, so we wait for the info panel to show
+  // some content indicating the weather data has loaded.
+  // Assuming the info panel has a test id or specific structure.
+  // Since no specific test ids are provided in the prompt for the info panel,
+  // we assume a generic structure or wait for a specific text pattern.
+  // Let's assume the info panel appears and contains "Weather" or similar.
+  // We will wait for the info panel to be visible and contain some forecast data.
+  
+  // Heuristic: Wait for the info panel to show up. 
+  // Often info panels are in a specific container. Let's try to find a container that appears.
+  // If there's a specific test id for the info panel, we'd use it. 
+  // Without it, we might look for a specific element that only appears with weather data.
+  // Let's assume the info panel is visible and we can find a list of forecast items.
+  
+  // Since the expected result is "24 entries", we can wait for a list or grid of items.
+  // Let's assume the forecast items are rendered in a list or similar structure within the info panel.
+  // We'll wait for at least one forecast item to appear, and then poll for 24.
+  
+  // Let's try to find the info panel. It might be a dialog or a side panel.
+  // Let's assume it's a panel with a specific role or text.
+  // If we don't know the exact locator, we might have to guess based on common patterns.
+  // Let's assume the info panel is visible and we can interact with it.
+  
+  // Wait for the info panel to be visible
+  // Assuming the info panel has a test id 'info-panel' or similar.
+  // If not, we might need to use a more generic locator.
+  // Let's assume there is a test id for the info panel.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear
+  // Assuming there is a section with test id 'weather-forecast' or similar.
+  const weatherForecastSection = page.getByTestId('weather-forecast');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the forecast to contain 24 entries.
+  // Assuming each entry has a test id or is a list item.
+  // Let's assume the entries are list items with test id 'forecast-entry'.
+  const forecastEntries = page.getByTestId('forecast-entry');
+  
+  // Poll until we have 24 entries
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+
+  // Verify the clicked position is highlighted on the map.
+  // This is tricky as the map is a canvas. 
+  // If there's a marker or highlight element, we might be able to see it.
+  // If not, we might have to rely on the fact that the info panel shows data for the clicked position.
+  // Let's assume there's a marker with a test id.
+  const marker = page.getByTestId('map-marker');
+  await expect(marker).toBeVisible();
+});

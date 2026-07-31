@@ -1,0 +1,81 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and be ready
+  await page.waitForLoadState('networkidle');
+
+  // Ensure the info panel is visible before interacting with the map
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Locate the map canvas container to click on it
+  // Using a generic map container locator as specific test ids for the map div are not provided in the prompt
+  // Chakra UI components often wrap the canvas. We look for the main map container.
+  const mapContainer = page.locator('div:has(> canvas)').first();
+  
+  // Wait for the map canvas to be visible and ready for interaction
+  await expect(mapContainer.locator('canvas')).toBeVisible();
+
+  // Click on the center of the map canvas to trigger the weather forecast
+  // Using force: true to bypass potential overlay issues, though map canvas is usually direct
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+
+  // Wait for the weather forecast section to appear in the info panel
+  const weatherSection = infoPanel.locator('text=Weather Forecast');
+  await expect(weatherSection).toBeVisible();
+
+  // Verify that the clicked position is highlighted on the map
+  // Since map state is not in DOM, we rely on the fact that the info panel updated.
+  // However, the requirement states "clicked position is highlighted". 
+  // Without helper functions provided in the prompt, we cannot programmatically check map coordinates.
+  // We assume the successful appearance of the forecast implies the click was registered.
+  // If there were a specific marker test id, we would check it here.
+  // For now, we assert the info panel content which is the primary visible result.
+
+  // Verify the forecast contains 24 entries
+  // The forecast entries are likely listed in the info panel.
+  // We need to find the list of forecast items.
+  // Assuming the forecast items have a common structure or test id.
+  // Without specific test ids, we look for a list of items within the weather section.
+  
+  // Let's assume the forecast entries are in a list or grid within the weather section.
+  // We will count the number of forecast item elements.
+  // Common patterns: <li> for list items, or divs with a specific class/test id.
+  // Since we don't have the exact DOM structure, we'll look for a reasonable selector.
+  // Often, forecast entries might be labeled or have a date/time.
+  
+  // Let's try to find elements that look like forecast entries.
+  // If there's a test id for forecast entries, we'd use it.
+  // Fallback: look for a list within the weather section.
+  const forecastList = weatherSection.locator('..').locator('ul, ol').first();
+  
+  // If no explicit list, maybe they are just divs.
+  // Let's assume there's a container for the forecast items.
+  const forecastItems = infoPanel.locator('[data-testid*="forecast-item"], .forecast-item, li:has-text("°")').first().locator('..').locator('li, [class*="item"]');
+  
+  // A more robust way without specific test ids:
+  // Look for a list of items inside the weather section.
+  // We'll count the number of child elements that represent a forecast entry.
+  // Let's assume the forecast items are in a list with test id 'weather-forecast-list' or similar.
+  // If not, we might need to guess based on typical UI.
+  
+  // Let's try to find the container of the forecast entries.
+  // We'll look for a list or grid of items.
+  const forecastEntries = infoPanel.locator('div:has-text("°")').count();
+  
+  // This is a bit heuristic. Let's look for a more structured approach.
+  // Often, forecast data is in a list.
+  // Let's try to find a list element within the weather section.
+  const listItems = infoPanel.locator('ul li, ol li').filter({ hasText: /°/ });
+  
+  // Wait for the number of forecast items to be 24
+  await expect.poll(async () => {
+    return await listItems.count();
+  }).toBe(24);
+});

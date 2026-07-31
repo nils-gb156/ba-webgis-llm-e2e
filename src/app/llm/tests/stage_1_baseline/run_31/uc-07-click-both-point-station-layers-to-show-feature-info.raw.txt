@@ -1,0 +1,129 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and be ready
+  // Assuming the main map container or a known app element is available.
+  // We wait for the map canvas to appear as a sign of loading completion.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible({ timeout: 30000 });
+
+  // Precondition: Ensure info panel is visible.
+  // If it's not visible, we might need to open it, but the prompt says it is visible.
+  // We'll wait for it to be present and visible to be safe.
+  const infoPanel = page.getByRole('region', { name: /Info Panel/i, exact: false }).or(
+    page.locator('[data-testid="info-panel"]')
+  );
+  // If the info panel is not immediately visible, we might need to trigger its visibility.
+  // However, the prompt states "The info panel is visible" as a precondition.
+  // We will assume it is visible or becomes visible shortly. If not, we might need to click an info button.
+  // Let's try to find the info panel by common test ids or roles.
+  // Often, info panels are dialogs or side panels.
+  const infoPanelLocator = page.locator('[data-testid="info-panel"], [data-testid="feature-info"], [data-testid="info-window"]');
+  
+  // If the info panel is not visible, we might need to ensure it is.
+  // Since the prompt says it's a precondition, we expect it to be there.
+  // If it's hidden by default, we might need to click a button.
+  // Let's assume the prompt implies the state is already set or we need to set it up.
+  // Given "Preconditions: The info panel is visible", we will wait for it.
+  await expect(infoPanelLocator).toBeVisible({ timeout: 10000 });
+
+  // Precondition: Ensure UV-Index Stations layer (WMS) is active.
+  // Precondition: Ensure EUCOS Ground Stations layer (WFS) is active.
+  // The prompt says these are preconditions, so we assume they are active.
+  // If not, we would need to enable them in the layer tree.
+  // Since no specific layer tree interaction is described in steps, we assume they are active.
+
+  // Precondition: No measurement tool is active.
+  // We assume no tool is active.
+
+  // Step 1: The user clicks at map coordinates [1188692.84, 6767643.28] (EPSG:3857) on the map canvas.
+  // We need to convert EPSG:3857 coordinates to pixel coordinates on the map canvas.
+  // However, Playwright's click method can take x, y relative to the element.
+  // We need to calculate the position on the canvas.
+  // The map canvas is an OpenLayers canvas.
+  // We can use the `page.mouse.move` and `page.mouse.click` with calculated coordinates.
+  // Or we can use `page.locator('canvas').click({ position: { x, y } })`.
+  
+  // To get the correct pixel coordinates, we need to know the map's view and the canvas size.
+  // Alternatively, we can use the helper functions if provided. The prompt does not provide helper functions.
+  // So we must calculate or use a different approach.
+  // Since we don't have helpers, we might need to rely on the map's internal state or assume the coordinates are passed correctly.
+  // But Playwright needs pixel coordinates.
+  // Let's assume we can get the map container and calculate the position.
+  // This is complex without helpers. 
+  // However, the prompt says "To interact with the map, click the map container element ... with a position option."
+  // We need to convert EPSG:3857 to pixel coordinates.
+  // OpenLayers uses a coordinate system. We can use `ol/extent` and `ol/proj` but we can't import them easily in Playwright without bundling.
+  // Alternatively, we can use the map's `getPixelFromCoordinate` method if we can access the map instance.
+  // Since we can't easily access the map instance from Playwright without helpers, we might need to use a workaround.
+  // One common workaround is to use the map's extent and zoom to estimate.
+  // But this is unreliable.
+  // Another approach is to use the geocoder or other UI elements to navigate to the location, but the prompt specifies clicking coordinates.
+  // Let's assume there is a way to click at specific coordinates.
+  // We will try to click at the center of the canvas if we don't have the exact coordinates, but that's not accurate.
+  // Given the complexity, and that no helpers are provided, we might need to skip the exact coordinate calculation or assume it's handled.
+  // However, the prompt requires clicking at specific coordinates.
+  // Let's try to use the `page.evaluate` to call a function on the map instance if it's exposed.
+  // Many OpenLayers apps expose the map instance on the window object.
+  // Let's assume the map instance is available as `window.map` or similar.
+  // We can try to get the pixel coordinates from the map instance.
+
+  // Try to get pixel coordinates from the map instance
+  const pixelCoords = await page.evaluate(() => {
+    // Try common map instance names
+    const map = (window as any).map || (window as any).olMap || (window as any).app?.map;
+    if (!map || !map.getPixelFromCoordinate) {
+      return null;
+    }
+    const coord = [1188692.84, 6767643.28];
+    try {
+      return map.getPixelFromCoordinate(coord);
+    } catch (e) {
+      return null;
+    }
+  });
+
+  if (!pixelCoords) {
+    // Fallback: If we can't get pixel coordinates, we might need to use a different approach.
+    // For now, we'll assume the map instance is available and pixelCoords is not null.
+    // If it is null, this test will fail, which is expected if the map instance is not exposed.
+    throw new Error('Could not get map instance or pixel coordinates');
+  }
+
+  const [x, y] = pixelCoords;
+
+  // Click on the map canvas at the calculated pixel coordinates
+  const mapCanvasLocator = page.locator('canvas');
+  await mapCanvasLocator.click({ position: { x, y }, force: true });
+
+  // Step 2: The user waits for the info panel to load the station info for both layers.
+  // Expected results:
+  // - The info panel displays a 'UV-Index Station' section with feature information.
+  // - The info panel displays an 'EUCOS Ground Station' section with feature information.
+
+  // Wait for the UV-Index Station section to appear in the info panel
+  const uvIndexSection = infoPanelLocator.getByRole('heading', { name: 'UV-Index Station', exact: false }).or(
+    infoPanelLocator.getByTestId('uv-index-station-info').or(
+      infoPanelLocator.getByText('UV-Index Station', { exact: false })
+    )
+  );
+  await expect(uvIndexSection).toBeVisible({ timeout: 10000 });
+
+  // Wait for the EUCOS Ground Station section to appear in the info panel
+  const eucosSection = infoPanelLocator.getByRole('heading', { name: 'EUCOS Ground Station', exact: false }).or(
+    infoPanelLocator.getByTestId('eucos-ground-station-info').or(
+      infoPanelLocator.getByText('EUCOS Ground Station', { exact: false })
+    )
+  );
+  await expect(eucosSection).toBeVisible({ timeout: 10000 });
+
+  // Additional assertions to ensure feature information is present
+  // We can check for some common feature info fields if known, but the prompt doesn't specify them.
+  // We'll just assert that the sections are visible, which implies feature info is loaded.
+});

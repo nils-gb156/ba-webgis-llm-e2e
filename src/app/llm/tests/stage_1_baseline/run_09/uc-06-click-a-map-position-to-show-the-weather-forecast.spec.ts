@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to be ready and the map to be interactive
+  const mapCanvas = page.locator('canvas.ol-viewport');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on the center of the map canvas
+  const box = await mapCanvas.boundingBox();
+  test.fail(!box, 'Map canvas bounding box not found');
+  const clickX = box.x + box.width / 2;
+  const clickY = box.y + box.height / 2;
+
+  await page.mouse.click(clickX, clickY);
+
+  // Wait for the info panel to update with weather forecast data
+  // We poll for the presence of weather forecast entries in the info panel
+  // Assuming the info panel has a test id or we can locate it by role/text
+  const infoPanel = page.getByRole('region', { name: /Info Panel/i }).first();
+  await expect(infoPanel).toBeVisible();
+
+  // Poll for the weather forecast section to appear and contain 24 entries
+  // We look for a list or container that holds the forecast entries
+  // Since specific test ids aren't provided, we rely on structure/role
+  // Let's assume the forecast entries are in a list or grid within the info panel
+  
+  // Wait for the forecast to load by checking for a specific element or text pattern
+  // The expected result mentions 24 entries. We can count elements that look like forecast entries.
+  // Let's assume forecast entries have a common class or role. 
+  // Without specific test ids, we might look for a container and then count children.
+  
+  // Let's try to find a container that likely holds the forecast.
+  // Often, weather apps have a list of days/hours.
+  // We will poll for the count of forecast items.
+  
+  const forecastItems = infoPanel.locator('[data-testid="forecast-item"]');
+  
+  await expect.poll(async () => {
+    const count = await forecastItems.count();
+    return count;
+  }).toBe(24);
+
+  // Verify the clicked position is highlighted on the map
+  // This is harder to assert visually without test ids on the marker.
+  // However, the prompt says "The clicked position is highlighted on the map."
+  // If there's a test id for the marker, we'd use it. 
+  // If not, we might rely on the info panel updating as proof of the click.
+  // Let's assume there might be a test id for the marker if one exists.
+  // Since none is provided, we rely on the info panel assertion as the primary indicator.
+  
+  // Additional check: Ensure the info panel actually shows weather forecast content
+  const weatherHeading = infoPanel.getByRole('heading', { name: /Weather Forecast/i });
+  await expect(weatherHeading).toBeVisible();
+});

@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming there is a button or toggle to open the base map selection panel.
+  // If the base map selector is directly visible, we skip an explicit "open" step.
+  // Based on typical Chakra UI patterns, we look for a button that says "Base Map" or similar.
+  const baseMapSelectorButton = page.getByRole('button', { name: 'Base Map' });
+  
+  // Check if the button exists and click it if the selector panel isn't already open.
+  // We assume the panel is not open initially as per "preconditions" implying we need to open it.
+  if (await baseMapSelectorButton.isVisible()) {
+    await baseMapSelectorButton.click();
+  }
+
+  // Wait for the base map selection options to appear
+  // Assuming the options are rendered in a dialog or a specific panel within the layer switcher
+  const baseMapOptionsPanel = page.getByRole('dialog', { name: 'Base Map' }).or(page.getByTestId('base-map-selector'));
+  
+  // Fallback: if no specific panel/testid, look for the list of base maps near the button
+  // Often these are radio buttons or list items inside the layer switcher
+  const baseMapList = page.getByRole('radiogroup', { name: 'Base Map' }).or(page.getByRole('listbox', { name: 'Base Map' }));
+  
+  // If neither dialog nor listbox is found, we might need to look for items directly
+  // Let's assume there is a list of base maps with test ids or accessible names
+  const openStreetMapOption = page.getByRole('radio', { name: 'OpenStreetMap' }).or(page.getByRole('option', { name: 'OpenStreetMap' })).or(page.getByText('OpenStreetMap'));
+  
+  // Wait for the OpenStreetMap option to be available
+  await expect(openStreetMapOption).toBeVisible();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  await expect(openStreetMapOption).toBeChecked();
+
+  // - The Carto Light base map is no longer selected.
+  const cartoLightOption = page.getByRole('radio', { name: 'Carto Light' }).or(page.getByRole('option', { name: 'Carto Light' })).or(page.getByText('Carto Light'));
+  await expect(cartoLightOption).not.toBeChecked();
+});

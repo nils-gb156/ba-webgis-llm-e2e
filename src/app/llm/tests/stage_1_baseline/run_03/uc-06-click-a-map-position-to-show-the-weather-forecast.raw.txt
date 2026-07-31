@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and the info panel to be visible
+  // Assuming the info panel has a test id or can be located by role
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Locate the map canvas
+  // Assuming the map container has a test id or can be located by role
+  const mapCanvas = page.getByTestId('map-canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on a position on the map canvas
+  // We'll click near the center of the map canvas
+  const mapBoundingBox = await mapCanvas.boundingBox();
+  if (!mapBoundingBox) {
+    throw new Error('Map canvas bounding box not found');
+  }
+  const clickX = mapBoundingBox.x + mapBoundingBox.width / 2;
+  const clickY = mapBoundingBox.y + mapBoundingBox.height / 2;
+
+  await mapCanvas.click({ position: { x: clickX, y: clickY } });
+
+  // Wait for the info panel to load the forecast
+  // Assuming the forecast section has a test id
+  const forecastSection = page.getByTestId('weather-forecast');
+  await expect(forecastSection).toBeVisible();
+
+  // Verify the clicked position is highlighted on the map
+  // This might be represented by a specific marker or layer
+  const highlightedPosition = page.getByTestId('highlighted-map-position');
+  await expect(highlightedPosition).toBeVisible();
+
+  // Verify the forecast contains 24 entries
+  // Assuming each entry has a test id or can be counted by a specific selector
+  const forecastEntries = page.getByTestId('forecast-entry');
+  const entryCount = await forecastEntries.count();
+  expect(entryCount).toBe(24);
+});

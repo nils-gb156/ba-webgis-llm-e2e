@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the layer switcher.
+  // We look for a button that might open the base map selection, often labeled "Base Map" or similar.
+  // If there's a specific test id for the base map selector button, we'd use it.
+  // Since none is specified, we try to find a button/role that opens the base map options.
+  // Often this is a dropdown or a list within the TOC.
+  // Let's assume there's a button labeled "Base Map" or an icon that opens the base map list.
+  // We will look for a button or link that seems to control base maps.
+  // A common pattern is a button with text "Base Map" or an icon.
+  // Let's try to find a button that might open the base map selector.
+  // If the layer switcher is visible, we look for a control to change base maps.
+  // Often this is a button with a specific role or text.
+  // Let's assume there is a button labeled "Base Map" or similar.
+  const baseMapSelectorButton = page.getByRole('button', { name: /Base Map/i }).first();
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // After clicking, a list or dropdown of base maps should appear.
+  // We look for the option labeled 'OpenStreetMap'.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' }).first();
+  // It might also be a list item or a button depending on implementation.
+  // Let's try getByRole('option') first, then fall back to button or listitem.
+  if (await openStreetMapOption.isVisible().catch(() => false)) {
+    await openStreetMapOption.click();
+  } else {
+    // Fallback: look for a button or list item with the text
+    const osmOption = page.getByRole('button', { name: 'OpenStreetMap' }).first();
+    if (await osmOption.isVisible().catch(() => false)) {
+      await osmOption.click();
+    } else {
+      const osmListItem = page.getByRole('listitem', { name: 'OpenStreetMap' }).first();
+      if (await osmListItem.isVisible().catch(() => false)) {
+        await osmListItem.click();
+      } else {
+        // Last resort: text match within the layer switcher
+        await page.getByTestId('layer-switcher').getByText('OpenStreetMap').click();
+      }
+    }
+  }
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // We need to verify the selection state.
+  // This might be reflected in the UI, e.g., the selected item is highlighted or the button text changes.
+  // Let's check if the base map selector button now reflects OpenStreetMap or if the selected item is highlighted.
+  
+  // Check if OpenStreetMap is visually indicated as selected.
+  // This could be a highlighted list item, a checked radio button, or the button text changing.
+  // Let's look for an indicator that OpenStreetMap is selected.
+  // Often, the selected base map is shown in the selector button or a list item is highlighted.
+  
+  // Try to find an element that indicates OpenStreetMap is selected.
+  // It might be the button text itself if it updates.
+  await expect(page.getByRole('button', { name: 'OpenStreetMap' })).toBeVisible();
+  
+  // Also ensure Carto Light is not selected.
+  // This might mean the button no longer says Carto Light, or the Carto Light option is not highlighted.
+  await expect(page.getByRole('button', { name: 'Carto Light' })).not.toBeVisible();
+  
+  // Additionally, we can check the map canvas for visual changes, but since we can't assert map content easily,
+  // we rely on the UI state of the layer switcher.
+  // If there's a specific test id for the selected base map, we would use it.
+  // Since none is provided, we rely on the role/text assertions above.
+});

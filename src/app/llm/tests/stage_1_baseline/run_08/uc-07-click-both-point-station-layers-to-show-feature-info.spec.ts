@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map to be ready
+  await page.getByTestId('map-container').waitFor({ state: 'visible' });
+
+  // Ensure the info panel is visible
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure UV-Index Stations layer (WMS) is active
+  const uvIndexLayerToggle = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true }).or(page.getByTestId('layer-toggle-uv-index-stations'));
+  // Try to find the toggle by test id first if available, otherwise by role
+  let uvToggle = page.getByTestId('layer-toggle-uv-index-stations');
+  if (uvToggle.count() === 0) {
+    uvToggle = page.getByRole('checkbox', { name: 'UV-Index Stations' });
+  }
+  // Ensure it is checked
+  if (!(await uvToggle.isChecked())) {
+    await uvToggle.click({ force: true });
+  }
+  await expect(uvToggle).toBeChecked();
+
+  // Ensure EUCOS Ground Stations layer (WFS) is active
+  let eucosToggle = page.getByTestId('layer-toggle-eucos-ground-stations');
+  if (eucosToggle.count() === 0) {
+    eucosToggle = page.getByRole('checkbox', { name: 'EUCOS Ground Stations' });
+  }
+  // Ensure it is checked
+  if (!(await eucosToggle.isChecked())) {
+    await eucosToggle.click({ force: true });
+  }
+  await expect(eucosToggle).toBeChecked();
+
+  // Ensure no measurement tool is active
+  // Assuming there's a measurement tool toggle or similar. If not explicitly provided, we assume default state is fine or check for active state.
+  // Since no specific test id for measurement tool is given, we rely on the fact that clicking the map shouldn't trigger measurement mode unless it was active.
+  // We will assume the default state is no measurement tool active.
+
+  // Click on the map at the specified coordinates
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Wait for the info panel to load the station info for both layers
+  // We expect the info panel to contain sections for both 'UV-Index Station' and 'EUCOS Ground Station'
+  await expect.poll(async () => {
+    const uvSection = page.getByRole('heading', { name: 'UV-Index Station', exact: true }).first();
+    const eucosSection = page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).first();
+    return {
+      uvVisible: await uvSection.isVisible().catch(() => false),
+      eucosVisible: await eucosSection.isVisible().catch(() => false)
+    };
+  }).toEqual({
+    uvVisible: true,
+    eucosVisible: true
+  });
+});

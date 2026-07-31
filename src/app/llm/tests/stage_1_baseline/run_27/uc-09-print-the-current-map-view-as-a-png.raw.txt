@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be visible
+  // We poll the map state to ensure the base layer and an overlay are active
+  const getActiveBaseLayer = async (p: typeof page) => {
+    // Assuming helper is available as per standard Open Pioneer Trails E2E setup
+    // If no helper is provided in prompt, we rely on DOM assertions for panel visibility
+    // and assume map is ready after initial load.
+    return null;
+  };
+
+  // Since no specific map helper was provided in the prompt, we wait for the map container to appear
+  await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
+
+  // Step 1: Click the 'Print Map' button in the toolbar
+  // We use a test id if available, otherwise by role/text.
+  // Common test id for print tool in Open Pioneer is 'print-map' or similar.
+  // Let's try getByTestId first, then fallback to role.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Step 2: Enter a title for the printout
+  // The printing panel should now be visible.
+  const printPanel = page.getByRole('dialog', { name: /Print|Print Map/i }).first();
+  await expect(printPanel).toBeVisible({ timeout: 10000 });
+
+  const titleInput = printPanel.getByLabel('Title');
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Test Printout');
+
+  // Step 3: Select the PNG file format
+  // Look for a radio button or select element for format
+  const formatSelect = printPanel.getByLabel('Format');
+  if (await formatSelect.isVisible()) {
+    await formatSelect.selectOption('PNG');
+  } else {
+    // Fallback to radio buttons if present
+    const pngRadio = printPanel.getByRole('radio', { name: 'PNG' });
+    await expect(pngRadio).toBeVisible();
+    // Check if already checked
+    const isChecked = await pngRadio.isChecked();
+    if (!isChecked) {
+      await pngRadio.check();
+    }
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = printPanel.getByRole('button', { name: /Export|Print|OK/i });
+  await expect(exportButton).toBeVisible();
+
+  // Wait for the download to start
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download happened and has a plausible filename
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

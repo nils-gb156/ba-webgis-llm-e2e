@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to be ready and map to load
+  // Assuming a specific test id for the map container or a general app-ready state
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Precondition: Ensure at least one base map and one overlay layer are visible.
+  // We assume the default state satisfies this, but we can wait for some map content.
+  // Since we can't assert map content directly via DOM, we rely on the map being interactive.
+  await expect(page.getByTestId('map-container')).toBeAttached();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Expected result: The printing panel is visible.
+  const printPanel = page.getByTestId('print-panel');
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  const titleInput = printPanel.getByLabel('Title');
+  await expect(titleInput).toBeVisible();
+  const testTitle = 'My Map Printout';
+  await titleInput.fill(testTitle);
+  await expect(titleInput).toHaveValue(testTitle);
+
+  // Step 3: The user selects the PNG file format.
+  const formatSelector = printPanel.getByRole('radiogroup', { name: 'Format' });
+  await expect(formatSelector).toBeVisible();
+  const pngOption = formatSelector.getByRole('radio', { name: 'PNG' });
+  await expect(pngOption).toBeVisible();
+  
+  // Check if PNG is already selected
+  const isPngSelected = await pngOption.isChecked();
+  if (!isPngSelected) {
+    await pngOption.click();
+  }
+  await expect(pngOption).toBeChecked();
+
+  // Step 4: The user clicks the export/print button.
+  // Set up download listener before triggering the action
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printPanel.getByRole('button', { name: 'Export' }).click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+  
+  // Save the file to verify it was created (optional but good for debugging)
+  await download.saveAs('/tmp/test-print.png');
+});

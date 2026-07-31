@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Identify the UV-Index layer toggle. Based on typical Chakra UI + Open Pioneer structure,
+  // the toggle is likely a checkbox associated with the layer name.
+  // We look for a checkbox with the text "UV-Index" or similar.
+  // If a specific test-id exists for the layer item, we would use it.
+  // Assuming a structure where the layer item has a test-id or we can scope by text.
+  // Let's assume the layer item container has a test-id like 'layer-uv-index' or similar.
+  // If not, we fall back to getting the checkbox by its accessible name within the TOC.
+  
+  // Try to find the UV-Index layer checkbox.
+  // Since we don't have the exact test-id from the prompt, we'll use getByRole with exact name.
+  // The TOC is likely the 'layer-switcher' or 'toc'.
+  const toc = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = toc.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // Verify initial state: UV-Index should be unchecked (hidden)
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle to show the layer.
+  // Chakra UI checkboxes often need force: true due to the decorative overlay.
+  await uvIndexCheckbox.click({ force: true });
+
+  // Step 2: Wait for the layer to be checked
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Verify that a WMS GetMap request was made for the UV-Index layer.
+  // We capture the request to verify the layer was requested.
+  let uvIndexRequestUrl: string | null = null;
+  page.on('request', (request) => {
+    const url = request.url();
+    if (url.includes('UV-Index') && url.includes('GetMap')) {
+      uvIndexRequestUrl = url;
+    }
+  });
+
+  // Wait for the response to confirm the layer tiles were loaded.
+  // We expect a response from a WMS GetMap request for the UV-Index layer.
+  const response = await page.waitForResponse((response) => {
+    const url = response.url();
+    return url.includes('UV-Index') && url.includes('GetMap') && response.status() === 200;
+  });
+
+  // Assert that the request was indeed sent
+  expect(uvIndexRequestUrl).toBeTruthy();
+
+  // Step 2 continued: Verify that the layer tiles are rendered on the map canvas.
+  // Since we can't directly assert canvas content easily without pixel comparison or helper functions,
+  // we rely on the successful network request and the checked state of the toggle as strong indicators.
+  // However, to be more thorough, we can check if the map container has changed or if there's any visual indicator.
+  // Given the constraints, the successful network response and checked state are the primary assertions.
+  // If map helper functions were provided, we would use them to check for layer visibility/zoom changes.
+  // Without helpers, we assert the UI state which reflects the activation.
+  
+  // Final assertion: Ensure the checkbox remains checked
+  await expect(uvIndexCheckbox).toBeChecked();
+});

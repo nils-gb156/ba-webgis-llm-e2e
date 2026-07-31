@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Precondition: The app is loaded successfully.
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be visible.
+  // We assume the map canvas exists and some content is rendered.
+  await expect(page.locator('canvas')).toBeVisible({ timeout: 30000 });
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Expected result: The printing panel is visible.
+  const printPanel = page.getByRole('dialog', { name: /Print|Printing/i });
+  await expect(printPanel).toBeVisible({ timeout: 10000 });
+
+  // Step 2: The user enters a title for the printout.
+  const titleInput = printPanel.getByLabel('Title');
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Test Printout');
+
+  // Step 3: The user selects the PNG file format.
+  const formatSelector = printPanel.getByLabel('Format');
+  await expect(formatSelector).toBeVisible();
+  await formatSelector.selectOption('PNG');
+
+  // Step 4: The user clicks the export/print button.
+  // We need to capture the download event before triggering the action.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    printPanel.getByRole('button', { name: /Print|Export|Generate/i }).click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  // We verify the file was downloaded and has a plausible name or extension.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  // Clean up the downloaded file.
+  await download.delete();
+});

@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Identify the UV-Index overlay toggle. Based on standard naming conventions for this app,
+  // the checkbox for the UV-Index layer is likely identified by a test id like 'layer-toc-uv-index'
+  // or similar. If no specific test id is known, we look for the label.
+  // Assuming a test id exists for the layer item or its checkbox.
+  // Let's assume the layer item has a test id 'layer-item-uv-index' or the checkbox itself.
+  // Common pattern: data-testid="layer-toc-{layer-name}" or similar.
+  // Since exact test ids are not provided in the prompt, we rely on accessible names or common patterns.
+  // However, the prompt says "Prefer getByTestId whenever a test id is available".
+  // Let's assume the UV-Index layer checkbox has a test id. A reasonable guess based on context is 'uv-index-layer-toggle' or similar.
+  // If we can't guess, we might need to use getByRole.
+  // Let's try to find the checkbox by its accessible name "UV-Index".
+  
+  // Note: Chakra UI checkboxes have the input visually hidden. We must use force: true.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  
+  // Ensure it is initially unchecked (hidden)
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle
+  await uvIndexCheckbox.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // The prompt states: "The UV-Index overlay tiles are rendered on the map canvas."
+  // Map canvas content cannot be asserted via DOM.
+  // However, we can assert that a network request for the WMS tiles or similar was made.
+  // Or, if there is a specific indicator in the UI (like a loading spinner disappearing or a status message), we could use that.
+  // Without specific UI indicators for "tile loaded", we rely on the fact that the layer is now active.
+  // To strictly verify "rendered on the map canvas" without DOM access to the canvas content is difficult.
+  // Usually, in these tests, we assert the network request was initiated and completed.
+  
+  // Let's register a listener for the WMS GetMap request for the UV-Index layer.
+  // We assume the WMS layer name for UV-Index is something like 'UVIndex' or 'uv-index'.
+  // We'll wait for a response from the WMS server containing the layer name.
+  
+  const wmsResponse = page.waitForResponse(response => {
+    const url = response.url();
+    return url.includes('SERVICE=WMS') && url.includes('REQUEST=GetMap') && (url.includes('UVIndex') || url.includes('uv-index'));
+  });
+
+  // Trigger the action that would cause the tile request if it hasn't happened yet (e.g., map interaction)
+  // Sometimes enabling a layer triggers an immediate request. We already clicked the checkbox.
+  // The click might have triggered the request. Let's wait for the response.
+  await wmsResponse;
+
+  // Since we cannot easily assert the canvas content visually, and the prompt asks to verify it is rendered,
+  // the successful completion of the WMS request is the strongest proxy available without complex canvas pixel analysis.
+  // The test passes if the layer is checked and the tile request succeeds.
+});

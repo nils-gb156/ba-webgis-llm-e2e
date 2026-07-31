@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await expect(measurementButton).toBeVisible();
+  await measurementButton.click();
+
+  // 2. Click several points on the map canvas to draw a line.
+  // We need to get the bounding box of the map canvas to click relative positions.
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  // Click first point
+  await page.mouse.click(mapBox.x + 100, mapBox.y + 100);
+  // Click second point
+  await page.mouse.click(mapBox.x + 200, mapBox.y + 200);
+  // Click third point
+  await page.mouse.click(mapBox.x + 300, mapBox.y + 100);
+
+  // 3. Double-click to finish the measurement.
+  await page.mouse.dblclick(mapBox.x + 300, mapBox.y + 100);
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+
+  // Wait for the measurement panel to be visible
+  // Assuming the panel has a test id or can be identified by role/text
+  // Since no specific test id is provided for the panel, we look for a panel/dialog containing measurement info
+  // Often measurement results appear in a side panel or a specific result container.
+  // Let's assume there is a container for measurement results.
+  // If no specific locator is known, we might look for text like "Length" or a number with a unit.
+  
+  // Let's try to find an element that shows the measurement result.
+  // Common patterns: a div with class 'measurement-result' or similar.
+  // Since we don't have the exact DOM structure, we'll look for text patterns that indicate a length.
+  
+  // Wait for the measurement result to appear.
+  // We'll look for text that looks like a measurement (e.g., "123.45 m", "1.23 km")
+  const measurementResultLocator = page.getByText(/^[0-9]+(\.[0-9]+)?\s*(m|km|cm|mm|mi|ft|yd)$/i);
+  
+  await expect(measurementResultLocator).toBeVisible({ timeout: 10000 });
+
+  // Assert that the measurement result is visible and contains a length value
+  await expect(measurementResultLocator).toBeVisible();
+});

@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await expect(measurementButton).toBeVisible();
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Get the map canvas bounding box to click on it
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  // Calculate click positions on the map canvas
+  // Start point: center of the map
+  const startX = mapBox.x + mapBox.width / 2;
+  const startY = mapBox.y + mapBox.height / 2;
+
+  // Second point: slightly to the right and down
+  const endX = mapBox.x + mapBox.width * 0.7;
+  const endY = mapBox.y + mapBox.height * 0.7;
+
+  // 2. Click several points on the map canvas to draw a line
+  // First click (start point)
+  await page.mouse.click(startX, startY);
+
+  // Second click (intermediate point)
+  const midX = mapBox.x + mapBox.width * 0.5;
+  const midY = mapBox.y + mapBox.height * 0.3;
+  await page.mouse.click(midX, midY);
+
+  // 3. Double-click to finish the measurement
+  await page.mouse.dblClick(endX, endY);
+
+  // Wait for the measurement result to appear
+  // The result is typically displayed within the measurement panel
+  // We look for a length value with a unit (e.g., "10.5 m" or "10.5 m²")
+  const measurementResult = measurementPanel.getByText(/[\d.]+\s*(m|km|ft|mi)/);
+  await expect(measurementResult).toBeVisible();
+
+  // Additional check: ensure the panel still shows the measurement details
+  await expect(measurementPanel).toBeVisible();
+});

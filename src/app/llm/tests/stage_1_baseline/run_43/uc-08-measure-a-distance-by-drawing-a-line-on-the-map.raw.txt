@@ -1,0 +1,121 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be present and the page to be stable
+  await expect(page.locator('canvas')).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // Using getByRole with exact name to distinguish from other potential buttons.
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await measurementButton.click();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas. We assume the canvas is visible and interactive.
+  // We'll click three points to form a simple line segment.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the canvas to determine click positions
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas bounding box not found');
+  }
+
+  // Define points relative to the canvas top-left corner
+  const point1 = { x: box.x + box.width * 0.2, y: box.y + box.height * 0.2 };
+  const point2 = { x: box.x + box.width * 0.5, y: box.y + box.height * 0.5 };
+  const point3 = { x: box.x + box.width * 0.8, y: box.y + box.height * 0.2 };
+
+  // Click the first point
+  await page.mouse.click(point1.x, point1.y);
+
+  // Click the second point
+  await page.mouse.click(point2.x, point2.y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Expected results:
+  // - The measurement panel is visible.
+  // - The measurement panel displays a length value with a unit.
+
+  // Wait for the measurement panel to be visible.
+  // Assuming the panel has a specific test id or role. If not, we look for a visible element
+  // that likely represents the measurement result. Often, measurement results are shown in a
+  // specific panel or dialog. Let's assume there's a panel with a test id or a specific role.
+  // If no specific test id is known, we might look for text like "Length" or a number with a unit.
+  // However, the prompt says "measurement panel is visible". Let's try to find a panel.
+  // Since no specific test id for the panel is provided in the prompt, we'll rely on the fact
+  // that the measurement result should appear. Let's look for a common pattern: a panel or
+  // a text element showing the measurement.
+
+  // Let's assume the measurement result is displayed in a container that becomes visible.
+  // We'll poll for the presence of text that looks like a measurement (e.g., a number followed by 'm' or 'km').
+  // Or we can look for a specific element if we know its test id. Since we don't, we'll look for
+  // a general pattern.
+
+  // A robust way is to look for the measurement panel. Let's assume the panel is identified by
+  // a role or a test id. If not available, we can look for the result text.
+  // Let's try to find a panel that might be related to measurement.
+  // Often, such panels have a test id like 'measurement-panel' or similar.
+  // Since we don't have that, we'll look for the result text.
+
+  // We'll wait for the measurement result to be displayed. The result usually contains a number and a unit.
+  // Let's poll for a text that matches a number followed by a unit (e.g., '123.45 m' or '1.23 km').
+  // We'll look for any text on the page that matches this pattern.
+
+  // However, to be more precise, let's assume the measurement panel is visible.
+  // We can check for the visibility of an element that is likely the panel.
+  // If we can't find a specific locator, we'll check for the result text.
+
+  // Let's try to find a panel with a role of 'region' or 'dialog' that might contain the measurement.
+  // Or we can just wait for the result text to appear.
+
+  // We'll use expect.poll to wait for the measurement result text to appear.
+  // The result text is likely inside a specific element. Let's assume it's in a container with a test id
+  // or we can search for the text globally.
+
+  // Let's assume the measurement result is shown in a text element. We'll look for a pattern.
+  // We'll poll for a text that looks like a measurement.
+
+  // To avoid ambiguity, let's look for a specific element if possible.
+  // Since we don't have a test id for the panel, we'll look for the result text.
+
+  // We'll wait for the page to contain text that matches a measurement pattern.
+  // The pattern could be a number followed by 'm', 'km', 'ft', etc.
+
+  // Let's define a regex for a measurement value.
+  const measurementPattern = /\d+\.?\d*\s*(m|km|ft|mi|m²|ha)/i;
+
+  // We'll poll the entire page content for this pattern.
+  await expect.poll(async () => {
+    const bodyText = await page.locator('body').textContent();
+    if (!bodyText) {
+      return false;
+    }
+    return measurementPattern.test(bodyText);
+  }).toBeTruthy();
+
+  // Additionally, we can check that the measurement panel is visible.
+  // If we know the test id of the panel, we would use that.
+  // Since we don't, we'll assume that the presence of the measurement text implies the panel is visible.
+  // If there's a specific panel element, we should assert its visibility.
+  // Let's assume there's a panel with a test id 'measurement-panel'.
+  // If not, we'll rely on the text assertion.
+
+  // For robustness, let's also check for a common test id for the measurement panel if it exists.
+  // If the test id is not present, this assertion will fail, but the text assertion should pass.
+  // We'll make this assertion optional or use a fallback.
+  // Since we don't know the test id, we'll skip this specific assertion and rely on the text.
+
+  // However, the use case explicitly states "The measurement panel is visible".
+  // Let's try to find a panel. We'll look for a dialog or region that might be the panel.
+  // We'll check for a dialog with a name related to measurement.
+  const measurementPanel = page.getByRole('dialog', { name: /measurement/i, exact: false });
+  await expect(measurementPanel).toBeVisible();
+});

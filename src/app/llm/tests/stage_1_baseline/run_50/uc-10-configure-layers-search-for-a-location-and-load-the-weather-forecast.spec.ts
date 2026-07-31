@@ -1,0 +1,164 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and initial state to settle
+  // The layer switcher (TOC) should be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Hide the Temperature overlay layer
+  // The Temperature layer toggle should initially be enabled (checked).
+  // We click it to hide it.
+  const temperatureToggle = page.getByTestId('layer-temperature-toggle');
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  // The Precipitation layer toggle should initially be hidden (unchecked).
+  // We click it to show it.
+  const precipitationToggle = page.getByTestId('layer-precipitation-toggle');
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+
+  // Step 3: Search for a location using the geocoder
+  // The search field should be accessible.
+  const searchField = page.getByLabel('Search');
+  await expect(searchField).toBeVisible();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // The result list should appear. We select the first item.
+  const firstResult = page.getByRole('option', { name: /Münster/ }).first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // The map is a canvas, so we can't assert position directly via DOM.
+  // However, the info panel should start loading or update, indicating navigation.
+  // We wait for the info panel to reflect the new location or start loading data.
+  // Since the next step is about the forecast, we can assume navigation happens
+  // as part of the selection process, but we wait for the info panel to be ready
+  // for the next assertion.
+
+  // Step 6: Wait for the info panel to load the forecast
+  // The info panel should display a weather forecast section with 24 entries.
+  // We look for a container that holds the forecast entries.
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  await expect(forecastSection).toBeVisible();
+
+  // Assert that there are 24 entries in the forecast section
+  const forecastEntries = forecastSection.getByRole('listitem');
+  await expect(forecastEntries).toHaveCount(24);
+
+  // Final Assertions based on Expected Results:
+  // - The Precipitation overlay layer toggle is in the disabled state (checked/visible in layer context, but toggle state reflects visibility).
+  //   Note: "disabled state" in expected results likely means "checked/active" for visibility, or potentially visually disabled if that's the convention.
+  //   Given standard Chakra UI toggle behavior, "visible" usually means "checked".
+  //   Let's re-read: "Precipitation overlay layer toggle is in the disabled state."
+  //   This is ambiguous. Usually, a toggle being "disabled" means it can't be clicked.
+  //   However, in the context of layer visibility, "disabled" might be a misnomer for "checked/active".
+  //   Or it might mean the layer is "disabled" (hidden). But the step was to SHOW it.
+  //   Let's look at the Temperature layer: "Temperature overlay layer toggle is in the enabled state."
+  //   If "enabled" means "checked" (visible), then "disabled" might mean "unchecked" (hidden).
+  //   But Step 2 was to SHOW Precipitation. So it should be checked.
+  //   Let's assume "enabled state" = checked (visible) and "disabled state" = unchecked (hidden) is NOT the case here because we just showed it.
+  //   Alternative interpretation: The toggle button itself is enabled/disabled (interactive).
+  //   Given the ambiguity, I will assert that the Precipitation layer is visible (checked) and Temperature is hidden (unchecked).
+  
+  // Re-evaluating Expected Results text:
+  // "The Precipitation overlay layer toggle is in the disabled state."
+  // "The Temperature overlay layer toggle is in the enabled state."
+  
+  // If we look at standard UI patterns, a toggle switch being "disabled" usually means it's greyed out and unclickable.
+  // But here, the user just interacted with them.
+  // Let's look at the steps again.
+  // Step 1: Hide Temperature.
+  // Step 2: Show Precipitation.
+  
+  // If the expected result says Precipitation is "disabled", it might mean the layer is NOT visible?
+  // But Step 2 says "show it".
+  // This is a contradiction unless "disabled" refers to something else.
+  
+  // Let's consider that "enabled" means the layer is active/visible and "disabled" means inactive/hidden.
+  // If so:
+  // Temperature should be disabled (hidden) -> unchecked.
+  // Precipitation should be enabled (visible) -> checked.
+  
+  // BUT the expected result says:
+  // "Precipitation ... disabled"
+  // "Temperature ... enabled"
+  
+  // This implies:
+  // Precipitation is HIDDEN?
+  // Temperature is VISIBLE?
+  
+  // This contradicts Steps 1 and 2.
+  
+  // Let's look at the Chakra UI component. `Checkbox` or `Switch`.
+  // Maybe "disabled" refers to the `disabled` prop?
+  // No, the user clicked them.
+  
+  // Let's assume there is a typo in the expected results description provided in the prompt,
+  // or "disabled/enabled" refers to the visual state of the TOC item (e.g. strikethrough vs normal).
+  
+  // However, I must follow the prompt's expected results strictly if possible.
+  // If I strictly follow "Precipitation ... disabled", I would assert it is unchecked.
+  // But that contradicts Step 2 "show it".
+  
+  // Let's look at the complexity "hard". This might imply tricky assertions.
+  
+  // Let's try another interpretation:
+  // Maybe the "toggle" refers to the button in the TOC.
+  // If a layer is visible, the toggle is "enabled" (active).
+  // If a layer is hidden, the toggle is "disabled" (inactive).
+  
+  // If Step 1 hides Temperature, it should be "disabled".
+  // If Step 2 shows Precipitation, it should be "enabled".
+  
+  // Expected Results:
+  // "Precipitation ... disabled" -> Hidden?
+  // "Temperature ... enabled" -> Visible?
+  
+  // This is the opposite of what the steps did.
+  
+  // Is it possible the steps are:
+  // 1. Hide Temperature (so it becomes disabled/unchecked)
+  // 2. Show Precipitation (so it becomes enabled/checked)
+  
+  // And the expected results are:
+  // "Precipitation ... enabled"
+  // "Temperature ... disabled"
+  
+  // The prompt says:
+  // "The Precipitation overlay layer toggle is in the disabled state."
+  // "The Temperature overlay layer toggle is in the enabled state."
+  
+  // This is very confusing. I will assume the prompt text for Expected Results has swapped the layer names or states.
+  // I will assert the logical outcome of the steps:
+  // Temperature is Hidden (Unchecked).
+  // Precipitation is Visible (Checked).
+  
+  // Wait, I should check if there's a specific "disabled" visual cue.
+  // In some TOCs, a hidden layer might have a disabled checkbox.
+  
+  // Let's stick to the logical outcome of the actions:
+  // Temperature: Hidden -> Unchecked.
+  // Precipitation: Visible -> Checked.
+  
+  // If the prompt insists on "Precipitation disabled", I might fail the test if I assert "checked".
+  // But asserting "unchecked" for a layer that was just shown is semantically wrong.
+  
+  // I will assert the state that reflects visibility:
+  
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Additionally, verify the info panel has the forecast
+  await expect(forecastSection).toBeVisible();
+  await expect(forecastEntries).toHaveCount(24);
+});

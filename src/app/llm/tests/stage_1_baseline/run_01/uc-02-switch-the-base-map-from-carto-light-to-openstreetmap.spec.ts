@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  // Precondition: The app is loaded successfully.
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to be ready and the layer switcher (TOC) to be visible.
+  // Assuming a standard test id for the layer switcher container.
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the layer switcher.
+  const baseMapSelector = page.getByTestId('base-map-selector');
+  await expect(baseMapSelector).toBeVisible();
+  await baseMapSelector.click();
+
+  // Wait for the base map list/options to appear.
+  const baseMapList = page.getByTestId('base-map-list');
+  await expect(baseMapList).toBeVisible();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  // Fallback to getByText if role is not available, but prefer role for accessibility.
+  // If the list items are not 'option' roles, use getByText.
+  const targetOption = openStreetMapOption.or(page.getByText('OpenStreetMap'));
+  await targetOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Assert that OpenStreetMap is selected.
+  await expect(page.getByRole('option', { name: 'OpenStreetMap', selected: true })).toBeVisible();
+  
+  // Assert that Carto Light is no longer selected.
+  await expect(page.getByRole('option', { name: 'Carto Light', selected: true })).not.toBeVisible();
+  
+  // Alternatively, if the UI indicates selection via a different mechanism (e.g., checked radio button),
+  // we might need to adjust. Assuming a listbox pattern where selected items are marked.
+  // If the implementation uses radio buttons:
+  // await expect(page.getByRole('radio', { name: 'OpenStreetMap', checked: true })).toBeVisible();
+  // await expect(page.getByRole('radio', { name: 'Carto Light', checked: true })).not.toBeVisible();
+
+  // Let's use a more robust assertion based on the visible state of the selector.
+  // If the selector shows the current selection, verify it shows OpenStreetMap.
+  await expect(baseMapSelector).toContainText('OpenStreetMap');
+});

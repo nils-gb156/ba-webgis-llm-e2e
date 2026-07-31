@@ -1,0 +1,25 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher and legend to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  // Step 1: Click the visibility toggle of the Precipitation overlay layer
+  // Using force: true because Chakra UI checkbox controls intercept pointer events
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+  await expect(precipitationToggle).toBeVisible();
+  await precipitationToggle.click({ force: true });
+
+  // Step 2: Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+  await expect(precipitationToggle).toBeChecked();
+
+  // Verify the legend displays an entry corresponding to the Precipitation layer
+  // We poll the legend content to ensure the async legend update has completed
+  await expect.poll(() => page.getByTestId('legend').textContent()).toContain('Precipitation');
+});

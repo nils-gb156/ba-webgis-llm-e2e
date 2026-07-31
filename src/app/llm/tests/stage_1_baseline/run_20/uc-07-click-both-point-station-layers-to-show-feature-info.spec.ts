@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Ensure the app is loaded and layers are active.
+  // Assuming standard layer panel IDs based on typical Open Pioneer Trails apps.
+  // We need to ensure UV-Index Stations (WMS) and EUCOS Ground Stations (WFS) are checked.
+  
+  // Locate the layer panel to ensure layers are active
+  const layerPanel = page.getByRole('group', { name: /Layer|Tree/i });
+  await expect(layerPanel).toBeVisible();
+
+  // Check UV-Index Stations layer
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Station', exact: true });
+  if (!(await uviLayerCheckbox.isChecked())) {
+    await uviLayerCheckbox.click({ force: true });
+  }
+
+  // Check EUCOS Ground Stations layer
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Station', exact: true });
+  if (!(await eucosLayerCheckbox.isChecked())) {
+    await eucosLayerCheckbox.click({ force: true });
+  }
+
+  // Precondition: Ensure info panel is visible
+  const infoPanel = page.getByRole('region', { name: /Info|Feature Info/i });
+  // It might be hidden initially or empty, but the container should exist
+  // If it's a toggleable panel, we might need to open it. Assuming it's visible by default or opened via a button.
+  // Let's look for an info panel toggle if it's not visible.
+  if (!await infoPanel.isVisible()) {
+    const infoToggle = page.getByRole('button', { name: /Info|Feature/i });
+    if (await infoToggle.isVisible()) {
+      await infoToggle.click();
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+
+  // Precondition: No measurement tool is active.
+  // We assume the default state is no tool active. If there was a tool active, we would click away or select the select tool.
+  // For this test, we proceed with the click.
+
+  // Step 1: Click on the map at the specific coordinates
+  // The map canvas is usually a div with a specific class or testid.
+  // We use the map container to click.
+  const mapContainer = page.locator('.ol-viewport').first(); // OpenLayers viewport
+  await expect(mapContainer).toBeVisible();
+
+  // Coordinates are in EPSG:3857. Playwright click takes page coordinates.
+  // We need to convert EPSG:3857 to pixel coordinates relative to the map container.
+  // However, Playwright's click with 'position' option clicks relative to the locator's bounding box.
+  // The prompt provides EPSG:3857 coordinates. We need to map these to the current view.
+  // Since we don't have helper functions provided in the prompt for coordinate conversion,
+  // we must rely on the fact that the map is likely centered or zoomed such that these coordinates are visible.
+  // Without helpers, we cannot accurately convert EPSG:3857 to pixel coordinates dynamically.
+  // However, the prompt says "Click at map coordinates...".
+  // In many E2E tests for maps, if helpers are not provided, we might assume the map is centered on these coordinates
+  // or we use a generic click if the coordinates are known to be in the center.
+  // Given the complexity 'hard' and no helpers, let's assume the map view is set up correctly or we click the center.
+  // But wait, the prompt says "Click at map coordinates [1188692.84, 6767643.28]".
+  // Without a helper to convert, this is tricky.
+  // Let's re-read the prompt: "Map state via helper functions (only if provided in the prompt)".
+  // No helpers provided.
+  // Standard approach without helpers: Click the center of the map if we assume the map is centered there,
+  // OR use a known offset if the map view is fixed.
+  // Given the specificity, it's likely the map is centered on this point or the test relies on a fixed view.
+  // Let's try clicking the center of the map container. If the map is centered on the point, this will work.
+  
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or has no bounding box');
+  }
+  
+  // Click the center of the map container
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+  // Step 2: Wait for the info panel to load the station info for both layers
+  // Expected: Info panel displays 'UV-Index Station' section and 'EUCOS Ground Station' section.
+  
+  // Wait for UV-Index Station info
+  await expect(page.getByRole('heading', { name: 'UV-Index Station', exact: true })).toBeVisible();
+  
+  // Wait for EUCOS Ground Station info
+  await expect(page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true })).toBeVisible();
+});

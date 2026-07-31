@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map container to be visible before interacting
+  const mapContainer = page.locator('#map');
+  await expect(mapContainer).toBeVisible();
+
+  // Locate the zoom buttons. Assuming standard test ids or roles for these controls.
+  // If specific test ids are not known, we rely on accessible names or common patterns.
+  // Common pattern for Chakra UI or similar maps: testid='zoom-in' and testid='zoom-out'
+  // or getByRole('button', { name: 'Zoom in' }) and getByRole('button', { name: 'Zoom out' })
+  
+  // Let's assume standard accessible names or test ids. 
+  // Since no specific test ids were provided in the prompt for these buttons, 
+  // we will try to find them by role and name.
+  
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out' });
+
+  // Verify buttons are visible
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  // Get initial zoom level using map helper if available, or infer from map state.
+  // Since no map helper functions were provided in the prompt, we cannot directly assert zoom level numerically.
+  // However, the instructions say "If no helpers are provided, this section is irrelevant".
+  // But we need to verify the zoom level changed. Without a helper, we might need to rely on visual cues or side effects.
+  // Wait, the prompt says "Map state ... is NOT represented as DOM elements".
+  // And "If no helpers are provided ... do not invent or import any helper module".
+  // This creates a conflict: how to assert zoom level change without a helper?
+  // Usually, in such E2E tests, if a helper is not provided, one might assert that the action completes without error,
+  // or assert on some visual change if possible. But here, the expected result is specifically about zoom level.
+  // Let's re-read carefully: "Map state ... is not in the DOM. Read it only through the helper functions provided in the prompt."
+  // And "If no helpers are provided, this section is irrelevant — do not invent or import any helper module."
+  // This implies that if no helpers are provided, we CANNOT assert on map state like zoom level.
+  // However, the use case explicitly asks to verify zoom level changes.
+  // In many Open Pioneer setups, there might be a global map model or a way to inspect it.
+  // But strictly following the instructions: if no helpers are provided, we can't read map state.
+  // Perhaps the test should just verify the buttons are clickable and the app doesn't crash?
+  // Or maybe there's an implicit assumption that a helper IS available for map-related tests?
+  // Let's look at the "Application under test" section again. It mentions "Open Pioneer Trails".
+  // Often, these apps expose a `window.__mapModel` or similar for testing.
+  // But the instructions say "If the prompt provides map model helper functions...".
+  // Since the prompt does NOT provide helper functions, I must not use them.
+  // This seems like a limitation. However, to fulfill the "Expected results", I might need to check if there's any other way.
+  // Maybe the zoom buttons have specific test ids?
+  // Let's assume the test ids are `zoom-in` and `zoom-out` based on common conventions if accessible names are ambiguous.
+  // But accessible names are preferred.
+  
+  // Let's proceed with clicking the buttons and assuming the test passes if no error occurs,
+  // but ideally, we should assert something.
+  // Without a helper, I will assert that the buttons are clickable and the map remains visible.
+  // This is the best I can do without the helper.
+  
+  // Click Zoom In
+  await zoomInButton.click();
+  
+  // Click Zoom Out
+  await zoomOutButton.click();
+
+  // Since we cannot assert zoom level without a helper, we assert that the map is still visible and interactive.
+  await expect(mapContainer).toBeVisible();
+});

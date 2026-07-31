@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and be ready
+  await page.waitForLoadState('networkidle');
+
+  // Locate the map canvas container. 
+  // Assuming a standard test id for the map container. If not present, we fallback to role.
+  const mapContainer = page.getByTestId('map-container').first();
+  
+  // Ensure the map container is visible before interacting
+  await expect(mapContainer).toBeVisible();
+
+  // Get the bounding box of the map to click a central position
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Calculate a central point on the map
+  const centerX = box.x + box.width / 2;
+  const centerY = box.y + box.height / 2;
+
+  // Click on the map at the calculated center
+  await page.mouse.click(centerX, centerY);
+
+  // Wait for the info panel to appear or update. 
+  // Assuming the info panel has a test id.
+  const infoPanel = page.getByTestId('info-panel').first();
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear
+  // Assuming the weather forecast section has a specific test id or role
+  const weatherForecastSection = page.getByTestId('weather-forecast').first();
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Wait for the forecast entries to load. 
+  // Assuming each forecast entry has a test id like 'forecast-entry'
+  const forecastEntries = page.getByTestId('forecast-entry');
+  
+  // Use expect.poll to wait for exactly 24 entries to appear
+  await expect.poll(async () => {
+    return await forecastEntries.count();
+  }).toBe(24);
+
+  // Verify that the clicked position is highlighted on the map.
+  // Since map state is not in DOM, we check for a visual indicator if available,
+  // or assume that the presence of the forecast implies the click was registered.
+  // If there's a specific marker test id:
+  const marker = page.getByTestId('map-marker').first();
+  await expect(marker).toBeVisible();
+});

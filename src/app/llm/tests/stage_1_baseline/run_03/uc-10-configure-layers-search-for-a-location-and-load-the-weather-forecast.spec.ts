@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and initial state to settle
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureToggle = page.getByTestId('layer-temperature-toggle');
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click();
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationToggle = page.getByTestId('layer-precipitation-toggle');
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click();
+
+  // Verify layer visibility states
+  await expect(precipitationToggle).not.toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 3: Search for a location
+  const searchField = page.getByTestId('geocoder-search-field');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const searchResults = page.getByTestId('geocoder-results');
+  await expect(searchResults).toBeVisible();
+
+  const firstResult = searchResults.getByRole('option').first();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate (poll map center/zoom or just wait for info panel update)
+  // Since we can't assert map DOM directly, we wait for the info panel to update with forecast content
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast with 24 entries
+  // We poll for the forecast section and count the entries
+  await expect.poll(async () => {
+    const forecastSection = page.getByTestId('weather-forecast');
+    if (await forecastSection.isVisible()) {
+      const entries = forecastSection.getByRole('listitem');
+      return await entries.count();
+    }
+    return 0;
+  }).toBe(24);
+});

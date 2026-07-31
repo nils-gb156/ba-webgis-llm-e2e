@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for initial load and TOC to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Step 1: Hide Temperature overlay layer
+  const temperatureToggle = page.getByTestId('layer-toggle-temperature');
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show Precipitation overlay layer
+  const precipitationToggle = page.getByTestId('layer-toggle-precipitation');
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Search for a location
+  const searchField = page.getByTestId('geocoder-search-field');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const resultList = page.getByTestId('geocoder-results');
+  await expect(resultList).toBeVisible();
+  
+  const firstResult = resultList.getByRole('option', { name: /Münster/ }).first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // Since map state is not in DOM, we wait for the info panel to start updating
+  // which implies the map has moved to the new location.
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Step 6: Wait for info panel to load the forecast with 24 entries
+  // The forecast entries are likely rendered as a list or grid within the info panel
+  const forecastEntries = page.getByTestId('forecast-entry');
+  await expect.poll(async () => forecastEntries.count()).toBe(24);
+});

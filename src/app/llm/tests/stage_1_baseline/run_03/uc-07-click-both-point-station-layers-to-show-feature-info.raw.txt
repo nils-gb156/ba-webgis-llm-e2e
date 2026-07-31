@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map to be ready
+  // We assume the map container has a specific test id or role.
+  // Based on typical Open Pioneer setups, we look for the map canvas or container.
+  const mapContainer = page.locator('canvas').first();
+  await expect(mapContainer).toBeVisible({ timeout: 30000 });
+
+  // Ensure the info panel is visible.
+  // The info panel usually appears after a click or is toggled.
+  // The prompt states "The info panel is visible" as a precondition,
+  // but in an E2E test we must ensure it's open.
+  // Often, clicking the map opens it if it's closed, or it's always visible.
+  // Let's assume it might be closed or empty and we need to trigger the info.
+  // However, the prompt says "Preconditions: The info panel is visible."
+  // If it's not visible by default, we might need to look for a toggle.
+  // For now, we proceed with the click which should populate it.
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28] (EPSG:3857)
+  // We need to convert these coordinates to pixel coordinates on the canvas.
+  // Since we don't have the map model helpers provided in the prompt,
+  // we must rely on Playwright's ability to click at specific coordinates
+  // relative to the element. However, the prompt gives EPSG:3857 coordinates.
+  // Without helper functions to convert EPSG:3857 to pixel coordinates,
+  // we cannot accurately click the specific location using `position` option
+  // unless we assume the map is centered there or we have a way to convert.
+  //
+  // Re-reading the prompt: "Map state via helper functions (only if provided in the prompt)".
+  // The prompt DOES NOT provide map model helper functions.
+  // This is a problem. How do we click at specific EPSG:3857 coordinates?
+  //
+  // Alternative: Use the geocoder or search if available? No, the use case says "clicks at map coordinates".
+  //
+  // Let's look at the "Complexity: hard" tag. This might imply we need to handle the coordinate conversion
+  // or that the map is already positioned such that we can click a visible feature.
+  //
+  // Wait, if no helpers are provided, we cannot convert EPSG:3857 to pixel coordinates reliably
+  // without knowing the map's current view (center, zoom, size).
+  //
+  // However, often in these tests, if specific coordinates are given, there might be a way to
+  // navigate to that view first, or the test environment is set up such that the map is centered there.
+  //
+  // Let's assume the map is already centered on these coordinates or close enough that we can
+  // click the center of the map if the features are centered.
+  //
+  // But the prompt says: "Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28]".
+  //
+  // If we cannot convert coordinates, we might have to use a different approach.
+  // Is there a test id for the map?
+  // Let's try to find the map container and click its center, assuming the features are centered.
+  // Or, we can try to use the `page.mouse` to click at specific coordinates if we knew the offset.
+  //
+  // Actually, Playwright's `click` method on a locator can take a `position` object.
+  // But the position is relative to the top-left of the element.
+  // We need to know where the EPSG:3857 coordinate [1188692.84, 6767643.28] is on the canvas.
+  //
+  // Without helper functions, this is impossible to do accurately.
+  //
+  // Let's re-read the "Map state via helper functions" section.
+  // "If no helpers are provided, this section is irrelevant — do not invent or import any helper module."
+  //
+  // This suggests that if helpers are not provided, we should NOT try to do complex map interactions
+  // that require coordinate conversion? Or perhaps the test is designed to work without them?
+  //
+  // Maybe the info panel appears regardless of where we click, and we just need to click somewhere?
+  // No, the expected results are specific: "UV-Index Station" and "EUCOS Ground Station" sections.
+  // This implies we MUST click on the specific location where these features exist.
+  //
+  // Is it possible that the prompt implies we SHOULD have helpers, but forgot to provide them?
+  // Or is there a standard way to handle this?
+  //
+  // Let's look at the "Preconditions" again.
+  // "The UV-Index Stations layer (WMS) is active."
+  // "The EUCOS Ground Stations layer (WFS) is active."
+  //
+  // If the layers are active, the features are rendered.
+  //
+  // Let's assume that the map is centered on these coordinates.
+  // We will click the center of the map canvas.
+  //
+  // First, get the map canvas element.
+  const canvas = page.locator('canvas').first();
+  await expect(canvas).toBeVisible({ timeout: 30000 });
+
+  // Get the bounding box of the canvas to click the center
+  const box = await canvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  const centerX = box.x + box.width / 2;
+  const centerY = box.y + box.height / 2;
+
+  // Click the center of the map
+  await page.mouse.click(centerX, centerY);
+
+  // Wait for the info panel to load the station info for both layers.
+  // The info panel likely has a test id or specific structure.
+  // Let's look for elements with text 'UV-Index Station' and 'EUCOS Ground Station'.
+  
+  // Wait for the UV-Index Station section to appear
+  await expect(page.getByText('UV-Index Station', { exact: false })).toBeVisible({ timeout: 10000 });
+
+  // Wait for the EUCOS Ground Station section to appear
+  await expect(page.getByText('EUCOS Ground Station', { exact: false })).toBeVisible({ timeout: 10000 });
+
+  // Verify that the info panel displays feature information for both layers.
+  // We can check that the sections are visible and contain some data.
+  const uvInfoSection = page.getByText('UV-Index Station', { exact: false }).locator('..').locator('..');
+  const eucosInfoSection = page.getByText('EUCOS Ground Station', { exact: false }).locator('..').locator('..');
+
+  // Assert that the sections are visible
+  await expect(uvInfoSection).toBeVisible();
+  await expect(eucosInfoSection).toBeVisible();
+
+  // We can also check that there is some content inside these sections.
+  // Since the exact structure is unknown, we'll just ensure the sections are visible.
+});

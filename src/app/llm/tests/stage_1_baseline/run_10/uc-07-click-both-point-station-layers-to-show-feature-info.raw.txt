@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the map to be ready.
+  // We assume the info panel is visible by default or becomes visible after initial load.
+  // The prompt states "The info panel is visible" as a precondition, implying it's already open.
+  // We wait for the map container to be visible to ensure the map is initialized.
+  const mapContainer = page.locator('#map');
+  await expect(mapContainer).toBeVisible();
+
+  // Ensure no measurement tool is active.
+  // We check if any measurement-related controls are in an active state and deactivate if necessary.
+  // Since specific test IDs for tools aren't provided, we rely on the fact that the precondition
+  // states no measurement tool is active. We proceed assuming the app is in the correct state.
+  // If needed, we could explicitly click a 'pointer' or 'select' tool if one was active,
+  // but without specific IDs, we assume the default state is correct.
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28] (EPSG:3857).
+  // We need to convert these coordinates to pixel coordinates relative to the map canvas.
+  // However, Playwright's click method with 'position' option clicks relative to the top-left of the element.
+  // The prompt provides EPSG:3857 coordinates. We need to convert them to pixel coordinates.
+  // Since we don't have a helper function for coordinate conversion provided in the prompt,
+  // we will assume the map is centered or we can click directly if the coordinates are relative.
+  // But the prompt explicitly gives EPSG:3857 coordinates.
+  // Without a helper, we cannot accurately convert EPSG:3857 to pixel coordinates.
+  // However, looking at the complexity and the fact that it's a "hard" test, it's likely that
+  // the map is centered on these coordinates or we need to navigate to them.
+  // Let's assume the map is already centered on these coordinates or we can click at a specific pixel position.
+  // Since we don't have a helper, we will try to click at the center of the map, assuming the coordinates are near the center.
+  // This is a limitation without a helper. But wait, the prompt says "Click at map coordinates...".
+  // In Playwright, to click at a specific geographic coordinate, we usually need to convert it to pixel coordinates.
+  // Without a helper, this is not possible accurately.
+  // Let's re-read the prompt. It says "Click at map coordinates [1188692.84, 6767643.28] (EPSG:3857)".
+  // It also says "Map state via helper functions (only if provided in the prompt)". No helpers are provided.
+  // This is a challenge. However, often in such tests, the map might be centered on these coordinates.
+  // Let's assume the map is centered on these coordinates and click the center of the map.
+  // If the map is not centered, this test will fail. But without a helper, we have no other option.
+  // Alternatively, we can try to find a feature at these coordinates using the map's interaction.
+  // But the most straightforward way is to click the center if we assume it's centered.
+  // Let's get the map container and click its center.
+  const mapBoundingBox = await mapContainer.boundingBox();
+  if (!mapBoundingBox) {
+    throw new Error('Map container not found or not visible');
+  }
+  const mapCenterX = mapBoundingBox.x + mapBoundingBox.width / 2;
+  const mapCenterY = mapBoundingBox.y + mapBoundingBox.height / 2;
+
+  // Click the map at the center
+  await page.mouse.click(mapCenterX, mapCenterY);
+
+  // Wait for the info panel to load the station info for both layers.
+  // We expect to see sections for 'UV-Index Station' and 'EUCOS Ground Station'.
+  // We use expect.poll to wait for the content to appear.
+  await expect.poll(async () => {
+    const uvIndexSection = page.getByRole('heading', { name: 'UV-Index Station', exact: true }).first();
+    const eucosSection = page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).first();
+    
+    // Check if both sections are visible
+    const uvIndexVisible = await uvIndexSection.isVisible().catch(() => false);
+    const eucosVisible = await eucosSection.isVisible().catch(() => false);
+    
+    return { uvIndexVisible, eucosVisible };
+  }).toEqual({ uvIndexVisible: true, eucosVisible: true });
+
+  // Assert that the info panel displays a 'UV-Index Station' section with feature information.
+  const uvIndexSection = page.getByRole('heading', { name: 'UV-Index Station', exact: true }).first();
+  await expect(uvIndexSection).toBeVisible();
+
+  // Assert that the info panel displays an 'EUCOS Ground Station' section with feature information.
+  const eucosSection = page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true }).first();
+  await expect(eucosSection).toBeVisible();
+});

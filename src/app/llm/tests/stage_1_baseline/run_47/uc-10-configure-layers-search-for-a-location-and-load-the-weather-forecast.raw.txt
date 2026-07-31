@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay layer
+  const temperatureToggle = page.getByTestId('layer-temperature-toggle');
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+
+  // Step 2: Show Precipitation overlay layer
+  const precipitationToggle = page.getByTestId('layer-precipitation-toggle');
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+
+  // Verify layer states
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 3: Search for a location
+  const searchField = page.getByTestId('geocoder-search-input');
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const resultList = page.getByTestId('geocoder-results');
+  await expect(resultList).toBeVisible();
+  
+  const firstResult = resultList.getByRole('option').first();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // Since we don't have map helpers provided, we rely on the info panel loading as a proxy
+  // for the map having navigated and the forecast being fetched.
+  
+  // Step 6: Wait for info panel to load the forecast
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Verify the forecast section has 24 entries
+  const forecastSection = infoPanel.getByTestId('forecast-section');
+  await expect(forecastSection).toBeVisible();
+  
+  const forecastEntries = forecastSection.getByTestId('forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

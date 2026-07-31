@@ -1,0 +1,31 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 9: Print the current map view as a PNG
+
+**Description:** The user opens the printing panel, enters a title, selects the PNG format and triggers the export of the current map view.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The printing tool is accessible via the toolbar.
+- At least one base map and one overlay layer are visible on the map.
+
+**Steps:**
+
+1. The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+2. The user enters a title for the printout.
+3. The user selects the PNG file format.
+4. The user clicks the export/print button.
+
+**Expected results:**
+
+- The printing panel is visible.
+- A PNG file containing the current map view is generated and downloaded.
+- The printed image shows the visible base map and overlay layers as well as the scale bar.
+
+**Complexity:** hard
+
+Return only the test code.

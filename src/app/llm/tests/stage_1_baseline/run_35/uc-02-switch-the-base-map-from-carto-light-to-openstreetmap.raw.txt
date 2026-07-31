@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // 1. The user opens the base map selector in the layer switcher.
+  // Assuming there is a toggle or button to open the base map selection panel within the TOC.
+  // Using a generic label/text if specific test id isn't known, but preferring getByRole.
+  // Often base map selection is a distinct panel or button inside the TOC.
+  // Let's assume there's a button to open base map options, or the TOC itself contains the list.
+  // If the TOC is already visible and contains the base map options, we might just need to click the option.
+  // However, the step says "opens the base map selector".
+  // Let's look for a button or link related to base maps.
+  
+  // Attempt to find a button/label for base maps.
+  const baseMapToggle = page.getByRole('button', { name: 'Base Map', exact: true }).or(page.getByText('Base Map'));
+  
+  // If a specific toggle exists, click it. If not, we might need to look for a specific test id.
+  // Since test ids are not provided in the prompt for this specific element, we fall back to role/text.
+  // Let's assume the TOC has a section or button for "Base Map".
+  if (await baseMapToggle.isVisible()) {
+    await baseMapToggle.click();
+    // Wait for the base map list/panel to appear
+    await expect(page.getByText('OpenStreetMap')).toBeVisible();
+  }
+
+  // 2. The user selects 'OpenStreetMap' as the base map.
+  await page.getByText('OpenStreetMap').click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Assert that OpenStreetMap is selected (e.g., it has an 'active' class or is highlighted)
+  // Assuming the text 'OpenStreetMap' is now highlighted or has an active state.
+  await expect(page.getByText('OpenStreetMap')).toHaveClass(/active|selected|checked/i);
+
+  // Assert that Carto Light is no longer selected
+  await expect(page.getByText('Carto Light')).not.toHaveClass(/active|selected|checked/i);
+});

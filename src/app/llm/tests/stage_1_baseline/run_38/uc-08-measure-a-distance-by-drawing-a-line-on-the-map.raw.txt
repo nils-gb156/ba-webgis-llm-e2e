@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and be ready
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // We look for a button with the text "Measurement" or a test id related to measurement.
+  // Assuming standard Chakra UI and Open Pioneer conventions, the toolbar button might have a test id or accessible name.
+  // If no specific test id is known, we use getByRole('button', { name: /measurement/i }).
+  const measurementButton = page.getByRole('button', { name: /measurement/i, exact: true });
+  await expect(measurementButton).toBeVisible();
+  await measurementButton.click();
+
+  // Wait for the measurement panel to become visible
+  const measurementPanel = page.getByRole('dialog', { name: /measurement/i }).or(page.getByTestId('measurement-panel'));
+  // Fallback: if no specific dialog/test id, look for a panel that appears after clicking measurement
+  // Often measurement tools open a side panel or a floating panel.
+  // Let's assume the panel is visible shortly after clicking.
+  await expect(page.getByText(/length/i, { exact: false })).toBeVisible({ timeout: 5000 });
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // The map is an OpenLayers canvas. We need to click on the map container.
+  // We'll identify the map container. Usually it's the main map element.
+  // We will use a generic locator for the map if no test id is provided.
+  // Commonly, the map is the first canvas or has a specific class.
+  // Let's try to find the map container. If it has a test id, use it. Otherwise, use a robust selector.
+  // Since we don't have specific test ids for the map, we'll assume the map is the primary interactive element.
+  // We'll click on the map canvas.
+  
+  // Get the map container element. In many Open Pioneer apps, the map is rendered in a div with a specific class or test id.
+  // Let's assume the map container has a test id 'map' or similar. If not, we fallback to finding the canvas.
+  const mapContainer = page.locator('#map').or(page.locator('.ol-map')).or(page.locator('canvas.ol-layer'));
+  await expect(mapContainer).toBeVisible();
+
+  // Get the bounding box of the map to click within it.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click three points to draw a line.
+  // Point 1: Center of the map
+  const point1 = { x: mapBox.x + mapBox.width / 2, y: mapBox.y + mapBox.height / 2 };
+  await page.mouse.click(point1.x, point1.y);
+
+  // Point 2: Offset from Point 1
+  const point2 = { x: point1.x + 100, y: point1.y - 100 };
+  await page.mouse.click(point2.x, point2.y);
+
+  // Point 3: Offset from Point 2
+  const point3 = { x: point2.x - 50, y: point2.y + 150 };
+  await page.mouse.click(point3.x, point3.y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3.x, point3.y);
+
+  // Wait for the measurement result to appear.
+  // The expected result is that the measurement panel displays a length value with a unit.
+  // We poll for a text that indicates a measurement result, e.g., containing "m" for meters or "km" for kilometers.
+  await expect.poll(async () => {
+    // Look for text that looks like a measurement result (number followed by unit)
+    // This might be in the measurement panel.
+    const panel = page.getByRole('dialog', { name: /measurement/i }).or(page.getByTestId('measurement-panel'));
+    if (await panel.isVisible()) {
+      const text = await panel.textContent();
+      return text;
+    }
+    return null;
+  }).toMatch(/[\d.]+\s*(m|km|mi|ft)/i, { timeout: 10000 });
+
+  // Verify the measurement panel is visible
+  await expect(page.getByRole('dialog', { name: /measurement/i }).or(page.getByTestId('measurement-panel'))).toBeVisible();
+});

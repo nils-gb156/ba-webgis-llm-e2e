@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // Using force: true as Chakra UI toolbar buttons might have overlay elements.
+  const measurementToggle = page.getByRole('button', { name: 'Measurement' });
+  await expect(measurementToggle).toBeVisible();
+  await measurementToggle.click({ force: true });
+
+  // Wait for the measurement panel to become visible.
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // The map is an OpenLayers canvas. We need to click on specific coordinates.
+  // We'll click a few points to form a line.
+  // Assuming the map takes up most of the viewport, we pick some arbitrary points.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the map to calculate click positions relative to the viewport
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  // Click first point (center-left of map)
+  const point1X = mapBox.x + mapBox.width * 0.3;
+  const point1Y = mapBox.y + mapBox.height * 0.5;
+  await page.mouse.click(point1X, point1Y);
+
+  // Click second point (center-right of map)
+  const point2X = mapBox.x + mapBox.width * 0.7;
+  const point2Y = mapBox.y + mapBox.height * 0.5;
+  await page.mouse.click(point2X, point2Y);
+
+  // Click third point (top-center of map)
+  const point3X = mapBox.x + mapBox.width * 0.5;
+  const point3Y = mapBox.y + mapBox.height * 0.3;
+  await page.mouse.click(point3X, point3Y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3X, point3Y);
+
+  // Expected results:
+  // - The measurement panel is visible.
+  await expect(measurementPanel).toBeVisible();
+
+  // - The measurement panel displays a length value with a unit.
+  // We look for text that resembles a number followed by a unit (e.g., "1.23 km", "500 m").
+  // The panel likely contains a list or table of segments or total length.
+  // We'll poll for any text matching a length pattern within the measurement panel.
+  await expect.poll(async () => {
+    // Try to find an element with a length value.
+    // Often, measurement results are in a specific container.
+    // Let's look for any text in the panel that matches a length pattern.
+    const panelText = await measurementPanel.textContent();
+    if (!panelText) {
+      return false;
+    }
+    // Regex for a number (integer or decimal) followed by whitespace and a unit (km, m, mi, ft)
+    const lengthPattern = /\d+(\.\d+)?\s*(km|m|mi|ft)/i;
+    return lengthPattern.test(panelText);
+  }).toBe(true);
+});

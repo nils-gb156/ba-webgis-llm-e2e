@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // Locate the map canvas container. Assuming a standard test id for the map container.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Get the bounding box of the map container to click within it
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Calculate some points within the map area to draw a line
+  const startX = mapBox.x + mapBox.width * 0.3;
+  const startY = mapBox.y + mapBox.height * 0.3;
+  const midX = mapBox.x + mapBox.width * 0.5;
+  const midY = mapBox.y + mapBox.height * 0.5;
+  const endX = mapBox.x + mapBox.width * 0.7;
+  const endY = mapBox.y + mapBox.height * 0.7;
+
+  // Click first point
+  await page.mouse.click(startX, startY);
+  // Click second point
+  await page.mouse.click(midX, midY);
+  // Click third point
+  await page.mouse.click(endX, endY);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblClick(endX, endY);
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit.
+  // We expect a text element inside the panel that contains a number and a unit like 'm' or 'km'.
+  // Using expect.poll to wait for the measurement result to appear and settle.
+  await expect.poll(async () => {
+    const text = await measurementPanel.textContent();
+    return text;
+  }).toMatch(/[\d.,]+\s*(m|km|mi|ft)/);
+});

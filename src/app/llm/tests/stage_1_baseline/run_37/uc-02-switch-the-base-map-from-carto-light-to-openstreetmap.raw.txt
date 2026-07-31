@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Layer switcher (TOC) is visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the layer switcher.
+  // If there's a specific test id for the base map selector button, use it.
+  // Otherwise, look for a button/label indicating base map selection.
+  const baseMapSelectorButton = page.getByTestId('base-map-selector-button');
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // Assuming the base map options are listed, possibly in a dropdown or a list within the layer switcher.
+  const openStreetMapOption = page.getByRole('button', { name: 'OpenStreetMap' });
+  // Or if it's a radio button or list item:
+  // const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  // Or if it's a list item:
+  // const openStreetMapOption = page.getByTestId('base-map-option-openstreetmap');
+
+  // Since the exact UI component for selecting the base map isn't specified with a test id,
+  // we'll assume it's a button or list item with the text "OpenStreetMap" inside the layer switcher.
+  // We need to ensure we are clicking the correct one, possibly scoped to the layer switcher.
+  const osmOptionInSwitcher = layerSwitcher.getByRole('button', { name: 'OpenStreetMap' }).first();
+  if (await osmOptionInSwitcher.isVisible()) {
+    await osmOptionInSwitcher.click();
+  } else {
+    // Fallback if it's not a button but maybe a list item or other element
+    const osmOptionList = layerSwitcher.getByRole('listitem').filter({ hasText: 'OpenStreetMap' }).first();
+    if (await osmOptionList.isVisible()) {
+      await osmOptionList.click();
+    } else {
+      // Last resort: try to find by text anywhere in the switcher
+      const osmOptionByText = layerSwitcher.getByText('OpenStreetMap', { exact: true }).first();
+      if (await osmOptionByText.isVisible()) {
+        await osmOptionByText.click();
+      } else {
+        throw new Error('Could not find OpenStreetMap option in the layer switcher.');
+      }
+    }
+  }
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+
+  // Verify OpenStreetMap is selected
+  // This might involve checking the active state of the OSM option
+  const osmOptionActive = layerSwitcher.getByRole('button', { name: 'OpenStreetMap' }).first();
+  await expect(osmOptionActive).toBeVisible();
+  // If the option has an aria-pressed or similar attribute when selected
+  await expect(osmOptionActive).toHaveAttribute('aria-pressed', 'true');
+
+  // Verify Carto Light is no longer selected
+  const cartoLightOption = layerSwitcher.getByRole('button', { name: 'Carto Light' }).first();
+  await expect(cartoLightOption).toBeVisible();
+  await expect(cartoLightOption).toHaveAttribute('aria-pressed', 'false');
+});

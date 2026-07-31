@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be visible and interactive
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on a position on the map canvas (center of the visible area)
+  const box = await mapCanvas.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  // Wait for the info panel to load the forecast
+  // The info panel should be visible and contain weather forecast data
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the forecast section to appear
+  const forecastSection = infoPanel.getByText(/Weather Forecast/i);
+  await expect(forecastSection).toBeVisible();
+
+  // Wait for the forecast entries to load
+  // Assuming forecast entries are rendered as list items or similar structure within the forecast section
+  // We'll wait for at least one entry to be visible to ensure the data has loaded
+  const forecastEntry = forecastSection.locator('li').first();
+  await expect(forecastEntry).toBeVisible();
+
+  // Verify that the clicked position is highlighted on the map
+  // Since we can't directly assert on the canvas content, we rely on the info panel updating
+  // This is a limitation of the test setup, but we can check that the info panel content changed
+  // by verifying the forecast section is still visible and has content
+
+  // Verify that the forecast contains 24 entries
+  // We'll count the number of forecast entries
+  const forecastEntries = forecastSection.locator('li');
+  await expect(forecastEntries).toHaveCount(24);
+});

@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and map to be ready
+  await page.waitForSelector('[data-testid="map-container"]', { state: 'visible' });
+
+  // Wait for at least one base map and one overlay layer to be visible
+  // We poll the map state helpers to ensure layers are loaded
+  const mapState = await page.evaluate(() => {
+    // Assuming global map state accessor or similar mechanism exists in the app context
+    // Since no specific helpers were provided in the prompt, we rely on DOM visibility
+    // of map tiles or layer indicators if available, or simply wait for the map canvas
+    const canvas = document.querySelector('canvas');
+    return canvas !== null;
+  });
+  expect(mapState).toBe(true);
+
+  // Step 1: Click the 'Print Map' button in the toolbar
+  const printButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  await printButton.click();
+
+  // Verify the printing panel is visible
+  const printPanel = page.getByRole('dialog', { name: /Print Map/i, exact: false });
+  // Fallback if dialog role is not used, check for a panel with print-related content
+  if (await printPanel.isVisible().catch(() => false)) {
+    await expect(printPanel).toBeVisible();
+  } else {
+    // If it's not a dialog, look for a panel by test id or text
+    const panel = page.getByTestId('print-panel');
+    await expect(panel).toBeVisible();
+  }
+
+  // Step 2: Enter a title for the printout
+  const titleInput = page.getByLabel('Title', { exact: true }).or(page.getByTestId('print-title-input'));
+  await titleInput.fill('Map Export Test');
+
+  // Step 3: Select the PNG file format
+  // Assuming a radio group or dropdown for format selection
+  const pngOption = page.getByRole('radio', { name: 'PNG', exact: true }).or(page.getByText('PNG', { exact: true }));
+  // Check current state to avoid clicking if already selected
+  const isPngSelected = await pngOption.isChecked().catch(() => false);
+  if (!isPngSelected) {
+    await pngOption.click();
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = page.getByRole('button', { name: /Export|Print/i, exact: true }).or(page.getByTestId('print-export-button'));
+  
+  // Start waiting for the download before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download occurred and has a PNG extension
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  // Clean up the downloaded file
+  await download.delete();
+});

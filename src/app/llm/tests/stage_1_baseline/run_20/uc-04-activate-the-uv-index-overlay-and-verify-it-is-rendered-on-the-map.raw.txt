@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher (TOC) to be visible as a precondition
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Locate the UV-Index overlay toggle.
+  // Assuming the layer item has a test-id or accessible name.
+  // If specific test-ids are not known, we use getByRole with accessible name.
+  // Based on typical Chakra UI + Open Pioneer patterns, the toggle is often a checkbox.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index' });
+
+  // Assert initial state: hidden (unchecked)
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle to show the layer
+  // Using force: true because Chakra UI checkboxes have a hidden input
+  // underneath a decorative control element.
+  await uvIndexToggle.click({ force: true });
+
+  // Assert that the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We listen for network requests to the WMS service for the UV-Index layer.
+  // Assuming the layer name or key in the WMS request is 'UV_INDEX' or similar.
+  // We need to capture the request to verify it was sent.
+  const uvIndexLayerRequest = page.waitForRequest((request) => {
+    const url = request.url();
+    // Check if the request is for the WMS GetMap or GetFeatureInfo for the UV-Index layer
+    // Adjust the layer parameter name based on actual application configuration if known.
+    // Common patterns: 'LAYERS=UV_INDEX', 'layers=UV-Index', etc.
+    return url.includes('LAYERS=UV_INDEX') || url.includes('layers=UV_INDEX') || url.includes('LAYERS=UV-Index') || url.includes('layers=UV-Index');
+  });
+
+  // Trigger the request by ensuring the layer is active (already done by clicking)
+  // Sometimes the request happens immediately upon click, sometimes after a short delay.
+  // We wait for the response to ensure the layer is "loaded" from a network perspective.
+  await uvIndexLayerRequest;
+
+  // Verify the tiles are rendered on the map canvas.
+  // Since map content is on a canvas, we can't assert specific DOM elements.
+  // However, we can assert that the map canvas exists and has content.
+  // A more robust check for "rendered" in E2E without image diffs is often checking
+  // that the map container is visible and potentially that the loading indicator is gone.
+  // Assuming there is a map container with a test-id.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // To further verify the UV-Index layer is rendered, we can check if the map canvas
+  // has changed. Without image comparison, this is hard.
+  // However, the successful network request for the layer tiles is a strong indicator.
+  // We can also wait for the map to be "idle" or for any loading spinners to disappear.
+  const loadingIndicator = page.getByRole('progressbar', { name: /loading/i });
+  await expect(loadingIndicator).not.toBeVisible();
+
+  // Final assertion: The layer toggle is checked (already asserted)
+  // and the map is visible and not loading.
+  await expect(mapContainer).toBeVisible();
+});

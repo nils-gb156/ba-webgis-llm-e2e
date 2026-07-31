@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and initial state to settle
+  // The layer switcher (TOC) should be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Preconditions: Temperature overlay is initially visible, Precipitation is hidden
+  // We assert the initial state to ensure preconditions are met before proceeding
+  const temperatureToggle = page.getByTestId('layer-temperature-toggle');
+  const precipitationToggle = page.getByTestId('layer-precipitation-toggle');
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  // Step 1: Hide the Temperature overlay layer
+  // Chakra UI checkboxes need force: true because the visual control intercepts clicks
+  await temperatureToggle.click({ force: true });
+
+  // Step 2: Show the Precipitation overlay layer
+  await precipitationToggle.click({ force: true });
+
+  // Expected results after layer toggles:
+  // Precipitation toggle is checked (enabled/visible)
+  // Temperature toggle is unchecked (disabled/hidden)
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 3: Search for a location
+  const searchField = page.getByTestId('geocoder-search-input');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list to appear and select the first result
+  // The geocoder usually shows a dropdown or list. We look for the first result item.
+  // Assuming the search results are rendered in a list or dropdown associated with the search input.
+  // We'll wait for any result item to be visible, then click the first one.
+  const firstResult = page.getByRole('option').first(); // Often search results use role='option'
+  // Fallback if 'option' is not used, look for list items within the search results container
+  const searchResultsContainer = page.getByTestId('geocoder-results');
+  const firstResultListItem = searchResultsContainer.getByRole('listitem').first();
+
+  // Wait for either structure to appear
+  await expect(firstResult.or(firstResultListItem)).toBeVisible();
+
+  // Select the first result. Try 'option' first, then listitem
+  if (await firstResult.isVisible()) {
+    await firstResult.click();
+  } else {
+    await firstResultListItem.click();
+  }
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // Since map state is not in DOM, we rely on the info panel updating or a specific map interaction marker
+  // However, the prompt says "Wait for the map to navigate". Without helper functions, we can't assert map coords directly.
+  // We assume the info panel loading the forecast is the downstream effect of navigation.
+  // We'll wait for the info panel to show content related to the search or forecast.
+
+  // Step 6: Wait for the info panel to load the forecast
+  // Expected result: Info panel displays a weather forecast section with 24 entries.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Look for the weather forecast section
+  const forecastSection = infoPanel.getByTestId('weather-forecast');
+  await expect(forecastSection).toBeVisible();
+
+  // Assert that there are 24 entries in the forecast
+  // Assuming each entry is a distinct element, e.g., a list item or a card
+  const forecastEntries = forecastSection.getByRole('listitem'); // Or appropriate role for forecast entries
+  await expect(forecastEntries).toHaveCount(24);
+});

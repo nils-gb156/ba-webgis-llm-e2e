@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the info panel to be visible as per preconditions
+  // Assuming the info panel has a testid or is identifiable by role/text.
+  // Since no specific testid is provided in the prompt for the info panel,
+  // we rely on the fact that it should be visible after load.
+  // We'll assume a generic visible container or wait for map interaction capability.
+  // Let's wait for the map canvas to be interactive/visible.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Precondition: Info panel is visible.
+  // We assume the info panel becomes visible upon loading or is already visible.
+  // If it's hidden initially, we might need to open it, but the precondition says it is visible.
+  // Let's assume there's a testid for the info panel or we check for a specific element.
+  // Without specific testids, we might wait for the weather section to appear after the click.
+  // However, the precondition states the info panel is visible.
+  // Let's try to locate the info panel. If it has a testid like 'info-panel', we use it.
+  // If not, we might look for a role.
+  // For this test, we will proceed with clicking the map and then asserting the results.
+
+  // Step 1: The user clicks on a position on the map canvas.
+  // We need to click on the map canvas.
+  // Since we don't have a specific coordinate, we click near the center.
+  const box = await mapCanvas.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  } else {
+    // Fallback if bounding box is not available, try clicking at a central viewport position
+    await page.mouse.click(500, 300);
+  }
+
+  // Step 2: The user waits for the info panel to load the forecast.
+  // Expected result: The clicked position is highlighted on the map.
+  // This might be represented by a marker or feature on the map.
+  // Since map content is not DOM, we can't easily assert the highlight directly unless there's a specific marker testid.
+  // However, the main assertion is about the info panel content.
+
+  // Expected result: The info panel displays a weather forecast section.
+  // Expected result: The forecast contains 24 entries.
+
+  // We need to find the weather forecast section in the info panel.
+  // Let's assume the info panel has a testid 'info-panel' and the forecast section has 'weather-forecast'.
+  // And each entry has a testid like 'forecast-entry'.
+
+  // Wait for the forecast section to appear
+  const forecastSection = page.getByTestId('weather-forecast');
+  await expect(forecastSection).toBeVisible();
+
+  // Assert that the forecast contains 24 entries
+  // We need to count the entries. Let's assume each entry has a testid 'forecast-entry'
+  const forecastEntries = page.getByTestId('forecast-entry');
+  await expect(forecastEntries).toHaveCount(24);
+});

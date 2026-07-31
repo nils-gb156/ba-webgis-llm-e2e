@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be present and ready
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Wait for the map to be fully initialized (OpenLayers typically sets a class or attribute when ready)
+  // We wait for the canvas to have a reasonable size to ensure it's rendered
+  await expect(mapCanvas).toHaveAttribute('width');
+  await expect(mapCanvas).toHaveAttribute('height');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // Using getByRole with exact name to target the specific toolbar button.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible.
+  // Assuming the panel has a test id or is accessible via a role.
+  // If no specific test id is known, we look for a dialog or panel that appears.
+  // Often, measurement panels are side panels or dialogs. Let's try to find it by text or role.
+  // A common pattern is a panel with a specific heading or test id.
+  // Since we don't have the exact test id, we'll look for the panel container.
+  // Let's assume the panel becomes visible and contains measurement-related text or controls.
+  // We will wait for the panel to be visible. If it's a dialog:
+  const measurementPanel = page.getByRole('dialog', { name: /Measurement/i }).or(page.getByTestId('measurement-panel'));
+  
+  // Fallback: If no specific role/testId, we might look for the container that appears.
+  // However, the instructions say to prefer getByTestId or getByRole.
+  // Let's assume there is a test id for the measurement panel for robustness.
+  // If not, we might need to check for the presence of the measurement input/label.
+  
+  // Let's try to assert the panel is visible. We'll use a generic locator if specific ones fail, 
+  // but ideally, we rely on test ids. Let's assume 'measurement-panel' is the test id.
+  const panelLocator = page.getByTestId('measurement-panel');
+  await expect(panelLocator).toBeVisible();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to get the bounding box of the map canvas to click within it.
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas bounding box not found');
+  }
+
+  // Define points to draw a line. We'll pick three points in the center area of the map.
+  // Point 1: Center-ish
+  const point1X = mapBox.x + mapBox.width * 0.3;
+  const point1Y = mapBox.y + mapBox.height * 0.3;
+  
+  // Point 2: Further right and down
+  const point2X = mapBox.x + mapBox.width * 0.6;
+  const point2Y = mapBox.y + mapBox.height * 0.6;
+
+  // Point 3: Further right and up
+  const point3X = mapBox.x + mapBox.width * 0.8;
+  const point3Y = mapBox.y + mapBox.height * 0.2;
+
+  // Click point 1
+  await page.mouse.click(point1X, point1Y);
+  
+  // Click point 2
+  await page.mouse.click(point2X, point2Y);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(point3X, point3Y);
+
+  // Expected results:
+  // - The measurement panel is visible. (Already asserted above, but we ensure it stays visible)
+  await expect(panelLocator).toBeVisible();
+
+  // - The measurement panel displays a length value with a unit.
+  // We need to find the text displaying the length. 
+  // It might be in a specific element like a result div or input.
+  // Let's look for text that matches a number followed by a unit (e.g., "123.45 m", "1.23 km").
+  // We'll poll for this text to appear in the panel.
+  
+  const lengthPattern = /[\d,.]+\s*(m|km|mi|ft)/i;
+  
+  await expect.poll(async () => {
+    // Try to find text matching the length pattern within the panel
+    const panelContent = await panelLocator.textContent();
+    if (!panelContent) {
+      return false;
+    }
+    return lengthPattern.test(panelContent);
+  }).toBeTruthy();
+});

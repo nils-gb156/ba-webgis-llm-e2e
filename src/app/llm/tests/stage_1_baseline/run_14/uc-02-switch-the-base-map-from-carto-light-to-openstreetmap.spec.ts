@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: Open the base map selector in the layer switcher
+  // Assuming the base map selector is a button or toggle within the layer switcher
+  // If there's a specific test id for the base map selector, use it.
+  // Otherwise, look for a button labeled "Base Map" or similar within the TOC.
+  const baseMapSelector = page.getByTestId('base-map-selector');
+  if (await baseMapSelector.isVisible()) {
+    await baseMapSelector.click();
+  } else {
+    // Fallback: Look for a button with text "Base Map" inside the layer switcher
+    const fallbackSelector = page.getByRole('button', { name: 'Base Map' }).first();
+    await fallbackSelector.click();
+  }
+
+  // Wait for the base map options to appear
+  // Assuming there's a list or menu for base map options
+  const baseMapOptions = page.getByTestId('base-map-options');
+  await expect(baseMapOptions).toBeVisible();
+
+  // Step 2: Select 'OpenStreetMap' as the base map
+  const openStreetMapOption = baseMapOptions.getByRole('option', { name: 'OpenStreetMap' });
+  if (await openStreetMapOption.isVisible()) {
+    await openStreetMapOption.click();
+  } else {
+    // Fallback: Look for a button or item with text "OpenStreetMap" inside the options container
+    const fallbackOption = baseMapOptions.getByRole('button', { name: 'OpenStreetMap' }).first();
+    if (await fallbackOption.isVisible()) {
+      await fallbackOption.click();
+    } else {
+      // Last resort: look for any element with the text
+      const textOption = baseMapOptions.getByText('OpenStreetMap').first();
+      await textOption.click();
+    }
+  }
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+
+  // Assert that OpenStreetMap is selected
+  // This might be indicated by an 'aria-selected="true"' attribute or a specific class
+  await expect(openStreetMapOption).toBeVisible();
+  if (await openStreetMapOption.getAttribute('aria-selected') === 'true') {
+    await expect(openStreetMapOption).toHaveAttribute('aria-selected', 'true');
+  } else {
+    // Fallback: Check for a selected class or state
+    const selectedOption = baseMapOptions.getByRole('option', { name: 'OpenStreetMap' }).first();
+    await expect(selectedOption).toHaveClass(/selected/);
+  }
+
+  // Assert that Carto Light is no longer selected
+  const cartoLightOption = baseMapOptions.getByRole('option', { name: 'Carto Light' });
+  if (await cartoLightOption.isVisible()) {
+    if (await cartoLightOption.getAttribute('aria-selected') === 'true') {
+      // If it's still selected, that's a failure
+      await expect(cartoLightOption).not.toHaveAttribute('aria-selected', 'true');
+    } else {
+      // It's not selected, which is good
+      await expect(cartoLightOption).not.toHaveClass(/selected/);
+    }
+  } else {
+    // If Carto Light option is not visible, it might have been removed or hidden, which is also acceptable
+    await expect(cartoLightOption).not.toBeVisible();
+  }
+});

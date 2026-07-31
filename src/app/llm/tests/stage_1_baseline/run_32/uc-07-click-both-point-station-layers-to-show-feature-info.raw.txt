@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the info panel to be visible as per preconditions
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Ensure UV-Index Stations layer is active
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  if (!(await uvIndexToggle.isChecked())) {
+    await uvIndexToggle.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer is active
+  const eucosToggle = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  if (!(await eucosToggle.isChecked())) {
+    await eucosToggle.click({ force: true });
+  }
+
+  // Click on the map at the specified coordinates
+  // The map container is typically identified by a test id or role.
+  // Assuming the map canvas/container has a test id 'map-container' based on typical Pioneer setups.
+  // If not, we might need to find the canvas or the div containing it.
+  // Let's try to find the map container by role 'application' or a specific test id if known.
+  // Common test id for map in Pioneer is 'map-container'.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Coordinates: [1188692.84, 6767643.28] (EPSG:3857)
+  // We need to click on the map element.
+  await mapContainer.click({
+    position: {
+      x: 1188692.84,
+      y: 6767643.28
+    }
+  });
+
+  // Wait for the info panel to update with feature info
+  // The info panel should now contain sections for both layers.
+
+  // Check for UV-Index Station section
+  const uvIndexInfoSection = page.getByRole('heading', { name: 'UV-Index Station', exact: true });
+  await expect(uvIndexInfoSection).toBeVisible();
+
+  // Check for EUCOS Ground Station section
+  const eucosInfoSection = page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true });
+  await expect(eucosInfoSection).toBeVisible();
+});

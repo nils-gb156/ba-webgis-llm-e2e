@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and map to be ready
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+
+  // Locate the map canvas container for interaction
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the map canvas to calculate click positions
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas bounding box not found');
+  }
+
+  // Define points to draw a line (e.g., a diagonal line)
+  // Point 1: Start near the center-left
+  const startX = mapBox.x + mapBox.width * 0.2;
+  const startY = mapBox.y + mapBox.height * 0.2;
+
+  // Point 2: Middle
+  const midX = mapBox.x + mapBox.width * 0.5;
+  const midY = mapBox.y + mapBox.height * 0.5;
+
+  // Point 3: End near the bottom-right
+  const endX = mapBox.x + mapBox.width * 0.8;
+  const endY = mapBox.y + mapBox.height * 0.8;
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // Click first point
+  await page.mouse.click(startX, startY);
+  
+  // Click second point
+  await page.mouse.click(midX, midY);
+  
+  // Click third point
+  await page.mouse.click(endX, endY);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblClick(endX, endY);
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit.
+  
+  // Wait for the measurement result to appear in the panel
+  // Assuming the result is displayed as text within the measurement panel
+  const measurementResult = page.getByTestId('measurement-result');
+  
+  // Use poll to wait for the result to settle as it's calculated asynchronously
+  await expect.poll(async () => {
+    const text = await measurementResult.textContent();
+    return text;
+  }).toMatch(/[\d.]+\s*(m|km|ft|mi)/i);
+
+  // Ensure the panel is still visible
+  await expect(page.getByTestId('measurement-panel')).toBeVisible();
+});

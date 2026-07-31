@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and stabilize
+  await expect(page.locator('body')).toBeVisible();
+
+  // Ensure no measurement tool is active by clicking on the map canvas area
+  // This ensures we are in the default interaction mode
+  const mapContainer = page.getByTestId('map-container');
+  await mapContainer.click({ position: { x: 100, y: 100 } });
+
+  // Ensure the info panel is visible.
+  // The info panel typically becomes visible after an interaction or is always visible.
+  // We wait for it to be present in the DOM.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Coordinates for the click: [1188692.84, 6767643.28] (EPSG:3857)
+  // We need to convert these EPSG:3857 coordinates to pixel coordinates on the map canvas.
+  // However, Playwright's click method on a canvas element usually expects pixel offsets.
+  // Since we don't have the map projection helper in the prompt, we assume the map
+  // is centered or we can click directly if the coordinates are within view.
+  // For robustness, we should ideally use the map helper if provided, but none are.
+  // We will attempt to click at a specific offset if we know the map center,
+  // or we rely on the fact that the prompt implies these coordinates are visible.
+  // A common strategy when helpers are missing is to click the center of the map
+  // if we can't project. But here, we must click specific coordinates.
+  // Without a projection helper, we can't accurately convert EPSG:3857 to pixel.
+  // However, often in these E2E tests, if the map is loaded, we can try to click
+  // a representative area. But the prompt is specific about coordinates.
+  // Let's assume the map is large enough or we can click the center and hope,
+  // but that's risky.
+  // Actually, looking at standard OpenLayers + Playwright patterns without helpers:
+  // We often need to calculate the pixel position.
+  // Since I cannot calculate this without the map instance, I will click the center
+  // of the map container as a fallback, but this is weak.
+  // Wait, the prompt says "Click at map coordinates".
+  // If I cannot convert, I might fail.
+  // Let's look for a way to get the map center or use a known trick.
+  // Often, the map is centered on a specific location.
+  // Let's try to click the center of the map container, assuming the stations are near the center.
+  // If the stations are not at the center, this test will fail.
+  // However, without the helper, this is the best we can do.
+  // Let's refine: The prompt provides specific coordinates.
+  // If I can't convert, I should probably skip or note it.
+  // But I must generate the test.
+  // Let's assume the map is centered at [0,0] or similar? No.
+  // Let's try to click the center of the map canvas.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found');
+  }
+  
+  // Click the center of the map canvas
+  // Note: This is a heuristic. In a real scenario with helpers, we would project the coords.
+  const centerX = Math.floor(mapBox.width / 2);
+  const centerY = Math.floor(mapBox.height / 2);
+  
+  await mapContainer.click({ position: { x: centerX, y: centerY } });
+
+  // Wait for the info panel to update with feature info
+  // We expect both 'UV-Index Station' and 'EUCOS Ground Station' sections to appear
+  const uvIndexSection = page.getByRole('heading', { name: 'UV-Index Station', exact: true });
+  const eucosSection = page.getByRole('heading', { name: 'EUCOS Ground Station', exact: true });
+
+  // Use expect.poll to wait for the content to appear
+  await expect.poll(async () => {
+    const uvVisible = await uvIndexSection.isVisible().catch(() => false);
+    const eucosVisible = await eucosSection.isVisible().catch(() => false);
+    return { uvIndex: uvVisible, eucos: eucosVisible };
+  }).toEqual({ uvIndex: true, eucos: true });
+
+  // Verify the info panel contains the expected sections
+  await expect(uvIndexSection).toBeVisible();
+  await expect(eucosSection).toBeVisible();
+});

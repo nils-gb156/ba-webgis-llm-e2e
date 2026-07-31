@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and map to be ready
+  await page.waitForLoadState('networkidle');
+  
+  // Wait for the map canvas to appear, indicating the map is initialized
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible({ timeout: 15000 });
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel
+  // Assuming a test id for the print button exists. If not, we fall back to role/text.
+  // Based on typical Open Pioneer trails, the print tool might be in a toolbar.
+  // Let's try to find the print button. Common test ids might be 'print-map' or similar.
+  // Since no specific test id is provided in the prompt for the toolbar button, 
+  // we will look for a button with text 'Print' or 'Print Map'.
+  // However, strictly following instructions: "Prefer getByTestId whenever a test id is available".
+  // If no test id is known, we use getByRole/Text.
+  // Let's assume the button has a test id 'print-map-button' for stability, 
+  // or we can use the accessible name.
+  
+  // Attempting to click the print button. 
+  // If the toolbar is complex, we might need to locate it first.
+  // Let's try a direct getByTestId if we assume one, or getByRole.
+  // Given the complexity and lack of specific test ids in the prompt, 
+  // we will use a robust locator strategy.
+  
+  // Let's try to find the print button by its role and accessible name.
+  const printButton = page.getByRole('button', { name: /Print|Print Map/i });
+  await printButton.click();
+
+  // Step 2: The printing panel is visible.
+  // We need to locate the printing panel/dialog.
+  // Assuming the panel might have a test id 'print-panel' or be a dialog.
+  // Let's try to find a dialog or panel that appears.
+  const printPanel = page.getByRole('dialog', { name: /Print/i }).first();
+  // If it's not a dialog, it might be a panel. Let's try to find an input for the title first.
+  // Often, the panel contains a title input.
+  
+  // Let's try to find the title input field.
+  const titleInput = page.getByLabel('Title').first();
+  // If getByLabel doesn't work, try placeholder or test id.
+  // Assuming a test id 'print-title-input' might exist.
+  // Let's fallback to finding the input within the print panel if it's a dialog.
+  
+  // If the printPanel locator above didn't resolve, we might need to search more broadly.
+  // Let's assume the print panel is visible now.
+  await expect(printPanel).toBeVisible({ timeout: 5000 });
+
+  // Step 2: Enter a title for the printout.
+  const printTitle = 'My Map Printout';
+  if (titleInput) {
+    await titleInput.fill(printTitle);
+  } else {
+    // Fallback: try to find input by placeholder or test id
+    const titleInputByPlaceholder = page.getByPlaceholder('Title').first();
+    await titleInputByPlaceholder.fill(printTitle);
+  }
+
+  // Step 3: Select the PNG file format.
+  // Look for a radio button or select element for format.
+  // Assuming a radio group or select with label 'Format' or 'File Format'.
+  const formatSelect = page.getByLabel('Format').first();
+  if (formatSelect) {
+    await formatSelect.selectOption('PNG');
+  } else {
+    // Fallback: Try radio buttons
+    const pngRadio = page.getByRole('radio', { name: 'PNG' }).first();
+    if (pngRadio) {
+      await pngRadio.check();
+    } else {
+      // Last resort: try to find an element with test id 'format-png' or similar
+      // Or try clicking a text 'PNG' if it's a button/link
+      const pngOption = page.getByText('PNG').first();
+      await pngOption.click();
+    }
+  }
+
+  // Step 4: Click the export/print button.
+  // Look for a button labeled 'Export', 'Print', or 'Download' within the panel.
+  const exportButton = page.getByRole('button', { name: /Export|Print|Download/i }).first();
+  await exportButton.click();
+
+  // Expected result: A PNG file is generated and downloaded.
+  // Wait for the download event.
+  const download = await page.waitForEvent('download');
+  
+  // Assert that the download happened and has the correct extension
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+  
+  // Clean up the downloaded file
+  await download.delete();
+});

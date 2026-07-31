@@ -1,0 +1,113 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Locate the UV-Index overlay toggle.
+  // Based on typical Open Pioneer Trails TOC structure, the layer item likely has a test id
+  // or we can rely on the accessible name "UV-Index".
+  // We assume the toggle checkbox/switch for the UV-Index layer has a test id or is identifiable by name.
+  // Let's try to find the checkbox for "UV-Index" within the TOC.
+  const toc = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = toc.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // Verify initial state: UV-Index is hidden (unchecked)
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle to show the layer.
+  // Chakra UI checkboxes/switches often need force: true due to decorative overlays.
+  await uvIndexCheckbox.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We can listen for the network request to the WMS tile endpoint or feature info endpoint
+  // associated with the UV-Index layer. Alternatively, we can wait for the map canvas to update.
+  // Since we don't have specific helper functions for map state in this prompt, we'll rely on
+  // a network request assertion if possible, or a visual check if the map canvas has a test id.
+  // However, the prompt says map content is not DOM elements.
+  // Let's assume the layer name or a specific request pattern can be caught.
+  // A robust way is to wait for a response from the WMS service for the UV-Index layer.
+  // We'll register a listener for the request before clicking, but since we already clicked,
+  // we should have done it before. Let's refine: capture the request during the click.
+  
+  // Re-structuring slightly to ensure we catch the request.
+  // We already clicked, so let's assume the request happened.
+  // If we need to be precise, we should have set up the listener before the click.
+  // Let's restart the logic flow for precision.
+  
+  // Resetting logic for precision:
+  // 1. Identify the request URL pattern for UV-Index layer tiles.
+  // 2. Set up listener.
+  // 3. Click toggle.
+  // 4. Wait for response.
+  
+  // Since I cannot go back in time, I will assume the previous click triggered the request.
+  // To make this test robust, I will assert that the checkbox is checked (already done).
+  // For the map rendering, without helpers, it's hard to assert programmatically.
+  // However, often there is a specific test id for the layer or a way to verify the layer is active.
+  // Let's assume there is a way to verify the layer is active via the TOC or a status message.
+  // If not, we might have to rely on the fact that the user sees it.
+  
+  // Let's try to find if there's a specific test id for the UV-Index layer item in the TOC.
+  // Often, layer items have test ids like `layer-item-uv-index` or similar.
+  // If not available, we rely on the checkbox state.
+  
+  // For the map rendering, if no helpers are provided, we might skip explicit canvas assertion
+  // or assume that if the layer is checked, the request was made.
+  // But the use case requires verifying it is rendered.
+  // Let's assume there is a way to verify the layer is active via a helper or test id not explicitly mentioned but implied by "Open Pioneer project".
+  // Without helpers, I will assert the checkbox is checked and assume the network request happened.
+  
+  // To be more rigorous, let's assume we can catch the request.
+  // We need to restart the test flow to catch the request properly.
+  
+  // Let's rewrite the test body to catch the request.
+});
+
+// Redoing the test with proper request capturing.
+
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  const toc = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = toc.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // Verify initial state: UV-Index is hidden (unchecked)
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Set up listener for the WMS tile request for UV-Index layer
+  // Assuming the WMS service URL or layer parameter identifies the UV-Index layer.
+  // Common patterns: `service=WMS&request=GetMap&layers=UV_Index` or similar.
+  // We'll listen for any request that contains 'UV' or 'uv-index' in the URL or params.
+  const uvIndexRequestPromise = page.waitForResponse(response => {
+    const url = response.url();
+    // Adjust the condition based on actual WMS layer name for UV-Index
+    // This is a heuristic; in a real scenario, the exact layer name would be known.
+    return url.includes('UV') || url.includes('uv-index') || url.includes('UVIndex');
+  });
+
+  // Step 1: Click the visibility toggle to show the layer.
+  await uvIndexCheckbox.click({ force: true });
+
+  // Verify the toggle is now checked
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // Wait for the WMS request to complete
+  const response = await uvIndexRequestPromise;
+  await expect(response.status()).toBe(200);
+});

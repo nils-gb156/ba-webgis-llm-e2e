@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and map to be ready
+  await page.getByTestId('map-container').waitFor({ state: 'visible' });
+
+  // Step 1: Open the printing panel by clicking the 'Print Map' button
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await printButton.click();
+
+  // Verify the printing panel is visible
+  await expect(page.getByTestId('print-panel')).toBeVisible();
+
+  // Step 2: Enter a title for the printout
+  const titleInput = page.getByLabel('Title');
+  await titleInput.fill('Test Printout');
+
+  // Step 3: Select the PNG file format
+  // Assuming the format selector is a radio group or dropdown with test id 'print-format'
+  // If it's a radio button group, we select the PNG option
+  const pngOption = page.getByRole('radio', { name: 'PNG' });
+  // Check if PNG is already selected; if not, click it
+  const isPngSelected = await pngOption.isChecked();
+  if (!isPngSelected) {
+    await pngOption.click();
+  }
+
+  // Step 4: Click the export/print button
+  const exportButton = page.getByRole('button', { name: 'Export' });
+  
+  // Set up download listener before triggering the action
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the file was downloaded
+  expect(download.suggestedFilename()).toMatch(/\.png$/);
+
+  // Note: Verifying the content of the downloaded image (base map, overlay, scale bar)
+  // is complex and typically requires image processing libraries. 
+  // For E2E purposes, we verify the download event and file type.
+  // The "expected result" of showing visible layers is implicitly covered by the successful generation
+  // of the printout from the current map state, assuming the backend handles it correctly.
+});

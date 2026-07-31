@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to be fully loaded and interactive
+  await page.waitForLoadState('networkidle');
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  // Assuming the measurement button has a test-id or accessible name.
+  // If no specific test-id is known, we look for a button with text "Measurement".
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to locate the map canvas. Usually, the map container is a specific div.
+  // Let's assume the map container has a test-id or is the main canvas.
+  // If no test-id is provided for the map container, we might need to find the canvas element.
+  // However, clicking on a canvas requires specific coordinates.
+  // Let's assume there is a map container with test-id 'map-container' or similar.
+  // If not, we might need to find the first canvas element.
+  // For robustness, let's try to find the map container.
+  // Often, the map is the main interactive element.
+  // Let's assume the map container is identified by a test-id 'map' or 'map-container'.
+  // If not, we can try to find the canvas.
+  // Let's assume the map container has a test-id 'ba-map'.
+  const mapContainer = page.locator('#ba-map').first(); // Adjust selector as needed
+  // If the above selector doesn't work, we might need to find the canvas directly.
+  // But the prompt says "The map canvas is interactive", so we should be able to click on it.
+  // Let's assume we can click on the map container.
+  // We need to get the bounding box of the map container to click on it.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container not found or not visible');
+  }
+
+  // Click a few points to draw a line.
+  // Point 1
+  await page.mouse.click(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+  // Point 2
+  await page.mouse.click(mapBox.x + mapBox.width / 4, mapBox.y + mapBox.height / 4);
+  // Point 3
+  await page.mouse.click(mapBox.x + (3 * mapBox.width) / 4, mapBox.y + (3 * mapBox.height) / 4);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblclick(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+
+  // Expected results:
+  // The measurement panel is visible.
+  // The measurement panel displays a length value with a unit.
+
+  // Wait for the measurement panel to be visible.
+  // Assuming the measurement panel has a test-id 'measurement-panel' or similar.
+  const measurementPanel = page.locator('#measurement-panel').first(); // Adjust selector as needed
+  await expect(measurementPanel).toBeVisible();
+
+  // Wait for the measurement result to be displayed.
+  // Assuming the result is displayed in an element with a test-id 'measurement-result' or similar.
+  const measurementResult = page.locator('#measurement-result').first(); // Adjust selector as needed
+  // Wait for the result to contain a length value with a unit (e.g., "123.45 m")
+  await expect(measurementResult).toContainText(/[\d.]+\s*m/);
+});

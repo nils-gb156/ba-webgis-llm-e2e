@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible.
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas. The map container is usually identified by a test id or role.
+  // Assuming the map canvas has a test id 'map-canvas' or we can locate it by its container.
+  // Since specific test ids for the map container aren't provided in the prompt, we'll try to find the map container.
+  // Often, the map is inside a container with a specific class or test id. Let's assume a common test id 'map-container'.
+  // If 'map-container' is not available, we might need to use a more generic locator.
+  // However, the prompt says "Identified via the context provided in the prompt". No context was provided.
+  // We will use a best-effort approach to locate the map canvas.
+  // In many Open Pioneer apps, the map is rendered in a div with a specific test id.
+  // Let's assume the map container has the test id 'map-container'.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  // Get the bounding box of the map container to click within it.
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box could not be determined.');
+  }
+
+  // Click three points to draw a line.
+  // Point 1
+  await mapContainer.click({ position: { x: mapBox.width / 4, y: mapBox.height / 4 } });
+  // Point 2
+  await mapContainer.click({ position: { x: mapBox.width / 2, y: mapBox.height / 2 } });
+  // Point 3
+  await mapContainer.click({ position: { x: (3 * mapBox.width) / 4, y: (3 * mapBox.height) / 4 } });
+
+  // 3. Double-click to finish the measurement.
+  await mapContainer.dblclick({ position: { x: (3 * mapBox.width) / 4, y: (3 * mapBox.height) / 4 } });
+
+  // Expected results:
+  // - The measurement panel is visible (already asserted).
+  // - The measurement panel displays a length value with a unit.
+
+  // Wait for the measurement result to appear.
+  // The result is likely displayed in a specific element within the measurement panel.
+  // Let's assume there is a test id 'measurement-result' or similar.
+  // If not, we might look for text matching a pattern like "123 m" or "123 m²".
+  // Let's try to find an element that shows the length.
+  // Commonly, the result might be in a list item or a specific result display area.
+  // Let's assume 'measurement-result' is the test id for the result display.
+  const measurementResult = page.getByTestId('measurement-result');
+  
+  // Use expect.poll to wait for the result to settle, as it might take time to calculate and display.
+  await expect.poll(async () => {
+    const text = await measurementResult.textContent();
+    return text;
+  }).toMatch(/[\d.]+\s*m/); // Match a number followed by 'm' for meters.
+});

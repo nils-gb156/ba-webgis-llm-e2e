@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the map canvas to be interactive
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the map canvas to click within it
+  const mapBox = await mapCanvas.boundingBox();
+  test.assert(mapBox, 'Map canvas bounding box should exist');
+
+  // Click on the map canvas at a specific position (center-ish)
+  if (mapBox) {
+    const clickX = mapBox.x + mapBox.width / 2;
+    const clickY = mapBox.y + mapBox.height / 2;
+    await page.mouse.click(clickX, clickY);
+  }
+
+  // Wait for the info panel to load the forecast
+  // Assuming the info panel has a test id or accessible role
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the weather forecast section to appear
+  const forecastSection = infoPanel.getByText('Weather Forecast', { exact: true }).first();
+  await expect(forecastSection).toBeVisible();
+
+  // Verify that the clicked position is highlighted on the map
+  // Since map state is not in DOM, we rely on the info panel update as a proxy
+  // But we can check if there's a marker or highlight layer visible
+  const highlightLayer = page.locator('canvas.ol-layer').last();
+  await expect(highlightLayer).toBeVisible();
+
+  // Verify that the forecast contains 24 entries
+  // Assuming each entry has a test id or specific structure
+  const forecastEntries = infoPanel.locator('[data-testid="forecast-entry"]');
+  await expect(forecastEntries).toHaveCount(24);
+});

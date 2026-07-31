@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the initial map to load and be ready
+  await page.waitForSelector('[data-testid="map-container"]');
+  
+  // Wait for the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Locate the UV-Index overlay toggle. 
+  // Assuming the layer switcher uses test ids for layers or accessible names.
+  // If a specific test id for the UV-Index layer toggle exists, use it.
+  // Otherwise, we rely on the accessible name within the layer switcher.
+  const uvIndexToggle = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'UV-Index', exact: true });
+  
+  // Ensure the toggle is initially unchecked (hidden)
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Click the visibility toggle to show the UV-Index layer
+  // Using force: true if it's a Chakra UI checkbox/switch that might intercept clicks
+  // However, standard checkboxes usually work. If it hangs, switch to force: true.
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // Since we can't assert canvas content directly, we wait for a network request
+  // that corresponds to the WMS tile request for the UV-Index layer.
+  // We listen for requests to the WMS service with the UV-Index layer name.
+  const uvIndexLayerName = 'UV-Index'; // Adjust if the internal layer name differs
+  const tileRequestPromise = page.waitForRequest(request => {
+    const url = request.url();
+    return url.includes('LAYERS=' + uvIndexLayerName) || url.includes('layers=' + uvIndexLayerName);
+  });
+
+  // Trigger a map interaction or wait for auto-update if necessary.
+  // Often, just adding the layer triggers the tile request.
+  // If the request doesn't fire immediately, we might need to wait for a map update event
+  // or simply wait for the request promise.
+  await tileRequestPromise;
+
+  // Verify that the map canvas exists (content rendered)
+  // We cannot assert the specific tiles visually, but we confirm the map container is present and interactable.
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+  
+  // Optional: Verify that the map canvas element is not empty by checking its dimensions or context
+  const canvas = page.locator('canvas');
+  await expect(canvas).toBeVisible();
+});

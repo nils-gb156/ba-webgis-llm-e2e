@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the info panel to be visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure no measurement tool is active (reset if necessary)
+  // Assuming there's a way to deselect tools or just proceed if the state is clean.
+  // The preconditions state no measurement tool is active, so we proceed.
+
+  // Identify the map container to click on it
+  const mapContainer = page.locator('canvas').first();
+  await expect(mapContainer).toBeVisible();
+
+  // Click on the map at the specified coordinates [1188692.84, 6767643.28] (EPSG:3857)
+  // Playwright's click coordinates are relative to the viewport.
+  // We need to convert EPSG:3857 coordinates to pixel coordinates on the canvas.
+  // However, OpenLayers provides a `getPixelFromCoordinate` method.
+  // Since we don't have direct access to the OpenLayers map instance in the test,
+  // we rely on the fact that the map is likely centered or we can calculate the offset.
+  // A more robust way in E2E without helper functions is to use the map's internal logic if exposed,
+  // but typically we click at a specific pixel position.
+  // Let's assume the map is visible and we can click at a relative position if we know the center.
+  // Alternatively, we can use the `page.mouse.click` with coordinates relative to the map element.
+  // To get the pixel coordinates from EPSG:3857, we would need the map's projection and view.
+  // Since the prompt mentions "Click at map coordinates", and we don't have helper functions,
+  // we might need to use a known pixel offset if the map is static or use a workaround.
+  // However, Playwright allows clicking at specific coordinates relative to an element.
+  // Let's try to get the bounding box of the map canvas and click at a calculated position.
+  // Without helper functions to convert EPSG:3857 to pixel, this is tricky.
+  // Let's assume the test environment has a way to map coordinates to pixels or we use a fixed pixel if the map is always centered.
+  // Given the complexity, let's use the `page.mouse.click` with coordinates relative to the viewport
+  // if we can determine the pixel position.
+  // A common approach is to use the map's `getPixelFromCoordinate` if we can access it via `page.evaluate`.
+  // Let's try to access the OpenLayers map instance.
+
+  // Get the pixel coordinates from EPSG:3857 using OpenLayers' map instance
+  const pixel = await page.evaluate(({ x, y }) => {
+    // Access the global OpenLayers map instance if available
+    // In Open Pioneer, the map instance is often attached to the window or accessible via a specific key
+    // Let's assume it's accessible via `window.olMap` or similar.
+    // If not, we might need to use a different approach.
+    // For now, let's assume we can get the map instance.
+    const map = (window as any).__openPioneerMap__;
+    if (!map) {
+      throw new Error('OpenLayers map instance not found');
+    }
+    const coordinate = [x, y];
+    const pixel = map.getPixelFromCoordinate(coordinate);
+    return pixel;
+  }, { x: 1188692.84, y: 6767643.28 });
+
+  // Click on the map canvas at the calculated pixel position
+  await mapContainer.click({
+    position: {
+      x: pixel[0],
+      y: pixel[1],
+    },
+  });
+
+  // Wait for the info panel to update with feature info for both layers
+  // The info panel should display sections for 'UV-Index Station' and 'EUCOS Ground Station'
+  await expect(page.getByText('UV-Index Station')).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible();
+});

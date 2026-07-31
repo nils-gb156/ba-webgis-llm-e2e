@@ -1,0 +1,124 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Precondition: Layer switcher (TOC) is visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the layer switcher.
+  // We look for a button that likely controls the base map visibility or selector panel.
+  // Common pattern: A button labeled "Base Map" or similar inside the TOC.
+  const baseMapSelectorButton = page.getByRole('button', { name: 'Base Map' }).first();
+  await expect(baseMapSelectorButton).toBeVisible();
+  
+  // Check if the selector is already open. If the button has aria-expanded="true", it might be open.
+  // However, usually clicking it toggles or opens it. Let's click it to ensure it's open.
+  // Note: If it's already open, clicking might close it. But typically "opens the selector" implies ensuring it's visible.
+  // Let's assume clicking opens it if closed, or toggles. To be safe, we can check if the selector panel is visible.
+  const baseMapSelectorPanel = page.getByTestId('base-map-selector').or(page.getByRole('listbox', { name: 'Base Map' }).or(page.getByRole('menu', { name: 'Base Map' })));
+  
+  // Try to find the panel by common test ids or roles. If not found, we might need to infer from structure.
+  // Let's assume there is a specific test id for the base map selector container if available.
+  // If not, we rely on the button click.
+  
+  // Clicking the button to open the selector
+  await baseMapSelectorButton.click();
+  
+  // Wait for the selector panel to be visible
+  // We need to identify the panel. Let's assume it contains the list of base maps.
+  // A common pattern is a listbox or menu.
+  const baseMapList = page.getByRole('listbox', { name: /Base Map/i }).first();
+  if (await baseMapList.isVisible().catch(() => false)) {
+    await expect(baseMapList).toBeVisible();
+  } else {
+    // Fallback: maybe it's a menu
+    const baseMapMenu = page.getByRole('menu', { name: /Base Map/i }).first();
+    if (await baseMapMenu.isVisible().catch(() => false)) {
+      await expect(baseMapMenu).toBeVisible();
+    } else {
+      // Fallback: maybe it's a specific container
+      const baseMapContainer = page.getByTestId('base-map-options').first();
+      if (await baseMapContainer.isVisible().catch(() => false)) {
+        await expect(baseMapContainer).toBeVisible();
+      } else {
+        // If we can't find a specific container, we assume the click worked and proceed to step 2.
+        // We will look for OpenStreetMap directly.
+      }
+    }
+  }
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  // Locate the OpenStreetMap option.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' }).first();
+  if (await openStreetMapOption.isVisible().catch(() => false)) {
+    await openStreetMapOption.click();
+  } else {
+    // Fallback: Maybe it's a menuitem
+    const openStreetMapMenuItem = page.getByRole('menuitem', { name: 'OpenStreetMap' }).first();
+    if (await openStreetMapMenuItem.isVisible().catch(() => false)) {
+      await openStreetMapMenuItem.click();
+    } else {
+      // Fallback: Maybe it's a button or label
+      const openStreetMapButton = page.getByRole('button', { name: 'OpenStreetMap' }).first();
+      if (await openStreetMapButton.isVisible().catch(() => false)) {
+        await openStreetMapButton.click();
+      } else {
+        // Last resort: text search within the likely container
+        const osmText = page.getByText('OpenStreetMap').first();
+        if (await osmText.isVisible().catch(() => false)) {
+          await osmText.click();
+        } else {
+          throw new Error('Could not find OpenStreetMap option');
+        }
+      }
+    }
+  }
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+  
+  // Check if OpenStreetMap is now selected.
+  // This might be reflected in the UI state of the selector or the map itself.
+  // Since map state is not in DOM, we check the UI indicator in the selector.
+  
+  // If there's a listbox/menu, the selected item might have aria-selected="true"
+  const selectedOSM = page.getByRole('option', { name: 'OpenStreetMap' }).first();
+  if (await selectedOSM.isVisible().catch(() => false)) {
+    await expect(selectedOSM).toHaveAttribute('aria-selected', 'true');
+  } else {
+    // Fallback for menu
+    const selectedOSMMenu = page.getByRole('menuitem', { name: 'OpenStreetMap' }).first();
+    if (await selectedOSMMenu.isVisible().catch(() => false)) {
+      await expect(selectedOSMMenu).toHaveAttribute('aria-selected', 'true');
+    } else {
+      // Fallback for button state or text color
+      const osmButton = page.getByRole('button', { name: 'OpenStreetMap' }).first();
+      if (await osmButton.isVisible().catch(() => false)) {
+        // Check for active class or similar
+        await expect(osmButton).toHaveClass(/active|selected|current/i);
+      }
+    }
+  }
+
+  // Check that Carto Light is no longer selected.
+  const cartoLightOption = page.getByRole('option', { name: 'Carto Light' }).first();
+  if (await cartoLightOption.isVisible().catch(() => false)) {
+    await expect(cartoLightOption).not.toHaveAttribute('aria-selected', 'true');
+  } else {
+    const cartoLightMenu = page.getByRole('menuitem', { name: 'Carto Light' }).first();
+    if (await cartoLightMenu.isVisible().catch(() => false)) {
+      await expect(cartoLightMenu).not.toHaveAttribute('aria-selected', 'true');
+    } else {
+      const cartoLightButton = page.getByRole('button', { name: 'Carto Light' }).first();
+      if (await cartoLightButton.isVisible().catch(() => false)) {
+        await expect(cartoLightButton).not.toHaveClass(/active|selected|current/i);
+      }
+    }
+  }
+});

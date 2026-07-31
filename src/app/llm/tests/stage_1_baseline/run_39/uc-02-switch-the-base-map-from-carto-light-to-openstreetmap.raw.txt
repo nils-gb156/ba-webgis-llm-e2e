@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Wait for the map to be ready and initial base layer to be set
+  // We assume the map model helper is available if needed, but for simple UI interaction
+  // we can rely on the UI state. If helpers were provided, we would poll them here.
+  // Since no helpers are provided in the prompt, we proceed with UI assertions.
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // The base map selector is typically a button or a section within the TOC.
+  // Let's look for a button that opens the base map list.
+  // Often this is labeled "Base map" or similar.
+  const baseMapToggle = page.getByRole('button', { name: /Base map/i });
+  await expect(baseMapToggle).toBeVisible();
+  await baseMapToggle.click();
+
+  // Wait for the base map list/dialog to appear
+  // It might be a dialog or a dropdown panel. Let's look for the list of base maps.
+  const baseMapList = page.getByRole('list', { name: /Base map/i, exact: false });
+  // If it's not a list with that name, it might be inside a dialog or panel.
+  // Let's try to find the OpenStreetMap option directly.
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  // If getByRole('option') doesn't work, it might be a button or a list item.
+  // Let's try a more robust approach: find the item containing "OpenStreetMap"
+  const osmItem = page.getByText('OpenStreetMap', { exact: true }).first();
+  
+  // If the item is not immediately visible after clicking the toggle, we might need to wait for it.
+  await expect(osmItem).toBeVisible({ timeout: 5000 });
+  
+  await osmItem.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+
+  // Assert that OpenStreetMap is selected
+  // We check if the OpenStreetMap option is marked as selected or active.
+  // In many UIs, the selected item has an "aria-selected=true" or a specific class.
+  // Let's assert that the OpenStreetMap option is visible and potentially highlighted.
+  await expect(osmItem).toHaveAttribute('aria-selected', 'true', { timeout: 5000 });
+
+  // Assert that Carto Light is no longer selected
+  const cartoLightItem = page.getByText('Carto Light', { exact: true }).first();
+  // It might still be in the list but not selected, or it might have disappeared.
+  // Let's check if it's not selected if it's still visible.
+  const isCartoVisible = await cartoLightItem.isVisible();
+  if (isCartoVisible) {
+    await expect(cartoLightItem).not.toHaveAttribute('aria-selected', 'true');
+  }
+
+  // Additionally, we can assert that the map has changed by checking the map canvas or a status message if available.
+  // Since we don't have map model helpers, we rely on the UI state of the selector.
+});

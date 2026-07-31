@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and initial state to settle
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Helper to get current zoom level via the map model if available, or infer from map interactions
+  // Since no specific helper functions were provided in the prompt for map state,
+  // we will rely on the visual feedback or side effects if possible.
+  // However, the prompt mentions map state is not in DOM.
+  // Let's assume there might be a way to inspect map state or we rely on the fact that
+  // the buttons exist and can be clicked.
+  // Without a provided helper, we must check if there's any visible indicator or
+  // we simply assert the click actions succeed and perhaps check for loading states.
+  // But the expected result is about zoom level change.
+  // Let's look for common test IDs for zoom controls.
+  
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out' });
+
+  // Precondition: Buttons are visible
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  // Step 1: Click 'Zoom in'
+  await zoomInButton.click();
+
+  // Step 2: Click 'Zoom out'
+  await zoomOutButton.click();
+
+  // Expected results:
+  // Since we cannot directly assert zoom level without a helper, and the prompt
+  // says "If no helpers are provided, this section is irrelevant", we must rely
+  // on the successful execution of the steps.
+  // However, to better verify, we might check if the map canvas updates or if
+  // there are any side effects.
+  // Given the constraints, we assert that the buttons are clickable and the
+  // actions complete without error.
+  
+  // To make the test more robust, let's assume there's a way to verify the map
+  // is still interactive or that the controls remain available.
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+});

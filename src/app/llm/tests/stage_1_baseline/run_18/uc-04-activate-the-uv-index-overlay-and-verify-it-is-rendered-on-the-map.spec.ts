@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher (TOC) to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Locate the UV-Index overlay toggle.
+  // Assuming the TOC items have test ids like 'layer-uv-index' or similar.
+  // If no specific test id exists for the toggle, we use the accessible name.
+  // Based on typical Open Pioneer Trails structure, we look for a checkbox or switch
+  // associated with "UV-Index".
+  
+  // Try to find the UV-Index layer item first to scope our search
+  const uvIndexLayerItem = page.getByTestId('layer-uv-index');
+  
+  // If a specific test id for the layer item exists, scope the toggle to it.
+  // Otherwise, search broadly within the layer switcher.
+  let toggleLocator;
+  try {
+    await uvIndexLayerItem.waitFor({ state: 'visible' });
+    toggleLocator = uvIndexLayerItem.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  } catch {
+    // Fallback if specific layer item test id is not available
+    toggleLocator = page.getByTestId('layer-switcher').getByRole('checkbox', { name: 'UV-Index', exact: true });
+  }
+
+  // Ensure the toggle is initially hidden (unchecked) as per preconditions
+  await expect(toggleLocator).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle of the UV-Index overlay layer to show it.
+  // Using force: true because Chakra UI checkboxes often have a decorative overlay
+  // that intercepts pointer events.
+  await toggleLocator.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(toggleLocator).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We can listen for network requests to the WMS or tile server for UV-Index.
+  // Assuming the UV-Index layer uses a WMS endpoint or tile URL containing 'uv' or 'UV'.
+  
+  const uvLayerRequestPromise = page.waitForResponse(response => {
+    const url = response.url();
+    // Check if the request is related to the UV-Index layer
+    // Common patterns: 'uv-index', 'UV', or specific WMS layer names
+    return url.toLowerCase().includes('uv') && response.status() === 200;
+  });
+
+  // Wait for the response to ensure the layer tiles are requested and loaded
+  await uvLayerRequestPromise;
+
+  // Verify that the UV-Index overlay tiles are rendered on the map canvas.
+  // Since map content is on a canvas, we can't directly assert "tiles are rendered" via DOM.
+  // However, we can assert that the map canvas exists and has content, or check for specific
+  // visual cues if available. A common approach in E2E tests for maps is to assert that
+  // the map container is visible and potentially take a screenshot or check for non-empty canvas.
+  // Without specific visual regression tools, we rely on the successful network request
+  // and the fact that the layer is checked.
+  
+  // Assert the map canvas is visible
+  const mapCanvas = page.locator('canvas.ol-layerscope'); // Common OpenLayers class
+  await expect(mapCanvas).toBeVisible();
+
+  // Additional check: Ensure no errors were logged to the console related to the layer
+  const consoleErrors: string[] = [];
+  page.on('console', msg => {
+    if (msg.type() === 'error') {
+      consoleErrors.push(msg.text());
+    }
+  });
+  
+  // Wait a short moment to ensure any potential async errors are captured
+  await page.waitForTimeout(1000);
+  
+  // Assert no critical errors occurred during the layer load
+  expect(consoleErrors).toEqual([]);
+});

@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide the Temperature overlay layer
+  const temperatureToggle = page.getByTestId('layer-temperature-visibility-toggle');
+  await expect(temperatureToggle).toBeVisible();
+  // The layer is initially visible, so the toggle should be "enabled/on".
+  // We click it to hide it.
+  await temperatureToggle.click();
+
+  // Step 2: Show the Precipitation overlay layer
+  const precipitationToggle = page.getByTestId('layer-precipitation-visibility-toggle');
+  await expect(precipitationToggle).toBeVisible();
+  // The layer is initially hidden, so the toggle should be "disabled/off".
+  // We click it to show it.
+  await precipitationToggle.click();
+
+  // Verify layer states after toggles
+  // Precipitation toggle should now be in disabled/enabled state (indicating visibility is ON)
+  // Temperature toggle should now be in enabled/disabled state (indicating visibility is OFF)
+  // Note: "disabled state" in expected results likely refers to the visual state of the toggle
+  // indicating the layer is active/visible. We assert the visual state via the role or attribute.
+  // Assuming the toggle uses a checkbox-like role or aria-pressed.
+  // Let's assume the toggle has a role of 'checkbox' or similar and we check aria-pressed or class.
+  // Based on Chakra UI conventions and the prompt's hint about `force: true` for checkboxes/switches:
+  // We will assert the final state.
+  await expect(precipitationToggle).toHaveAttribute('aria-pressed', 'true'); // Or similar attribute indicating ON
+  await expect(temperatureToggle).toHaveAttribute('aria-pressed', 'false'); // Or similar attribute indicating OFF
+
+  // Step 3: Search for a location
+  const searchField = page.getByLabel('Search'); // Or specific test id if available, e.g. getByTestId('geocoder-input')
+  // Using getByLabel is safer if test id is not provided. If test id is provided, use getByTestId.
+  // Prompt says "search field (geocoder) is accessible". Let's try common test ids or labels.
+  // If no test id, we fall back to getByRole or getByLabel.
+  const geocoderInput = page.getByTestId('geocoder-input').or(page.getByLabel('Search address'));
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  const firstResult = page.getByRole('option', { name: /Münster/ }).first(); // Assuming autocomplete uses listbox/option pattern
+  // If it's a list of divs, we might need getByRole('listitem') or similar.
+  // Let's assume standard ARIA autocomplete pattern with listbox and options.
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // Map navigation is asynchronous. We can wait for the info panel to start loading or map center to change.
+  // Since we don't have map helpers in the prompt, we wait for the info panel to reflect the new location or load content.
+  // The prompt says "info panel is visible". We wait for it to update or load the forecast.
+
+  // Step 6: Wait for info panel to load the forecast with 24 entries
+  // The info panel should display a weather forecast section with 24 entries.
+  // We look for a container with 24 items.
+  const forecastSection = page.getByTestId('weather-forecast-section'); // Hypothetical test id
+  // If no test id, we might look for a list with 24 items.
+  // Let's assume there's a list or grid for the forecast entries.
+  const forecastEntries = page.getByTestId('weather-forecast-entry'); // Hypothetical test id for each entry
+  
+  // Using expect.poll to wait for the 24 entries to appear
+  await expect.poll(async () => {
+    const count = await page.getByTestId('weather-forecast-entry').count();
+    return count;
+  }).toBe(24);
+
+  // Additional assertion: Verify the map navigated to the location
+  // Without map helpers, we can assert that the info panel shows the correct city name if available.
+  // Or we can assert that the search input was cleared or the result is no longer highlighted.
+  // Let's assert the forecast section is visible.
+  await expect(forecastSection).toBeVisible();
+});

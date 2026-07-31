@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and map to be ready
+  // We assume the map container becomes visible once loaded
+  await expect(page.getByTestId('map-container')).toBeVisible({ timeout: 30000 });
+
+  // Wait for at least one base map and one overlay layer to be visible
+  // Since we can't assert map content directly, we rely on the map container being visible
+  // and assume the preconditions are met by the app initialization.
+  // We'll wait for the map to be "ready" by checking for a specific element that appears when layers are loaded.
+  // If no specific element is known, we wait for the map canvas to be interactable.
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible({ timeout: 30000 });
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  // Locate the print button in the toolbar. Assuming a test id or accessible name.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Verify the printing panel is visible
+  const printPanel = page.getByRole('dialog', { name: /Print/ }).or(page.getByTestId('print-panel'));
+  // Try to find the panel by common test id or role
+  const panel = page.locator('[data-testid="print-panel"]').or(page.getByRole('dialog').first());
+  await expect(panel).toBeVisible({ timeout: 10000 });
+
+  // Step 2: The user enters a title for the printout.
+  const titleInput = page.getByLabel('Title').or(page.locator('[data-testid="print-title-input"]'));
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Map Export Test');
+
+  // Step 3: The user selects the PNG file format.
+  // Locate the format selection, likely a radio group or select.
+  const pngFormatOption = page.getByRole('radio', { name: 'PNG' }).or(page.getByLabel('PNG'));
+  if (await pngFormatOption.isVisible()) {
+    await pngFormatOption.click();
+  } else {
+    // Fallback: if it's a select, click and select
+    const formatSelect = page.getByLabel('Format').or(page.locator('[data-testid="print-format-select"]'));
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.click();
+    await page.getByText('PNG').click();
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: /Export|Print|Generate/ }).click()
+  ]);
+
+  // Verify the download started and get the suggested filename
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  // Wait for the download to complete
+  await download.saveAs('/tmp/test-print-output.png');
+
+  // Note: We cannot assert the content of the downloaded PNG file directly in Playwright
+  // without additional libraries, but we verified the file was generated and has the correct extension.
+  // The precondition ensures the map view has base map and overlay layers.
+});

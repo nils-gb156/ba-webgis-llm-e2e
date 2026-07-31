@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and map to be interactive
+  // The map canvas is typically the main interactive element.
+  // We wait for a reasonable amount of time for the map to initialize.
+  await page.waitForLoadState('networkidle');
+
+  // Locate the map canvas. Assuming a standard test-id for the map container if available,
+  // or fallback to role/label. Since no specific test-id was provided in the prompt for the map,
+  // we try to find the canvas element.
+  // Often in Open Pioneer, the map container might have a specific class or test-id.
+  // Let's assume a common pattern or look for the canvas directly if no test-id is known.
+  // However, best practice is to use test-ids. Let's assume there is a test-id for the map container.
+  // If not, we might need to use a more generic locator.
+  // Let's try to find the map container by its role or a common test-id like 'map-container'.
+  // If 'map-container' is not available, we might need to inspect the DOM.
+  // For this exercise, let's assume we can click on the canvas directly if no other locator works.
+  // But Playwright prefers semantic locators. Let's try to get the map container.
+  // A common test-id for the map in such apps is 'map'.
+  const mapLocator = page.getByTestId('map').first(); // Adjust test-id if necessary
+  // Fallback: If 'map' test-id doesn't exist, we might need to use a different approach.
+  // Let's assume the map container is identified by a specific test-id provided in the context.
+  // Since no context was provided, I will use a generic approach to find the canvas.
+  // However, the instructions say "click the map container element (identified via the context provided in the prompt)".
+  // Since no context was provided, I will assume a standard test-id 'map-container' or similar.
+  // Let's try to locate the canvas element directly as a last resort if no test-id is known.
+  // But to be safe, let's assume there is a test-id 'map' for the map component.
+  
+  // Let's assume the map has a test-id 'map'
+  const map = page.locator('[data-testid="map"]').first();
+  
+  // If the map locator is not found, we might need to wait for it to appear.
+  // We'll wait for the map to be visible.
+  await expect(map).toBeVisible({ timeout: 10000 });
+
+  // Click on a position on the map canvas.
+  // We need to click at a specific position. Let's click in the center of the map.
+  const mapBox = await map.boundingBox();
+  if (mapBox) {
+    const centerX = mapBox.x + mapBox.width / 2;
+    const centerY = mapBox.y + mapBox.height / 2;
+    await page.mouse.click(centerX, centerY);
+  } else {
+    throw new Error('Map bounding box not found');
+  }
+
+  // Wait for the info panel to load the forecast.
+  // The info panel might have a test-id like 'info-panel' or 'weather-forecast'.
+  // Let's assume the info panel has a test-id 'info-panel'.
+  const infoPanel = page.getByTestId('info-panel').first();
+  await expect(infoPanel).toBeVisible({ timeout: 10000 });
+
+  // Wait for the weather forecast section to appear.
+  // Let's assume the weather forecast section has a test-id 'weather-forecast'.
+  const weatherForecast = page.getByTestId('weather-forecast').first();
+  await expect(weatherForecast).toBeVisible({ timeout: 10000 });
+
+  // Verify that the clicked position is highlighted on the map.
+  // This might be represented by a marker or a specific layer on the map.
+  // Since map state is not in the DOM, we might need to use helper functions if provided.
+  // Since no helpers are provided, we assume the visual highlight is not directly testable via DOM.
+  // However, the presence of the weather forecast implies the click was successful.
+
+  // Verify that the info panel displays a weather forecast section.
+  // We already checked for the visibility of the weather forecast section.
+
+  // Verify that the forecast contains 24 entries.
+  // Let's assume each forecast entry has a test-id or a specific structure.
+  // For example, each entry might have a test-id 'forecast-entry' or be listed in a list.
+  // Let's assume the forecast entries are listed in a container with test-id 'forecast-entries'.
+  const forecastEntries = page.getByTestId('forecast-entry');
+  await expect(forecastEntries).toHaveCount(24, { timeout: 10000 });
+});

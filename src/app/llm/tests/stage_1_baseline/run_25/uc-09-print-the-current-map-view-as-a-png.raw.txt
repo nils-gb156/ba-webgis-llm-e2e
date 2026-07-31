@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and layers to be visible.
+  // Since we don't have specific map helper functions provided in the prompt,
+  // we wait for the map canvas to appear and assume default layers are loaded.
+  await expect(page.locator('canvas')).toBeVisible();
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  // Assuming the print button has a test id or accessible name.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Verify the printing panel is visible.
+  // Assuming the panel has a test id or is a dialog with an accessible name.
+  const printPanel = page.getByRole('dialog', { name: /Print/ });
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: The user enters a title for the printout.
+  // Assuming the title input has a test id or accessible label.
+  const titleInput = page.getByLabel('Title').or(page.getByTestId('print-title-input'));
+  await titleInput.fill('Map Export Test');
+
+  // Step 3: The user selects the PNG file format.
+  // Assuming the format selector is a radio group or dropdown with test ids.
+  // Try radio buttons first as they are common for format selection.
+  const pngRadio = page.getByRole('radio', { name: 'PNG' });
+  if (await pngRadio.isVisible()) {
+    await pngRadio.check();
+  } else {
+    // Fallback to dropdown/select if radio is not found
+    const formatSelect = page.getByLabel('Format').or(page.getByTestId('print-format-select'));
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption('png');
+  }
+
+  // Step 4: The user clicks the export/print button.
+  // Set up download listener before clicking.
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: /Export|Print/ }).click()
+  ]);
+
+  // Verify the file was downloaded and is a PNG.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+  // Clean up the downloaded file to avoid cluttering the test environment.
+  await download.delete();
+});

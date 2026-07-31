@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Ensure the info panel is visible before interacting with the map
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Click on the center of the map canvas to trigger the weather forecast
+  const mapCanvas = page.locator('canvas');
+  await mapCanvas.click({ position: { x: 100, y: 100 } });
+
+  // Wait for the info panel to load the forecast content
+  // The forecast section should appear in the info panel
+  await expect(page.getByTestId('weather-forecast')).toBeVisible();
+
+  // Assert that the forecast contains 24 entries
+  // Assuming each entry has a specific test id or role for the forecast items
+  const forecastEntries = page.locator('[data-testid="forecast-entry"]');
+  await expect(forecastEntries).toHaveCount(24);
+
+  // Assert that the clicked position is highlighted on the map
+  // This might be represented by a specific marker or highlight layer
+  // Since map state is not in DOM, we rely on the info panel update as a proxy
+  // However, if there's a specific highlight marker, we can check for it
+  const highlightMarker = page.locator('[data-testid="map-highlight-marker"]');
+  await expect(highlightMarker).toBeVisible();
+});

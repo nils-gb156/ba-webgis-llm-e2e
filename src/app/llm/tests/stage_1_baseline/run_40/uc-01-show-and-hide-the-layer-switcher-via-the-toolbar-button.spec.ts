@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 1: Show and hide the layer switcher via the toolbar button', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // The layer switcher (TOC) is initially visible.
+  const layerSwitcherPanel = page.getByTestId('layer-switcher-panel');
+  await expect(layerSwitcherPanel).toBeVisible();
+
+  // Step 1: Click the 'Layer Switcher' button to hide the panel.
+  // The button might already be in an "active" state (pressed=true) if the panel is visible.
+  // We need to check its current state. If it's pressed, clicking it will hide the panel.
+  // If it's not pressed, clicking it will show the panel.
+  // Since the panel is initially visible, the button should be in the "pressed/active" state.
+  const layerSwitcherButton = page.getByRole('button', { name: 'Layer Switcher' });
+  
+  // Verify the button is currently pressed (indicating the panel is open)
+  const isButtonPressed = await layerSwitcherButton.getAttribute('aria-pressed');
+  
+  // Click the button to hide the panel
+  await layerSwitcherButton.click();
+  
+  // Step 1 Expected result: The layer switcher panel is no longer visible.
+  await expect(layerSwitcherPanel).not.toBeVisible();
+
+  // Step 2: Click the 'Layer Switcher' button again to show the panel.
+  // Now the button should be in the "not pressed" state.
+  await layerSwitcherButton.click();
+
+  // Step 2 Expected result: The layer switcher panel is visible again.
+  await expect(layerSwitcherPanel).toBeVisible();
+});

@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and map to be ready
+  // Assuming there is a main map container or a specific loading indicator
+  await expect(page.getByTestId('map-container')).toBeVisible();
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  // Using force: true as toolbar icons might have overlay elements or be small targets
+  await page.getByRole('button', { name: 'Print Map' }).click({ force: true });
+
+  // Expected result: The printing panel is visible.
+  await expect(page.getByRole('dialog', { name: /Print/ })).toBeVisible();
+
+  // Step 2: Enter a title for the printout.
+  const printTitle = 'My Map Export';
+  await page.getByLabel('Title').fill(printTitle);
+
+  // Step 3: Select the PNG file format.
+  // Assuming the format selection is a radio group or dropdown.
+  // If it's a radio group, we select the radio button for PNG.
+  await page.getByRole('radio', { name: 'PNG' }).check();
+
+  // Step 4: Click the export/print button.
+  // Setup download listener before triggering the action
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: /Export|Print|Generate/ }).click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+
+  // Clean up the downloaded file to avoid cluttering the system
+  await download.delete();
+});

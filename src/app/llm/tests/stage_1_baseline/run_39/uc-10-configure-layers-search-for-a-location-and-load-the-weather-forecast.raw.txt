@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and initial state to settle
+  // The layer switcher (TOC) should be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Identify the Temperature and Precipitation layer toggles
+  // Assuming test IDs or accessible names exist for these layers
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature' });
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+
+  // Step 1: Hide the Temperature overlay layer
+  // The temperature layer is initially visible (checked). We need to uncheck it.
+  // Using force: true because Chakra UI checkboxes often have pointer events intercepted
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  // Step 2: Show the Precipitation overlay layer
+  // The precipitation layer is initially hidden (unchecked). We need to check it.
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  // Step 3: Click the search field and type a place name
+  const searchField = page.getByRole('combobox', { name: /search/i }); // Adjust name if necessary
+  if (!searchField) {
+    // Fallback if specific combobox name isn't available, try generic search input
+    const searchInput = page.getByRole('textbox', { name: /search/i });
+    await searchInput.click();
+    await searchInput.fill('Münster');
+  } else {
+    await searchField.click();
+    await searchField.fill('Münster');
+  }
+
+  // Step 4: Wait for the result list to appear and select the first result
+  // Assuming the search results are in a list or dropdown
+  const firstResult = page.getByRole('option').first(); // Often listbox options or list items
+  // If the results are in a specific container, scope it
+  const searchResultsContainer = page.getByRole('listbox').first(); // Common for comboboxes
+  if (searchResultsContainer) {
+    await expect(searchResultsContainer).toBeVisible();
+    const firstResultInList = searchResultsContainer.getByRole('option').first();
+    await expect(firstResultInList).toBeVisible();
+    await firstResultInList.click();
+  } else {
+    // Fallback for generic list items
+    const firstResultItem = page.getByRole('listitem').first();
+    await expect(firstResultItem).toBeVisible();
+    await firstResultItem.click();
+  }
+
+  // Step 5: Wait for the map to navigate to the selected location
+  // Since map state is not in DOM, we rely on the info panel updating or map canvas changing.
+  // We can't easily assert map coordinates without helper functions.
+  // We wait for the info panel to update, which implies navigation happened.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 6: Wait for the info panel to load the forecast
+  // Expected result: The info panel displays a weather forecast section with 24 entries.
+  // Assuming there is a specific container for the forecast entries
+  const forecastEntries = page.getByTestId('forecast-entry'); // Hypothetical test ID for forecast items
+  if (forecastEntries) {
+    // Use poll to wait for the count to reach 24
+    await expect.poll(async () => {
+      const count = await forecastEntries.count();
+      return count;
+    }).toBe(24);
+  } else {
+    // Fallback: Look for a container that likely holds 24 items
+    // Or wait for a specific text indicating 24 hours/days
+    const forecastSection = page.getByRole('region', { name: /forecast/i });
+    await expect(forecastSection).toBeVisible();
+    // If we can't find specific entries, we might check for a list with 24 children if structure is known
+    // Or simply wait for the section to be visible and populated
+    await expect(page.getByText('24')).toBeVisible(); // Weak assertion, but better than nothing if IDs are missing
+  }
+});

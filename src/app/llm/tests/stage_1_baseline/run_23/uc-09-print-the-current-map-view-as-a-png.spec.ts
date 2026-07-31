@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and map to be ready
+  // Assuming the map container or a specific UI element indicates readiness
+  await page.waitForSelector('[data-testid="map-container"]', { state: 'visible' });
+
+  // Precondition: Ensure at least one base map and one overlay layer are visible.
+  // We assume the default state satisfies this, but we wait for some map activity.
+  await page.waitForTimeout(2000); // Allow tiles and layers to load
+
+  // Step 1: The user clicks the 'Print Map' button in the toolbar to open the printing panel.
+  const printButton = page.getByRole('button', { name: 'Print Map' });
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Expected result: The printing panel is visible.
+  const printPanel = page.getByRole('dialog', { name: /Print/i }).or(page.getByTestId('print-panel'));
+  // Fallback if dialog/testid isn't exact: look for a visible panel containing title input
+  const panel = page.locator('[data-testid="print-panel"]').or(page.locator('text="Print Map"').first().locator('..').locator('..'));
+  
+  // Try to find the panel by common patterns if specific testid is unknown
+  // Often printing panels are dialogs or side panels.
+  // Let's assume there is a test id for the print panel or we find it by content.
+  // If no testid, we look for the title input which implies the panel is open.
+  const titleInput = page.getByLabel(/Title/i).or(page.getByTestId('print-title'));
+  await expect(titleInput).toBeVisible({ timeout: 10000 });
+
+  // Step 2: The user enters a title for the printout.
+  const title = 'Test Map Print';
+  if (titleInput) {
+    await titleInput.fill(title);
+  } else {
+    // Fallback: find input by placeholder or label
+    const fallbackInput = page.locator('input[type="text"]').first();
+    await fallbackInput.fill(title);
+  }
+
+  // Step 3: The user selects the PNG file format.
+  const pngFormatOption = page.getByRole('radio', { name: 'PNG' }).or(page.getByRole('option', { name: 'PNG' })).or(page.getByText('PNG'));
+  await expect(pngFormatOption).toBeVisible();
+  
+  // Check if PNG is already selected
+  const isPngSelected = await pngFormatOption.evaluate(el => {
+    // Check common radio/checkbox states
+    if (el instanceof HTMLInputElement) {
+      return el.checked;
+    }
+    if (el.getAttribute('aria-checked') === 'true') {
+      return true;
+    }
+    if (el.classList.contains('active') || el.classList.contains('selected')) {
+      return true;
+    }
+    return false;
+  });
+
+  if (!isPngSelected) {
+    await pngFormatOption.click();
+  }
+
+  // Step 4: The user clicks the export/print button.
+  const exportButton = page.getByRole('button', { name: /Export/i }).or(page.getByRole('button', { name: /Print/i })).or(page.getByTestId('print-export-button'));
+  await expect(exportButton).toBeVisible();
+
+  // Wait for download to start before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Expected result: A PNG file containing the current map view is generated and downloaded.
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+
+  // Clean up the downloaded file
+  await download.delete();
+});

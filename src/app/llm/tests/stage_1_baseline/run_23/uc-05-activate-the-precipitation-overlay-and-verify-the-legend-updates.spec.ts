@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the layer switcher and legend to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  // Locate the Precipitation layer toggle.
+  // Assuming the layer switcher contains checkboxes for each layer,
+  // and the Precipitation layer has a test id or accessible name.
+  // If no specific test id is known for the layer item, we use the accessible name.
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation' });
+
+  // Ensure the toggle is initially hidden (unchecked) as per preconditions
+  await expect(precipitationToggle).not.toBeChecked();
+
+  // Click the visibility toggle to show the Precipitation overlay
+  await precipitationToggle.click({ force: true });
+
+  // Verify the Precipitation overlay layer toggle is in the enabled (checked) state
+  await expect(precipitationToggle).toBeChecked();
+
+  // Verify the legend displays an entry corresponding to the Precipitation layer
+  // Assuming the legend has test ids or accessible names for layer entries
+  const precipitationLegendEntry = page.getByRole('listitem', { name: 'Precipitation' }).or(
+    page.getByTestId('legend-precipitation')
+  );
+  
+  // If specific legend entry test ids or roles are not available, check for text within the legend
+  const legendContainer = page.getByTestId('legend');
+  await expect(legendContainer.getByText('Precipitation')).toBeVisible();
+});

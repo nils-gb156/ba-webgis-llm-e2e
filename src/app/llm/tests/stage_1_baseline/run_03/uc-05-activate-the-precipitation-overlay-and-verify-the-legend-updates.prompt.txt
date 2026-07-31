@@ -1,0 +1,28 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 5: Activate the Precipitation overlay and verify the legend updates
+
+**Description:** The user activates the Precipitation overlay and checks that the legend reflects the newly active layer.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The layer switcher (TOC) and legend are visible.
+- The Precipitation overlay layer is initially hidden.
+
+**Steps:**
+
+1. The user clicks the visibility toggle of the Precipitation overlay layer to show it.
+2. The user views the legend.
+
+**Expected results:**
+
+- The Precipitation overlay layer toggle is in the enabled (checked) state.
+- The legend displays an entry corresponding to the Precipitation layer.
+
+**Complexity:** medium
+
+Return only the test code.

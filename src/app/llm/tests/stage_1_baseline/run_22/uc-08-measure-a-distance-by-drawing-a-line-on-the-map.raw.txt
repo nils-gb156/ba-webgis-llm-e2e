@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Open the measurement panel by clicking the Measurement button in the toolbar
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible
+  const measurementPanel = page.getByTestId('measurement-panel');
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line
+  // We need to click on the map canvas element. Assuming the map container has a test id or we can find it.
+  // Since no specific test id for the map container is provided in the prompt, we look for a reasonable locator.
+  // Often, the map is the main interactive element. Let's try to find the canvas or a container.
+  // However, the prompt says "Click the map container element (identified via the context provided in the prompt)".
+  // Since no context with a specific test id for the map container was provided in the prompt text,
+  // we must infer a standard way to locate the map. In many Open Pioneer apps, the map might not have a specific test id.
+  // Let's assume there is a generic map container or we can click on the canvas directly.
+  // To be safe and robust, let's look for the map container. If not found, we might need to use a broader selector.
+  // Let's try to find the map container by role or a common test id if available.
+  // If no test id is available, we might have to use a CSS selector as a last resort, but the prompt discourages it.
+  // Let's assume the map container has a test id like 'map-container' or similar. If not, we'll try to find the canvas.
+  // Actually, the prompt says "identified via the context provided in the prompt". Since it's not provided, I will use a generic approach.
+  // Let's try to click on the map canvas directly.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the map canvas to click on it
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  // Click a few points to draw a line
+  // Point 1
+  await page.mouse.click(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+  // Point 2
+  await page.mouse.click(mapBox.x + mapBox.width / 3, mapBox.y + mapBox.height / 3);
+  // Point 3
+  await page.mouse.click(mapBox.x + mapBox.width * 2 / 3, mapBox.y + mapBox.height * 2 / 3);
+
+  // 3. Double-click to finish the measurement
+  await page.mouse.dblclick(mapBox.x + mapBox.width / 2, mapBox.y + mapBox.height / 2);
+
+  // Expected results:
+  // - The measurement panel is visible (already checked)
+  // - The measurement panel displays a length value with a unit.
+  // We need to find the element displaying the result.
+  // Let's look for a text or element within the measurement panel that shows the length.
+  // It might have a test id like 'measurement-result' or similar.
+  // Let's try to find any text that looks like a length measurement (e.g., "123.45 m")
+  // Since we don't have a specific test id for the result, we'll look for a pattern in the panel.
+  const measurementResult = measurementPanel.locator('text=/\\d+\\.?\\d*\\s*m/');
+  await expect(measurementResult).toBeVisible();
+});

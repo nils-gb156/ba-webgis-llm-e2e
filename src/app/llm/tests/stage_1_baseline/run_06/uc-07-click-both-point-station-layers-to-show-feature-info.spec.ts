@@ -1,0 +1,202 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the page to load and be ready
+  await page.waitForLoadState('networkidle');
+
+  // Ensure the info panel is visible.
+  // Assuming the info panel has a test id or is identifiable by role/text.
+  // If no specific test id is known for the panel container, we might rely on
+  // the presence of content or a specific region. Let's assume a standard
+  // structure where the info panel is a distinct region.
+  // We will wait for the info panel to be visible. If it's not visible by default,
+  // we might need to ensure it is. The preconditions say it is visible.
+  const infoPanel = page.getByRole('region', { name: /info/i }).first();
+  await expect(infoPanel).toBeVisible({ timeout: 10000 });
+
+  // Ensure layers are active.
+  // Preconditions state they are active, but we should ensure the map is ready.
+  // We'll proceed to click the map.
+
+  // Identify the map container.
+  // Usually, the map canvas is inside a container with a specific class or test id.
+  // Let's assume a standard OpenLayers map container.
+  // If there's a specific test id for the map, use it. Otherwise, we might need to
+  // infer it. Let's try to find the canvas or a container around it.
+  // Often, the map is in a div with a specific role or test id.
+  // Let's assume the map container has a test id 'map-container' or similar.
+  // If not provided, we might need to use a more generic locator.
+  // Let's try to locate the map canvas directly.
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible({ timeout: 10000 });
+
+  // Get the bounding box of the map canvas to click on it.
+  const boundingBox = await mapCanvas.boundingBox();
+  if (!boundingBox) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  // Coordinates to click: [1188692.84, 6767643.28] (EPSG:3857)
+  // We need to convert these coordinates to pixel coordinates on the canvas.
+  // However, Playwright's click method with 'position' option clicks relative to the
+  // top-left corner of the element. We need to calculate the pixel offset.
+  // Without a helper function to convert coordinates, we might need to use the map's
+  // internal logic or assume the coordinates are already in pixel space?
+  // No, the coordinates are in EPSG:3857.
+  // Since no helper functions were provided in the prompt for map coordinate conversion,
+  // we cannot reliably convert EPSG:3857 to pixel coordinates.
+  // However, the prompt says: "To interact with the map, click the map container element
+  // (identified via the context provided in the prompt) with a `position` option."
+  // It does not provide coordinate conversion helpers.
+  // This suggests that either:
+  // 1. The coordinates are already in pixel space (unlikely for EPSG:3857).
+  // 2. There is an implicit assumption that we can use a helper.
+  // 3. The prompt expects us to use a specific test id for the map and click at a
+  //    position that corresponds to the features.
+  //
+  // Re-reading the prompt: "If the prompt provides map model helper functions..."
+  // It did NOT provide map model helper functions.
+  // Therefore, we cannot convert EPSG:3857 to pixel coordinates.
+  //
+  // However, the use case specifies exact coordinates.
+  // In many E2E setups, there might be a way to trigger a click at specific coordinates
+  // if the application exposes an API or if the test environment has a utility.
+  // But Playwright itself doesn't know EPSG:3857.
+  //
+  // Let's assume that the map container has a test id and that we can click on it.
+  // But we need the pixel position.
+  //
+  // Alternative: Maybe the coordinates are provided in the context of a helper that
+  // is NOT explicitly listed in the "map state via helper functions" section but
+  // is available in the global scope or a specific module?
+  // The prompt says: "If no helpers are provided, this section is irrelevant".
+  //
+  // Let's look at the preconditions again.
+  // "Both a UVI station and an EUCOS ground station are located at map coordinates [1188692.84, 6767643.28] (EPSG:3857)."
+  //
+  // If I cannot convert coordinates, I cannot click at the exact location.
+  // However, in many Open Pioneer tests, there might be a `map` object or a utility
+  // available in the browser context or via a specific import.
+  //
+  // Let's assume there is a global `map` object or a utility function `mapToPixel`
+  // that is available. But the prompt doesn't specify it.
+  //
+  // Let's re-read the "Map state via helper functions" section.
+  // It says: "If the prompt provides map model helper functions...".
+  // It does NOT provide them here.
+  //
+  // This is a dilemma. Without coordinate conversion, I cannot click at the exact
+  // EPSG:3857 coordinates.
+  //
+  // However, looking at the "Locators" section:
+  // "To interact with the map, click the map container element (identified via the
+  // context provided in the prompt) with a `position` option."
+  //
+  // The "context provided in the prompt" might refer to the map container's locator.
+  // But it doesn't provide the coordinate conversion.
+  //
+  // Let's assume that the test environment has a way to convert coordinates.
+  // Or, perhaps the coordinates are meant to be used with a specific helper that
+  // is implicitly available.
+  //
+  // Given the constraints, I will assume that there is a helper function `mapToPixel`
+  // or similar that is available in the page context or via a specific import.
+  // But since it's not provided, I will try to find a way to click on the map.
+  //
+  // Actually, in many Open Pioneer E2E tests, the map coordinates are converted
+  // using a utility that is part of the test infrastructure.
+  // Let's assume there is a global function `getPixelFromCoordinate` or similar.
+  //
+  // Since I cannot be sure, I will try to use a generic approach.
+  // If the coordinates are critical, and I cannot convert them, the test might fail.
+  //
+  // Let's try to assume that the map container has a test id 'map' and that we can
+  // click on it. But we need the pixel position.
+  //
+  // I will proceed by assuming that there is a helper function `mapToPixel` that
+  // is available in the page context. If not, the test will fail, but it's the
+  // best I can do without more information.
+  //
+  // Wait, the prompt says: "Return exactly ONE Playwright test file...".
+  // It does not say I can add helper functions.
+  //
+  // Let's look at the "Complexity: hard" tag.
+  // This suggests that coordinate conversion might be expected.
+  //
+  // I will assume that there is a global `map` object or a utility function
+  // `convertCoordinateToPixel` that is available in the browser context.
+  // Let's try to evaluate it in the page context.
+  //
+  // However, a safer approach is to assume that the test infrastructure provides
+  // a way to click at specific coordinates.
+  //
+  // Let's try to use the `page.evaluate` to convert coordinates.
+  // But I don't know the function name.
+  //
+  // Let's assume that the map container has a test id 'map-container' and that
+  // the map is an OpenLayers map.
+  // OpenLayers maps have a `getPixelFromCoordinate` method.
+  // We can access the map instance via the page context if it's exposed.
+  //
+  // Let's try to assume that the map instance is available as `window.map` or similar.
+  // This is a common pattern in Open Pioneer tests.
+  //
+  // I will try to get the pixel coordinates using `page.evaluate`.
+  // If this fails, the test will fail, but it's the best I can do.
+  //
+  // Let's assume the map instance is available as `window.olMap` or similar.
+  // I'll try `window.map` first.
+  //
+  // Actually, let's look at the preconditions again.
+  // "The app is loaded successfully."
+  //
+  // I will try to get the pixel coordinates from the map instance.
+  // If the map instance is not available, I will fall back to a generic click.
+  //
+  // Let's try to assume that the map instance is available as `window.map`.
+  //
+  // Step 1: Get the map instance and convert coordinates to pixel.
+  const pixelCoordinates = await page.evaluate(() => {
+    // Assume the map instance is available as window.map
+    const map = (window as any).map;
+    if (!map) {
+      throw new Error('Map instance not found');
+    }
+    const coordinate = [1188692.84, 6767643.28];
+    const pixel = map.getPixelFromCoordinate(coordinate);
+    return pixel;
+  }, { timeout: 5000 });
+
+  // Step 2: Click on the map canvas at the calculated pixel coordinates.
+  await mapCanvas.click({
+    position: {
+      x: pixelCoordinates[0],
+      y: pixelCoordinates[1]
+    },
+    timeout: 5000
+  });
+
+  // Step 3: Wait for the info panel to load the station info for both layers.
+  // The info panel should now display 'UV-Index Station' and 'EUCOS Ground Station'.
+  // We will wait for these sections to be visible.
+  // Assuming the info panel has sections with specific text or test ids.
+  // Let's look for text 'UV-Index Station' and 'EUCOS Ground Station' in the info panel.
+  
+  // Wait for UV-Index Station info
+  await expect(page.getByText('UV-Index Station', { exact: false })).toBeVisible({ timeout: 10000 });
+  
+  // Wait for EUCOS Ground Station info
+  await expect(page.getByText('EUCOS Ground Station', { exact: false })).toBeVisible({ timeout: 10000 });
+
+  // Additional assertion: Ensure that the info panel contains feature information for both.
+  // We can check for some common feature info fields.
+  // For example, 'Station Name' or 'ID'.
+  // Let's assume there is a 'Station Name' field.
+  await expect(page.getByText('Station Name', { exact: false })).toBeVisible({ timeout: 5000 });
+});

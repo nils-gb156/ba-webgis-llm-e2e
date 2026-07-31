@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  // Navigate to the base URL
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the map to be ready
+  // The map container is typically the main canvas or a specific div.
+  // We wait for the map canvas to be visible to ensure the map is initialized.
+  await expect(page.locator('canvas')).toBeVisible();
+
+  // Ensure no measurement tool is active by resetting map interactions if necessary.
+  // However, since preconditions state "No measurement tool is active", we assume
+  // the initial state is correct. We just need to ensure the layers are active.
+  // The preconditions state the layers are active, so we proceed to click.
+
+  // Coordinates for the click
+  const x = 1188692.84;
+  const y = 6767643.28;
+
+  // Click on the map canvas at the specified coordinates
+  // We need to find the map canvas element. Usually it's the first canvas or has a specific class.
+  // Let's assume the canvas is the primary interactive element for the map.
+  const canvas = page.locator('canvas');
+  await expect(canvas).toBeVisible();
+
+  // Click on the map at the specific coordinates
+  await canvas.click({
+    position: {
+      x: x,
+      y: y
+    }
+  });
+
+  // Wait for the info panel to load and display feature info for both layers
+  // The info panel usually contains sections for each layer's feature info.
+  // We expect to see 'UV-Index Station' and 'EUCOS Ground Station' sections.
+
+  // Wait for the UV-Index Station section to appear
+  await expect(page.getByText('UV-Index Station')).toBeVisible({ timeout: 10000 });
+
+  // Wait for the EUCOS Ground Station section to appear
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible({ timeout: 10000 });
+
+  // Additional assertion to ensure both sections are present and contain some information
+  // We can check for the presence of the info panel and its content
+  const infoPanel = page.locator('[data-testid="info-panel"]'); // Assuming a test id for the info panel
+  await expect(infoPanel).toBeVisible();
+
+  // Verify that the UV-Index Station section is visible within the info panel
+  await expect(infoPanel.getByText('UV-Index Station')).toBeVisible();
+
+  // Verify that the EUCOS Ground Station section is visible within the info panel
+  await expect(infoPanel.getByText('EUCOS Ground Station')).toBeVisible();
+});

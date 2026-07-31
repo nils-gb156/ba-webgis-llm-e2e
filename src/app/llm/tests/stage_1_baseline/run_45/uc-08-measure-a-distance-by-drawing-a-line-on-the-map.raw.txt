@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map to be ready and interactive
+  const mapCanvas = page.locator('canvas.ol-layer');
+  await expect(mapCanvas).toBeVisible();
+
+  // Step 1: Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Step 2: Click several points on the map canvas to draw a line.
+  // We need to click on the map canvas at different positions.
+  // Assuming the map canvas is centered and has a reasonable size.
+  // We will click near the center, then move slightly, then move more.
+  
+  // Get the bounding box of the map canvas to determine click positions
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas not found or not visible');
+  }
+
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+
+  // First point: near center
+  await page.mouse.click(centerX, centerY);
+  
+  // Second point: slightly to the right and down
+  await page.mouse.click(centerX + 100, centerY + 100);
+  
+  // Third point: further to the right and down
+  await page.mouse.click(centerX + 200, centerY + 200);
+
+  // Step 3: Double-click to finish the measurement.
+  await page.mouse.dblClick(centerX + 200, centerY + 200);
+
+  // Expected results:
+  // The measurement panel is visible.
+  // The measurement panel displays a length value with a unit.
+  
+  // Locate the measurement panel. It might be a dialog or a specific panel.
+  // Let's try to find an element that looks like a measurement result.
+  // Often, measurement results are shown in a sidebar or a popup.
+  // We'll look for text that resembles a length measurement (e.g., "1.23 km" or "1234 m").
+  
+  // Wait for the measurement result to appear.
+  // We'll poll for any text that looks like a number followed by a unit.
+  const measurementResult = page.locator('body').getByText(/^[0-9.]+\s*(km|m|cm|mm|mi|ft|in)$/);
+  
+  await expect(measurementResult).toBeVisible();
+});

@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map canvas to be present and visible
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Click on the center of the map canvas to trigger the click event
+  const box = await mapCanvas.boundingBox();
+  if (box) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  } else {
+    throw new Error('Map canvas bounding box not found');
+  }
+
+  // Wait for the info panel to load the forecast.
+  // We look for a specific element or text that indicates the forecast is loaded.
+  // Assuming the forecast entries are rendered in the info panel.
+  // We will poll for the presence of forecast entries.
+  
+  // First, ensure the info panel is visible (precondition check, though likely already visible)
+  const infoPanel = page.getByTestId('info-panel'); // Assuming a test id for the info panel
+  await expect(infoPanel).toBeVisible();
+
+  // Wait for the forecast section to appear. 
+  // Since we don't know the exact test id for the forecast, we'll look for a common pattern
+  // or wait for a specific number of forecast items if they have a test id.
+  // Let's assume the forecast items have a test id like 'forecast-item' or similar.
+  // If not, we might need to look for text or a container.
+  // Given the complexity, let's try to find a container that appears when forecast is loaded.
+  // Or, we can wait for the number of forecast entries to be 24.
+  
+  // Let's assume there is a list or container for forecast items.
+  // We will poll for the existence of at least one forecast item, and then check the count.
+  
+  // Wait for the first forecast item to appear
+  const forecastItem = page.getByTestId('forecast-item').first();
+  await expect(forecastItem).toBeVisible();
+
+  // Now, check that there are 24 forecast entries
+  const forecastItems = page.getByTestId('forecast-item');
+  await expect(forecastItems).toHaveCount(24);
+
+  // Verify that the clicked position is highlighted on the map.
+  // This is tricky because the map is a canvas. 
+  // However, sometimes applications add a marker or feature to the map that might be represented
+  // in the DOM or via a test id if the application is designed for testing.
+  // If there's no DOM representation, we might rely on the fact that the forecast loaded for the clicked position.
+  // Let's assume there is a marker or highlight element with a test id.
+  const mapHighlight = page.getByTestId('map-highlight');
+  await expect(mapHighlight).toBeVisible();
+});

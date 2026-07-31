@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Identify the UV-Index overlay toggle.
+  // Assuming the toggle has a test-id or can be identified by its accessible name.
+  // If no specific test-id exists for the toggle, we use getByRole with exact name.
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  // Ensure the toggle is initially hidden (unchecked) as per preconditions
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  // Step 1: Click the visibility toggle to show the UV-Index overlay
+  // Using force: true because Chakra UI checkboxes render the input visually hidden
+  await uvIndexToggle.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexToggle).toBeChecked();
+
+  // Step 2: Wait for the map to load the layer tiles.
+  // We listen for the WMS GetMap request which is typical for overlay layers like UV-Index.
+  const wmsRequestPromise = page.waitForRequest((request) => {
+    const url = request.url();
+    return url.includes('SERVICE=WMS') && url.includes('REQUEST=GetMap') && url.includes('LAYERS=UV-Index');
+  });
+
+  // Trigger the map update if necessary, or wait for the natural update.
+  // Usually, toggling a layer triggers a map update automatically.
+  // We wait for the request to be sent.
+  await wmsRequestPromise;
+
+  // Verify that the map canvas exists and has rendered content.
+  // Since we cannot assert specific tiles via DOM, we assert the canvas is visible
+  // and potentially has non-zero dimensions/content.
+  const mapCanvas = page.locator('canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Optional: Verify that the map container reflects the change by checking for any
+  // visual update or by asserting the canvas is not empty.
+  // Playwright's toBeVisible is usually sufficient for "rendered" in this context.
+});

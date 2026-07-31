@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Step 1: Hide Temperature overlay layer
+  // The Temperature layer is initially visible, so we click its toggle to hide it.
+  const temperatureToggle = page.getByTestId('layer-toggle-temperature');
+  await expect(temperatureToggle).toBeChecked();
+  await temperatureToggle.click();
+
+  // Step 2: Show Precipitation overlay layer
+  // The Precipitation layer is initially hidden, so we click its toggle to show it.
+  const precipitationToggle = page.getByTestId('layer-toggle-precipitation');
+  await expect(precipitationToggle).not.toBeChecked();
+  await precipitationToggle.click();
+
+  // Step 3: Search for a location
+  const searchField = page.getByLabel('Search');
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  // Step 4: Wait for result list and select first result
+  // Assuming the search results are rendered in a list with a specific test id or role
+  const firstResult = page.getByRole('option', { name: 'Münster' }).first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  // Step 5: Wait for map to navigate
+  // Since map state is not in DOM, we wait for the info panel to update, which implies navigation.
+  // We can also assert that the map canvas has changed, but without helpers, we rely on the info panel.
+  // The info panel should show content related to Münster.
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanel).toBeVisible();
+
+  // Step 6: Wait for info panel to load the forecast
+  // The expected result is 24 entries in the weather forecast section.
+  // Assuming the forecast entries have a specific test id or role.
+  // Let's assume each forecast entry is an element with a test id like 'forecast-entry' or similar.
+  // If not, we might need to count elements by a common class or role.
+  // Given the complexity, we'll assume a structure like a list of items.
+  
+  // Let's assume the forecast entries are listed in a container with test id 'weather-forecast-entries'
+  // and each entry has a test id 'forecast-entry'.
+  // We will poll for the count of these entries to be 24.
+  
+  const forecastEntries = page.getByTestId('forecast-entry');
+  await expect.poll(async () => forecastEntries.count()).toBe(24);
+});

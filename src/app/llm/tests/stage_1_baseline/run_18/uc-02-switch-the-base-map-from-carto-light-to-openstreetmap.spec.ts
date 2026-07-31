@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming the base map selector is a button or toggle within the layer switcher.
+  // We look for a button that likely controls the base map selection.
+  const baseMapSelectorButton = page.getByTestId('base-map-selector');
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Wait for the base map options to appear. Assuming there's a container for base map options.
+  const baseMapOptionsContainer = page.getByTestId('base-map-options');
+  await expect(baseMapOptionsContainer).toBeVisible();
+
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  // Or if it's a list item or button with text
+  const osmButton = page.getByText('OpenStreetMap');
+  
+  // Try to click the option/button. If getByRole('option') doesn't work due to custom implementation,
+  // we might need to rely on text or testid. Let's assume standard ARIA or testid.
+  // If no testid, we use text.
+  await osmButton.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Verify OpenStreetMap is now selected.
+  // We check if the "OpenStreetMap" option/button has an active state or selected attribute.
+  // Assuming the UI updates the appearance of the selected item.
+  await expect(osmButton).toHaveAttribute('aria-selected', 'true');
+
+  // Verify Carto Light is no longer selected.
+  const cartoLightOption = page.getByText('Carto Light');
+  await expect(cartoLightOption).not.toHaveAttribute('aria-selected', 'true');
+});

@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcher).toBeVisible();
+
+  // Step 1: The user opens the base map selector in the layer switcher.
+  // Assuming there is a button or toggle to open the base map selection panel/dialog within the TOC.
+  // Common pattern: A button labeled "Base map" or similar inside the TOC.
+  const baseMapSelectorButton = page.getByRole('button', { name: 'Base map' });
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Wait for the base map selection list/dialog to appear
+  // Assuming the base map options are presented in a list or dialog after clicking the button.
+  // We look for the "OpenStreetMap" option to be clickable.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' }).or(page.getByText('OpenStreetMap'));
+  
+  // If getByRole('option') doesn't work immediately, we might need to wait for the list to render.
+  // Let's try to find the OpenStreetMap option specifically.
+  // Often, base maps are in a list. Let's assume a list container exists.
+  const baseMapList = page.getByTestId('base-map-list').or(page.getByRole('list', { name: 'Base map' }));
+  
+  // If the list doesn't have a specific test id, we might need to rely on the text.
+  // Let's try clicking the OpenStreetMap text directly if it's visible.
+  const osmText = page.getByText('OpenStreetMap');
+  await expect(osmText).toBeVisible();
+  
+  // Step 2: The user selects 'OpenStreetMap' as the base map.
+  await osmText.click();
+
+  // Expected results:
+  // The OpenStreetMap base map is selected.
+  // The Carto Light base map is no longer selected.
+  
+  // Assert that OpenStreetMap is now selected/active.
+  // This might be indicated by a checkmark, a highlight, or the button state.
+  // Let's assume the OpenStreetMap option now has an 'aria-selected' or similar state, or is visually distinct.
+  // We can check if the OpenStreetMap text is still visible and perhaps in an active state.
+  // A common way to assert selection is to check that the previously active item is no longer active,
+  // or the new item is active.
+  
+  // Let's check if the OpenStreetMap option is marked as selected.
+  // If the UI uses aria-selected:
+  const selectedOSM = page.getByRole('option', { name: 'OpenStreetMap', selected: true }).or(osmText);
+  await expect(selectedOSM).toBeVisible();
+
+  // Assert that Carto Light is no longer selected.
+  const cartoLightOption = page.getByText('Carto Light');
+  // It should still be visible in the list but not selected.
+  await expect(cartoLightOption).toBeVisible();
+  
+  // Check that Carto Light is not the active selection.
+  // If it was a button, it might lose an 'aria-pressed' or similar attribute.
+  // Or we can check that the map has changed, but we don't have map helpers.
+  // Let's assume the selection state is reflected in the UI component.
+  // We can assert that the OpenStreetMap option is the one that is currently "active" or "selected".
+  
+  // Since we don't have specific test ids for the selected state, we rely on the fact that
+  // the user clicked OpenStreetMap and it should be the one reflecting the selection.
+  // We can also check that the base map selector button text or icon might change, but that's speculative.
+  
+  // A robust assertion: Ensure the OpenStreetMap option is visible and the Carto Light option is visible.
+  // The actual map change is hard to assert without map helpers or specific DOM indicators.
+  // However, the prompt says "The OpenStreetMap base map is selected", which implies a UI state change.
+  
+  // Let's assume there's a visual indicator for the selected base map.
+  // We'll assert that the OpenStreetMap option is visible and perhaps has a specific class or attribute if known.
+  // Without specific test ids for selection state, we'll assert visibility of both, implying the list is still open or the change is registered.
+  
+  // If the dialog closes after selection, we might need to re-open it to verify, or assert based on the button state.
+  // Let's assume the dialog closes and the base map button reflects the new selection.
+  
+  // If the button text changes to "OpenStreetMap":
+  // await expect(page.getByRole('button', { name: 'OpenStreetMap' })).toBeVisible();
+  
+  // If the button text doesn't change, we might need to re-open the selector to check.
+  // Let's try to re-open and check the selected state.
+  await baseMapSelectorButton.click();
+  await expect(page.getByRole('option', { name: 'OpenStreetMap', selected: true })).toBeVisible();
+  await expect(page.getByRole('option', { name: 'Carto Light', selected: true })).not.toBeVisible();
+});

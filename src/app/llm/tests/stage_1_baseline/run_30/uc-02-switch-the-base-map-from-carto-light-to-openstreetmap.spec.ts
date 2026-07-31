@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // 1. The user opens the base map selector in the layer switcher.
+  // Assuming the layer switcher has a toggle/button to expand base map options.
+  // If the base map selector is always visible, we can skip this step or just interact with it directly.
+  // Let's assume there's a test id for the base map selector button or the list itself.
+  // Common pattern: a button labeled "Base Map" or similar.
+  const baseMapSelectorButton = page.getByRole('button', { name: /Base Map/i });
+  await expect(baseMapSelectorButton).toBeVisible();
+  await baseMapSelectorButton.click();
+
+  // Wait for the base map options list to appear
+  const baseMapList = page.getByTestId('base-map-list');
+  await expect(baseMapList).toBeVisible();
+
+  // 2. The user selects 'OpenStreetMap' as the base map.
+  const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap' });
+  await expect(openStreetMapOption).toBeVisible();
+  await openStreetMapOption.click();
+
+  // Expected results:
+  // - The OpenStreetMap base map is selected.
+  // - The Carto Light base map is no longer selected.
+  
+  // Assert that OpenStreetMap is now selected (aria-selected="true" or similar class)
+  await expect(openStreetMapOption).toBeChecked(); // Assuming radio group behavior or checkbox
+  // If it's not a checkbox/radio, check for selected state
+  await expect(openStreetMapOption).toHaveAttribute('aria-selected', 'true');
+
+  // Assert that Carto Light is no longer selected
+  const cartoLightOption = page.getByRole('option', { name: 'Carto Light' });
+  await expect(cartoLightOption).not.toHaveAttribute('aria-selected', 'true');
+});

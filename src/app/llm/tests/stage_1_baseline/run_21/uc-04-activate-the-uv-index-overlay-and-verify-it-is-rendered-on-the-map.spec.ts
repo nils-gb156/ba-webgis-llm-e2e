@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the application to load and the layer switcher (TOC) to be visible
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  // Locate the UV-Index overlay layer item in the TOC.
+  // We look for the text "UV-Index" within the layer switcher container.
+  const uvIndexLayerItem = page.getByTestId('layer-switcher').getByText('UV-Index');
+  await expect(uvIndexLayerItem).toBeVisible();
+
+  // The UV-Index overlay is initially hidden. We need to find the visibility toggle (checkbox/switch) associated with it.
+  // Based on typical Chakra UI structures, the toggle might be a sibling or child.
+  // We will look for a checkbox or switch near the "UV-Index" text.
+  // Using `getByRole` with `checked: false` to ensure we target the hidden state initially,
+  // or simply finding the input associated with the label "UV-Index".
+  
+  // Let's try to find the checkbox specifically for UV-Index.
+  // Often, the structure is Label -> Checkbox or Checkbox -> Label.
+  // We'll assume the checkbox is accessible via the label "UV-Index" or find it by role within the layer item context.
+  
+  // A robust way is to find the layer container for UV-Index and then find the checkbox inside it.
+  // However, without specific test IDs for the layer items, we rely on text.
+  // Let's assume the checkbox is a sibling or the next element after the text.
+  // Alternatively, we can use `getByRole('checkbox', { name: 'UV-Index' })` if the accessible name is set correctly.
+  
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index' });
+  
+  // Ensure it is initially unchecked (hidden)
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  // Click the visibility toggle to show the layer
+  // Since it's a Chakra UI checkbox, we use force: true to bypass the decorative overlay
+  await uvIndexCheckbox.click({ force: true });
+
+  // Verify the toggle is now in the enabled (checked) state
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  // Wait for the map to load the layer tiles.
+  // We can wait for a network request to the WMS or tile server for the UV-Index layer.
+  // Assuming the layer name or a specific identifier is in the URL.
+  // We'll wait for a response that likely contains "UV" or the specific layer endpoint.
+  // Since we don't know the exact URL pattern, we'll wait for a generic tile request or a specific one if known.
+  // A safer bet for "tiles rendered" is to wait for a network request to the tile server.
+  // Let's assume the tile server URL contains 'tiles' or 'wms'.
+  
+  // We will poll the map canvas for changes or wait for a network response.
+  // Since we can't assert on the canvas directly, we rely on the network request.
+  
+  const uvIndexRequestPromise = page.waitForResponse(response => {
+    const url = response.url();
+    // Check if the response is a tile or WMS request for the UV-Index layer.
+    // This might require knowing the specific layer name in the WMS GetMap request or tile URL.
+    // For this test, we'll assume a generic tile request or a specific one if we can infer it.
+    // Let's look for 'UV' in the URL or a specific layer parameter.
+    return url.includes('UV') || url.includes('uv-index') || url.includes('UV-Index');
+  }, { timeout: 10000 });
+
+  await uvIndexRequestPromise;
+
+  // Since we can't directly assert on the canvas content, we verify that the layer is active and the request was made.
+  // The prompt states "The UV-Index overlay tiles are rendered on the map canvas."
+  // We've verified the request was made. To further confirm, we could wait for the map to be idle or check for specific features if available.
+  // However, without helper functions provided, we rely on the network request as a proxy for rendering.
+  
+  // Additional check: Ensure the map container is still visible and the application hasn't crashed.
+  await expect(page.getByTestId('map-container')).toBeVisible();
+});

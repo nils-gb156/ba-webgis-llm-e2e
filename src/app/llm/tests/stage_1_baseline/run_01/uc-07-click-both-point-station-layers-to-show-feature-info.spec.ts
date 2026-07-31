@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the app to load and the info panel to be visible
+  await expect(page.getByTestId('info-panel')).toBeVisible();
+
+  // Ensure UV-Index Stations layer (WMS) is active
+  // We assume the layer tree allows toggling. We need to ensure it's checked.
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index Station' });
+  if (!(await uvIndexCheckbox.isChecked())) {
+    await uvIndexCheckbox.click({ force: true });
+  }
+
+  // Ensure EUCOS Ground Stations layer (WFS) is active
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Station' });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+
+  // Click on the map at the specific coordinates where both stations are located
+  // Coordinates are in EPSG:3857
+  const mapContainer = page.locator('.ol-viewport');
+  await mapContainer.click({
+    position: { x: 1188692.84, y: 6767643.28 }
+  });
+
+  // Wait for the info panel to load the station info for both layers
+  // We check for the presence of the section headers or titles in the info panel
+  await expect(page.getByText('UV-Index Station')).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station')).toBeVisible();
+});

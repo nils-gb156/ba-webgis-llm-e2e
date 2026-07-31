@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  // Navigate to the application
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // Wait for the map and UI to be ready.
+  // Assuming a standard loading state or map container presence.
+  await expect(page.getByTestId('map-container')).toBeVisible({ timeout: 30000 });
+
+  // Step 1: Click the 'Print Map' button in the toolbar to open the printing panel.
+  // We assume a test id for the print tool button based on common naming conventions.
+  const printButton = page.getByTestId('print-tool-button');
+  await expect(printButton).toBeVisible();
+  await printButton.click();
+
+  // Verify the printing panel is visible.
+  const printPanel = page.getByTestId('print-panel');
+  await expect(printPanel).toBeVisible();
+
+  // Step 2: Enter a title for the printout.
+  const titleInput = printPanel.getByLabel('Title');
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Test Map Print');
+
+  // Step 3: Select the PNG file format.
+  // Assuming radio buttons or a select for format. Using radio for accessibility.
+  const pngFormatRadio = printPanel.getByRole('radio', { name: 'PNG' });
+  await expect(pngFormatRadio).toBeVisible();
+  
+  // Check if it's already checked; if not, click it.
+  if (!(await pngFormatRadio.isChecked())) {
+    await pngFormatRadio.click({ force: true });
+  }
+
+  // Step 4: Click the export/print button.
+  const exportButton = printPanel.getByRole('button', { name: /Export|Print|Generate/i });
+  await expect(exportButton).toBeVisible();
+  
+  // Set up download listener before clicking
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    exportButton.click()
+  ]);
+
+  // Verify the download started and has a PNG extension
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/);
+
+  // Clean up the downloaded file to avoid cluttering the system
+  await download.delete();
+});

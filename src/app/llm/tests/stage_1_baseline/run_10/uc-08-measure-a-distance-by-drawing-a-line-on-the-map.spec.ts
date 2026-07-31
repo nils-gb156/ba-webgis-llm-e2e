@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  // 1. Click the 'Measurement' button in the toolbar to open the measurement panel.
+  const measurementButton = page.getByRole('button', { name: 'Measurement' });
+  await measurementButton.click();
+
+  // Verify the measurement panel is visible.
+  const measurementPanel = page.getByRole('dialog', { name: /Measurement/i });
+  await expect(measurementPanel).toBeVisible();
+
+  // 2. Click several points on the map canvas to draw a line.
+  // The map canvas is the element with the data-testid 'map-canvas'.
+  const mapCanvas = page.getByTestId('map-canvas');
+  await expect(mapCanvas).toBeVisible();
+
+  // Get the bounding box of the map to calculate click positions.
+  const mapBox = await mapCanvas.boundingBox();
+  test.fail(!mapBox, 'Map canvas should be visible');
+
+  // Define some points to click on the map.
+  // We'll click in a rough line pattern.
+  const points = [
+    { x: mapBox!.x + 100, y: mapBox!.y + 100 },
+    { x: mapBox!.x + 200, y: mapBox!.y + 150 },
+    { x: mapBox!.x + 300, y: mapBox!.y + 100 },
+  ];
+
+  for (const point of points) {
+    await page.mouse.click(point.x, point.y);
+  }
+
+  // 3. Double-click to finish the measurement.
+  // Double-click on the last point or near it to finish.
+  const lastPoint = points[points.length - 1];
+  await page.mouse.dblclick(lastPoint.x, lastPoint.y);
+
+  // Expected results:
+  // The measurement panel displays a length value with a unit.
+  // We look for text that resembles a measurement result, e.g., "1.23 km" or "1234 m".
+  // The panel might contain a list of segments or a total length.
+  // We'll poll for any text that looks like a number followed by a unit.
+  const measurementResultLocator = page.getByText(/^[0-9,.]+\s*(km|m|mi|ft)$/);
+  await expect.poll(() => measurementResultLocator.isVisible()).toBe(true);
+});
