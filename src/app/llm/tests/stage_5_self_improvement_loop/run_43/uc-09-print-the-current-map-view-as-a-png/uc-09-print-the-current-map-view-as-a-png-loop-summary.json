@@ -1,0 +1,40 @@
+{
+  "run": "run_43",
+  "use_case_id": 9,
+  "title": "Print the current map view as a PNG",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-09-iter-0-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  107 |     ];\n  108 |\n> 109 |     await expect.poll(async () => hasVisibleCandidate(exportButtonCandidates)).toBe(true);\n      |                                                                                ^\n  110 |     const exportButton = await firstVisibleCandidate(exportButtonCandidates);\n  111 |     if (!exportButton) {\n  112 | "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-09-iter-1-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"PNG\"\nReceived: \"png\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  47 |     await expect(formatSelect).toBeVisible();\n  48 |     await formatSelect.selectOption({ label: 'PNG' });\n> 49 |     await expect.poll(() => formatSelect.inputValue()).toBe('PNG');\n     |                                                        ^\n  50 |\n  51 |     await expect(page.getByTestId('scale-bar')).toBeVisible();\n  52 |"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-09-iter-2-print-the-current-map-view-as-a-png.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

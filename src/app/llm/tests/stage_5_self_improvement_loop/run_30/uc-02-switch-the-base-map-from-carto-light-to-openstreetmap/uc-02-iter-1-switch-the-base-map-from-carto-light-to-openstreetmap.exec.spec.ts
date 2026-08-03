@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const baseMapSelector = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+
+    await expect(layerSwitcherToggle).toBeVisible();
+    if (!(await layerSwitcher.isVisible())) {
+        await layerSwitcherToggle.click();
+    }
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(baseMapSelector).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const readSelectedBaseMapLabel = async (): Promise<string> => {
+        return await baseMapSelector.evaluate((element) => {
+            if (element instanceof HTMLSelectElement) {
+                const selectedOption = element.options.item(element.selectedIndex);
+                return selectedOption?.textContent?.trim() ?? '';
+            }
+
+            const ariaValueText = element.getAttribute('aria-valuetext');
+            if (ariaValueText) {
+                return ariaValueText.trim();
+            }
+
+            if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+                return element.value.trim();
+            }
+
+            const nestedInput = element.querySelector('input');
+            if (nestedInput instanceof HTMLInputElement) {
+                return nestedInput.value.trim();
+            }
+
+            return (element.textContent ?? '').trim();
+        });
+    };
+
+    await expect.poll(readSelectedBaseMapLabel).toBe('Carto Light');
+
+    const isNativeSelect = await baseMapSelector.evaluate((element) => element instanceof HTMLSelectElement);
+
+    if (isNativeSelect) {
+        await baseMapSelector.selectOption({ label: 'OpenStreetMap' });
+    } else {
+        await baseMapSelector.click();
+        const osmOption = page.getByRole('option', { name: 'OpenStreetMap', exact: true });
+        await expect(osmOption).toBeVisible();
+        await osmOption.click();
+    }
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+    await expect.poll(readSelectedBaseMapLabel).toBe('OpenStreetMap');
+});

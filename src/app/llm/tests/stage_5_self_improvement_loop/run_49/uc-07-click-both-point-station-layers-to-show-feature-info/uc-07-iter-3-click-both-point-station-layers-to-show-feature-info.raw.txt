@@ -1,0 +1,143 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+
+    const eucosCheckbox = page.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviCheckbox = page.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    await expect(weatherForecastSection).toBeVisible();
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const pixel = await expect
+        .poll(
+            () =>
+                page.evaluate(([x, y]) => {
+                    const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+                    const pixelFromCoordinate = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+                    const size = map?.olMap?.getSize?.();
+
+                    if (
+                        !pixelFromCoordinate ||
+                        !size ||
+                        pixelFromCoordinate.length < 2 ||
+                        size.length < 2 ||
+                        typeof pixelFromCoordinate[0] !== 'number' ||
+                        typeof pixelFromCoordinate[1] !== 'number'
+                    ) {
+                        return undefined;
+                    }
+
+                    const [px, py] = pixelFromCoordinate;
+                    if (px < 0 || py < 0 || px > size[0] || py > size[1]) {
+                        return undefined;
+                    }
+
+                    return {
+                        x: Math.round(px),
+                        y: Math.round(py)
+                    };
+                }, targetCoordinate),
+            { timeout: 10000 }
+        )
+        .not.toBeUndefined();
+
+    await mapContainer.click({ position: pixel! });
+
+    await expect.poll(async () => await weatherForecastSection.innerText(), { timeout: 30000 }).toMatch(/Location:/);
+
+    const getSectionDetailsCount = (text: string, heading: RegExp, stopHeading?: RegExp): number => {
+        const lines = text
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+        const headingIndex = lines.findIndex((line) => heading.test(line));
+        if (headingIndex === -1) {
+            return 0;
+        }
+
+        let count = 0;
+        for (let i = headingIndex + 1; i < lines.length; i++) {
+            if (stopHeading && stopHeading.test(lines[i])) {
+                break;
+            }
+            count++;
+        }
+        return count;
+    };
+
+    await expect
+        .poll(
+            async () => {
+                await infoPanel.evaluate((element) => {
+                    element.scrollTop = element.scrollHeight;
+                });
+                const text = await infoPanel.innerText();
+                return getSectionDetailsCount(
+                    text,
+                    /UV-Index Station(s)?/i,
+                    /EUCOS Ground Station(s)?/i
+                );
+            },
+            { timeout: 30000 }
+        )
+        .toBeGreaterThan(1);
+
+    await expect
+        .poll(
+            async () => {
+                await infoPanel.evaluate((element) => {
+                    element.scrollTop = element.scrollHeight;
+                });
+                const text = await infoPanel.innerText();
+                return getSectionDetailsCount(
+                    text,
+                    /EUCOS Ground Station(s)?/i,
+                    /UV-Index Station(s)?/i
+                );
+            },
+            { timeout: 30000 }
+        )
+        .toBeGreaterThan(1);
+});

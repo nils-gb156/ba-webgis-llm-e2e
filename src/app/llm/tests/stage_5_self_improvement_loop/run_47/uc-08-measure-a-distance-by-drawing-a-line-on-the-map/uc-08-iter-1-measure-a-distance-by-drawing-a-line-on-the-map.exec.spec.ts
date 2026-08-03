@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) !== 'true') {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(
+        measurementPanel.getByRole('heading', { name: 'Measurement', exact: true })
+    ).toBeVisible();
+
+    const box = await mapContainer.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const clickPositions = [
+        { x: Math.round(box.width * 0.38), y: Math.round(box.height * 0.32) },
+        { x: Math.round(box.width * 0.48), y: Math.round(box.height * 0.42) },
+        { x: Math.round(box.width * 0.58), y: Math.round(box.height * 0.36) },
+        { x: Math.round(box.width * 0.64), y: Math.round(box.height * 0.46) }
+    ];
+
+    await mapContainer.click({ position: clickPositions[0] });
+    await mapContainer.click({ position: clickPositions[1] });
+    await mapContainer.click({ position: clickPositions[2] });
+    await mapContainer.dblclick({ position: clickPositions[3] });
+
+    await expect(measurementPanel).toBeVisible();
+
+    const lengthPattern = /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i;
+    const lengthTooltip = page.getByRole('tooltip').filter({ hasText: lengthPattern }).first();
+
+    await expect(lengthTooltip).toBeVisible();
+    await expect(lengthTooltip).toContainText(lengthPattern);
+});

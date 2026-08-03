@@ -1,0 +1,269 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getHighlightedCoordinate,
+    getMapZoomLevel,
+    isLayerRendered
+} from '../../../../map-model-helpers';
+
+type CapturedResponse = {
+    url: string;
+    status: number;
+    forecastEntryCount?: number;
+};
+
+const FORECAST_HINT_REGEX =
+    /(forecast|weather|hour|time|date|temp|temperature|precip|rain|snow|cloud|wind|icon|entry|timeseries|daily)/i;
+
+function extractForecastEntryCount(value: unknown): number | undefined {
+    const visited = new Set<object>();
+
+    const walk = (node: unknown, path: string[] = []): number | undefined => {
+        if (node === null || node === undefined) {
+            return undefined;
+        }
+
+        if (typeof node !== 'object') {
+            return undefined;
+        }
+
+        if (visited.has(node)) {
+            return undefined;
+        }
+        visited.add(node);
+
+        if (Array.isArray(node)) {
+            if (node.length === 24) {
+                const pathLooksForecast = path.some((segment) => FORECAST_HINT_REGEX.test(segment));
+                const hasForecastLikeObject = node.some((item) => {
+                    if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+                        return false;
+                    }
+                    return Object.keys(item).some((key) => FORECAST_HINT_REGEX.test(key));
+                });
+                const primitiveOnly = node.every(
+                    (item) =>
+                        item === null ||
+                        typeof item === 'string' ||
+                        typeof item === 'number' ||
+                        typeof item === 'boolean'
+                );
+
+                if (hasForecastLikeObject || (primitiveOnly && pathLooksForecast)) {
+                    return 24;
+                }
+            }
+
+            for (const item of node) {
+                const nested = walk(item, path);
+                if (nested === 24) {
+                    return nested;
+                }
+            }
+
+            return undefined;
+        }
+
+        const record = node as Record<string, unknown>;
+        const keys = Object.keys(record);
+        const objectLooksForecast = keys.some((key) => FORECAST_HINT_REGEX.test(key));
+
+        for (const key of keys) {
+            const child = record[key];
+            if (
+                Array.isArray(child) &&
+                child.length === 24 &&
+                (objectLooksForecast || FORECAST_HINT_REGEX.test(key))
+            ) {
+                return 24;
+            }
+        }
+
+        for (const key of keys) {
+            const nested = walk(record[key], [...path, key]);
+            if (nested === 24) {
+                return nested;
+            }
+        }
+
+        return undefined;
+    };
+
+    return walk(value);
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const weatherForecastHeading = infoPanel.getByRole('heading', {
+        name: 'Weather Forecast',
+        exact: true
+    });
+    const placeholderText = weatherForecastSection.getByText(
+        'Click on the map to load a forecast.',
+        { exact: true }
+    );
+    const errorText = weatherForecastSection.getByText('Fehler beim Laden der Wetterdaten', {
+        exact: true
+    });
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    if (!(await infoPanel.isVisible())) {
+        const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastHeading).toBeVisible();
+    await expect(placeholderText).toBeVisible();
+
+    const eucosGroundStationsCheckbox = page.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    const uvIndexStationsCheckbox = page.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+
+    if (await eucosGroundStationsCheckbox.isChecked()) {
+        await eucosGroundStationsCheckbox.click({ force: true });
+    }
+    await expect(eucosGroundStationsCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(false);
+
+    if (await uvIndexStationsCheckbox.isChecked()) {
+        await uvIndexStationsCheckbox.click({ force: true });
+    }
+    await expect(uvIndexStationsCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(false);
+
+    const capturedResponses: CapturedResponse[] = [];
+    page.on('response', async (response) => {
+        const resourceType = response.request().resourceType();
+        if (resourceType !== 'xhr' && resourceType !== 'fetch') {
+            return;
+        }
+
+        let forecastEntryCount: number | undefined;
+        try {
+            const contentType = response.headers()['content-type'] ?? '';
+            if (contentType.includes('json') || /weather|forecast|meteo/i.test(response.url())) {
+                const body = await response.json();
+                forecastEntryCount = extractForecastEntryCount(body);
+            }
+        } catch {
+            // Ignore non-JSON or unreadable responses.
+        }
+
+        capturedResponses.push({
+            url: response.url(),
+            status: response.status(),
+            forecastEntryCount
+        });
+    });
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const clamp = (value: number, min: number, max: number) =>
+        Math.max(min, Math.min(max, value));
+
+    const candidateFractions = [
+        { x: 0.5, y: 0.38 },
+        { x: 0.58, y: 0.46 },
+        { x: 0.42, y: 0.52 },
+        { x: 0.55, y: 0.6 },
+        { x: 0.35, y: 0.42 },
+        { x: 0.66, y: 0.56 },
+        { x: 0.48, y: 0.68 },
+        { x: 0.6, y: 0.34 },
+        { x: 0.4, y: 0.64 }
+    ];
+
+    let successfulResponse: CapturedResponse | undefined;
+
+    for (const candidate of candidateFractions) {
+        const position = {
+            x: clamp(Math.round(mapBox.width * candidate.x), 10, Math.round(mapBox.width) - 10),
+            y: clamp(Math.round(mapBox.height * candidate.y), 10, Math.round(mapBox.height) - 10)
+        };
+
+        const previousHighlight = await getHighlightedCoordinate(page);
+        const responseCountBeforeClick = capturedResponses.length;
+
+        await mapContainer.click({ position });
+
+        await expect
+            .poll(async () => {
+                const currentHighlight = await getHighlightedCoordinate(page);
+                if (!Array.isArray(currentHighlight) || currentHighlight.length !== 2) {
+                    return false;
+                }
+
+                if (!previousHighlight) {
+                    return true;
+                }
+
+                return (
+                    currentHighlight[0] !== previousHighlight[0] ||
+                    currentHighlight[1] !== previousHighlight[1]
+                );
+            })
+            .toBe(true);
+
+        try {
+            await expect
+                .poll(
+                    () => {
+                        const freshResponses = capturedResponses.slice(responseCountBeforeClick);
+                        const match = freshResponses.find(
+                            (entry) =>
+                                entry.status >= 200 &&
+                                entry.status < 300 &&
+                                entry.forecastEntryCount === 24
+                        );
+                        successfulResponse = match;
+                        return match?.forecastEntryCount ?? 0;
+                    },
+                    { timeout: 15000 }
+                )
+                .toBe(24);
+            break;
+        } catch {
+            continue;
+        }
+    }
+
+    expect(
+        successfulResponse,
+        'No clicked map position produced a successful weather forecast response with 24 entries.'
+    ).toBeDefined();
+
+    await expect
+        .poll(async () => {
+            const highlight = await getHighlightedCoordinate(page);
+            return Array.isArray(highlight) && highlight.length === 2;
+        })
+        .toBe(true);
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastHeading).toBeVisible();
+    await expect(placeholderText).not.toBeVisible();
+    await expect(errorText).not.toBeVisible();
+
+    expect(successfulResponse?.forecastEntryCount).toBe(24);
+});

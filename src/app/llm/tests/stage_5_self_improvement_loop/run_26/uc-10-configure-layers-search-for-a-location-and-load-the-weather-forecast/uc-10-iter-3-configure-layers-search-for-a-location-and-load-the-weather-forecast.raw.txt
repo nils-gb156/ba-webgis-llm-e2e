@@ -1,0 +1,95 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+    const temperatureCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await expect(page.getByTestId('temperature-legend')).toBeHidden();
+    await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+    const initialCenter = await getMapCenter(page);
+    if (!initialCenter) {
+        throw new Error('Map center was not available after the map became ready.');
+    }
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    const geocoderResults = page.getByTestId('geocoder-results');
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+
+    await expect(geocoderResults).toBeVisible();
+    await expect(firstResult).toBeVisible();
+    await expect(firstResult).toContainText(/Münster|Munster/i);
+
+    await firstResult.click();
+
+    await expect(geocoderInput).toHaveValue(/Münster/i);
+
+    await expect.poll(async () => (await getHighlightedCoordinate(page)) !== undefined, {
+        timeout: 15000
+    }).toBe(true);
+
+    const highlightedCoordinate = await getHighlightedCoordinate(page);
+    if (!highlightedCoordinate) {
+        throw new Error('No highlighted coordinate was created for the selected geocoder result.');
+    }
+
+    const distance = (a: [number, number], b: [number, number]) =>
+        Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+    const initialDistanceToTarget = distance(initialCenter, highlightedCoordinate);
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        return currentCenter ? distance(currentCenter, initialCenter) : 0;
+    }, {
+        timeout: 15000
+    }).toBeGreaterThan(1000);
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        return currentCenter ? distance(currentCenter, highlightedCoordinate) : Number.POSITIVE_INFINITY;
+    }, {
+        timeout: 15000
+    }).toBeLessThan(initialDistanceToTarget);
+
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.', {
+        timeout: 20000
+    });
+    await expect(weatherForecastSection.getByTestId('weather-forecast-entry')).toHaveCount(24, {
+        timeout: 20000
+    });
+});

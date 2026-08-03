@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_07/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 8974,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \u001b[32m\"EUCOS Ground Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature15.76 Â°CHumidity68 %Wind direction246Â°Wind speed5.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.38 Â°CHumidity76 %Wind direction270Â°Wind speed5.5 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity86 %Wind direction282Â°Wind speed4.48 m/sMon, Jul 27, 08:00 AMlight rainTemperature14.56 Â°CHumidity87 %Wind direction296Â°Wind speed4.19 m/sMon, Jul 27, 11:00 AMlight rainTemperature16.75 Â°CHumidity70 %Wind direction292Â°Wind speed4.09 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity53 %Wind direction284Â°Wind speed5.08 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.75 Â°CHumidity65 %Wind direction282Â°Wind speed3.47 m/sMon, Jul 27, 08:00 PMlight rainTemperature18.6 Â°CHumidity79 %Wind direction285Â°Wind speed2.98 m/sMon, Jul 27, 11:00 PMlight rainTemperature12.94 Â°CHumidity97 %Wind direction262Â°Wind speed1.89 m/sTue, Jul 28, 02:00 AMscattered cloudsTemperature11.55 Â°CHumidity97 %Wind direction260Â°Wind speed2.41 m/sTue, Jul 28, 05:00 AMscattered cloudsTemperature9.14 Â°CHumidity97 %Wind direction255Â°Wind speed2.03 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature14.25 Â°CHumidity79 %Wind direction272Â°Wind speed2.55 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.38 Â°CHumidity55 %Wind direction280Â°Wind speed3.73 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature23.35 Â°CHumidity48 %Wind direction280Â°Wind speed3.66 m/sTue, Jul 28, 05:00 PMfew cloudsTemperature21.94 Â°CHumidity45 %Wind direction298Â°Wind speed3.29 m/sTue, Jul 28, 08:00 PMfew cloudsTemperature19.21 Â°CHumidity64 %Wind direction325Â°Wind speed0.98 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature14.74 Â°CHumidity76 %Wind direction192Â°Wind speed0.6 m/sWed, Jul 29, 02:00 AMfew cloudsTemperature14 Â°CHumidity78 %Wind direction174Â°Wind speed1.5 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature13.75 Â°CHumidity76 %Wind direction188Â°Wind speed1.38 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature19.07 Â°CHumidity58 %Wind direction179Â°Wind speed1.43 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature24.94 Â°CHumidity40 %Wind direction190Â°Wind speed1.97 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature27.73 Â°CHumidity34 %Wind direction193Â°Wind speed2.45 m/sWed, Jul 29, 05:00 PMclear skyTemperature28.66 Â°CHumidity31 %Wind direction188Â°Wind speed1.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature24.38 Â°CHumidity50 %Wind direction86Â°Wind speed0.75 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature15.76 Â°CHumidity68 %Wind direction246Â°Wind speed5.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.38 Â°CHumidity76 %Wind direction270Â°Wind speed5.5 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity86 %Wind direction282Â°Wind speed4.48 m/sMon, Jul 27, 08:00 AMlight rainTemperature14.56 Â°CHumidity87 %Wind direction296Â°Wind speed4.19 m/sMon, Jul 27, 11:00 AMlight rainTemperature16.75 Â°CHumidity70 %Wind direction292Â°Wind speed4.09 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity53 %Wind direction284Â°Wind speed5.08 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.75 Â°CHumidity65 %Wind direction282Â°Wind speed3.47 m/sMon, Jul 27, 08:00 PMlight rainTemperature18.6 Â°CHumidity79 %Wind direction285Â°Wind speed2.98 m/sMon, Jul 27, 11:00 PMlight rainTemperature12.94 Â°CHumidity97 %Wind direction262Â°Wind speed1.89 m/sTue, Jul 28, 02:00 AMscattered cloudsTemperature11.55 Â°CHumidity97 %Wind direction260Â°Wind speed2.41 m/sTue, Jul 28, 05:00 AMscattered cloudsTemperature9.14 Â°CHumidity97 %Wind direction255Â°Wind speed2.03 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature14.25 Â°CHumidity79 %Wind direction272Â°Wind speed2.55 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.38 Â°CHumidity55 %Wind direction280Â°Wind speed3.73 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature23.35 Â°CHumidity48 %Wind direction280Â°Wind speed3.66 m/sTue, Jul 28, 05:00 PMfew cloudsTemperature21.94 Â°CHumidity45 %Wind direction298Â°Wind speed3.29 m/sTue, Jul 28, 08:00 PMfew cloudsTemperature19.21 Â°CHumidity64 %Wind direction325Â°Wind speed0.98 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature14.74 Â°CHumidity76 %Wind direction192Â°Wind speed0.6 m/sWed, Jul 29, 02:00 AMfew cloudsTemperature14 Â°CHumidity78 %Wind direction174Â°Wind speed1.5 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature13.75 Â°CHumidity76 %Wind direction188Â°Wind speed1.38 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature19.07 Â°CHumidity58 %Wind direction179Â°Wind speed1.43 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature24.94 Â°CHumidity40 %Wind direction190Â°Wind speed1.97 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature27.73 Â°CHumidity34 %Wind direction193Â°Wind speed2.45 m/sWed, Jul 29, 05:00 PMclear skyTemperature28.66 Â°CHumidity31 %Wind direction188Â°Wind speed1.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature24.38 Â°CHumidity50 %Wind direction86Â°Wind speed0.75 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \u001b[32m\"EUCOS Ground Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature15.76 Â°CHumidity68 %Wind direction246Â°Wind speed5.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.38 Â°CHumidity76 %Wind direction270Â°Wind speed5.5 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity86 %Wind direction282Â°Wind speed4.48 m/sMon, Jul 27, 08:00 AMlight rainTemperature14.56 Â°CHumidity87 %Wind direction296Â°Wind speed4.19 m/sMon, Jul 27, 11:00 AMlight rainTemperature16.75 Â°CHumidity70 %Wind direction292Â°Wind speed4.09 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity53 %Wind direction284Â°Wind speed5.08 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.75 Â°CHumidity65 %Wind direction282Â°Wind speed3.47 m/sMon, Jul 27, 08:00 PMlight rainTemperature18.6 Â°CHumidity79 %Wind direction285Â°Wind speed2.98 m/sMon, Jul 27, 11:00 PMlight rainTemperature12.94 Â°CHumidity97 %Wind direction262Â°Wind speed1.89 m/sTue, Jul 28, 02:00 AMscattered cloudsTemperature11.55 Â°CHumidity97 %Wind direction260Â°Wind speed2.41 m/sTue, Jul 28, 05:00 AMscattered cloudsTemperature9.14 Â°CHumidity97 %Wind direction255Â°Wind speed2.03 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature14.25 Â°CHumidity79 %Wind direction272Â°Wind speed2.55 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.38 Â°CHumidity55 %Wind direction280Â°Wind speed3.73 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature23.35 Â°CHumidity48 %Wind direction280Â°Wind speed3.66 m/sTue, Jul 28, 05:00 PMfew cloudsTemperature21.94 Â°CHumidity45 %Wind direction298Â°Wind speed3.29 m/sTue, Jul 28, 08:00 PMfew cloudsTemperature19.21 Â°CHumidity64 %Wind direction325Â°Wind speed0.98 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature14.74 Â°CHumidity76 %Wind direction192Â°Wind speed0.6 m/sWed, Jul 29, 02:00 AMfew cloudsTemperature14 Â°CHumidity78 %Wind direction174Â°Wind speed1.5 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature13.75 Â°CHumidity76 %Wind direction188Â°Wind speed1.38 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature19.07 Â°CHumidity58 %Wind direction179Â°Wind speed1.43 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature24.94 Â°CHumidity40 %Wind direction190Â°Wind speed1.97 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature27.73 Â°CHumidity34 %Wind direction193Â°Wind speed2.45 m/sWed, Jul 29, 05:00 PMclear skyTemperature28.66 Â°CHumidity31 %Wind direction188Â°Wind speed1.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature24.38 Â°CHumidity50 %Wind direction86Â°Wind speed0.75 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature15.76 Â°CHumidity68 %Wind direction246Â°Wind speed5.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.38 Â°CHumidity76 %Wind direction270Â°Wind speed5.5 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity86 %Wind direction282Â°Wind speed4.48 m/sMon, Jul 27, 08:00 AMlight rainTemperature14.56 Â°CHumidity87 %Wind direction296Â°Wind speed4.19 m/sMon, Jul 27, 11:00 AMlight rainTemperature16.75 Â°CHumidity70 %Wind direction292Â°Wind speed4.09 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity53 %Wind direction284Â°Wind speed5.08 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.75 Â°CHumidity65 %Wind direction282Â°Wind speed3.47 m/sMon, Jul 27, 08:00 PMlight rainTemperature18.6 Â°CHumidity79 %Wind direction285Â°Wind speed2.98 m/sMon, Jul 27, 11:00 PMlight rainTemperature12.94 Â°CHumidity97 %Wind direction262Â°Wind speed1.89 m/sTue, Jul 28, 02:00 AMscattered cloudsTemperature11.55 Â°CHumidity97 %Wind direction260Â°Wind speed2.41 m/sTue, Jul 28, 05:00 AMscattered cloudsTemperature9.14 Â°CHumidity97 %Wind direction255Â°Wind speed2.03 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature14.25 Â°CHumidity79 %Wind direction272Â°Wind speed2.55 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.38 Â°CHumidity55 %Wind direction280Â°Wind speed3.73 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature23.35 Â°CHumidity48 %Wind direction280Â°Wind speed3.66 m/sTue, Jul 28, 05:00 PMfew cloudsTemperature21.94 Â°CHumidity45 %Wind direction298Â°Wind speed3.29 m/sTue, Jul 28, 08:00 PMfew cloudsTemperature19.21 Â°CHumidity64 %Wind direction325Â°Wind speed0.98 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature14.74 Â°CHumidity76 %Wind direction192Â°Wind speed0.6 m/sWed, Jul 29, 02:00 AMfew cloudsTemperature14 Â°CHumidity78 %Wind direction174Â°Wind speed1.5 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature13.75 Â°CHumidity76 %Wind direction188Â°Wind speed1.38 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature19.07 Â°CHumidity58 %Wind direction179Â°Wind speed1.43 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature24.94 Â°CHumidity40 %Wind direction190Â°Wind speed1.97 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature27.73 Â°CHumidity34 %Wind direction193Â°Wind speed2.45 m/sWed, Jul 29, 05:00 PMclear skyTemperature28.66 Â°CHumidity31 %Wind direction188Â°Wind speed1.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature24.38 Â°CHumidity50 %Wind direction86Â°Wind speed0.75 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:95:29",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 29,
+                      "line": 95
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 93 |\u001b[39m\n \u001b[90m 94 |\u001b[39m     \u001b[36mawait\u001b[39m expect(infoPanel)\u001b[33m.\u001b[39mtoContainText(\u001b[32m'UV-Index Station'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 95 |\u001b[39m     \u001b[36mawait\u001b[39m expect(infoPanel)\u001b[33m.\u001b[39mtoContainText(\u001b[32m'EUCOS Ground Station'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 96 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 97 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 29,
+                        "line": 95
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \u001b[32m\"EUCOS Ground Station\"\u001b[39m\nReceived string:    \u001b[31m\"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature15.76 Â°CHumidity68 %Wind direction246Â°Wind speed5.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.38 Â°CHumidity76 %Wind direction270Â°Wind speed5.5 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity86 %Wind direction282Â°Wind speed4.48 m/sMon, Jul 27, 08:00 AMlight rainTemperature14.56 Â°CHumidity87 %Wind direction296Â°Wind speed4.19 m/sMon, Jul 27, 11:00 AMlight rainTemperature16.75 Â°CHumidity70 %Wind direction292Â°Wind speed4.09 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity53 %Wind direction284Â°Wind speed5.08 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.75 Â°CHumidity65 %Wind direction282Â°Wind speed3.47 m/sMon, Jul 27, 08:00 PMlight rainTemperature18.6 Â°CHumidity79 %Wind direction285Â°Wind speed2.98 m/sMon, Jul 27, 11:00 PMlight rainTemperature12.94 Â°CHumidity97 %Wind direction262Â°Wind speed1.89 m/sTue, Jul 28, 02:00 AMscattered cloudsTemperature11.55 Â°CHumidity97 %Wind direction260Â°Wind speed2.41 m/sTue, Jul 28, 05:00 AMscattered cloudsTemperature9.14 Â°CHumidity97 %Wind direction255Â°Wind speed2.03 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature14.25 Â°CHumidity79 %Wind direction272Â°Wind speed2.55 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.38 Â°CHumidity55 %Wind direction280Â°Wind speed3.73 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature23.35 Â°CHumidity48 %Wind direction280Â°Wind speed3.66 m/sTue, Jul 28, 05:00 PMfew cloudsTemperature21.94 Â°CHumidity45 %Wind direction298Â°Wind speed3.29 m/sTue, Jul 28, 08:00 PMfew cloudsTemperature19.21 Â°CHumidity64 %Wind direction325Â°Wind speed0.98 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature14.74 Â°CHumidity76 %Wind direction192Â°Wind speed0.6 m/sWed, Jul 29, 02:00 AMfew cloudsTemperature14 Â°CHumidity78 %Wind direction174Â°Wind speed1.5 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature13.75 Â°CHumidity76 %Wind direction188Â°Wind speed1.38 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature19.07 Â°CHumidity58 %Wind direction179Â°Wind speed1.43 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature24.94 Â°CHumidity40 %Wind direction190Â°Wind speed1.97 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature27.73 Â°CHumidity34 %Wind direction193Â°Wind speed2.45 m/sWed, Jul 29, 05:00 PMclear skyTemperature28.66 Â°CHumidity31 %Wind direction188Â°Wind speed1.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature24.38 Â°CHumidity50 %Wind direction86Â°Wind speed0.75 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('info-panel')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div class=\"css-1632bd4\" data-testid=\"info-panel\" aria-label=\"Map controls\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature15.76 Â°CHumidity68 %Wind direction246Â°Wind speed5.86 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.38 Â°CHumidity76 %Wind direction270Â°Wind speed5.5 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity86 %Wind direction282Â°Wind speed4.48 m/sMon, Jul 27, 08:00 AMlight rainTemperature14.56 Â°CHumidity87 %Wind direction296Â°Wind speed4.19 m/sMon, Jul 27, 11:00 AMlight rainTemperature16.75 Â°CHumidity70 %Wind direction292Â°Wind speed4.09 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity53 %Wind direction284Â°Wind speed5.08 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature19.75 Â°CHumidity65 %Wind direction282Â°Wind speed3.47 m/sMon, Jul 27, 08:00 PMlight rainTemperature18.6 Â°CHumidity79 %Wind direction285Â°Wind speed2.98 m/sMon, Jul 27, 11:00 PMlight rainTemperature12.94 Â°CHumidity97 %Wind direction262Â°Wind speed1.89 m/sTue, Jul 28, 02:00 AMscattered cloudsTemperature11.55 Â°CHumidity97 %Wind direction260Â°Wind speed2.41 m/sTue, Jul 28, 05:00 AMscattered cloudsTemperature9.14 Â°CHumidity97 %Wind direction255Â°Wind speed2.03 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature14.25 Â°CHumidity79 %Wind direction272Â°Wind speed2.55 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.38 Â°CHumidity55 %Wind direction280Â°Wind speed3.73 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature23.35 Â°CHumidity48 %Wind direction280Â°Wind speed3.66 m/sTue, Jul 28, 05:00 PMfew cloudsTemperature21.94 Â°CHumidity45 %Wind direction298Â°Wind speed3.29 m/sTue, Jul 28, 08:00 PMfew cloudsTemperature19.21 Â°CHumidity64 %Wind direction325Â°Wind speed0.98 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature14.74 Â°CHumidity76 %Wind direction192Â°Wind speed0.6 m/sWed, Jul 29, 02:00 AMfew cloudsTemperature14 Â°CHumidity78 %Wind direction174Â°Wind speed1.5 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature13.75 Â°CHumidity76 %Wind direction188Â°Wind speed1.38 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature19.07 Â°CHumidity58 %Wind direction179Â°Wind speed1.43 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature24.94 Â°CHumidity40 %Wind direction190Â°Wind speed1.97 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature27.73 Â°CHumidity34 %Wind direction193Â°Wind speed2.45 m/sWed, Jul 29, 05:00 PMclear skyTemperature28.66 Â°CHumidity31 %Wind direction188Â°Wind speed1.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature24.38 Â°CHumidity50 %Wind direction86Â°Wind speed0.75 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[22m\n\n\n  93 |\n  94 |     await expect(infoPanel).toContainText('UV-Index Station');\n> 95 |     await expect(infoPanel).toContainText('EUCOS Ground Station');\n     |                             ^\n  96 | });\n  97 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:95:29"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-26T19:39:05.085Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-bb1fb-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_07\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 29,
+                    "line": 95
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "49786e8e471f03082f50-1e1b586dd157a2f14638",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_07/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-26T19:39:04.466Z",
+    "duration": 11887.882000000001,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

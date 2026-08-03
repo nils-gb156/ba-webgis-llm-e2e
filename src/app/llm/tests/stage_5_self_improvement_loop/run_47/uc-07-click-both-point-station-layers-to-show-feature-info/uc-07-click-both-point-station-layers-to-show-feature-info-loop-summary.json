@@ -1,0 +1,49 @@
+{
+  "run": "run_47",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\n\n\n  87 |\n  88 |   await expect(infoPanel.getByText('UV-Index Station', { exact: true })).toBeVisible();\n> 89 |   await expect(infoPanel.getByText('EUCOS Groun"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeTruthy()\n\nReceived: undefined\n\n  68 |   const mapBox = await mapContainer.boundingBox();\n  69 |   expect(mapBox).not.toBeNull();\n> 70 |   expect(clickPosition).toBeTruthy();\n     |                         ^\n  71 |   expect(clickPosition!.x).toBeGreaterThan(0);\n  72 |   expect(clickPosition!.y).toBeGreaterThan(0);\n  73 |   expect(clickPosition!.x).toBeLessThan(mapBox!.width);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_lo"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /EUCOS Ground Station/i\nReceived string:  \"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 11:00 AMlight rainTemperature14.72 Â°CHumidity71 %Wind direction298Â°Wind speed4.07 m/sMon, Jul 27, 02:00 PMlight rainTemperature16.77 Â°CHumidity60 %Wind direction287Â°Wind speed4.78 m/sMon, Jul 27, 05:00 PMbroken cloudsTemperature19.45 Â°CHumidity61 %Wind direction280Â°Wind speed4.15 m/sMon, Jul 27, 08:00 PMlight rainTemperatu"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

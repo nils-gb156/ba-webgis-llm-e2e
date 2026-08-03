@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const initialExtentButton = page.getByTestId('initial-extent-button');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+    if (!(await infoPanel.isVisible())) {
+        expect(await infoPanelToggle.getAttribute('aria-pressed')).not.toBe('true');
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect.poll(() => measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+    const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    const getPixelFromCoordinate = async (): Promise<[number, number] | undefined> => {
+        return await page.evaluate(([x, y]) => {
+            const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+            return Array.isArray(pixel) && pixel.length >= 2 ? [pixel[0], pixel[1]] : undefined;
+        }, targetCoordinate);
+    };
+
+    const isTargetCoordinateVisibleInMap = async (): Promise<boolean> => {
+        const pixel = await getPixelFromCoordinate();
+        const box = await mapContainer.boundingBox();
+        if (!pixel || !box) {
+            return false;
+        }
+
+        return (
+            pixel[0] >= 1 &&
+            pixel[1] >= 1 &&
+            pixel[0] <= box.width - 1 &&
+            pixel[1] <= box.height - 1
+        );
+    };
+
+    if (!(await isTargetCoordinateVisibleInMap())) {
+        await initialExtentButton.click();
+    }
+
+    await expect.poll(() => isTargetCoordinateVisibleInMap()).toBe(true);
+
+    const clickPixel = await getPixelFromCoordinate();
+    expect(clickPixel).toBeTruthy();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(clickPixel![0]),
+            y: Math.round(clickPixel![1])
+        }
+    });
+
+    await expect(infoPanel).toContainText('UV-Index Station');
+    await expect(infoPanel).toContainText('EUCOS Ground Station');
+});

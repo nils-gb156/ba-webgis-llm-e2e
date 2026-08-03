@@ -1,0 +1,140 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    const temperatureCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'Temperature',
+        exact: true
+    });
+    const precipitationCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'Precipitation',
+        exact: true
+    });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+    await expect(page.getByText('Click on the map to load a forecast.')).toBeVisible();
+
+    await expect.poll(() => getMapCenter(page)).toBeDefined();
+    const initialCenter = await getMapCenter(page);
+    expect(initialCenter).toBeDefined();
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    await expect(geocoderPanel).toBeVisible();
+
+    const optionResults = geocoderPanel.getByRole('option');
+    const buttonResults = geocoderPanel.getByRole('button');
+    const linkResults = geocoderPanel.getByRole('link');
+    const listItemResults = geocoderPanel.locator('li');
+
+    await expect
+        .poll(async () => {
+            return (
+                (await optionResults.count()) +
+                (await buttonResults.count()) +
+                (await linkResults.count()) +
+                (await listItemResults.count())
+            );
+        })
+        .toBeGreaterThan(0);
+
+    let firstResult = optionResults.first();
+    if ((await optionResults.count()) > 0) {
+        firstResult = optionResults.first();
+    } else if ((await buttonResults.count()) > 0) {
+        firstResult = buttonResults.first();
+    } else if ((await linkResults.count()) > 0) {
+        firstResult = linkResults.first();
+    } else {
+        firstResult = listItemResults.first();
+    }
+
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    await expect
+        .poll(async () => {
+            const currentCenter = await getMapCenter(page);
+            if (!initialCenter || !currentCenter) {
+                return 0;
+            }
+            return Math.hypot(
+                currentCenter[0] - initialCenter[0],
+                currentCenter[1] - initialCenter[1]
+            );
+        })
+        .toBeGreaterThan(1000);
+
+    await expect
+        .poll(async () => (await infoPanel.textContent()) ?? '')
+        .not.toContain('Click on the map to load a forecast.');
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect
+        .poll(async () => {
+            return await weatherForecastSection.evaluate((section) => {
+                const explicitCount = [
+                    section.querySelectorAll('[role="listitem"]').length,
+                    section.querySelectorAll('li').length,
+                    section.querySelectorAll('article').length,
+                    section.querySelectorAll('tbody tr').length
+                ].find((count) => count > 0);
+
+                if (explicitCount) {
+                    return explicitCount;
+                }
+
+                const timeMatches = section.textContent?.match(/\b\d{1,2}:\d{2}\b/g) ?? [];
+                let maxRepeatedChildren = 0;
+
+                for (const element of [section, ...Array.from(section.querySelectorAll('*'))]) {
+                    const children = Array.from(element.children);
+                    if (children.length === 0) {
+                        continue;
+                    }
+
+                    const counts = new Map<string, number>();
+                    for (const child of children) {
+                        const key = child.tagName;
+                        counts.set(key, (counts.get(key) ?? 0) + 1);
+                    }
+
+                    const localMax = Math.max(...counts.values());
+                    if (localMax > maxRepeatedChildren) {
+                        maxRepeatedChildren = localMax;
+                    }
+                }
+
+                return Math.max(new Set(timeMatches).size, maxRepeatedChildren);
+            });
+        })
+        .toBe(24);
+});

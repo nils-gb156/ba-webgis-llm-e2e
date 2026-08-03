@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+
+  if (!(await layerSwitcher.isVisible())) {
+    await expect(layerSwitcherToggle).toBeVisible();
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+  }
+
+  await expect(layerSwitcher).toBeVisible();
+
+  const baseMapSelector = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(baseMapSelector).toBeVisible();
+
+  const getSelectedBaseMapLabel = async (): Promise<string | undefined> =>
+    await baseMapSelector.evaluate((element) => {
+      if (element instanceof HTMLSelectElement) {
+        return element.selectedOptions[0]?.textContent?.trim() || undefined;
+      }
+
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        return element.value.trim() || undefined;
+      }
+
+      const ariaValueText = element.getAttribute('aria-valuetext')?.trim();
+      if (ariaValueText) {
+        return ariaValueText;
+      }
+
+      const valueAttr = element.getAttribute('value')?.trim();
+      if (valueAttr) {
+        return valueAttr;
+      }
+
+      const text = element.textContent?.trim();
+      return text || undefined;
+    });
+
+  await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 20000 }).toBe('Carto Light');
+  await expect.poll(getSelectedBaseMapLabel, { timeout: 10000 }).toBe('Carto Light');
+
+  const selectorTagName = await baseMapSelector.evaluate((element) => element.tagName.toLowerCase());
+
+  if (selectorTagName === 'select') {
+    await baseMapSelector.selectOption({ label: 'OpenStreetMap' });
+  } else {
+    await baseMapSelector.click();
+    const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap', exact: true });
+    await expect(openStreetMapOption).toBeVisible();
+    await openStreetMapOption.click();
+  }
+
+  await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 20000 }).toBe('OpenStreetMap');
+  await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 20000 }).not.toBe('Carto Light');
+  await expect.poll(getSelectedBaseMapLabel, { timeout: 10000 }).toBe('OpenStreetMap');
+  await expect.poll(getSelectedBaseMapLabel, { timeout: 10000 }).not.toBe('Carto Light');
+});

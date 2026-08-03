@@ -1,0 +1,49 @@
+{
+  "run": "run_09",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  89 |             );\n  90 |         })\n> 91 |         .toBeGreaterThan(0);\n     |          ^\n  92 |\n  93 |     let firstSearchResult = searchResultOptions.first();\n  94 |     if ((await searchResultOptions.count()) === 0) {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_09\\uc-10-configure-layers-"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  130 |         });\n  131 |\n> 132 |     await expect.poll(forecastEntryCount, { timeout: 15000 }).toBe(24);\n      |                                                               ^\n  133 |\n  134 |     await expect(temperatureCheckbox).not.toBeChecked();\n  135 |     await expect(precipitationCheckbox).toBeChecked();\n    at c:\\Users\\n.beikel\\re"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveAttribute(expected) failed\n\nLocator:  getByTestId('layer-switcher-toggle')\nExpected: \"false\"\nReceived: \"true\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" with timeout 5000ms\n  - waiting for getByTestId('layer-switcher-toggle')\n    13 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_10_\" aria-label=\"Layer Switcher\" id=\"tooltip:_r_10_:tri"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

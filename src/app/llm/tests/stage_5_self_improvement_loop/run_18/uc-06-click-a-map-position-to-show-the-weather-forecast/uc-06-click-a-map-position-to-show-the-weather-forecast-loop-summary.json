@@ -1,0 +1,40 @@
+{
+  "run": "run_18",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n   97 |     await expect.poll(async () => (await getHighlightedCoordinate(page))?.length ?? 0).toBe(2);\n   98 |     await expect(weatherForecastSection).toBeVisible();\n>  99 |     await expect.poll(() => getForecastEntryCount()).toBe(24);\n      |                                                      ^\n  100 | });\n  101 |\n    at c:\\Users\\n.beik"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \"Location:\"\nReceived string:    \"Mon, Jul 27, 02:00 AMovercast cloudsTemperature18.62 Â°CHumidity80 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature16.91 Â°CHumidity78 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.3 Â°CHumidity76 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

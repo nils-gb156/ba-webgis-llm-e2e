@@ -1,0 +1,40 @@
+{
+  "run": "run_29",
+  "use_case_id": 2,
+  "title": "Switch the base map from Carto Light to OpenStreetMap",
+  "complexity": "easy",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.evaluate: TypeError: Cannot read properties of undefined (reading '0')\n    at eval (eval at evaluate (:302:30), <anonymous>:3:56)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (eval at evaluate (:302:30), <anonymous>:3:56)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvemen"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.selectOption: Error: Element is not a <select> element\nCall log:\n  - waiting for getByRole('combobox', { name: 'Basemaps', exact: true })\n    - locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"closed\" data-scope=\"select\" data-part=\"trigger\" aria-invalid=\"false\" aria-expanded=\"false\" aria-required=\"false\" aria-haspopup=\"listbox\" aria-labelledby=\"_r_3_\" id=\"select:_r_4_:trigger\" aria-controls=\"select:_r_4_:content\" class=\"basemap-switcher-select-trigge"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from "../../../../map-model-helpers";
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+
+  const uviSection = page.getByTestId('uvi-station-section');
+  const uviInfo = page.getByTestId('uvi-station-info');
+  const eucosSection = page.getByTestId('eucos-station-section');
+  const eucosInfo = page.getByTestId('eucos-station-info');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanelToggle).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+  await expect(eucosLayerCheckbox).toBeChecked();
+  await expect(uviLayerCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+  const clickPosition = await expect
+    .poll(async () => {
+      return await page.evaluate((coordinate: [number, number]) => {
+        const map = (globalThis as { __openPioneerMap?: { olMap?: { getPixelFromCoordinate?: (c: [number, number]) => number[] | undefined; getSize?: () => number[] | undefined } } }).__openPioneerMap;
+        const olMap = map?.olMap;
+        const pixel = olMap?.getPixelFromCoordinate?.(coordinate);
+        const size = olMap?.getSize?.();
+
+        if (!Array.isArray(pixel) || pixel.length < 2 || !Array.isArray(size) || size.length < 2) {
+          return undefined;
+        }
+
+        const x = Math.round(pixel[0]);
+        const y = Math.round(pixel[1]);
+        const width = size[0];
+        const height = size[1];
+
+        if (x < 0 || y < 0 || x > width || y > height) {
+          return undefined;
+        }
+
+        return { x, y };
+      }, targetCoordinate);
+    })
+    .toBeTruthy();
+
+  const featureInfoRequests: string[] = [];
+  page.on('request', (request) => {
+    if (/getfeatureinfo/i.test(request.url())) {
+      featureInfoRequests.push(request.url());
+    }
+  });
+
+  const featureInfoResponsePromise = page.waitForResponse(
+    (response) => /getfeatureinfo/i.test(response.url()) && response.ok()
+  );
+
+  await Promise.all([
+    featureInfoResponsePromise,
+    mapContainer.click({ position: clickPosition! })
+  ]);
+
+  await expect.poll(() => featureInfoRequests.length).toBeGreaterThan(0);
+
+  await expect(uviSection).toBeVisible();
+  await expect(uviInfo).toBeVisible();
+  await expect(uviSection).toContainText('UV-Index Station');
+  await expect(uviInfo).toContainText('Identifier');
+  await expect(uviInfo).toContainText('Name');
+
+  await expect(eucosSection).toBeVisible();
+  await expect(eucosInfo).toBeVisible();
+  await expect(eucosSection).toContainText('EUCOS Ground Station');
+  await expect(eucosInfo).toContainText('WMO Identifier');
+  await expect(eucosInfo).toContainText('Name');
+
+  await expect
+    .poll(async () => {
+      const text = ((await uviInfo.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+      return text
+        .replace('Identifier', '')
+        .replace('Name', '')
+        .replace('Alias', '')
+        .replace('Station Height', '')
+        .replace('Alpha-3 Code', '')
+        .replace('Country', '')
+        .replace(/\s+/g, '')
+        .length;
+    })
+    .toBeGreaterThan(0);
+
+  await expect
+    .poll(async () => {
+      const text = ((await eucosInfo.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+      return text
+        .replace('WMO Identifier', '')
+        .replace('Name', '')
+        .replace('Country', '')
+        .replace('Type', '')
+        .replace('Observation', '')
+        .replace('Daily', '')
+        .replace(/\s+/g, '')
+        .length;
+    })
+    .toBeGreaterThan(0);
+});

@@ -1,0 +1,103 @@
+{
+  "run": "run_04",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\n\n\n  91 |\n  92 |     await expect(infoPanel.getByText('UV-Index Station', { exact: true })).toBeVisible();\n> 93 |     await expect(infoPanel.getByText('EUCOS G"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\n\n\n  118 |     await expect(uviSectionTitle).toBeVisible({ timeout: 15000 });\n  119 |     await expect(page.getByTestId('uvi-station-info')).toBeVisible({ ti"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"EUCOS Ground Station\"\nReceived string:    \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature16.73 Â°CHumidity73 %Wind direction254Â°Wind speed6.23 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.4 Â°CHumidity85 %Wind direction270Â°Wind speed5.89 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.06 Â°CHumidity92 %Wind direction282Â°Wind speed5."
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).toBeLessThan(expected)\n\nExpected: < 1\nReceived:   17.308332118325264\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  156 |             { timeout: 30000 }\n  157 |         )\n> 158 |         .toBeLessThan(1);\n      |          ^\n  159 |\n  160 |     const uviStationSection = page.getByTestId('uvi-station-section');\n  161 |     const uviStationInfo = page.getByTestId('uvi-station-info');\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvemen"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByTestId('eucos-station-section')\nExpected: visible\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 30000ms\n  - waiting for getByTestId('info-panel').getByTestId('eucos-station-section')\n\n\n  150 |     await expect(uviStationSection).toContainText('UV-Index Station');\n  151 |\n> 152 |     await expect(eucosStationSection).toBeVisible({ timeout: 300"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /\\bIdentifier\\b\\s+\\S+/\nReceived string:  \"Identifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\"\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  158 |\n  159 |     await expect(uviStationInfo).toBeVisible();\n> 160 |     await expect.poll(readUviStationText, { timeout: 30000 }).toMatch(/\\bIdentifier\\b\\s+\\S+/);\n      |                                                               ^\n  161 |     await"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-07-iter-6-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.scrollIntoViewIfNeeded: Test timeout of 30000ms exceeded.\nCall log:\n  - waiting for getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true }).first()\n\n\n  178 |     const eucosHeading = infoPanel.getByText('EUCOS Ground Station', { exact: true }).first();\n  179 |\n> 180 |     await eucosHeading.scrollIntoViewIfNeeded();\n      |                        ^\n  181 |     await expect(eucosHeading).toBeVisible({ timeout: 30000 });\n "
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-07-iter-7-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "TypeError: Cannot read properties of undefined (reading 'x')\n\n  104 |     };\n  105 |\n> 106 |     expect(resolvedClickPosition.x).toBeGreaterThanOrEqual(0);\n      |                                  ^\n  107 |     expect(resolvedClickPosition.y).toBeGreaterThanOrEqual(0);\n  108 |     expect(resolvedClickPosition.x).toBeLessThan(resolvedClickPosition.width);\n  109 |     expect(resolvedClickPosition.y).toBeLessThan(resolvedClickPosition.height);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\ap"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-07-iter-8-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /EUCOS Ground Station(?:s)?/\nReceived string:  \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature16.25 Â°CHumidity74 %Wind direction254Â°Wind speed5.84 m/sMon, Jul 27, 02:00 AMlight rainTemperature14.7 Â°CHumidity85 %Wind direction270Â°Wind speed5.75 m/sMon, Jul 27, 05:00 AMlight rainTemperature12.08 Â°CHumidity93 %Wind direction282Â°Wind speed5.31 m/sMon, Jul 27, 08:00 AMlight rainTemperat"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-07-iter-9-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  158 |             { timeout: 30000 }\n  159 |         )\n> 160 |         .toBe(true);\n      |          ^\n  161 |\n  162 |     let clickPosition:\n  163 |         | {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_04\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-9-click-both-point-sta"
+    }
+  ]
+}

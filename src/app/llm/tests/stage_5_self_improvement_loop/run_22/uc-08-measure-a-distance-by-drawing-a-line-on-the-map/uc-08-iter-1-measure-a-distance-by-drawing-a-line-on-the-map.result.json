@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_22/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 8: Measure a distance by drawing a line on the map",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 8062,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\nExpected: \u001b[32m\"\u001b[7mD\u001b[27mistance\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7md\u001b[27mistance\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <select id=\"_r_13_\" data-scope=\"field\" data-part=\"select\" class=\"chakra-native-select__field measurement-select css-1fgm1uu\">â€¦</select>\u001b[22m\n\u001b[2m       - unexpected value \"distance\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\nExpected: \u001b[32m\"\u001b[7mD\u001b[27mistance\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7md\u001b[27mistance\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <select id=\"_r_13_\" data-scope=\"field\" data-part=\"select\" class=\"chakra-native-select__field measurement-select css-1fgm1uu\">â€¦</select>\u001b[22m\n\u001b[2m       - unexpected value \"distance\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:30:32",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                      "column": 32,
+                      "line": 30
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m expect(measurementDialog)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[36mawait\u001b[39m expect(distanceMode)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m expect(distanceMode)\u001b[33m.\u001b[39mtoHaveValue(\u001b[32m'Distance'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m     \u001b[36mconst\u001b[39m mapBox \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m mapContainer\u001b[33m.\u001b[39mboundingBox()\u001b[33m;\u001b[39m\n \u001b[90m 33 |\u001b[39m     expect(mapBox)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoBeNull()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                        "column": 32,
+                        "line": 30
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\nExpected: \u001b[32m\"\u001b[7mD\u001b[27mistance\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7md\u001b[27mistance\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <select id=\"_r_13_\" data-scope=\"field\" data-part=\"select\" class=\"chakra-native-select__field measurement-select css-1fgm1uu\">â€¦</select>\u001b[22m\n\u001b[2m       - unexpected value \"distance\"\u001b[22m\n\n\n  28 |     await expect(measurementDialog).toBeVisible();\n  29 |     await expect(distanceMode).toBeVisible();\n> 30 |     await expect(distanceMode).toHaveValue('Distance');\n     |                                ^\n  31 |\n  32 |     const mapBox = await mapContainer.boundingBox();\n  33 |     expect(mapBox).not.toBeNull();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts:30:32"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-26T23:20:17.257Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-5c42f-y-drawing-a-line-on-the-map-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_22\\uc-08-measure-a-distance-by-drawing-a-line-on-the-map\\uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+                    "column": 32,
+                    "line": 30
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "fcdbe55e257b90ccea5f-b74f35f223a876f7819b",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_22/uc-08-measure-a-distance-by-drawing-a-line-on-the-map/uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-26T23:20:16.615Z",
+    "duration": 11003.490000000002,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

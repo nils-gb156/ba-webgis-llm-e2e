@@ -1,0 +1,148 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from "../../../../map-model-helpers";
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    await printToggle.click();
+
+    const printDialog = page.getByRole('dialog').first();
+    const dialogVisible = await printDialog.isVisible().catch(() => false);
+    const panel = dialogVisible ? printDialog : page;
+
+    if (dialogVisible) {
+        await expect(printDialog).toBeVisible();
+    }
+
+    const titleInputCandidates = [
+        panel.getByRole('textbox', { name: /^title$/i }).first(),
+        panel.getByRole('textbox', { name: /title/i }).first(),
+        panel.getByLabel(/^title$/i).first(),
+        panel.getByLabel(/title/i).first()
+    ];
+
+    let titleInput = titleInputCandidates[0];
+    for (const candidate of titleInputCandidates) {
+        if (await candidate.isVisible().catch(() => false)) {
+            titleInput = candidate;
+            break;
+        }
+    }
+
+    await expect(titleInput).toBeVisible();
+
+    const formatComboboxCandidates = [
+        panel.getByRole('combobox', { name: /^format$/i }).first(),
+        panel.getByRole('combobox', { name: /file format/i }).first(),
+        panel.getByRole('combobox', { name: /format/i }).first(),
+        panel.getByLabel(/^format$/i).first(),
+        panel.getByLabel(/file format/i).first(),
+        panel.getByLabel(/format/i).first()
+    ];
+
+    let formatCombobox = formatComboboxCandidates[0];
+    let formatComboboxVisible = false;
+    for (const candidate of formatComboboxCandidates) {
+        if (await candidate.isVisible().catch(() => false)) {
+            formatCombobox = candidate;
+            formatComboboxVisible = true;
+            break;
+        }
+    }
+
+    const pngRadio = panel.getByRole('radio', { name: /^PNG$/i }).first();
+    const pngRadioVisible = await pngRadio.isVisible().catch(() => false);
+
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = `Playwright PNG export ${Date.now()}`;
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    if (formatComboboxVisible) {
+        await expect(formatCombobox).toBeVisible();
+        try {
+            await formatCombobox.selectOption({ label: 'PNG' });
+        } catch {
+            try {
+                await formatCombobox.selectOption('PNG');
+            } catch {
+                try {
+                    await formatCombobox.selectOption('png');
+                } catch {
+                    await formatCombobox.click();
+                    const pngOption = panel.getByRole('option', { name: /^PNG$/i }).first();
+                    await expect(pngOption).toBeVisible();
+                    await pngOption.click();
+                }
+            }
+        }
+    } else if (pngRadioVisible) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const pngOption = panel.getByRole('option', { name: /^PNG$/i }).first();
+        const pngOptionVisible = await pngOption.isVisible().catch(() => false);
+        if (pngOptionVisible) {
+            await pngOption.click();
+        } else {
+            const pngButton = panel.getByRole('button', { name: /^PNG$/i }).first();
+            await expect(pngButton).toBeVisible();
+            await pngButton.click();
+        }
+    }
+
+    const exportButtonCandidates = [
+        panel.getByRole('button', { name: /^export$/i }).first(),
+        panel.getByRole('button', { name: /export/i }).first(),
+        panel.getByRole('button', { name: /^download$/i }).first(),
+        panel.getByRole('button', { name: /^print$/i }).first()
+    ];
+
+    let exportButton = exportButtonCandidates[0];
+    for (const candidate of exportButtonCandidates) {
+        if (await candidate.isVisible().catch(() => false)) {
+            exportButton = candidate;
+            break;
+        }
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const stream = await download.createReadStream();
+    expect(stream).not.toBeNull();
+    if (!stream) {
+        throw new Error('Expected a download stream for the exported PNG file.');
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    const fileBuffer = Buffer.concat(chunks);
+
+    expect(fileBuffer.length).toBeGreaterThan(1000);
+    expect(fileBuffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe(true);
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

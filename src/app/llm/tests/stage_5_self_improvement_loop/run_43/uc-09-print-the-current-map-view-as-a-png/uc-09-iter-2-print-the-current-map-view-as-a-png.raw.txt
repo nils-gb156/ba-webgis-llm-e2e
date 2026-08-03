@@ -1,0 +1,245 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+import { inflateSync } from 'node:zlib';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect(
+        page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true })
+    ).toBeChecked();
+    await expect(
+        page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true })
+    ).toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(printingPanel).toBeVisible();
+
+    const printDialog = page.getByRole('dialog', { name: 'Print Map', exact: true });
+    await expect(printDialog).toBeVisible();
+
+    const titleInput = printDialog.getByRole('textbox', { name: 'Title', exact: true });
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'Use Case 9 PNG Export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const formatSelect = printDialog.getByRole('combobox', { name: 'File format', exact: true });
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption({ label: 'PNG' });
+    await expect(formatSelect).toHaveValue('png');
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const exportButton = printDialog.getByRole('button', { name: 'Export map', exact: true });
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename).toMatch(/\.png$/i);
+
+    const savedFilePath = test.info().outputPath(suggestedFilename);
+    await download.saveAs(savedFilePath);
+
+    const fileBytes = await fs.readFile(savedFilePath);
+    expect(fileBytes.length).toBeGreaterThan(10_000);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    const paethPredictor = (a: number, b: number, c: number): number => {
+        const p = a + b - c;
+        const pa = Math.abs(p - a);
+        const pb = Math.abs(p - b);
+        const pc = Math.abs(p - c);
+        if (pa <= pb && pa <= pc) return a;
+        if (pb <= pc) return b;
+        return c;
+    };
+
+    const decodePng = (png: Buffer) => {
+        const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+        expect(Array.from(png.subarray(0, 8))).toEqual(signature);
+
+        let offset = 8;
+        let width = 0;
+        let height = 0;
+        let bitDepth = 0;
+        let colorType = 0;
+        let interlaceMethod = 0;
+        const idatParts: Buffer[] = [];
+
+        while (offset < png.length) {
+            const length = png.readUInt32BE(offset);
+            const type = png.toString('ascii', offset + 4, offset + 8);
+            const dataStart = offset + 8;
+            const dataEnd = dataStart + length;
+
+            if (type === 'IHDR') {
+                width = png.readUInt32BE(dataStart);
+                height = png.readUInt32BE(dataStart + 4);
+                bitDepth = png[dataStart + 8];
+                colorType = png[dataStart + 9];
+                interlaceMethod = png[dataStart + 12];
+            } else if (type === 'IDAT') {
+                idatParts.push(png.subarray(dataStart, dataEnd));
+            } else if (type === 'IEND') {
+                break;
+            }
+
+            offset = dataEnd + 4;
+        }
+
+        expect(width).toBeGreaterThan(200);
+        expect(height).toBeGreaterThan(200);
+        expect(bitDepth).toBe(8);
+        expect(interlaceMethod).toBe(0);
+        expect([2, 6]).toContain(colorType);
+        expect(idatParts.length).toBeGreaterThan(0);
+
+        const bytesPerPixel = colorType === 6 ? 4 : 3;
+        const stride = width * bytesPerPixel;
+        const inflated = inflateSync(Buffer.concat(idatParts));
+        const pixels = Buffer.alloc(width * height * bytesPerPixel);
+
+        let sourceOffset = 0;
+        let targetOffset = 0;
+        let previousRow = Buffer.alloc(stride, 0);
+
+        for (let y = 0; y < height; y++) {
+            const filterType = inflated[sourceOffset];
+            sourceOffset += 1;
+
+            const row = Buffer.alloc(stride);
+            for (let x = 0; x < stride; x++) {
+                const raw = inflated[sourceOffset + x];
+                const left = x >= bytesPerPixel ? row[x - bytesPerPixel] : 0;
+                const up = previousRow[x] ?? 0;
+                const upLeft = x >= bytesPerPixel ? previousRow[x - bytesPerPixel] ?? 0 : 0;
+
+                let value = 0;
+                switch (filterType) {
+                    case 0:
+                        value = raw;
+                        break;
+                    case 1:
+                        value = (raw + left) & 0xff;
+                        break;
+                    case 2:
+                        value = (raw + up) & 0xff;
+                        break;
+                    case 3:
+                        value = (raw + Math.floor((left + up) / 2)) & 0xff;
+                        break;
+                    case 4:
+                        value = (raw + paethPredictor(left, up, upLeft)) & 0xff;
+                        break;
+                    default:
+                        throw new Error(`Unsupported PNG filter type: ${filterType}`);
+                }
+                row[x] = value;
+            }
+
+            row.copy(pixels, targetOffset);
+            previousRow = row;
+            sourceOffset += stride;
+            targetOffset += stride;
+        }
+
+        return { width, height, bytesPerPixel, pixels };
+    };
+
+    const image = decodePng(fileBytes);
+
+    let opaquePixels = 0;
+    let lightBackgroundPixels = 0;
+    let blueOverlayPixels = 0;
+    let redOverlayPixels = 0;
+    let darkBottomPixels = 0;
+    let lightBottomPixels = 0;
+    const sampledColorBins = new Set<string>();
+
+    for (let y = 0; y < image.height; y++) {
+        for (let x = 0; x < image.width; x++) {
+            const index = (y * image.width + x) * image.bytesPerPixel;
+            const r = image.pixels[index];
+            const g = image.pixels[index + 1];
+            const b = image.pixels[index + 2];
+            const a = image.bytesPerPixel === 4 ? image.pixels[index + 3] : 255;
+
+            if (a < 200) {
+                continue;
+            }
+
+            opaquePixels++;
+
+            if (x % 8 === 0 && y % 8 === 0) {
+                sampledColorBins.add(
+                    `${Math.floor(r / 32)}-${Math.floor(g / 32)}-${Math.floor(b / 32)}`
+                );
+            }
+
+            const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+            if (luma > 185) {
+                lightBackgroundPixels++;
+            }
+
+            if (b > 140 && b - r > 35 && b - g > 10) {
+                blueOverlayPixels++;
+            }
+
+            if (r > 150 && r - g > 45 && r - b > 45) {
+                redOverlayPixels++;
+            }
+
+            if (y >= Math.floor(image.height * 0.85)) {
+                if (luma < 60) {
+                    darkBottomPixels++;
+                }
+                if (luma > 230) {
+                    lightBottomPixels++;
+                }
+            }
+        }
+    }
+
+    const totalPixels = image.width * image.height;
+    const bottomStripPixels = image.width * Math.max(1, Math.ceil(image.height * 0.15));
+
+    expect(opaquePixels).toBeGreaterThan(Math.floor(totalPixels * 0.9));
+    expect(sampledColorBins.size).toBeGreaterThan(20);
+    expect(lightBackgroundPixels).toBeGreaterThan(Math.max(1_000, Math.floor(totalPixels * 0.02)));
+    expect(blueOverlayPixels).toBeGreaterThan(Math.max(20, Math.floor(totalPixels * 0.00002)));
+    expect(redOverlayPixels).toBeGreaterThan(Math.max(5, Math.floor(totalPixels * 0.000005)));
+    expect(darkBottomPixels).toBeGreaterThan(Math.max(25, Math.floor(bottomStripPixels * 0.0002)));
+    expect(lightBottomPixels).toBeGreaterThan(Math.max(25, Math.floor(bottomStripPixels * 0.0002)));
+});

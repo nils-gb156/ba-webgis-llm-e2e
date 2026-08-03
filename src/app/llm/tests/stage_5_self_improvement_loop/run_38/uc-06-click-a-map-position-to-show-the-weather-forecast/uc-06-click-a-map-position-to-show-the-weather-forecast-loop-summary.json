@@ -1,0 +1,67 @@
+{
+  "run": "run_38",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 6,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-5-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  93 |             })\n  94 |         )\n> 95 |         .toBe(24);\n     |          ^\n  96 | });\n  97 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:95:10"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).not.toBe(expected) // Object.is equality\n\nExpected: not \"1351351,6523656\"\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  170 |                     return highlighted?.map((value) => Math.round(value)).join(',');\n  171 |                 })\n> 172 |                 .not.toBe(previousHighlightKey);\n      |                      ^\n  173 |         } else {\n  174 |             await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();\n  175 |         }\n    at "
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: No successful weather forecast response with 24 entries was received after clicking the map. Latest section text: \"Weather ForecastFehler beim Laden der Wetterdaten\". Recent fetch/xhr responses: 429 https://api.openweathermap.org/data/2.5/forecast?lat=51.0218783067879&lon=10.403551273338445&appid=6b904086651c872d0e2c58c1529d2dcb&units=metric&cnt=24 | 200 http://localhost:5173/dwd-wms?REQUEST=GetFeatureInfo&QUERY_LAYERS=Uv_Stationen&SERVICE=WMS&VERSION=1.3.0&FORMAT=image%2Fpng&STYLES=&TRAN"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: response.json: Protocol error (Network.getResponseBody): No data found for resource with given identifier\n\n  128 |\n  129 |     const forecastResponse = await forecastResponsePromise;\n> 130 |     const forecastJson = await forecastResponse.json();\n      |                                                 ^\n  131 |     expect(Array.isArray(forecastJson.list)).toBe(true);\n  132 |     expect(forecastJson.list).toHaveLength(24);\n  133 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\ll"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \"Location: Test City, DE\"\nReceived string:    \"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity5"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-06-iter-5-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

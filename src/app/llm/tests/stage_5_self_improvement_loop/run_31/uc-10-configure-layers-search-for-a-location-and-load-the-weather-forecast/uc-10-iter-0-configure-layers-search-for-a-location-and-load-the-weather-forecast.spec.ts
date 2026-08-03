@@ -1,0 +1,161 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    getHighlightedCoordinate,
+    getMapCenter,
+    isLayerRendered
+} from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const app = page.getByRole('application', { name: 'webgis map', exact: true });
+    await expect(app).toBeVisible();
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    if (!(await layerSwitcher.isVisible())) {
+        if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+            await layerSwitcherToggle.click();
+        }
+    }
+    await expect(layerSwitcher).toBeVisible();
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    if (!(await infoPanel.isVisible())) {
+        if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+    await expect(infoPanel).toBeVisible();
+
+    const geocoderInput = page.getByTestId('geocoder-input');
+    await expect(geocoderInput).toBeVisible();
+
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 15000 }).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature'), { timeout: 15000 }).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation'), { timeout: 15000 }).toBe(false);
+    await expect.poll(() => getMapCenter(page), { timeout: 15000 }).not.toBeUndefined();
+
+    const centerBeforeSearch = await getMapCenter(page);
+    if (!centerBeforeSearch) {
+        throw new Error('Map center is not available after the map became ready.');
+    }
+
+    const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature'), { timeout: 15000 }).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation'), { timeout: 15000 }).toBe(true);
+
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+    await expect(geocoderPanel).toBeVisible();
+    await expect(geocoderPanel).toContainText(/\S+/);
+
+    await geocoderInput.press('ArrowDown');
+    await geocoderInput.press('Enter');
+
+    await expect.poll(() => getMapCenter(page), { timeout: 30000 }).not.toEqual(centerBeforeSearch);
+
+    const highlightedCoordinate = await getHighlightedCoordinate(page);
+    if (highlightedCoordinate) {
+        await expect.poll(async () => {
+            const center = await getMapCenter(page);
+            if (!center) {
+                return Number.POSITIVE_INFINITY;
+            }
+            return Math.hypot(center[0] - highlightedCoordinate[0], center[1] - highlightedCoordinate[1]);
+        }, { timeout: 30000 }).toBeLessThan(20000);
+    }
+
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+
+    const getForecastEntryCount = async (): Promise<number> => {
+        return await page.evaluate(() => {
+            const section = document.querySelector('[data-testid="weather-forecast-section"]');
+            if (!section) {
+                return 0;
+            }
+
+            const listItemCount = section.querySelectorAll('[role="listitem"], li').length;
+            if (listItemCount > 0) {
+                return listItemCount;
+            }
+
+            const tableBodyRowCount = section.querySelectorAll('tbody tr').length;
+            if (tableBodyRowCount > 0) {
+                return tableBodyRowCount;
+            }
+
+            const rowCount = section.querySelectorAll('[role="row"], tr').length;
+            if (rowCount > 1) {
+                return rowCount - 1;
+            }
+
+            const articleCount = section.querySelectorAll('article').length;
+            if (articleCount > 0) {
+                return articleCount;
+            }
+
+            const buttonCount = Array.from(section.querySelectorAll('button')).filter(
+                (button) => (button.textContent ?? '').trim().length > 0
+            ).length;
+            if (buttonCount > 0) {
+                return buttonCount;
+            }
+
+            return Array.from(section.children).filter((child) => {
+                if (/^H[1-6]$/.test(child.tagName)) {
+                    return false;
+                }
+                return (child.textContent ?? '').trim().length > 0;
+            }).length;
+        });
+    };
+
+    let forecastLoaded = false;
+    try {
+        await expect.poll(() => getForecastEntryCount(), { timeout: 10000 }).toBe(24);
+        forecastLoaded = true;
+    } catch {
+        forecastLoaded = false;
+    }
+
+    if (!forecastLoaded) {
+        const forecastHint = infoPanel.getByText('Click on the map to load a forecast.');
+        if (await forecastHint.isVisible()) {
+            const mapContainer = page.getByTestId('map-container');
+            await expect(mapContainer).toBeVisible();
+            const box = await mapContainer.boundingBox();
+            if (!box) {
+                throw new Error('Map container bounding box is not available.');
+            }
+
+            await mapContainer.click({
+                position: {
+                    x: Math.round(box.width / 2),
+                    y: Math.round(box.height / 2)
+                }
+            });
+        }
+
+        await expect.poll(() => getForecastEntryCount(), { timeout: 30000 }).toBe(24);
+    }
+});

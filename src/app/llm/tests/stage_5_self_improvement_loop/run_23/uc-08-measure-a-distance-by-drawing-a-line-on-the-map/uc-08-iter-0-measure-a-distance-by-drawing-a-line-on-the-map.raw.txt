@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapControlsPanel = page.getByTestId('map-controls-panel');
+    const measurementButton = page.getByTestId('measurement-toggle');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapControlsPanel).toBeVisible();
+    await expect(measurementButton).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+    const measurementHeading = mapControlsPanel.getByRole('heading', { name: 'Measurement', exact: true });
+    const measurementInstruction = mapControlsPanel
+        .getByText(/double-?click|click .* map|start measuring|finish measuring/i)
+        .first();
+
+    const measurementButtonPressed = await measurementButton.getAttribute('aria-pressed');
+    if (measurementButtonPressed !== 'true') {
+        await measurementButton.click();
+    }
+
+    await expect
+        .poll(async () => {
+            return (
+                (await measurementDialog.isVisible()) ||
+                (await measurementHeading.isVisible()) ||
+                (await measurementInstruction.isVisible())
+            );
+        })
+        .toBe(true);
+
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const points = [
+        { x: Math.round(box.width * 0.45), y: Math.round(box.height * 0.35) },
+        { x: Math.round(box.width * 0.55), y: Math.round(box.height * 0.43) },
+        { x: Math.round(box.width * 0.64), y: Math.round(box.height * 0.5) },
+        { x: Math.round(box.width * 0.72), y: Math.round(box.height * 0.58) }
+    ];
+
+    await mapContainer.click({ position: points[0] });
+    await mapContainer.click({ position: points[1] });
+    await mapContainer.click({ position: points[2] });
+    await mapContainer.dblclick({ position: points[3] });
+
+    const measurementValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/;
+    const measurementValueInDialog = measurementDialog.getByText(measurementValuePattern).first();
+    const measurementValueInControls = mapControlsPanel.getByText(measurementValuePattern).first();
+
+    await expect
+        .poll(async () => {
+            if (await measurementValueInDialog.isVisible()) {
+                return (await measurementValueInDialog.innerText()).trim();
+            }
+            if (await measurementValueInControls.isVisible()) {
+                return (await measurementValueInControls.innerText()).trim();
+            }
+            return '';
+        })
+        .toMatch(measurementValuePattern);
+});

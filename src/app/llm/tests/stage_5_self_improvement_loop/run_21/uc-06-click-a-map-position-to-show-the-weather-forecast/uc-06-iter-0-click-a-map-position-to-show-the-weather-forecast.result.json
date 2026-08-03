@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_21\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_21/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 6: Click a map position to show the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 4113,
+                  "error": {
+                    "message": "Error: response.json: Protocol error (Network.getResponseBody): No data found for resource with given identifier",
+                    "stack": "Error: response.json: Protocol error (Network.getResponseBody): No data found for resource with given identifier\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_21\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:108:53",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_21\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                      "column": 53,
+                      "line": 108
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 106 |\u001b[39m\n \u001b[90m 107 |\u001b[39m     \u001b[36mconst\u001b[39m forecastResponse \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m forecastResponsePromise\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 108 |\u001b[39m     \u001b[36mconst\u001b[39m forecastPayload \u001b[33m=\u001b[39m (\u001b[36mawait\u001b[39m forecastResponse\u001b[33m.\u001b[39mjson()) \u001b[36mas\u001b[39m unknown\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 109 |\u001b[39m     expect(extractForecastEntryCount(forecastPayload))\u001b[33m.\u001b[39mtoBe(\u001b[35m24\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 110 |\u001b[39m\n \u001b[90m 111 |\u001b[39m     \u001b[36mif\u001b[39m (highlightBeforeClick) {\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_21\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                        "column": 53,
+                        "line": 108
+                      },
+                      "message": "Error: response.json: Protocol error (Network.getResponseBody): No data found for resource with given identifier\n\n  106 |\n  107 |     const forecastResponse = await forecastResponsePromise;\n> 108 |     const forecastPayload = (await forecastResponse.json()) as unknown;\n      |                                                     ^\n  109 |     expect(extractForecastEntryCount(forecastPayload)).toBe(24);\n  110 |\n  111 |     if (highlightBeforeClick) {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_21\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:108:53"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-26T23:04:04.673Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-96c2d-o-show-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_21\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                    "column": 53,
+                    "line": 108
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "ea7aeaab110dfb603a11-d0f7d5ec151b2c7ccc3d",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_21/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+          "line": 61,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-26T23:04:04.010Z",
+    "duration": 6018.574,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

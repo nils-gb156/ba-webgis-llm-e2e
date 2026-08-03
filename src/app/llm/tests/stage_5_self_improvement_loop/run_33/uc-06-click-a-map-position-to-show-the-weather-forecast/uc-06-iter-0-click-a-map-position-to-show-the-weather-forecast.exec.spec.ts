@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const mapContainer = page.getByTestId('map-container');
+
+    if (!(await infoPanel.isVisible())) {
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+    await expect.poll(async () => (await getHighlightedCoordinate(page)) === undefined).toBe(true);
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox!.width * 0.6),
+            y: Math.round(mapBox!.height * 0.45)
+        }
+    });
+
+    await expect.poll(async () => (await getHighlightedCoordinate(page)) !== undefined).toBe(true);
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+    await expect
+        .poll(async () => {
+            return await weatherForecastSection.evaluate((section) => {
+                const counts = new Set<number>();
+                const semanticCounts = [
+                    section.querySelectorAll('[role="listitem"]').length,
+                    section.querySelectorAll('li').length,
+                    section.querySelectorAll('[role="row"]').length,
+                    section.querySelectorAll('tbody tr').length,
+                    section.querySelectorAll('time').length,
+                    section.querySelectorAll('article').length
+                ];
+
+                for (const count of semanticCounts) {
+                    if (count > 0) {
+                        counts.add(count);
+                    }
+                }
+
+                const allElements = [section, ...Array.from(section.querySelectorAll('*'))];
+                for (const element of allElements) {
+                    if (element.childElementCount > 0) {
+                        counts.add(element.childElementCount);
+                    }
+                }
+
+                return counts.has(24) ? 24 : Math.max(0, ...counts);
+            });
+        })
+        .toBe(24);
+});

@@ -1,0 +1,191 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+
+    const eucosCheckbox = page.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviCheckbox = page.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    let clickPosition:
+        | {
+              x: number;
+              y: number;
+          }
+        | undefined;
+
+    await expect
+        .poll(async () => {
+            clickPosition = await page.evaluate(([x, y]) => {
+                const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+                const container = document.querySelector('[data-testid="map-container"]') as HTMLElement | null;
+                const targetElement = map?.olMap?.getTargetElement?.() as HTMLElement | undefined;
+                const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+
+                if (
+                    !container ||
+                    !targetElement ||
+                    !Array.isArray(pixel) ||
+                    pixel.length < 2 ||
+                    typeof pixel[0] !== 'number' ||
+                    typeof pixel[1] !== 'number'
+                ) {
+                    return undefined;
+                }
+
+                const containerRect = container.getBoundingClientRect();
+                const targetRect = targetElement.getBoundingClientRect();
+
+                const clickX = pixel[0] + targetRect.left - containerRect.left;
+                const clickY = pixel[1] + targetRect.top - containerRect.top;
+
+                if (
+                    !Number.isFinite(clickX) ||
+                    !Number.isFinite(clickY) ||
+                    clickX < 0 ||
+                    clickY < 0 ||
+                    clickX > containerRect.width ||
+                    clickY > containerRect.height
+                ) {
+                    return undefined;
+                }
+
+                return { x: clickX, y: clickY };
+            }, targetCoordinate);
+
+            return clickPosition;
+        })
+        .not.toBeUndefined();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(clickPosition!.x),
+            y: Math.round(clickPosition!.y)
+        }
+    });
+
+    await expect
+        .poll(
+            async () => {
+                const highlighted = await getHighlightedCoordinate(page);
+                if (!highlighted) {
+                    return Number.POSITIVE_INFINITY;
+                }
+
+                return Math.hypot(highlighted[0] - targetCoordinate[0], highlighted[1] - targetCoordinate[1]);
+            },
+            { timeout: 10000 }
+        )
+        .toBeLessThan(1000);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect
+        .poll(async () => (await weatherForecastSection.innerText()).replace(/\u00a0/g, ' '), { timeout: 30000 })
+        .toMatch(/Location:/i);
+
+    const informationHeading = /Information/i;
+    const weatherForecastHeading = /Weather Forecast/i;
+    const uviHeading = /UV-Index Station(?:s)?/i;
+    const eucosHeading = /EUCOS Ground Station(?:s)?/i;
+
+    const sectionHasFeatureContent = (
+        text: string,
+        heading: RegExp,
+        stopHeadings: RegExp[]
+    ): boolean => {
+        const lines = text
+            .replace(/\u00a0/g, ' ')
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+        const headingIndex = lines.findIndex((line) => heading.test(line));
+        if (headingIndex === -1) {
+            return false;
+        }
+
+        const remainderOfHeadingLine = lines[headingIndex].replace(heading, '').trim();
+        if (remainderOfHeadingLine.length > 0) {
+            return true;
+        }
+
+        for (let i = headingIndex + 1; i < lines.length; i++) {
+            if (stopHeadings.some((stopHeading) => stopHeading.test(lines[i]))) {
+                break;
+            }
+            if (lines[i].length > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    await expect
+        .poll(
+            async () => {
+                const text = await infoPanel.innerText();
+                return sectionHasFeatureContent(text, uviHeading, [
+                    eucosHeading,
+                    weatherForecastHeading,
+                    informationHeading
+                ]);
+            },
+            { timeout: 30000 }
+        )
+        .toBe(true);
+
+    await expect
+        .poll(
+            async () => {
+                const text = await infoPanel.innerText();
+                return sectionHasFeatureContent(text, eucosHeading, [
+                    uviHeading,
+                    weatherForecastHeading,
+                    informationHeading
+                ]);
+            },
+            { timeout: 30000 }
+        )
+        .toBe(true);
+});

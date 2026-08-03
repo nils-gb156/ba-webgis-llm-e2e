@@ -1,0 +1,114 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    getMapCenter,
+    getMapZoomLevel,
+    getHighlightedCoordinate
+} from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(async () => {
+        const zoom = await getMapZoomLevel(page);
+        return typeof zoom === 'number';
+    }).toBe(true);
+    await expect.poll(async () => {
+        const center = await getMapCenter(page);
+        return Array.isArray(center) && center.length === 2 && center.every((value) => typeof value === 'number');
+    }).toBe(true);
+
+    const initialForecastText = ((await weatherForecastSection.textContent()) ?? '').trim();
+    const initialHighlightedCoordinate = await getHighlightedCoordinate(page);
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const clickPosition = {
+        x: Math.min(Math.max(Math.round(mapBox.width * 0.55), 50), Math.round(mapBox.width - 50)),
+        y: Math.min(Math.max(Math.round(mapBox.height * 0.45), 50), Math.round(mapBox.height - 50))
+    };
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect.poll(async () => {
+        const highlighted = await getHighlightedCoordinate(page);
+        if (!Array.isArray(highlighted) || highlighted.length !== 2) {
+            return false;
+        }
+
+        if (!Array.isArray(initialHighlightedCoordinate) || initialHighlightedCoordinate.length !== 2) {
+            return true;
+        }
+
+        return (
+            highlighted[0] !== initialHighlightedCoordinate[0] ||
+            highlighted[1] !== initialHighlightedCoordinate[1]
+        );
+    }).toBe(true);
+
+    await expect.poll(async () => {
+        return ((await weatherForecastSection.textContent()) ?? '').trim();
+    }).not.toBe(initialForecastText);
+
+    await expect.poll(async () => {
+        return await weatherForecastSection.evaluate((section) => {
+            const root = section as HTMLElement;
+            const counts: number[] = [];
+
+            const listItemCount = root.querySelectorAll('li, [role="listitem"]').length;
+            if (listItemCount > 0) {
+                counts.push(listItemCount);
+            }
+
+            const tableBodyRowCount = root.querySelectorAll('tbody > tr').length;
+            if (tableBodyRowCount > 0) {
+                counts.push(tableBodyRowCount);
+            }
+
+            const roleRowCount = Array.from(root.querySelectorAll('[role="row"]')).filter((row) => {
+                return !row.querySelector('th, [role="columnheader"]');
+            }).length;
+            if (roleRowCount > 0) {
+                counts.push(roleRowCount);
+            }
+
+            const containers = [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))];
+            for (const container of containers) {
+                const children = Array.from(container.children) as HTMLElement[];
+                if (children.length !== 24) {
+                    continue;
+                }
+
+                const allChildrenHaveContent = children.every((child) => {
+                    const text = child.innerText?.replace(/\s+/g, ' ').trim() ?? '';
+                    return text.length > 0 || child.querySelector('img, svg, canvas') !== null;
+                });
+
+                if (allChildrenHaveContent) {
+                    counts.push(24);
+                }
+            }
+
+            if (counts.includes(24)) {
+                return 24;
+            }
+
+            return counts.length > 0 ? Math.max(...counts) : 0;
+        });
+    }).toBe(24);
+});

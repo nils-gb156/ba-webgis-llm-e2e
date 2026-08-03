@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementButton).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    const initialStandaloneLengthValueCount = await page
+        .getByText(/^\d+(?:[.,]\d+)?\s*(?:m|km)$/i)
+        .count();
+
+    const measurementPressed = await measurementButton.getAttribute('aria-pressed');
+    if (measurementPressed !== 'true') {
+        await measurementButton.click();
+    }
+
+    await expect.poll(async () => {
+        const measurementDialog = page.getByRole('dialog', { name: /measurement/i });
+        const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+        const lengthLabel = page.getByText(/^Length$/i);
+        const distanceLabel = page.getByText(/^Distance$/i);
+        const finishHint = page.getByText(/double[- ]click.*finish/i);
+
+        return (
+            (await measurementDialog.isVisible().catch(() => false)) ||
+            (await measurementHeading.isVisible().catch(() => false)) ||
+            (await lengthLabel.isVisible().catch(() => false)) ||
+            (await distanceLabel.isVisible().catch(() => false)) ||
+            (await finishHint.isVisible().catch(() => false))
+        );
+    }).toBe(true);
+
+    await mapContainer.click({ position: { x: 500, y: 200 } });
+    await mapContainer.click({ position: { x: 650, y: 260 } });
+    await mapContainer.click({ position: { x: 820, y: 330 } });
+    await mapContainer.dblclick({ position: { x: 980, y: 400 } });
+
+    await expect.poll(async () => {
+        const labeledLengthValue = page.getByText(
+            /(?:length|distance)\s*:?\s*\d+(?:[.,]\d+)?\s*(?:m|km)/i
+        );
+        if (await labeledLengthValue.first().isVisible().catch(() => false)) {
+            return true;
+        }
+
+        const standaloneLengthValueCount = await page
+            .getByText(/^\d+(?:[.,]\d+)?\s*(?:m|km)$/i)
+            .count();
+        return standaloneLengthValueCount > initialStandaloneLengthValueCount;
+    }).toBe(true);
+});

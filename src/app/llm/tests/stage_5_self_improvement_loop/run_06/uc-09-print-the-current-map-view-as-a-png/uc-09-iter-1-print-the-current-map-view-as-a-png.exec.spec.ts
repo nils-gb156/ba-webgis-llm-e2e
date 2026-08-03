@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import * as fs from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('footer')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('scale-viewer')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printPanel = page.getByTestId('printing-panel');
+
+    await expect(printToggle).toBeVisible();
+
+    if (!(await printPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printPanel).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Print Map', exact: true })).toBeVisible();
+    await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+
+    const titleInput = printPanel.getByRole('textbox', { name: 'Title', exact: true });
+    const formatSelect = printPanel.getByRole('combobox', { name: 'File format', exact: true });
+    const exportButton = printPanel.getByRole('button', { name: 'Export map', exact: true });
+
+    await expect(titleInput).toBeVisible();
+    await expect(formatSelect).toBeVisible();
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const printTitle = 'Current weather map export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    await formatSelect.selectOption({ label: 'PNG' });
+    await expect
+        .poll(() =>
+            formatSelect.evaluate((element) => {
+                const select = element as HTMLSelectElement;
+                return select.selectedOptions[0]?.textContent?.trim();
+            })
+        )
+        .toBe('PNG');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('scale-viewer')).toBeVisible();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const savedPath = test.info().outputPath(download.suggestedFilename());
+    await download.saveAs(savedPath);
+
+    const fileBytes = await fs.readFile(savedPath);
+    expect(fileBytes.length).toBeGreaterThan(1000);
+
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    expect(fileBytes.subarray(0, 8).equals(pngSignature)).toBe(true);
+
+    const width = fileBytes.readUInt32BE(16);
+    const height = fileBytes.readUInt32BE(20);
+    expect(width).toBeGreaterThan(100);
+    expect(height).toBeGreaterThan(100);
+});

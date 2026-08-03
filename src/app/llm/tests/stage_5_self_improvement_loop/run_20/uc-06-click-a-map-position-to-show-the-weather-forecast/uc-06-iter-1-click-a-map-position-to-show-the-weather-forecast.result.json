@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_20/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 6: Click a map position to show the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 8612,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \u001b[32m\"Location:\"\u001b[39m\nReceived string:    \u001b[31m\"Mon, Jul 27, 02:00 AMbroken cloudsTemperature17.95 Â°CHumidity86 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature17.31 Â°CHumidity82 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature16.18 Â°CHumidity79 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96 Â°CHumidity71 %Wind direction297Â°Wind speed5.22 m/sMon, Jul 27, 02:00 PMlight rainTemperature23.23 Â°CHumidity49 %Wind direction283Â°Wind speed4.85 m/sMon, Jul 27, 05:00 PMlight rainTemperature23.45 Â°CHumidity65 %Wind direction284Â°Wind speed4.09 m/sMon, Jul 27, 08:00 PMlight rainTemperature20.96 Â°CHumidity77 %Wind direction284Â°Wind speed3.44 m/sMon, Jul 27, 11:00 PMfew cloudsTemperature16.04 Â°CHumidity93 %Wind direction237Â°Wind speed1.99 m/sTue, Jul 28, 02:00 AMclear skyTemperature14.39 Â°CHumidity96 %Wind direction231Â°Wind speed2.08 m/sTue, Jul 28, 05:00 AMclear skyTemperature11.7 Â°CHumidity95 %Wind direction232Â°Wind speed2.04 m/sTue, Jul 28, 08:00 AMclear skyTemperature14.28 Â°CHumidity74 %Wind direction269Â°Wind speed2.26 m/sTue, Jul 28, 11:00 AMclear skyTemperature21.4 Â°CHumidity47 %Wind direction295Â°Wind speed3.19 m/sTue, Jul 28, 02:00 PMfew cloudsTemperature26.07 Â°CHumidity39 %Wind direction311Â°Wind speed3.1 m/sTue, Jul 28, 05:00 PMclear skyTemperature26.51 Â°CHumidity34 %Wind direction317Â°Wind speed2.64 m/sTue, Jul 28, 08:00 PMclear skyTemperature22.89 Â°CHumidity53 %Wind direction67Â°Wind speed1.35 m/sTue, Jul 28, 11:00 PMclear skyTemperature16.84 Â°CHumidity69 %Wind direction99Â°Wind speed1.14 m/sWed, Jul 29, 02:00 AMclear skyTemperature15.01 Â°CHumidity75 %Wind direction150Â°Wind speed1.08 m/sWed, Jul 29, 05:00 AMclear skyTemperature14.49 Â°CHumidity77 %Wind direction171Â°Wind speed1.17 m/sWed, Jul 29, 08:00 AMclear skyTemperature20 Â°CHumidity59 %Wind direction166Â°Wind speed0.94 m/sWed, Jul 29, 11:00 AMclear skyTemperature27.64 Â°CHumidity37 %Wind direction142Â°Wind speed2.24 m/sWed, Jul 29, 02:00 PMclear skyTemperature31.05 Â°CHumidity29 %Wind direction147Â°Wind speed3.26 m/sWed, Jul 29, 05:00 PMclear skyTemperature32.09 Â°CHumidity27 %Wind direction149Â°Wind speed2.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature26.42 Â°CHumidity49 %Wind direction155Â°Wind speed1.8 m/sWed, Jul 29, 11:00 PMclear skyTemperature20.98 Â°CHumidity58 %Wind direction162Â°Wind speed1.52 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div class=\"css-4zwbi1\" data-testid=\"weather-forecast\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Mon, Jul 27, 02:00 AMbroken cloudsTemperature17.95 Â°CHumidity86 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature17.31 Â°CHumidity82 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature16.18 Â°CHumidity79 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96 Â°CHumidity71 %Wind direction297Â°Wind speed5.22 m/sMon, Jul 27, 02:00 PMlight rainTemperature23.23 Â°CHumidity49 %Wind direction283Â°Wind speed4.85 m/sMon, Jul 27, 05:00 PMlight rainTemperature23.45 Â°CHumidity65 %Wind direction284Â°Wind speed4.09 m/sMon, Jul 27, 08:00 PMlight rainTemperature20.96 Â°CHumidity77 %Wind direction284Â°Wind speed3.44 m/sMon, Jul 27, 11:00 PMfew cloudsTemperature16.04 Â°CHumidity93 %Wind direction237Â°Wind speed1.99 m/sTue, Jul 28, 02:00 AMclear skyTemperature14.39 Â°CHumidity96 %Wind direction231Â°Wind speed2.08 m/sTue, Jul 28, 05:00 AMclear skyTemperature11.7 Â°CHumidity95 %Wind direction232Â°Wind speed2.04 m/sTue, Jul 28, 08:00 AMclear skyTemperature14.28 Â°CHumidity74 %Wind direction269Â°Wind speed2.26 m/sTue, Jul 28, 11:00 AMclear skyTemperature21.4 Â°CHumidity47 %Wind direction295Â°Wind speed3.19 m/sTue, Jul 28, 02:00 PMfew cloudsTemperature26.07 Â°CHumidity39 %Wind direction311Â°Wind speed3.1 m/sTue, Jul 28, 05:00 PMclear skyTemperature26.51 Â°CHumidity34 %Wind direction317Â°Wind speed2.64 m/sTue, Jul 28, 08:00 PMclear skyTemperature22.89 Â°CHumidity53 %Wind direction67Â°Wind speed1.35 m/sTue, Jul 28, 11:00 PMclear skyTemperature16.84 Â°CHumidity69 %Wind direction99Â°Wind speed1.14 m/sWed, Jul 29, 02:00 AMclear skyTemperature15.01 Â°CHumidity75 %Wind direction150Â°Wind speed1.08 m/sWed, Jul 29, 05:00 AMclear skyTemperature14.49 Â°CHumidity77 %Wind direction171Â°Wind speed1.17 m/sWed, Jul 29, 08:00 AMclear skyTemperature20 Â°CHumidity59 %Wind direction166Â°Wind speed0.94 m/sWed, Jul 29, 11:00 AMclear skyTemperature27.64 Â°CHumidity37 %Wind direction142Â°Wind speed2.24 m/sWed, Jul 29, 02:00 PMclear skyTemperature31.05 Â°CHumidity29 %Wind direction147Â°Wind speed3.26 m/sWed, Jul 29, 05:00 PMclear skyTemperature32.09 Â°CHumidity27 %Wind direction149Â°Wind speed2.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature26.42 Â°CHumidity49 %Wind direction155Â°Wind speed1.8 m/sWed, Jul 29, 11:00 PMclear skyTemperature20.98 Â°CHumidity58 %Wind direction162Â°Wind speed1.52 m/s\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \u001b[32m\"Location:\"\u001b[39m\nReceived string:    \u001b[31m\"Mon, Jul 27, 02:00 AMbroken cloudsTemperature17.95 Â°CHumidity86 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature17.31 Â°CHumidity82 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature16.18 Â°CHumidity79 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96 Â°CHumidity71 %Wind direction297Â°Wind speed5.22 m/sMon, Jul 27, 02:00 PMlight rainTemperature23.23 Â°CHumidity49 %Wind direction283Â°Wind speed4.85 m/sMon, Jul 27, 05:00 PMlight rainTemperature23.45 Â°CHumidity65 %Wind direction284Â°Wind speed4.09 m/sMon, Jul 27, 08:00 PMlight rainTemperature20.96 Â°CHumidity77 %Wind direction284Â°Wind speed3.44 m/sMon, Jul 27, 11:00 PMfew cloudsTemperature16.04 Â°CHumidity93 %Wind direction237Â°Wind speed1.99 m/sTue, Jul 28, 02:00 AMclear skyTemperature14.39 Â°CHumidity96 %Wind direction231Â°Wind speed2.08 m/sTue, Jul 28, 05:00 AMclear skyTemperature11.7 Â°CHumidity95 %Wind direction232Â°Wind speed2.04 m/sTue, Jul 28, 08:00 AMclear skyTemperature14.28 Â°CHumidity74 %Wind direction269Â°Wind speed2.26 m/sTue, Jul 28, 11:00 AMclear skyTemperature21.4 Â°CHumidity47 %Wind direction295Â°Wind speed3.19 m/sTue, Jul 28, 02:00 PMfew cloudsTemperature26.07 Â°CHumidity39 %Wind direction311Â°Wind speed3.1 m/sTue, Jul 28, 05:00 PMclear skyTemperature26.51 Â°CHumidity34 %Wind direction317Â°Wind speed2.64 m/sTue, Jul 28, 08:00 PMclear skyTemperature22.89 Â°CHumidity53 %Wind direction67Â°Wind speed1.35 m/sTue, Jul 28, 11:00 PMclear skyTemperature16.84 Â°CHumidity69 %Wind direction99Â°Wind speed1.14 m/sWed, Jul 29, 02:00 AMclear skyTemperature15.01 Â°CHumidity75 %Wind direction150Â°Wind speed1.08 m/sWed, Jul 29, 05:00 AMclear skyTemperature14.49 Â°CHumidity77 %Wind direction171Â°Wind speed1.17 m/sWed, Jul 29, 08:00 AMclear skyTemperature20 Â°CHumidity59 %Wind direction166Â°Wind speed0.94 m/sWed, Jul 29, 11:00 AMclear skyTemperature27.64 Â°CHumidity37 %Wind direction142Â°Wind speed2.24 m/sWed, Jul 29, 02:00 PMclear skyTemperature31.05 Â°CHumidity29 %Wind direction147Â°Wind speed3.26 m/sWed, Jul 29, 05:00 PMclear skyTemperature32.09 Â°CHumidity27 %Wind direction149Â°Wind speed2.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature26.42 Â°CHumidity49 %Wind direction155Â°Wind speed1.8 m/sWed, Jul 29, 11:00 PMclear skyTemperature20.98 Â°CHumidity58 %Wind direction162Â°Wind speed1.52 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div class=\"css-4zwbi1\" data-testid=\"weather-forecast\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Mon, Jul 27, 02:00 AMbroken cloudsTemperature17.95 Â°CHumidity86 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature17.31 Â°CHumidity82 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature16.18 Â°CHumidity79 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96 Â°CHumidity71 %Wind direction297Â°Wind speed5.22 m/sMon, Jul 27, 02:00 PMlight rainTemperature23.23 Â°CHumidity49 %Wind direction283Â°Wind speed4.85 m/sMon, Jul 27, 05:00 PMlight rainTemperature23.45 Â°CHumidity65 %Wind direction284Â°Wind speed4.09 m/sMon, Jul 27, 08:00 PMlight rainTemperature20.96 Â°CHumidity77 %Wind direction284Â°Wind speed3.44 m/sMon, Jul 27, 11:00 PMfew cloudsTemperature16.04 Â°CHumidity93 %Wind direction237Â°Wind speed1.99 m/sTue, Jul 28, 02:00 AMclear skyTemperature14.39 Â°CHumidity96 %Wind direction231Â°Wind speed2.08 m/sTue, Jul 28, 05:00 AMclear skyTemperature11.7 Â°CHumidity95 %Wind direction232Â°Wind speed2.04 m/sTue, Jul 28, 08:00 AMclear skyTemperature14.28 Â°CHumidity74 %Wind direction269Â°Wind speed2.26 m/sTue, Jul 28, 11:00 AMclear skyTemperature21.4 Â°CHumidity47 %Wind direction295Â°Wind speed3.19 m/sTue, Jul 28, 02:00 PMfew cloudsTemperature26.07 Â°CHumidity39 %Wind direction311Â°Wind speed3.1 m/sTue, Jul 28, 05:00 PMclear skyTemperature26.51 Â°CHumidity34 %Wind direction317Â°Wind speed2.64 m/sTue, Jul 28, 08:00 PMclear skyTemperature22.89 Â°CHumidity53 %Wind direction67Â°Wind speed1.35 m/sTue, Jul 28, 11:00 PMclear skyTemperature16.84 Â°CHumidity69 %Wind direction99Â°Wind speed1.14 m/sWed, Jul 29, 02:00 AMclear skyTemperature15.01 Â°CHumidity75 %Wind direction150Â°Wind speed1.08 m/sWed, Jul 29, 05:00 AMclear skyTemperature14.49 Â°CHumidity77 %Wind direction171Â°Wind speed1.17 m/sWed, Jul 29, 08:00 AMclear skyTemperature20 Â°CHumidity59 %Wind direction166Â°Wind speed0.94 m/sWed, Jul 29, 11:00 AMclear skyTemperature27.64 Â°CHumidity37 %Wind direction142Â°Wind speed2.24 m/sWed, Jul 29, 02:00 PMclear skyTemperature31.05 Â°CHumidity29 %Wind direction147Â°Wind speed3.26 m/sWed, Jul 29, 05:00 PMclear skyTemperature32.09 Â°CHumidity27 %Wind direction149Â°Wind speed2.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature26.42 Â°CHumidity49 %Wind direction155Â°Wind speed1.8 m/sWed, Jul 29, 11:00 PMclear skyTemperature20.98 Â°CHumidity58 %Wind direction162Â°Wind speed1.52 m/s\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:54:35",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                      "column": 35,
+                      "line": 54
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 52 |\u001b[39m     \u001b[36mconst\u001b[39m weatherForecast \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'weather-forecast'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecast)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 54 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecast)\u001b[33m.\u001b[39mtoContainText(\u001b[32m'Location:'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 55 |\u001b[39m\n \u001b[90m 56 |\u001b[39m     \u001b[36mconst\u001b[39m forecastEntries \u001b[33m=\u001b[39m weatherForecast\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'weather-forecast-entry'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 57 |\u001b[39m     \u001b[36mawait\u001b[39m expect(forecastEntries)\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m24\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                        "column": 35,
+                        "line": 54
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \u001b[32m\"Location:\"\u001b[39m\nReceived string:    \u001b[31m\"Mon, Jul 27, 02:00 AMbroken cloudsTemperature17.95 Â°CHumidity86 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature17.31 Â°CHumidity82 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature16.18 Â°CHumidity79 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96 Â°CHumidity71 %Wind direction297Â°Wind speed5.22 m/sMon, Jul 27, 02:00 PMlight rainTemperature23.23 Â°CHumidity49 %Wind direction283Â°Wind speed4.85 m/sMon, Jul 27, 05:00 PMlight rainTemperature23.45 Â°CHumidity65 %Wind direction284Â°Wind speed4.09 m/sMon, Jul 27, 08:00 PMlight rainTemperature20.96 Â°CHumidity77 %Wind direction284Â°Wind speed3.44 m/sMon, Jul 27, 11:00 PMfew cloudsTemperature16.04 Â°CHumidity93 %Wind direction237Â°Wind speed1.99 m/sTue, Jul 28, 02:00 AMclear skyTemperature14.39 Â°CHumidity96 %Wind direction231Â°Wind speed2.08 m/sTue, Jul 28, 05:00 AMclear skyTemperature11.7 Â°CHumidity95 %Wind direction232Â°Wind speed2.04 m/sTue, Jul 28, 08:00 AMclear skyTemperature14.28 Â°CHumidity74 %Wind direction269Â°Wind speed2.26 m/sTue, Jul 28, 11:00 AMclear skyTemperature21.4 Â°CHumidity47 %Wind direction295Â°Wind speed3.19 m/sTue, Jul 28, 02:00 PMfew cloudsTemperature26.07 Â°CHumidity39 %Wind direction311Â°Wind speed3.1 m/sTue, Jul 28, 05:00 PMclear skyTemperature26.51 Â°CHumidity34 %Wind direction317Â°Wind speed2.64 m/sTue, Jul 28, 08:00 PMclear skyTemperature22.89 Â°CHumidity53 %Wind direction67Â°Wind speed1.35 m/sTue, Jul 28, 11:00 PMclear skyTemperature16.84 Â°CHumidity69 %Wind direction99Â°Wind speed1.14 m/sWed, Jul 29, 02:00 AMclear skyTemperature15.01 Â°CHumidity75 %Wind direction150Â°Wind speed1.08 m/sWed, Jul 29, 05:00 AMclear skyTemperature14.49 Â°CHumidity77 %Wind direction171Â°Wind speed1.17 m/sWed, Jul 29, 08:00 AMclear skyTemperature20 Â°CHumidity59 %Wind direction166Â°Wind speed0.94 m/sWed, Jul 29, 11:00 AMclear skyTemperature27.64 Â°CHumidity37 %Wind direction142Â°Wind speed2.24 m/sWed, Jul 29, 02:00 PMclear skyTemperature31.05 Â°CHumidity29 %Wind direction147Â°Wind speed3.26 m/sWed, Jul 29, 05:00 PMclear skyTemperature32.09 Â°CHumidity27 %Wind direction149Â°Wind speed2.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature26.42 Â°CHumidity49 %Wind direction155Â°Wind speed1.8 m/sWed, Jul 29, 11:00 PMclear skyTemperature20.98 Â°CHumidity58 %Wind direction162Â°Wind speed1.52 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div class=\"css-4zwbi1\" data-testid=\"weather-forecast\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Mon, Jul 27, 02:00 AMbroken cloudsTemperature17.95 Â°CHumidity86 %Wind direction258Â°Wind speed6.98 m/sMon, Jul 27, 05:00 AMlight rainTemperature17.31 Â°CHumidity82 %Wind direction271Â°Wind speed4.98 m/sMon, Jul 27, 08:00 AMlight rainTemperature16.18 Â°CHumidity79 %Wind direction280Â°Wind speed4.59 m/sMon, Jul 27, 11:00 AMlight rainTemperature19.96 Â°CHumidity71 %Wind direction297Â°Wind speed5.22 m/sMon, Jul 27, 02:00 PMlight rainTemperature23.23 Â°CHumidity49 %Wind direction283Â°Wind speed4.85 m/sMon, Jul 27, 05:00 PMlight rainTemperature23.45 Â°CHumidity65 %Wind direction284Â°Wind speed4.09 m/sMon, Jul 27, 08:00 PMlight rainTemperature20.96 Â°CHumidity77 %Wind direction284Â°Wind speed3.44 m/sMon, Jul 27, 11:00 PMfew cloudsTemperature16.04 Â°CHumidity93 %Wind direction237Â°Wind speed1.99 m/sTue, Jul 28, 02:00 AMclear skyTemperature14.39 Â°CHumidity96 %Wind direction231Â°Wind speed2.08 m/sTue, Jul 28, 05:00 AMclear skyTemperature11.7 Â°CHumidity95 %Wind direction232Â°Wind speed2.04 m/sTue, Jul 28, 08:00 AMclear skyTemperature14.28 Â°CHumidity74 %Wind direction269Â°Wind speed2.26 m/sTue, Jul 28, 11:00 AMclear skyTemperature21.4 Â°CHumidity47 %Wind direction295Â°Wind speed3.19 m/sTue, Jul 28, 02:00 PMfew cloudsTemperature26.07 Â°CHumidity39 %Wind direction311Â°Wind speed3.1 m/sTue, Jul 28, 05:00 PMclear skyTemperature26.51 Â°CHumidity34 %Wind direction317Â°Wind speed2.64 m/sTue, Jul 28, 08:00 PMclear skyTemperature22.89 Â°CHumidity53 %Wind direction67Â°Wind speed1.35 m/sTue, Jul 28, 11:00 PMclear skyTemperature16.84 Â°CHumidity69 %Wind direction99Â°Wind speed1.14 m/sWed, Jul 29, 02:00 AMclear skyTemperature15.01 Â°CHumidity75 %Wind direction150Â°Wind speed1.08 m/sWed, Jul 29, 05:00 AMclear skyTemperature14.49 Â°CHumidity77 %Wind direction171Â°Wind speed1.17 m/sWed, Jul 29, 08:00 AMclear skyTemperature20 Â°CHumidity59 %Wind direction166Â°Wind speed0.94 m/sWed, Jul 29, 11:00 AMclear skyTemperature27.64 Â°CHumidity37 %Wind direction142Â°Wind speed2.24 m/sWed, Jul 29, 02:00 PMclear skyTemperature31.05 Â°CHumidity29 %Wind direction147Â°Wind speed3.26 m/sWed, Jul 29, 05:00 PMclear skyTemperature32.09 Â°CHumidity27 %Wind direction149Â°Wind speed2.98 m/sWed, Jul 29, 08:00 PMclear skyTemperature26.42 Â°CHumidity49 %Wind direction155Â°Wind speed1.8 m/sWed, Jul 29, 11:00 PMclear skyTemperature20.98 Â°CHumidity58 %Wind direction162Â°Wind speed1.52 m/s\"\u001b[22m\n\n\n  52 |     const weatherForecast = page.getByTestId('weather-forecast');\n  53 |     await expect(weatherForecast).toBeVisible();\n> 54 |     await expect(weatherForecast).toContainText('Location:');\n     |                                   ^\n  55 |\n  56 |     const forecastEntries = weatherForecast.getByTestId('weather-forecast-entry');\n  57 |     await expect(forecastEntries).toHaveCount(24);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:54:35"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-26T22:46:32.165Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-51f30-o-show-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_20\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                    "column": 35,
+                    "line": 54
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a2b81b2fa619226c79e8-8205d64991caae5435e7",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_20/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-26T22:46:31.527Z",
+    "duration": 11580.027999999998,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

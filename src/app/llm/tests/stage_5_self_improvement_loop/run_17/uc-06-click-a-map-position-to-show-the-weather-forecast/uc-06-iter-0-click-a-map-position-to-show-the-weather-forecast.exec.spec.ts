@@ -1,0 +1,98 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+function findNestedArrayLength(value: unknown, expectedLength: number): number | undefined {
+    if (Array.isArray(value)) {
+        if (value.length === expectedLength) {
+            return value.length;
+        }
+
+        for (const entry of value) {
+            const found = findNestedArrayLength(entry, expectedLength);
+            if (found !== undefined) {
+                return found;
+            }
+        }
+
+        return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+        for (const nestedValue of Object.values(value as Record<string, unknown>)) {
+            const found = findNestedArrayLength(nestedValue, expectedLength);
+            if (found !== undefined) {
+                return found;
+            }
+        }
+    }
+
+    return undefined;
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const initialForecastHint = weatherForecastSection.getByText('Click on the map to load a forecast.', {
+        exact: true
+    });
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(initialForecastHint).toBeVisible();
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeUndefined();
+
+    const forecastResponsePromise = page.waitForResponse(async (response) => {
+        if (!['xhr', 'fetch'].includes(response.request().resourceType())) {
+            return false;
+        }
+
+        if (!response.ok()) {
+            return false;
+        }
+
+        try {
+            const json = await response.json();
+            return findNestedArrayLength(json, 24) === 24;
+        } catch {
+            return false;
+        }
+    });
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox.width * 0.55),
+            y: Math.round(mapBox.height * 0.55)
+        }
+    });
+
+    const forecastResponse = await forecastResponsePromise;
+    const forecastJson = await forecastResponse.json();
+
+    expect(findNestedArrayLength(forecastJson, 24)).toBe(24);
+
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(initialForecastHint).not.toBeVisible();
+});

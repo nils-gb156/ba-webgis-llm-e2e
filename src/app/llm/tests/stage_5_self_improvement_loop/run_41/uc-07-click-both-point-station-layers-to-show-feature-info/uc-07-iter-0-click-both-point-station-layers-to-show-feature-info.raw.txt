@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(mapContainer).toBeVisible();
+
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+        await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeVisible();
+    await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+    const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    let targetPixel: [number, number] | undefined;
+    await expect
+        .poll(async () => {
+            const pixel = await page.evaluate((coordinate) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (coord: number[]) => number[] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+                const result = map?.olMap?.getPixelFromCoordinate?.(coordinate);
+                return Array.isArray(result) && result.length >= 2
+                    ? ([result[0], result[1]] as [number, number])
+                    : undefined;
+            }, [1188692.84, 6767643.28]);
+            targetPixel = pixel;
+            return targetPixel;
+        })
+        .toBeTruthy();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    expect(targetPixel![0]).toBeGreaterThanOrEqual(0);
+    expect(targetPixel![1]).toBeGreaterThanOrEqual(0);
+    expect(targetPixel![0]).toBeLessThanOrEqual(mapBox!.width);
+    expect(targetPixel![1]).toBeLessThanOrEqual(mapBox!.height);
+
+    const featureInfoResponsePromise = page.waitForResponse(
+        (response) =>
+            response.request().method() === 'GET' &&
+            /getfeatureinfo/i.test(response.url()) &&
+            response.status() === 200
+    );
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(targetPixel![0]),
+            y: Math.round(targetPixel![1])
+        }
+    });
+
+    await featureInfoResponsePromise;
+
+    await expect(infoPanel).toContainText('UV-Index Station');
+    await expect(infoPanel).toContainText('EUCOS Ground Station');
+});

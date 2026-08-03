@@ -1,0 +1,103 @@
+{
+  "run": "run_39",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  111 |             return counts.length > 0 ? Math.max(...counts) : 0;\n  112 |         });\n> 113 |     }).toBe(24);\n      |        ^\n  114 | });\n  115 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-0-click-a-map-posit"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Test timeout of 30000ms exceeded.\n\n---\n\nError: locator.click: Target page, context or browser has been closed\n\n  145 |             .catch(() => null);\n  146 |\n> 147 |         await mapContainer.click({ position });\n      |                            ^\n  148 |\n  149 |         await expect\n  150 |             .poll(\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-1-click-a-map"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toContainText(expected) failed\n\nLocator: getByTestId('weather-forecast-section')\nExpected substring: not \"Fehler beim Laden der Wetterdaten\"\nReceived string: \"Weather ForecastFehler beim Laden der Wetterdaten\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"not toContainText\" with timeout 5000ms\n  - waiting for getByTestId('weather-forecast-section')\n    14 Ã— locator resolved to <div data-testid=\"weather-forecast-section\">â€¦</div>\n       - unexpected value \"Weather ForecastFe"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-06-iter-3-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: No tested map position produced a visible 24-entry weather forecast. Attempts: Click at 9Â°36'5.58\"(E) 52Â°34'15.04\"(N) EPSG:4326 returned forecast response 429. Click at 8Â°45'20.17\"(E) 52Â°9'17.63\"(N) EPSG:4326 returned forecast response 429. Click at 10Â°26'50.99\"(E) 52Â°9'17.63\"(N) EPSG:4326 returned forecast response 429. Click at 8Â°20'17.24\"(E) 51Â°35'30.91\"(N) EPSG:4326 returned forecast response 429. Click at 10Â°1'48.06\"(E) 51Â°35'30.91\"(N) EPSG:4326 returned forecast response 4"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"entries:24\"\nReceived: \"entries:undefined\"\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  311 |             { timeout: 15000 }\n  312 |         )\n> 313 |         .toBe('entries:24');\n      |          ^\n  314 | });\n  315 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-m"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-06-iter-5-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 3\n\n- ObjectContaining {\n-   \"entryCount\": 24,\n+ Object {\n+   \"entryCount\": undefined,\n    \"hasError\": false,\n    \"hasPlaceholder\": false,\n+   \"text\": \"\",\n  }\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  375 |     await expect\n  376 |         .poll(async () => getForecastSectionState(page), { timeout: 15000 })\n> 377 |         .toEqual(\n      |          ^\n  378 |             expect."
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-06-iter-6-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  67 |\n  68 |     await expect.poll(() => forecastRequests.length).toBeGreaterThan(0);\n> 69 |     await expect.poll(() => forecastResponses.some((response) => response.ok)).toBe(true);\n     |                                                                                ^\n  70 |\n  71 |     await expect.poll(() => getHighlightedCoordinat"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-06-iter-7-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Weather forecast did not load successfully after clicking candidate map positions. Last state: {\"text\":\"Weather Forecast Fehler beim Laden der Wetterdaten\",\"hasPlaceholder\":false,\"hasError\":true,\"entryCount\":0}\n\n  208 |\n  209 |     if (!successfulForecast) {\n> 210 |         throw new Error(\n      |               ^\n  211 |             `Weather forecast did not load successfully after clicking candidate map positions. Last state: ${JSON.stringify(\n  212 |                 lastForecastState\n "
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-06-iter-8-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: Weather forecast did not load successfully for any tested map position. Last state: {\"text\":\"Weather Forecast Fehler beim Laden der Wetterdaten\",\"hasPlaceholder\":false,\"hasError\":true,\"entryCount\":0}\n\n  318 |\n  319 |     if (!successfulForecast) {\n> 320 |         throw new Error(\n      |               ^\n  321 |             `Weather forecast did not load successfully for any tested map position. Last state: ${JSON.stringify(\n  322 |                 lastForecastState\n  323 |             )}`"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-06-iter-9-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: Test timeout of 30000ms exceeded\n\n  276 |         await mapContainer.click({ position });\n  277 |\n> 278 |         await expect.poll(() => getHighlightedCoordinate(page), { timeout: 10000 }).not.toBeUndefined();\n      |                                                                                         ^\n  279 |\n  280 |         try {\n  281 |             await expect\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map"
+    }
+  ]
+}

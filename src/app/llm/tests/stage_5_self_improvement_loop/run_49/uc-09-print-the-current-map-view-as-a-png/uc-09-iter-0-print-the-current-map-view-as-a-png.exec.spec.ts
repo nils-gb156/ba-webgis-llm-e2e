@@ -1,0 +1,172 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    const printToggle = page.getByTestId('print-toggle');
+    await expect(printToggle).toBeVisible();
+    await printToggle.click();
+
+    let titleInput = page.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = page.getByRole('textbox', { name: /name/i });
+    }
+
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'E2E PNG export';
+    await titleInput.fill(printTitle);
+
+    const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+    const formatCombobox = page.getByRole('combobox', { name: /format/i });
+    const pngOption = page.getByRole('option', { name: /^PNG$/i });
+
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else if ((await formatCombobox.count()) > 0) {
+        await expect(formatCombobox).toBeVisible();
+        try {
+            await formatCombobox.selectOption({ label: 'PNG' });
+        } catch {
+            await formatCombobox.selectOption({ value: 'png' });
+        }
+        await expect(formatCombobox).toHaveValue(/png/i);
+    } else if ((await pngOption.count()) > 0) {
+        await pngOption.click();
+        await expect(pngOption).toBeVisible();
+    } else {
+        throw new Error('Could not find a control for selecting the PNG export format.');
+    }
+
+    let exportButton = page.getByRole('button', { name: /^Export$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Download$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Print$/i });
+    }
+
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+    expect(await download.failure()).toBeNull();
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const buffer = await readFile(downloadPath!);
+    expect(buffer.byteLength).toBeGreaterThan(10_000);
+    expect(
+        buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+    ).toBe(true);
+
+    const analysis = await page.evaluate(
+        async ({ base64 }) => {
+            const img = new Image();
+            const loaded = new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to load the downloaded PNG.'));
+            });
+
+            img.src = `data:image/png;base64,${base64}`;
+            await loaded;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                throw new Error('Could not create a 2D canvas context for PNG inspection.');
+            }
+
+            ctx.drawImage(img, 0, 0);
+
+            const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            let opaquePixels = 0;
+            let beigePixels = 0;
+            let bluePixels = 0;
+            let redPixels = 0;
+            let bottomCenterDarkPixels = 0;
+            let bottomCenterLightPixels = 0;
+
+            const bottomStartY = Math.floor(height * 0.82);
+            const bottomMinX = Math.floor(width * 0.35);
+            const bottomMaxX = Math.ceil(width * 0.65);
+
+            for (let pixelIndex = 0, i = 0; i < data.length; i += 4, pixelIndex++) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const a = data[i + 3];
+
+                if (a < 200) {
+                    continue;
+                }
+
+                opaquePixels++;
+
+                if (r > 170 && g > 160 && b > 110 && r >= g && g >= b - 10) {
+                    beigePixels++;
+                }
+
+                if (b > 130 && b > r + 35 && b > g + 25) {
+                    bluePixels++;
+                }
+
+                if (r > 150 && r > g + 35 && r > b + 20) {
+                    redPixels++;
+                }
+
+                const x = pixelIndex % width;
+                const y = Math.floor(pixelIndex / width);
+
+                if (y >= bottomStartY && x >= bottomMinX && x <= bottomMaxX) {
+                    if (r < 70 && g < 70 && b < 70) {
+                        bottomCenterDarkPixels++;
+                    }
+                    if (r > 220 && g > 220 && b > 220) {
+                        bottomCenterLightPixels++;
+                    }
+                }
+            }
+
+            return {
+                width,
+                height,
+                opaquePixels,
+                beigePixels,
+                bluePixels,
+                redPixels,
+                bottomCenterDarkPixels,
+                bottomCenterLightPixels
+            };
+        },
+        { base64: buffer.toString('base64') }
+    );
+
+    expect(analysis.width).toBeGreaterThan(300);
+    expect(analysis.height).toBeGreaterThan(200);
+    expect(analysis.beigePixels).toBeGreaterThan(analysis.opaquePixels * 0.05);
+    expect(analysis.bluePixels + analysis.redPixels).toBeGreaterThan(100);
+    expect(analysis.bottomCenterDarkPixels).toBeGreaterThan(20);
+    expect(analysis.bottomCenterLightPixels).toBeGreaterThan(100);
+});

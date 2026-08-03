@@ -1,0 +1,49 @@
+{
+  "run": "run_15",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 10000\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  70 |         if (!center) return 0;\n  71 |         return Math.hypot(center[0] - initialCenter[0], center[1] - initialCenter[1]);\n> 72 |     }).toBeGreaterThan(10000);\n     |        ^\n  73 |\n  74 |     await expect.poll(async () => {\n  75 |         const center = await getMapCenter(page);\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 50000\nReceived:   0\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  86 |         if (!center) return 0;\n  87 |         return Math.hypot(center[0] - initialCenter[0], center[1] - initialCenter[1]);\n> 88 |     }, { timeout: 15000 }).toBeGreaterThan(50000);\n     |                            ^\n  89 |\n  90 |     await expect.poll(async () => {\n  91 |         const center = await getMapCenter(page);\n    at c:\\Users"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 51\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n   96 |             return directCardCount;\n   97 |         });\n>  98 |     }, { timeout: 15000 }).toBe(24);\n      |                            ^\n   99 | });\n  100 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_15\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-foreca"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

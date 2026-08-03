@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_39/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 6: Click a map position to show the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 46101,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast-section')\nExpected substring: not \u001b[32m\"Fehler beim Laden der Wetterdaten\"\u001b[39m\nReceived string: \u001b[31m\"Weather Forecast\u001b[7mFehler beim Laden der Wetterdaten\u001b[27m\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast-section')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div data-testid=\"weather-forecast-section\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Weather ForecastFehler beim Laden der Wetterdaten\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast-section')\nExpected substring: not \u001b[32m\"Fehler beim Laden der Wetterdaten\"\u001b[39m\nReceived string: \u001b[31m\"Weather Forecast\u001b[7mFehler beim Laden der Wetterdaten\u001b[27m\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast-section')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div data-testid=\"weather-forecast-section\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Weather ForecastFehler beim Laden der Wetterdaten\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:289:46",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                      "column": 46,
+                      "line": 289
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 287 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecastSection)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 288 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecastSection)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoContainText(\u001b[32m'Click on the map to load a forecast.'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 289 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecastSection)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoContainText(\u001b[32m'Fehler beim Laden der Wetterdaten'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 290 |\u001b[39m\n \u001b[90m 291 |\u001b[39m     \u001b[36mconst\u001b[39m finalState \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m getWeatherForecastRenderState(page)\u001b[33m;\u001b[39m\n \u001b[90m 292 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                        "column": 46,
+                        "line": 289
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast-section')\nExpected substring: not \u001b[32m\"Fehler beim Laden der Wetterdaten\"\u001b[39m\nReceived string: \u001b[31m\"Weather Forecast\u001b[7mFehler beim Laden der Wetterdaten\u001b[27m\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast-section')\u001b[22m\n\u001b[2m    14 Ã— locator resolved to <div data-testid=\"weather-forecast-section\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Weather ForecastFehler beim Laden der Wetterdaten\"\u001b[22m\n\n\n  287 |     await expect(weatherForecastSection).toBeVisible();\n  288 |     await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');\n> 289 |     await expect(weatherForecastSection).not.toContainText('Fehler beim Laden der Wetterdaten');\n      |                                              ^\n  290 |\n  291 |     const finalState = await getWeatherForecastRenderState(page);\n  292 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:289:46"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T03:53:34.425Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-d63fb-o-show-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                    "column": 46,
+                    "line": 289
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "206ad4bdc88db15b2e04-7d57af5c371dc513280a",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_39/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+          "line": 153,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T03:53:33.699Z",
+    "duration": 49110.207,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

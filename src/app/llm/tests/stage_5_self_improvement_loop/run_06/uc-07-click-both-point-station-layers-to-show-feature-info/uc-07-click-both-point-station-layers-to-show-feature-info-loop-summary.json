@@ -1,0 +1,31 @@
+{
+  "run": "run_06",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"EUCOS Ground Station\"\nReceived string:    \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 11:00 PMlight rainTemperature16.38 Â°CHumidity75 %Wind direction247Â°Wind speed6.19 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.54 Â°CHumidity85 %Wind direction268Â°Wind speed5.65 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.83 Â°CHumidity95 %Wind direction280Â°Wind speed4"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

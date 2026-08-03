@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+
+    await expect(layerSwitcherToggle).toBeVisible();
+
+    if (!(await layerSwitcher.isVisible())) {
+        if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+            await layerSwitcherToggle.click();
+        }
+    }
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(basemapCombobox).toBeVisible();
+
+    const readSelectedBasemapLabel = async () => {
+        return basemapCombobox.evaluate((element) => {
+            const el = element as HTMLElement;
+
+            if (el instanceof HTMLSelectElement) {
+                const selected =
+                    el.selectedOptions?.item(0) ??
+                    (el.selectedIndex >= 0 ? el.options.item(el.selectedIndex) : null);
+                return selected?.textContent?.trim() ?? '';
+            }
+
+            if (el instanceof HTMLInputElement) {
+                return el.value.trim();
+            }
+
+            const ariaValueText = el.getAttribute('aria-valuetext')?.trim();
+            if (ariaValueText) {
+                return ariaValueText;
+            }
+
+            const activeDescendantId = el.getAttribute('aria-activedescendant');
+            if (activeDescendantId) {
+                const activeDescendant = document.getElementById(activeDescendantId);
+                const activeText = activeDescendant?.textContent?.trim();
+                if (activeText) {
+                    return activeText;
+                }
+            }
+
+            const valueAttribute = el.getAttribute('value')?.trim();
+            if (valueAttribute) {
+                return valueAttribute;
+            }
+
+            return el.textContent?.trim() ?? '';
+        });
+    };
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => readSelectedBasemapLabel()).toBe('Carto Light');
+
+    const isNativeSelect = await basemapCombobox.evaluate((element) => element instanceof HTMLSelectElement);
+
+    if (isNativeSelect) {
+        await basemapCombobox.selectOption({ label: 'OpenStreetMap' });
+    } else {
+        await basemapCombobox.click();
+        const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap', exact: true });
+        await expect(openStreetMapOption).toBeVisible();
+        await openStreetMapOption.click();
+    }
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+    await expect.poll(() => readSelectedBasemapLabel()).toBe('OpenStreetMap');
+    await expect.poll(() => readSelectedBasemapLabel()).not.toBe('Carto Light');
+});

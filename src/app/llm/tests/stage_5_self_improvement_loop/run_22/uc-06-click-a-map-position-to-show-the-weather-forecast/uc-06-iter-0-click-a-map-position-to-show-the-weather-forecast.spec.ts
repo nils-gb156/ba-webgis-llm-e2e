@@ -1,0 +1,131 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const initialForecastHint = weatherForecastSection.getByText('Click on the map to load a forecast.');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    await expect(infoPanelToggle).toBeVisible();
+    if (!(await infoPanel.isVisible())) {
+        const isPressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (isPressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(
+        infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(initialForecastHint).toBeVisible();
+
+    let forecastResponseEntryCount: number | undefined;
+
+    const findForecastEntryCount = (value: unknown): number | undefined => {
+        if (Array.isArray(value)) {
+            if (value.length === 24) {
+                return 24;
+            }
+
+            for (const item of value) {
+                const nestedCount = findForecastEntryCount(item);
+                if (nestedCount !== undefined) {
+                    return nestedCount;
+                }
+            }
+
+            return undefined;
+        }
+
+        if (value && typeof value === 'object') {
+            for (const [key, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+                if (
+                    ['forecast', 'forecasts', 'hourly', 'entries', 'timeseries', 'timeSeries'].includes(
+                        key
+                    ) &&
+                    Array.isArray(nestedValue)
+                ) {
+                    return nestedValue.length;
+                }
+
+                const nestedCount = findForecastEntryCount(nestedValue);
+                if (nestedCount !== undefined) {
+                    return nestedCount;
+                }
+            }
+        }
+
+        return undefined;
+    };
+
+    page.on('response', async (response) => {
+        const resourceType = response.request().resourceType();
+        if (resourceType !== 'fetch' && resourceType !== 'xhr') {
+            return;
+        }
+
+        const contentType = response.headers()['content-type'] ?? '';
+        if (!contentType.includes('json')) {
+            return;
+        }
+
+        try {
+            const responseBody = await response.json();
+            const entryCount = findForecastEntryCount(responseBody);
+            if (entryCount !== undefined) {
+                forecastResponseEntryCount = entryCount;
+            }
+        } catch {
+            // Ignore responses that are not readable as JSON.
+        }
+    });
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round((mapBox?.width ?? 0) * 0.5),
+            y: Math.round((mapBox?.height ?? 0) * 0.45)
+        }
+    });
+
+    await expect.poll(async () => {
+        const highlightedCoordinate = await getHighlightedCoordinate(page);
+        return Array.isArray(highlightedCoordinate) && highlightedCoordinate.length === 2;
+    }).toBe(true);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+    await expect.poll(async () => {
+        const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+        if (listItemCount === 24) {
+            return 24;
+        }
+
+        const rowCount = await weatherForecastSection.getByRole('row').count();
+        if (rowCount === 24 || rowCount === 25) {
+            return 24;
+        }
+
+        const imageCount = await weatherForecastSection.getByRole('img').count();
+        if (imageCount === 24) {
+            return 24;
+        }
+
+        return forecastResponseEntryCount ?? 0;
+    }).toBe(24);
+});

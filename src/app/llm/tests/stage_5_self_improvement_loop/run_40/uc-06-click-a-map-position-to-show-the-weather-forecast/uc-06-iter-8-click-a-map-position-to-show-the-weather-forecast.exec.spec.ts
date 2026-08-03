@@ -1,0 +1,228 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import {
+    getActiveBaseLayerTitle,
+    getHighlightedCoordinate,
+    getMapCenter,
+    getMapZoomLevel
+} from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    test.setTimeout(180000);
+
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const weatherForecastHeading = infoPanel.getByRole('heading', {
+        name: 'Weather Forecast',
+        exact: true
+    });
+    const placeholderText = weatherForecastSection.getByText(
+        'Click on the map to load a forecast.',
+        { exact: true }
+    );
+    const errorText = weatherForecastSection.getByText('Fehler beim Laden der Wetterdaten', {
+        exact: true
+    });
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastHeading).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(placeholderText).toBeVisible();
+
+    const readForecastState = async (): Promise<{ status: 'pending' | 'error' | 'loaded'; count: number }> => {
+        return await weatherForecastSection.evaluate((section) => {
+            const normalize = (value: string): string => value.replace(/\s+/g, ' ').trim();
+            const text = normalize(section.textContent ?? '');
+
+            if (text.includes('Fehler beim Laden der Wetterdaten')) {
+                return { status: 'error' as const, count: 0 };
+            }
+
+            if (!text || text.includes('Click on the map to load a forecast.')) {
+                return { status: 'pending' as const, count: 0 };
+            }
+
+            const candidateCounts: number[] = [];
+
+            const semanticCounts = [
+                section.querySelectorAll('[role="listitem"]').length,
+                section.querySelectorAll('li').length,
+                Array.from(section.querySelectorAll('tr')).filter((row) =>
+                    row.querySelector('td, th')
+                ).length,
+                section.querySelectorAll('article').length,
+                section.querySelectorAll('img').length
+            ].filter((count) => count > 0);
+
+            candidateCounts.push(...semanticCounts);
+
+            for (const element of Array.from(section.querySelectorAll<HTMLElement>('*'))) {
+                const childCount = element.children.length;
+                if (childCount > 0) {
+                    candidateCounts.push(childCount);
+                }
+            }
+
+            const normalizeExactHour = (raw: string): string | undefined => {
+                const match = raw.match(/^([01]?\d|2[0-3])(?::([0-5]\d))?(?:\s*Uhr)?$/i);
+                if (!match) {
+                    return undefined;
+                }
+
+                const hour = match[1].padStart(2, '0');
+                const minute = match[2] ?? '00';
+                return `${hour}:${minute}`;
+            };
+
+            const uniqueTimes = new Set<string>();
+
+            for (const element of Array.from(section.querySelectorAll<HTMLElement>('*'))) {
+                const value = normalize(element.textContent ?? '');
+                if (!value || value.length > 12) {
+                    continue;
+                }
+
+                const normalized = normalizeExactHour(value);
+                if (normalized) {
+                    uniqueTimes.add(normalized);
+                }
+            }
+
+            const inlineTimeRegex = /\b([01]?\d|2[0-3])(?::([0-5]\d)|\s*Uhr)\b/gi;
+            const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT);
+            let node = walker.nextNode();
+
+            while (node) {
+                const value = normalize(node.textContent ?? '');
+                if (value && value.length <= 120) {
+                    for (const match of value.matchAll(inlineTimeRegex)) {
+                        const hour = match[1].padStart(2, '0');
+                        const minute =
+                            match[2] && /^\d{2}$/.test(match[2].trim()) ? match[2].trim() : '00';
+                        uniqueTimes.add(`${hour}:${minute}`);
+                    }
+                }
+
+                node = walker.nextNode();
+            }
+
+            if (uniqueTimes.size > 0) {
+                candidateCounts.push(uniqueTimes.size);
+            }
+
+            const has24Entries = candidateCounts.includes(24) || uniqueTimes.size === 24;
+            const count = has24Entries ? 24 : Math.max(0, ...candidateCounts);
+
+            return {
+                status: has24Entries ? ('loaded' as const) : ('pending' as const),
+                count
+            };
+        });
+    };
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const clamp = (value: number, min: number, max: number): number =>
+        Math.max(min, Math.min(max, value));
+
+    const candidatePositions = [
+        { x: 0.48, y: 0.18 },
+        { x: 0.64, y: 0.29 },
+        { x: 0.46, y: 0.48 },
+        { x: 0.33, y: 0.29 },
+        { x: 0.58, y: 0.62 },
+        { x: 0.75, y: 0.66 },
+        { x: 0.70, y: 0.46 },
+        { x: 0.32, y: 0.64 },
+        { x: 0.54, y: 0.38 },
+        { x: 0.60, y: 0.22 }
+    ];
+
+    let forecastLoaded = false;
+    let previousHighlightBeforeSuccessfulClick: string | undefined;
+
+    for (const candidate of candidatePositions) {
+        const previousHighlight = JSON.stringify((await getHighlightedCoordinate(page)) ?? null);
+        const position = {
+            x: clamp(Math.round(mapBox.width * candidate.x), 24, Math.round(mapBox.width) - 24),
+            y: clamp(Math.round(mapBox.height * candidate.y), 24, Math.round(mapBox.height) - 24)
+        };
+
+        await mapContainer.click({ position });
+
+        try {
+            await expect
+                .poll(
+                    async () => JSON.stringify((await getHighlightedCoordinate(page)) ?? null),
+                    { timeout: 10000 }
+                )
+                .not.toBe(previousHighlight);
+
+            await expect.poll(() => getHighlightedCoordinate(page), { timeout: 10000 }).not.toBeUndefined();
+
+            await expect
+                .poll(
+                    async () => {
+                        const state = await readForecastState();
+                        return state.status;
+                    },
+                    { timeout: 20000 }
+                )
+                .not.toBe('pending');
+
+            const state = await readForecastState();
+            if (state.status === 'loaded' && state.count === 24) {
+                forecastLoaded = true;
+                previousHighlightBeforeSuccessfulClick = previousHighlight;
+                break;
+            }
+        } catch {
+            // Try another map position if this click did not produce a usable forecast.
+        }
+    }
+
+    expect(
+        forecastLoaded,
+        'Clicking the map did not load a weather forecast with 24 entries.'
+    ).toBe(true);
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastHeading).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(placeholderText).toBeHidden();
+    await expect(errorText).toBeHidden();
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+
+    if (previousHighlightBeforeSuccessfulClick !== undefined) {
+        expect(JSON.stringify((await getHighlightedCoordinate(page)) ?? null)).not.toBe(
+            previousHighlightBeforeSuccessfulClick
+        );
+    }
+
+    await expect
+        .poll(async () => {
+            const state = await readForecastState();
+            return state.count;
+        })
+        .toBe(24);
+});

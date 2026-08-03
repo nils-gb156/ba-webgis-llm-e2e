@@ -1,0 +1,85 @@
+{
+  "run": "run_45",
+  "use_case_id": 2,
+  "title": "Switch the base map from Carto Light to OpenStreetMap",
+  "complexity": "easy",
+  "passed": true,
+  "iterations_used": 8,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-02-iter-7-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.evaluate: TypeError: Cannot read properties of undefined (reading '0')\n    at eval (eval at evaluate (:302:30), <anonymous>:3:56)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (eval at evaluate (:302:30), <anonymous>:3:56)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvemen"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.selectOption: Error: Element is not a <select> element\nCall log:\n  - waiting for getByRole('combobox', { name: 'Basemaps', exact: true })\n    - locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"closed\" data-scope=\"select\" data-part=\"trigger\" aria-invalid=\"false\" aria-expanded=\"false\" aria-required=\"false\" aria-haspopup=\"listbox\" aria-labelledby=\"_r_3_\" id=\"select:_r_4_:trigger\" aria-controls=\"select:_r_4_:content\" class=\"basemap-switcher-select-trigge"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveAttribute(expected) failed\n\nLocator:  getByTestId('layer-switcher-toggle')\nExpected: \"false\"\nReceived: \"true\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" with timeout 5000ms\n  - waiting for getByTestId('layer-switcher-toggle')\n    13 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_10_\" aria-label=\"Layer Switcher\" id=\"tooltip:_r_10_:tri"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-02-iter-3-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveAttribute(expected) failed\n\nLocator:  getByTestId('layer-switcher-toggle')\nExpected: \"false\"\nReceived: \"true\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" with timeout 5000ms\n  - waiting for getByTestId('layer-switcher-toggle')\n    13 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_10_\" aria-label=\"Layer Switcher\" id=\"tooltip:_r_10_:tri"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-02-iter-4-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"Carto Light\"\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  33 |             return undefined;\n  34 |         })\n> 35 |     ).toBe('Carto Light');\n     |       ^\n  36 |\n  37 |     await basemapSelector.selectOption({ label: 'OpenStreetMap' });\n  38 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_45\\uc-02-switch-the-base-map-fr"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-02-iter-5-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"Carto Light\"\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |\n  42 |     await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');\n> 43 |     await expect.poll(readSelectedBasemapLabel).toBe('Carto Light');\n     |                                                 ^\n  44 |\n  45 |     await basemapSelector.selectOption({ label: 'OpenStreetMap' });\n  46 |\n    at c:"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-02-iter-6-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: locator.selectOption: Error: Element is not a <select> element\nCall log:\n  - waiting for getByTestId('layer-switcher').getByRole('combobox', { name: 'Basemaps', exact: true })\n    - locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"closed\" data-scope=\"select\" data-part=\"trigger\" aria-invalid=\"false\" aria-expanded=\"false\" aria-required=\"false\" aria-haspopup=\"listbox\" aria-labelledby=\"_r_3_\" id=\"select:_r_4_:trigger\" aria-controls=\"select:_r_4_:content\" class=\""
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-02-iter-7-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

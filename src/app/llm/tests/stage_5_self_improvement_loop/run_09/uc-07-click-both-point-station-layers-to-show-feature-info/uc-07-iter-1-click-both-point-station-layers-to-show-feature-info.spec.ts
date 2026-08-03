@@ -1,0 +1,163 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    getHighlightedCoordinate,
+    getMapCenter,
+    getMapZoomLevel,
+    isLayerRendered
+} from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if (!(await layerSwitcher.isVisible())) {
+        if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+            await layerSwitcherToggle.click();
+        }
+    }
+    await expect(layerSwitcher).toBeVisible();
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    const eucosCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    const uviCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    await page.waitForLoadState('networkidle');
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    let targetPixel: { x: number; y: number } | undefined;
+    await expect
+        .poll(async () => {
+            targetPixel = await page.evaluate((coordinate: [number, number]) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (coord: [number, number]) => number[] | undefined;
+                                getSize?: () => number[] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+                const olMap = map?.olMap;
+                const pixel = olMap?.getPixelFromCoordinate?.(coordinate);
+                const size = olMap?.getSize?.();
+
+                if (!pixel || !size || pixel.length < 2 || size.length < 2) {
+                    return undefined;
+                }
+
+                if (pixel[0] < 0 || pixel[1] < 0 || pixel[0] > size[0] || pixel[1] > size[1]) {
+                    return undefined;
+                }
+
+                return { x: pixel[0], y: pixel[1] };
+            }, targetCoordinate);
+
+            return targetPixel;
+        })
+        .not.toBeUndefined();
+
+    if (!targetPixel) {
+        throw new Error('Could not determine a clickable map pixel for coordinate [1188692.84, 6767643.28].');
+    }
+
+    const uviSection = page.getByTestId('uvi-station-section');
+    const uviInfo = page.getByTestId('uvi-station-info');
+    const eucosSection = infoPanel.getByText(/EUCOS Ground Station/i);
+
+    const clickOffsets: ReadonlyArray<readonly [number, number]> = [
+        [0, 0],
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0],
+        [1, 1],
+        [-1, 1],
+        [1, -1],
+        [-1, -1],
+        [0, 2],
+        [2, 0],
+        [0, -2],
+        [-2, 0]
+    ];
+
+    let bothSectionsLoaded = false;
+
+    for (const [dx, dy] of clickOffsets) {
+        await mapContainer.click({
+            position: {
+                x: targetPixel.x + dx,
+                y: targetPixel.y + dy
+            }
+        });
+
+        await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+
+        try {
+            await expect
+                .poll(async () => {
+                    const text = await infoPanel.textContent();
+                    return (
+                        text?.includes('UV-Index Station') === true &&
+                        text.includes('EUCOS Ground Station')
+                    );
+                }, { timeout: 8000 })
+                .toBe(true);
+            bothSectionsLoaded = true;
+            break;
+        } catch {
+            // Try the next nearby clickable pixel around the same map coordinate.
+        }
+    }
+
+    expect(bothSectionsLoaded).toBe(true);
+
+    await expect(uviSection).toBeVisible();
+    await expect(uviInfo).toBeVisible();
+    await expect(eucosSection).toBeVisible();
+});

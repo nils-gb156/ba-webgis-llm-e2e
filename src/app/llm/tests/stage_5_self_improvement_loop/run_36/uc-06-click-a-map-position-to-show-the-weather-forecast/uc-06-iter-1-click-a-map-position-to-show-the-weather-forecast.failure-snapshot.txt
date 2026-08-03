@@ -1,0 +1,254 @@
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Heinsen, DE"
+- paragraph: Mon, Jul 27, 05:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 15.29 °C
+- paragraph: Humidity
+- paragraph: 87 %
+- paragraph: Wind direction
+- paragraph: 274°
+- paragraph: Wind speed
+- paragraph: 3.2 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 16.06 °C
+- paragraph: Humidity
+- paragraph: 88 %
+- paragraph: Wind direction
+- paragraph: 299°
+- paragraph: Wind speed
+- paragraph: 3.63 m/s
+- separator
+- paragraph: Mon, Jul 27, 11:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 19.49 °C
+- paragraph: Humidity
+- paragraph: 75 %
+- paragraph: Wind direction
+- paragraph: 294°
+- paragraph: Wind speed
+- paragraph: 4.18 m/s
+- separator
+- paragraph: Mon, Jul 27, 02:00 PM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 21.81 °C
+- paragraph: Humidity
+- paragraph: 56 %
+- paragraph: Wind direction
+- paragraph: 290°
+- paragraph: Wind speed
+- paragraph: 3.91 m/s
+- separator
+- paragraph: Mon, Jul 27, 05:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 21.09 °C
+- paragraph: Humidity
+- paragraph: 64 %
+- paragraph: Wind direction
+- paragraph: 275°
+- paragraph: Wind speed
+- paragraph: 4.95 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 20.58 °C
+- paragraph: Humidity
+- paragraph: 88 %
+- paragraph: Wind direction
+- paragraph: 294°
+- paragraph: Wind speed
+- paragraph: 3.33 m/s
+- separator
+- paragraph: Mon, Jul 27, 11:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 16.02 °C
+- paragraph: Humidity
+- paragraph: 94 %
+- paragraph: Wind direction
+- paragraph: 264°
+- paragraph: Wind speed
+- paragraph: 1.76 m/s
+- separator
+- paragraph: Tue, Jul 28, 02:00 AM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 14.9 °C
+- paragraph: Humidity
+- paragraph: 94 %
+- paragraph: Wind direction
+- paragraph: 245°
+- paragraph: Wind speed
+- paragraph: 2.01 m/s
+- separator
+- paragraph: Tue, Jul 28, 05:00 AM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 11.93 °C
+- paragraph: Humidity
+- paragraph: 95 %
+- paragraph: Wind direction
+- paragraph: 246°
+- paragraph: Wind speed
+- paragraph: 1.65 m/s
+- separator
+- paragraph: Tue, Jul 28, 08:00 AM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 16.51 °C
+- paragraph: Humidity
+- paragraph: 87 %
+- paragraph: Wind direction
+- paragraph: 204°
+- paragraph: Wind speed
+- paragraph: 1.6 m/s
+- separator
+- paragraph: Tue, Jul 28, 11:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 21.95 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 246°
+- paragraph: Wind speed
+- paragraph: 2.49 m/s
+- separator
+- paragraph: Tue, Jul 28, 02:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 26.77 °C
+- paragraph: Humidity
+- paragraph: 47 %
+- paragraph: Wind direction
+- paragraph: 273°
+- paragraph: Wind speed
+- paragraph: 3.5 m/s
+- separator
+- paragraph: Tue, Jul 28, 05:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 27.85 °C
+- paragraph: Humidity
+- paragraph: 42 %
+- paragraph: Wind direction
+- paragraph: 272°
+- paragraph: Wind speed
+- paragraph: 3.17 m/s
+- separator
+- paragraph: Tue, Jul 28, 08:00 PM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 27.09 °C
+- paragraph: Humidity
+- paragraph: 61 %
+- paragraph: Wind direction
+- paragraph: 128°
+- paragraph: Wind speed
+- paragraph: 0.23 m/s
+- separator
+- paragraph: Tue, Jul 28, 11:00 PM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 18.33 °C
+- paragraph: Humidity
+- paragraph: 71 %
+- paragraph: Wind direction
+
+[... truncated ...]

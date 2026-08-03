@@ -1,0 +1,40 @@
+{
+  "run": "run_31",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).not.toEqual(expected) // deep equality\n\nExpected: not [1163010, 6650236]\n\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  72 |     await geocoderInput.press('Enter');\n  73 |\n> 74 |     await expect.poll(() => getMapCenter(page), { timeout: 30000 }).not.toEqual(centerBeforeSearch);\n     |                                                                         ^\n  75 |\n  76 |     const highlightedCoordinate = await getHighlightedCoordinate(page);\n  77 |     if (highlighted"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('Click on the map to load a forecast.', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText('Click on the map to load a forecast.', { exact: true })\n\n\n  148 |     if (!forecastLoaded) {\n  149 |         const forecastHint = infoPanel.getByText('Click on the map to load a fore"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

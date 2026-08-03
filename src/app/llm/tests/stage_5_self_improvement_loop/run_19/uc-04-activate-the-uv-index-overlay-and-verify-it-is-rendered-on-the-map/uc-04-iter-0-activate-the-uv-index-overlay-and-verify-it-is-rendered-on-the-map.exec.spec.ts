@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({
+    page
+}) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+    await expect(uvIndexCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(false);
+
+    let activationStarted = false;
+    const mapTileRequests: string[] = [];
+
+    page.on('request', (request) => {
+        if (!activationStarted) {
+            return;
+        }
+
+        const url = request.url();
+        if (request.resourceType() === 'image' && /(GetMap|service=wms)/i.test(url)) {
+            mapTileRequests.push(url);
+        }
+    });
+
+    const tileResponsePromise = page.waitForResponse((response) => {
+        if (!activationStarted) {
+            return false;
+        }
+
+        const url = response.url();
+        return (
+            response.ok() &&
+            response.request().resourceType() === 'image' &&
+            /(GetMap|service=wms)/i.test(url)
+        );
+    });
+
+    activationStarted = true;
+    await uvIndexCheckbox.click({ force: true });
+
+    await expect(uvIndexCheckbox).toBeChecked();
+    await tileResponsePromise;
+    await expect.poll(() => mapTileRequests.length).toBeGreaterThan(0);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+});

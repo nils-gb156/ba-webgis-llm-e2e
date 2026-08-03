@@ -1,0 +1,243 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC10 Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+    await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+    const initialCenter = await getMapCenter(page);
+    if (!initialCenter) {
+        throw new Error('Map center was not available after application startup.');
+    }
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect(page.getByTestId('temperature-legend')).toHaveCount(0);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+    await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+
+    const findForecastArrayLength = (value: unknown): number | undefined => {
+        if (Array.isArray(value)) {
+            if (value.length === 24) {
+                return 24;
+            }
+            for (const item of value) {
+                const nested = findForecastArrayLength(item);
+                if (nested === 24) {
+                    return 24;
+                }
+            }
+            return undefined;
+        }
+
+        if (value && typeof value === 'object') {
+            for (const nested of Object.values(value as Record<string, unknown>)) {
+                const result = findForecastArrayLength(nested);
+                if (result === 24) {
+                    return 24;
+                }
+            }
+        }
+
+        return undefined;
+    };
+
+    let forecastResponseEntryCount: number | undefined;
+    page.on('response', (response) => {
+        void (async () => {
+            const resourceType = response.request().resourceType();
+            if (resourceType !== 'fetch' && resourceType !== 'xhr') {
+                return;
+            }
+
+            if (!response.ok()) {
+                return;
+            }
+
+            const contentType = response.headers()['content-type'] ?? '';
+            if (!contentType.includes('application/json')) {
+                return;
+            }
+
+            try {
+                const body = await response.json();
+                const count = findForecastArrayLength(body);
+                if (count === 24) {
+                    forecastResponseEntryCount = 24;
+                }
+            } catch {
+                // Ignore non-JSON or unrelated JSON responses.
+            }
+        })();
+    });
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    const geocoderResults = page.getByTestId('geocoder-results');
+    const firstSearchResult = page.getByTestId('geocoder-result-item-0');
+
+    await expect(geocoderResults).toBeVisible();
+    await expect(firstSearchResult).toBeVisible();
+    await expect(firstSearchResult).toContainText(/Münster/i);
+
+    await firstSearchResult.click();
+
+    await expect(geocoderInput).toHaveValue(/Münster/i);
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        if (!currentCenter) {
+            return false;
+        }
+
+        const dx = currentCenter[0] - initialCenter[0];
+        const dy = currentCenter[1] - initialCenter[1];
+        return Math.hypot(dx, dy) > 50000;
+    }).toBe(true);
+
+    await expect.poll(async () => {
+        const coordinate = await getHighlightedCoordinate(page);
+        if (!coordinate) {
+            return false;
+        }
+
+        const muensterApproximate3857: [number, number] = [849000, 6790000];
+        const dx = coordinate[0] - muensterApproximate3857[0];
+        const dy = coordinate[1] - muensterApproximate3857[1];
+        return Math.hypot(dx, dy) < 100000;
+    }).toBe(true);
+
+    const countForecastEntries = async (): Promise<number> => {
+        return await weatherForecastSection.evaluate((section) => {
+            const tableRows = section.querySelectorAll('tbody tr').length;
+            if (tableRows > 0) {
+                return tableRows;
+            }
+
+            const roleRows = section.querySelectorAll('[role="row"]').length;
+            if (roleRows > 0) {
+                const columnHeaders = section.querySelectorAll('[role="columnheader"]').length;
+                return columnHeaders > 0 ? roleRows - 1 : roleRows;
+            }
+
+            const listItems = section.querySelectorAll('[role="listitem"], li').length;
+            if (listItems > 0) {
+                return listItems;
+            }
+
+            const articles = section.querySelectorAll('article').length;
+            if (articles > 0) {
+                return articles;
+            }
+
+            const candidateParents = [section, ...Array.from(section.querySelectorAll('div, section, ul, ol'))];
+            for (const parent of candidateParents) {
+                const children = Array.from(parent.children);
+                if (children.length < 24) {
+                    continue;
+                }
+
+                const signatureCount = new Map<string, number>();
+                for (const child of children) {
+                    const element = child as HTMLElement;
+                    const className =
+                        typeof element.className === 'string'
+                            ? element.className
+                            : Array.from(element.classList).join(' ');
+                    const signature = `${child.tagName}|${child.getAttribute('role') ?? ''}|${className}`;
+                    signatureCount.set(signature, (signatureCount.get(signature) ?? 0) + 1);
+                }
+
+                if ([...signatureCount.values()].some((count) => count === 24)) {
+                    return 24;
+                }
+            }
+
+            const text = section.textContent ?? '';
+
+            const hhmmMatches = Array.from(text.matchAll(/\b([01]?\d|2[0-3]):00\b/g)).map((match) =>
+                match[1].padStart(2, '0')
+            );
+            if (new Set(hhmmMatches).size === 24) {
+                return 24;
+            }
+
+            const hourWordMatches = Array.from(text.matchAll(/\b([01]?\d|2[0-3])\s*(?:Uhr|h)\b/g)).map((match) =>
+                match[1].padStart(2, '0')
+            );
+            if (new Set(hourWordMatches).size === 24) {
+                return 24;
+            }
+
+            return 0;
+        });
+    };
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const mapCenterClickPosition = {
+        x: Math.round(mapBox.width / 2),
+        y: Math.round(mapBox.height / 2),
+    };
+
+    let forecastLoaded = false;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        await mapContainer.click({ position: mapCenterClickPosition });
+
+        try {
+            await expect.poll(() => forecastResponseEntryCount, { timeout: 20000 }).toBe(24);
+            await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toHaveCount(0);
+            await expect(weatherForecastSection.getByText(/Fehler beim Laden der Wetterdaten/i)).toHaveCount(0);
+            await expect.poll(countForecastEntries, { timeout: 20000 }).toBe(24);
+            forecastLoaded = true;
+            break;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    if (!forecastLoaded) {
+        throw lastError instanceof Error ? lastError : new Error('Weather forecast did not load with 24 entries.');
+    }
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection.getByText(/Fehler beim Laden der Wetterdaten/i)).toHaveCount(0);
+    await expect.poll(countForecastEntries).toBe(24);
+});

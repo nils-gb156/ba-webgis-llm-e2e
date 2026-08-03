@@ -1,0 +1,158 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { promises as fs } from 'node:fs';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    await page.getByTestId('print-toggle').click();
+
+    const namedPrintDialog = page.getByRole('dialog', { name: /print/i });
+    const anyDialog = page.getByRole('dialog');
+    const hasNamedPrintDialog =
+        (await namedPrintDialog.count()) > 0 &&
+        (await namedPrintDialog.first().isVisible().catch(() => false));
+    const hasAnyDialog =
+        !hasNamedPrintDialog &&
+        (await anyDialog.count()) > 0 &&
+        (await anyDialog.first().isVisible().catch(() => false));
+
+    if (hasNamedPrintDialog) {
+        await expect(namedPrintDialog.first()).toBeVisible();
+    } else if (hasAnyDialog) {
+        await expect(anyDialog.first()).toBeVisible();
+    }
+
+    const scope = hasNamedPrintDialog ? namedPrintDialog.first() : hasAnyDialog ? anyDialog.first() : page;
+
+    const titleCandidates = [
+        scope.getByRole('textbox', { name: /^title$/i }),
+        scope.getByRole('textbox', { name: /title/i }),
+        scope.getByLabel(/^title$/i),
+        scope.getByLabel(/title/i),
+        scope.getByPlaceholder(/title/i)
+    ];
+
+    let titleInput = titleCandidates[0];
+    let titleFound = false;
+    for (const candidate of titleCandidates) {
+        if ((await candidate.count()) > 0 && (await candidate.first().isVisible().catch(() => false))) {
+            titleInput = candidate.first();
+            titleFound = true;
+            break;
+        }
+    }
+
+    expect(titleFound).toBe(true);
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'Current Weather Map';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const formatComboboxCandidates = [
+        scope.getByRole('combobox', { name: /^format$/i }),
+        scope.getByRole('combobox', { name: /file format/i }),
+        scope.getByRole('combobox', { name: /format/i }),
+        scope.getByLabel(/^format$/i),
+        scope.getByLabel(/file format/i),
+        scope.getByLabel(/format/i)
+    ];
+
+    let formatCombobox = formatComboboxCandidates[0];
+    let formatComboboxFound = false;
+    for (const candidate of formatComboboxCandidates) {
+        if ((await candidate.count()) > 0 && (await candidate.first().isVisible().catch(() => false))) {
+            formatCombobox = candidate.first();
+            formatComboboxFound = true;
+            break;
+        }
+    }
+
+    if (formatComboboxFound) {
+        await expect(formatCombobox).toBeVisible();
+        const optionTexts = await formatCombobox.getByRole('option').allTextContents();
+        const pngOptionLabel = optionTexts.map((text) => text.trim()).find((text) => /png/i.test(text));
+        expect(pngOptionLabel).toBeTruthy();
+
+        await formatCombobox.selectOption({ label: pngOptionLabel! });
+        await expect
+            .poll(async () => {
+                return await formatCombobox.evaluate((element) => {
+                    const select = element as HTMLSelectElement;
+                    return select.selectedOptions[0]?.textContent?.trim() ?? '';
+                });
+            })
+            .toMatch(/png/i);
+    } else {
+        const pngRadioCandidates = [
+            scope.getByRole('radio', { name: /^PNG$/i }),
+            scope.getByRole('radio', { name: /png/i }),
+            scope.getByLabel(/^PNG$/i),
+            scope.getByLabel(/png/i)
+        ];
+
+        let pngRadio = pngRadioCandidates[0];
+        let pngRadioFound = false;
+        for (const candidate of pngRadioCandidates) {
+            if ((await candidate.count()) > 0 && (await candidate.first().isVisible().catch(() => false))) {
+                pngRadio = candidate.first();
+                pngRadioFound = true;
+                break;
+            }
+        }
+
+        expect(pngRadioFound).toBe(true);
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    }
+
+    const exportButtonCandidates = [
+        scope.getByRole('button', { name: /^Export$/i }),
+        scope.getByRole('button', { name: /^Download$/i }),
+        scope.getByRole('button', { name: /^Print$/i }),
+        scope.getByRole('button', { name: /^Create printout$/i }),
+        scope.getByRole('button', { name: /^Create export$/i })
+    ];
+
+    let exportButton = exportButtonCandidates[0];
+    let exportButtonFound = false;
+    for (const candidate of exportButtonCandidates) {
+        if ((await candidate.count()) > 0 && (await candidate.first().isVisible().catch(() => false))) {
+            exportButton = candidate.first();
+            exportButtonFound = true;
+            break;
+        }
+    }
+
+    expect(exportButtonFound).toBe(true);
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(() => download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileContent = await fs.readFile(downloadPath!);
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+    expect(fileContent.subarray(0, 8).equals(pngSignature)).toBe(true);
+    expect(fileContent.byteLength).toBeGreaterThan(1000);
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

@@ -1,0 +1,131 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from "../../../../map-model-helpers";
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    async function getFirstVisible(locators: any[]) {
+        for (const locator of locators) {
+            if ((await locator.count()) > 0 && (await locator.first().isVisible())) {
+                return locator.first();
+            }
+        }
+        return undefined;
+    }
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const initialTextboxCount = await page.getByRole('textbox').count();
+    const initialComboboxCount = await page.getByRole('combobox').count();
+
+    const printToggle = page.getByRole('button', { name: 'Print Map', exact: true });
+    await printToggle.click();
+
+    const dialog = page.getByRole('dialog').last();
+    let printScope: any = page;
+    if ((await dialog.count()) > 0 && (await dialog.isVisible())) {
+        printScope = dialog;
+        await expect(dialog).toBeVisible();
+    }
+
+    let titleInput: any = await getFirstVisible([
+        printScope.getByRole('textbox', { name: /title/i }),
+        printScope.getByLabel(/title/i),
+        printScope.getByPlaceholder(/title/i)
+    ]);
+
+    if (!titleInput) {
+        await expect.poll(async () => await page.getByRole('textbox').count()).toBeGreaterThan(initialTextboxCount);
+        titleInput = page.getByRole('textbox').last();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Current weather map');
+    await expect(titleInput).toHaveValue('Current weather map');
+
+    const pngRadio: any = await getFirstVisible([
+        printScope.getByRole('radio', { name: /^PNG$/i }),
+        printScope.getByRole('radio', { name: /png/i }),
+        printScope.getByLabel(/^PNG$/i)
+    ]);
+
+    if (pngRadio) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl: any = await getFirstVisible([
+            printScope.getByRole('combobox', { name: /format/i }),
+            printScope.getByLabel(/format/i)
+        ]);
+
+        if (!formatControl) {
+            await expect.poll(async () => await page.getByRole('combobox').count()).toBeGreaterThan(initialComboboxCount);
+            formatControl = page.getByRole('combobox').last();
+        }
+
+        await expect(formatControl).toBeVisible();
+
+        let pngSelected = false;
+        for (const option of [{ label: 'PNG' }, { label: 'png' }, 'PNG', 'png', 'image/png']) {
+            try {
+                await formatControl.selectOption(option as any);
+                pngSelected = true;
+                break;
+            } catch {
+                // try next option representation
+            }
+        }
+        expect(pngSelected).toBe(true);
+
+        await expect.poll(async () => {
+            return await formatControl.evaluate((element: Element) => {
+                const select = element as HTMLSelectElement;
+                return select.selectedOptions?.[0]?.textContent ?? select.value ?? '';
+            });
+        }).toMatch(/png/i);
+    }
+
+    const exportButton: any =
+        (await getFirstVisible([
+            printScope.getByRole('button', { name: /^Export$/i }),
+            printScope.getByRole('button', { name: /export/i }),
+            printScope.getByRole('button', { name: /^Download$/i }),
+            printScope.getByRole('button', { name: /download/i }),
+            printScope.getByRole('button', { name: /^Generate$/i }),
+            printScope.getByRole('button', { name: /generate/i }),
+            printScope.getByRole('button', { name: /^Print$/i })
+        ]));
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileBytes = await readFile(downloadPath as string);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    const width = fileBytes.readUInt32BE(16);
+    const height = fileBytes.readUInt32BE(20);
+    expect(width).toBeGreaterThan(100);
+    expect(height).toBeGreaterThan(100);
+    expect(fileBytes.length).toBeGreaterThan(1000);
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+});

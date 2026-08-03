@@ -1,0 +1,49 @@
+{
+  "run": "run_22",
+  "use_case_id": 8,
+  "title": "Measure a distance by drawing a line on the map",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-08-iter-0-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /(Length|Distance)[\\s\\S]*\\b\\d+(?:[.,]\\d+)?\\s*(?:m|km)\\b/i\nReceived string:  \"475.98 km\nClick to start measuring.\"\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  41 |     await mapContainer.dblclick({ position: points[3] });\n  42 |\n> 43 |     await expect.poll(() => app.innerText()).toMatch(\n     |                                              ^\n  44 |         /(Length|Distance)[\\s\\S]*\\b\\d+(?:[.,]\\d+)?\\s*(?:m|km)\\"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-08-iter-1-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator:  getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\nExpected: \"Distance\"\nReceived: \"distance\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveValue\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement', exact: true }).getByRole('combobox', { name: 'Mode', exact: true })\n    14 Ã— locator resolved to <select id=\"_r_13_\" data-scope=\"field\" data-part=\"sele"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-08-iter-2-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Measurement', exact: true })\nExpected pattern: /\\d+(?:[.,]\\d+)?\\s*(?:m|km)\\b/i\nReceived string:  \"MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Measurement', exact: true })\n    14 Ã— locator resolved to <div role=\"dialog\" aria-labelledby=\"_r_0_\">"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-08-iter-3-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

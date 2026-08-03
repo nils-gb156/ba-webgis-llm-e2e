@@ -1,0 +1,190 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect.poll(async () => (await getMapZoomLevel(page)) !== undefined).toBe(true);
+
+    await expect(infoPanelToggle).toBeVisible();
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    await expect(layerSwitcherToggle).toBeVisible();
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+        await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeVisible();
+
+    await expect(measurementToggle).toBeVisible();
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect
+        .poll(async () => await measurementToggle.getAttribute('aria-pressed'))
+        .toBe('false');
+
+    const eucosCheckbox = page.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviCheckbox = page.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    await expect(mapContainer).toBeVisible();
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    let clickPosition: { x: number; y: number } | undefined;
+    await expect
+        .poll(async () => {
+            const pixelInfo = await page.evaluate((coord) => {
+                const map = (globalThis as any).__openPioneerMap;
+                const pixel = map?.olMap?.getPixelFromCoordinate?.(coord);
+                const size = map?.olMap?.getSize?.();
+
+                if (
+                    !Array.isArray(pixel) ||
+                    pixel.length < 2 ||
+                    !Array.isArray(size) ||
+                    size.length < 2
+                ) {
+                    return null;
+                }
+
+                return {
+                    x: pixel[0],
+                    y: pixel[1],
+                    width: size[0],
+                    height: size[1]
+                };
+            }, targetCoordinate);
+
+            if (
+                pixelInfo &&
+                Number.isFinite(pixelInfo.x) &&
+                Number.isFinite(pixelInfo.y) &&
+                pixelInfo.x >= 0 &&
+                pixelInfo.y >= 0 &&
+                pixelInfo.x <= pixelInfo.width &&
+                pixelInfo.y <= pixelInfo.height
+            ) {
+                clickPosition = { x: pixelInfo.x, y: pixelInfo.y };
+                return true;
+            }
+
+            clickPosition = undefined;
+            return false;
+        })
+        .toBe(true);
+
+    if (!clickPosition) {
+        throw new Error('Could not calculate click position for the target map coordinate.');
+    }
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect
+        .poll(async () => {
+            const highlighted = await getHighlightedCoordinate(page);
+            return (
+                Array.isArray(highlighted) &&
+                highlighted.length === 2 &&
+                Math.abs(highlighted[0] - targetCoordinate[0]) < 5 &&
+                Math.abs(highlighted[1] - targetCoordinate[1]) < 5
+            );
+        })
+        .toBe(true);
+
+    await expect(infoPanel).toContainText('UV-Index Station', { timeout: 15000 });
+    await expect(infoPanel).toContainText('EUCOS Ground Station', { timeout: 15000 });
+
+    await expect
+        .poll(
+            async () =>
+                await infoPanel.evaluate((panel) => {
+                    const sectionTitles = new Set([
+                        'Information',
+                        'Weather Forecast',
+                        'UV-Index Station',
+                        'EUCOS Ground Station'
+                    ]);
+
+                    const elements = Array.from(panel.querySelectorAll('*'));
+
+                    const findExactTextElements = (title: string): Element[] => {
+                        return elements.filter((el) => (el.textContent ?? '').trim() === title);
+                    };
+
+                    const hasSectionDetails = (title: string): boolean => {
+                        for (const titleElement of findExactTextElements(title)) {
+                            const parent = titleElement.parentElement;
+                            if (parent && parent !== panel) {
+                                const parentText = (parent.textContent ?? '').replace(title, '').trim();
+                                if (parentText.length > 0) {
+                                    return true;
+                                }
+                            }
+
+                            let sibling = titleElement.nextElementSibling;
+                            let siblingText = '';
+
+                            while (sibling) {
+                                const text = (sibling.textContent ?? '').trim();
+                                if (sectionTitles.has(text)) {
+                                    break;
+                                }
+                                siblingText += ` ${text}`;
+                                sibling = sibling.nextElementSibling;
+                            }
+
+                            if (siblingText.trim().length > 0) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    };
+
+                    const panelText = panel.textContent ?? '';
+
+                    return {
+                        uviSectionPresent: panelText.includes('UV-Index Station'),
+                        uviHasDetails: hasSectionDetails('UV-Index Station'),
+                        eucosSectionPresent: panelText.includes('EUCOS Ground Station'),
+                        eucosHasDetails: hasSectionDetails('EUCOS Ground Station')
+                    };
+                }),
+            { timeout: 15000 }
+        )
+        .toEqual({
+            uviSectionPresent: true,
+            uviHasDetails: true,
+            eucosSectionPresent: true,
+            eucosHasDetails: true
+        });
+});

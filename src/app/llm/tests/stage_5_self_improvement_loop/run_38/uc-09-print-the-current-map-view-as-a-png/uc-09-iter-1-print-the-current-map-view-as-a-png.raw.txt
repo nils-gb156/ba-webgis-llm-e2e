@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const renderedStates = await Promise.all([
+                isLayerRendered(page, 'EUCOS Ground Stations'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'Temperature')
+            ]);
+            return renderedStates.some(Boolean);
+        })
+        .toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printPanel = page.getByTestId('printing-panel');
+
+    await expect(printToggle).toBeVisible();
+
+    const panelAlreadyVisible = await printPanel.isVisible().catch(() => false);
+    if (!panelAlreadyVisible) {
+        await expect(printToggle).toHaveAttribute('aria-pressed', 'false');
+        await printToggle.click();
+    }
+
+    await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(printPanel).toBeVisible();
+
+    const printDialog = page.getByRole('dialog', { name: 'Print Map', exact: true });
+    await expect(printDialog).toBeVisible();
+
+    const titleInput = printDialog.getByRole('textbox', { name: 'Title', exact: true });
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'UC9 PNG export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const formatSelect = printDialog.getByRole('combobox', { name: 'File format', exact: true });
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption({ label: 'PNG' });
+    await expect(formatSelect).toHaveValue(/png/i);
+
+    const exportButton = printDialog.getByRole('button', { name: 'Export map', exact: true });
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect(printPanel).toBeVisible();
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = test.info().outputPath(download.suggestedFilename());
+    await download.saveAs(downloadPath);
+
+    const fileBuffer = await readFile(downloadPath);
+    expect(fileBuffer.byteLength).toBeGreaterThan(1024);
+    expect(fileBuffer.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    );
+});

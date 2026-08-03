@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherSection = page.getByTestId('weather-forecast-section');
+    const mapContainer = page.getByTestId('map-container');
+
+    if (!(await infoPanel.isVisible())) {
+        const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherSection).toBeVisible();
+    await expect(weatherSection).toContainText('Click on the map to load a forecast.');
+    await expect(mapContainer).toBeVisible();
+
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeUndefined();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox.width * 0.55),
+            y: Math.round(mapBox.height * 0.5)
+        }
+    });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+    await expect(weatherSection).toBeVisible();
+    await expect(weatherSection).not.toContainText('Click on the map to load a forecast.');
+
+    await expect
+        .poll(async () => {
+            return await weatherSection.evaluate((section) => {
+                const placeholder = 'Click on the map to load a forecast.';
+                if ((section.textContent ?? '').includes(placeholder)) {
+                    return 0;
+                }
+
+                const listItems = section.querySelectorAll('li');
+                if (listItems.length > 0) {
+                    return listItems.length;
+                }
+
+                const bodyRows = section.querySelectorAll('tbody tr');
+                if (bodyRows.length > 0) {
+                    return bodyRows.length;
+                }
+
+                const tableRows = section.querySelectorAll('tr');
+                if (tableRows.length > 1) {
+                    return tableRows.length - 1;
+                }
+
+                let maxRepeatedChildren = 0;
+                const descendants = Array.from(section.querySelectorAll<HTMLElement>('*'));
+                for (const element of descendants) {
+                    const meaningfulChildren = Array.from(element.children).filter((child) => {
+                        const childElement = child as HTMLElement;
+                        const hasText =
+                            (childElement.innerText ?? childElement.textContent ?? '').trim().length > 0;
+                        const hasGraphic = childElement.querySelector('img, svg, canvas') !== null;
+                        return hasText || hasGraphic;
+                    });
+                    maxRepeatedChildren = Math.max(maxRepeatedChildren, meaningfulChildren.length);
+                }
+
+                return maxRepeatedChildren;
+            });
+        })
+        .toBe(24);
+});

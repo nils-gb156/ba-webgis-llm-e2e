@@ -1,0 +1,95 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect(page.getByTestId('map-container')).toBeVisible();
+
+    const application = page.getByRole('application', { name: 'webgis map' });
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const readApplicationText = async (): Promise<string> =>
+        (((await application.textContent()) ?? '').replace(/\s+/g, ' ').trim());
+
+    const getNonScaleMeasurementValuesInMeters = async (): Promise<number[]> => {
+        const text = await readApplicationText();
+        const matches = text.match(/\b\d+(?:[.,]\d+)?\s?(mm|cm|m|km)\b/gi) ?? [];
+
+        return matches
+            .filter((value) => !/^50\s?km$/i.test(value.trim()))
+            .map((value) => {
+                const match = value.match(/(\d+(?:[.,]\d+)?)\s?(mm|cm|m|km)/i);
+                if (!match) {
+                    return 0;
+                }
+
+                const numericValue = Number.parseFloat(match[1].replace(',', '.'));
+                const unit = match[2].toLowerCase();
+
+                switch (unit) {
+                    case 'mm':
+                        return numericValue / 1000;
+                    case 'cm':
+                        return numericValue / 100;
+                    case 'm':
+                        return numericValue;
+                    case 'km':
+                        return numericValue * 1000;
+                    default:
+                        return 0;
+                }
+            });
+    };
+
+    await expect(measurementToggle).toBeVisible();
+    if ((await measurementToggle.getAttribute('aria-pressed')) !== 'true') {
+        await measurementToggle.click();
+    }
+
+    if ((await measurementToggle.getAttribute('aria-pressed')) !== null) {
+        await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+    }
+
+    await expect
+        .poll(async () => {
+            const dialogs = page.getByRole('dialog');
+            const hasVisibleDialog =
+                (await dialogs.count()) > 0 && (await dialogs.first().isVisible());
+            const text = await readApplicationText();
+            return hasVisibleDialog || /(measurement|measure|distance|length)/i.test(text);
+        })
+        .toBe(true);
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const point1 = {
+        x: Math.round(mapBox.width * 0.45),
+        y: Math.round(mapBox.height * 0.36)
+    };
+    const point2 = {
+        x: Math.round(mapBox.width * 0.56),
+        y: Math.round(mapBox.height * 0.44)
+    };
+    const point3 = {
+        x: Math.round(mapBox.width * 0.67),
+        y: Math.round(mapBox.height * 0.52)
+    };
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.dblclick({ position: point3 });
+
+    await expect
+        .poll(async () => {
+            const values = await getNonScaleMeasurementValuesInMeters();
+            return values.some((value) => value > 0);
+        })
+        .toBe(true);
+});

@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from "../../../../map-model-helpers";
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const baseMapSelector = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(baseMapSelector).toBeVisible();
+
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  const selectorTagName = await baseMapSelector.evaluate((element) => element.tagName);
+
+  if (selectorTagName === 'SELECT') {
+    await expect.poll(() =>
+      baseMapSelector.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return select.selectedOptions.item(0)?.textContent?.trim();
+      })
+    ).toBe('Carto Light');
+
+    await baseMapSelector.selectOption({ label: 'OpenStreetMap' });
+
+    await expect.poll(() =>
+      baseMapSelector.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return select.selectedOptions.item(0)?.textContent?.trim();
+      })
+    ).toBe('OpenStreetMap');
+  } else {
+    await baseMapSelector.click();
+
+    const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap', exact: true });
+    await expect(openStreetMapOption).toBeVisible();
+    await openStreetMapOption.click();
+  }
+
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+  await expect.poll(async () => (await getActiveBaseLayerTitle(page)) === 'Carto Light').toBe(false);
+});

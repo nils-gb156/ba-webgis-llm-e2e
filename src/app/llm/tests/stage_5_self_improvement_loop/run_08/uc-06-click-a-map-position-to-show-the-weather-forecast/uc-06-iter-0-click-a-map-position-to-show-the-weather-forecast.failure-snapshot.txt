@@ -1,0 +1,252 @@
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Stelle, DE"
+- paragraph: Sun, Jul 26, 11:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 17.1 °C
+- paragraph: Humidity
+- paragraph: 89 %
+- paragraph: Wind direction
+- paragraph: 265°
+- paragraph: Wind speed
+- paragraph: 6.51 m/s
+- separator
+- paragraph: Mon, Jul 27, 02:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 16.83 °C
+- paragraph: Humidity
+- paragraph: 91 %
+- paragraph: Wind direction
+- paragraph: 280°
+- paragraph: Wind speed
+- paragraph: 5.66 m/s
+- separator
+- paragraph: Mon, Jul 27, 05:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 15.37 °C
+- paragraph: Humidity
+- paragraph: 92 %
+- paragraph: Wind direction
+- paragraph: 288°
+- paragraph: Wind speed
+- paragraph: 4.78 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 15.31 °C
+- paragraph: Humidity
+- paragraph: 86 %
+- paragraph: Wind direction
+- paragraph: 291°
+- paragraph: Wind speed
+- paragraph: 3.74 m/s
+- separator
+- paragraph: Mon, Jul 27, 11:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 19.03 °C
+- paragraph: Humidity
+- paragraph: 64 %
+- paragraph: Wind direction
+- paragraph: 288°
+- paragraph: Wind speed
+- paragraph: 4.03 m/s
+- separator
+- paragraph: Mon, Jul 27, 02:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 19.92 °C
+- paragraph: Humidity
+- paragraph: 58 %
+- paragraph: Wind direction
+- paragraph: 306°
+- paragraph: Wind speed
+- paragraph: 4.58 m/s
+- separator
+- paragraph: Mon, Jul 27, 05:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 20.39 °C
+- paragraph: Humidity
+- paragraph: 58 %
+- paragraph: Wind direction
+- paragraph: 288°
+- paragraph: Wind speed
+- paragraph: 4.72 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 19.4 °C
+- paragraph: Humidity
+- paragraph: 79 %
+- paragraph: Wind direction
+- paragraph: 304°
+- paragraph: Wind speed
+- paragraph: 3.88 m/s
+- separator
+- paragraph: Mon, Jul 27, 11:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 15.43 °C
+- paragraph: Humidity
+- paragraph: 91 %
+- paragraph: Wind direction
+- paragraph: 271°
+- paragraph: Wind speed
+- paragraph: 2.84 m/s
+- separator
+- paragraph: Tue, Jul 28, 02:00 AM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 13.54 °C
+- paragraph: Humidity
+- paragraph: 91 %
+- paragraph: Wind direction
+- paragraph: 263°
+- paragraph: Wind speed
+- paragraph: 3.28 m/s
+- separator
+- paragraph: Tue, Jul 28, 05:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 11.26 °C
+- paragraph: Humidity
+- paragraph: 92 %
+- paragraph: Wind direction
+- paragraph: 251°
+- paragraph: Wind speed
+- paragraph: 2.85 m/s
+- separator
+- paragraph: Tue, Jul 28, 08:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 15.14 °C
+- paragraph: Humidity
+- paragraph: 80 %
+- paragraph: Wind direction
+- paragraph: 246°
+- paragraph: Wind speed
+- paragraph: 2.77 m/s
+- separator
+- paragraph: Tue, Jul 28, 11:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 21.32 °C
+- paragraph: Humidity
+- paragraph: 54 %
+- paragraph: Wind direction
+- paragraph: 244°
+- paragraph: Wind speed
+- paragraph: 2.9 m/s
+- separator
+- paragraph: Tue, Jul 28, 02:00 PM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 24.4 °C
+- paragraph: Humidity
+- paragraph: 44 %
+- paragraph: Wind direction
+- paragraph: 271°
+- paragraph: Wind speed
+- paragraph: 3.12 m/s
+- separator
+- paragraph: Tue, Jul 28, 05:00 PM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 25.92 °C
+- paragraph: Humidity
+- paragraph: 42 
+[... truncated ...]

@@ -1,0 +1,148 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const forecastStart = new Date(Date.UTC(2025, 0, 1, 0, 0, 0));
+    const forecastEntries = Array.from({ length: 24 }, (_, index) => {
+        const date = new Date(forecastStart.getTime() + index * 60 * 60 * 1000);
+        const iso = date.toISOString().slice(0, 19).replace('T', ' ');
+
+        return {
+            dt: Math.floor(date.getTime() / 1000),
+            main: {
+                temp: 101 + index,
+                feels_like: 101 + index,
+                temp_min: 101 + index,
+                temp_max: 101 + index,
+                pressure: 1013,
+                sea_level: 1013,
+                grnd_level: 1000,
+                humidity: 55,
+                temp_kf: 0
+            },
+            weather: [
+                {
+                    id: 800,
+                    main: 'Clear',
+                    description: `slot-${String(index).padStart(2, '0')}`,
+                    icon: '01d'
+                }
+            ],
+            clouds: { all: 0 },
+            wind: { speed: 2.5, deg: 180, gust: 4.2 },
+            visibility: 10000,
+            pop: 0,
+            sys: { pod: index < 12 ? 'd' : 'n' },
+            dt_txt: iso
+        };
+    });
+
+    const mockedForecastPayload = {
+        cod: '200',
+        message: 0,
+        cnt: 24,
+        list: forecastEntries,
+        city: {
+            id: 1,
+            name: 'Test City',
+            coord: { lat: 50.5, lon: 9.5 },
+            country: 'DE',
+            population: 1,
+            timezone: 0,
+            sunrise: 1735714800,
+            sunset: 1735744800
+        }
+    };
+
+    await page.route(/https:\/\/api\.openweathermap\.org\/data\/2\.5\/forecast.*/, async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(mockedForecastPayload)
+        });
+    });
+
+    const mapContainer = page.getByTestId('map-container');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const weatherForecast = page.getByTestId('weather-forecast');
+    const weatherForecastEntriesLocator = page.getByTestId('weather-forecast-entry');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeUndefined();
+
+    const forecastRequestUrls: string[] = [];
+    page.on('request', (request) => {
+        if (request.url().includes('api.openweathermap.org/data/2.5/forecast')) {
+            forecastRequestUrls.push(request.url());
+        }
+    });
+
+    const forecastResponsePromise = page.waitForResponse((response) => {
+        return response.url().includes('api.openweathermap.org/data/2.5/forecast') && response.status() === 200;
+    });
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const layerSwitcherBox = await layerSwitcher.boundingBox();
+    const infoPanelBox = await infoPanel.boundingBox();
+
+    const leftLimit = layerSwitcherBox
+        ? Math.ceil(layerSwitcherBox.x + layerSwitcherBox.width - mapBox.x + 24)
+        : Math.ceil(mapBox.width * 0.35);
+    const rightLimit = infoPanelBox
+        ? Math.floor(infoPanelBox.x - mapBox.x - 24)
+        : Math.floor(mapBox.width * 0.65);
+
+    const clickX =
+        rightLimit > leftLimit ? Math.round((leftLimit + rightLimit) / 2) : Math.round(mapBox.width * 0.5);
+    const clickY = Math.round(mapBox.height * 0.58);
+
+    await mapContainer.click({
+        position: {
+            x: clickX,
+            y: clickY
+        }
+    });
+
+    await forecastResponsePromise;
+
+    await expect.poll(() => getHighlightedCoordinate(page), { timeout: 10000 }).not.toBeUndefined();
+    await expect.poll(() => forecastRequestUrls.length, { timeout: 10000 }).toBeGreaterThan(0);
+
+    const forecastRequestUrl = new URL(forecastRequestUrls[0]);
+    expect(forecastRequestUrl.hostname).toBe('api.openweathermap.org');
+    expect(forecastRequestUrl.pathname).toBe('/data/2.5/forecast');
+    expect(forecastRequestUrl.searchParams.get('cnt')).toBe('24');
+    expect(forecastRequestUrl.searchParams.get('lat')).toMatch(/^-?\d+(\.\d+)?$/);
+    expect(forecastRequestUrl.searchParams.get('lon')).toMatch(/^-?\d+(\.\d+)?$/);
+
+    await expect(weatherForecast).toBeVisible();
+    await expect(infoPanel.getByText('Location: Test City, DE', { exact: true })).toBeVisible();
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+    await expect.poll(() => weatherForecastEntriesLocator.count(), { timeout: 10000 }).toBe(24);
+    await expect(weatherForecastEntriesLocator.nth(0)).toContainText('slot-00');
+    await expect(weatherForecastEntriesLocator.nth(23)).toContainText('slot-23');
+});

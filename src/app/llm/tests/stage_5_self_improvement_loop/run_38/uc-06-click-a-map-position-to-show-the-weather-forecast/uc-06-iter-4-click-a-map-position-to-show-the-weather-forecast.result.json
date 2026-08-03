@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_38/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 6: Click a map position to show the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 8517,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \u001b[32m\"Location: Test City, DE\"\u001b[39m\nReceived string:    \u001b[31m\"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 AMslot-04Temperature105 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 AMslot-05Temperature106 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 AMslot-06Temperature107 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 AMslot-07Temperature108 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 AMslot-08Temperature109 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 AMslot-09Temperature110 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 AMslot-10Temperature111 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 12:00 PMslot-11Temperature112 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 01:00 PMslot-12Temperature113 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 PMslot-13Temperature114 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 PMslot-14Temperature115 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 PMslot-15Temperature116 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 PMslot-16Temperature117 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 PMslot-17Temperature118 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 PMslot-18Temperature119 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 PMslot-19Temperature120 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 PMslot-20Temperature121 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 PMslot-21Temperature122 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 PMslot-22Temperature123 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sThu, Jan 02, 12:00 AMslot-23Temperature124 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast')\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <div class=\"css-9hqrmb\" data-testid=\"weather-forecast\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 AMslot-04Temperature105 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 AMslot-05Temperature106 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 AMslot-06Temperature107 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 AMslot-07Temperature108 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 AMslot-08Temperature109 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 AMslot-09Temperature110 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 AMslot-10Temperature111 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 12:00 PMslot-11Temperature112 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 01:00 PMslot-12Temperature113 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 PMslot-13Temperature114 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 PMslot-14Temperature115 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 PMslot-15Temperature116 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 PMslot-16Temperature117 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 PMslot-17Temperature118 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 PMslot-18Temperature119 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 PMslot-19Temperature120 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 PMslot-20Temperature121 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 PMslot-21Temperature122 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 PMslot-22Temperature123 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sThu, Jan 02, 12:00 AMslot-23Temperature124 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/s\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \u001b[32m\"Location: Test City, DE\"\u001b[39m\nReceived string:    \u001b[31m\"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 AMslot-04Temperature105 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 AMslot-05Temperature106 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 AMslot-06Temperature107 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 AMslot-07Temperature108 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 AMslot-08Temperature109 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 AMslot-09Temperature110 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 AMslot-10Temperature111 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 12:00 PMslot-11Temperature112 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 01:00 PMslot-12Temperature113 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 PMslot-13Temperature114 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 PMslot-14Temperature115 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 PMslot-15Temperature116 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 PMslot-16Temperature117 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 PMslot-17Temperature118 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 PMslot-18Temperature119 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 PMslot-19Temperature120 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 PMslot-20Temperature121 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 PMslot-21Temperature122 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 PMslot-22Temperature123 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sThu, Jan 02, 12:00 AMslot-23Temperature124 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast')\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <div class=\"css-9hqrmb\" data-testid=\"weather-forecast\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 AMslot-04Temperature105 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 AMslot-05Temperature106 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 AMslot-06Temperature107 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 AMslot-07Temperature108 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 AMslot-08Temperature109 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 AMslot-09Temperature110 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 AMslot-10Temperature111 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 12:00 PMslot-11Temperature112 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 01:00 PMslot-12Temperature113 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 PMslot-13Temperature114 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 PMslot-14Temperature115 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 PMslot-15Temperature116 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 PMslot-16Temperature117 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 PMslot-17Temperature118 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 PMslot-18Temperature119 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 PMslot-19Temperature120 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 PMslot-20Temperature121 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 PMslot-21Temperature122 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 PMslot-22Temperature123 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sThu, Jan 02, 12:00 AMslot-23Temperature124 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/s\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:133:35",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                      "column": 35,
+                      "line": 133
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 131 |\u001b[39m\n \u001b[90m 132 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecast)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 133 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecast)\u001b[33m.\u001b[39mtoContainText(\u001b[32m'Location: Test City, DE'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 134 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecast)\u001b[33m.\u001b[39mtoContainText(\u001b[32m'slot-00'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 135 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecast)\u001b[33m.\u001b[39mtoContainText(\u001b[32m'slot-23'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 136 |\u001b[39m     \u001b[36mawait\u001b[39m expect(weatherForecastSection)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoContainText(\u001b[32m'Click on the map to load a forecast.'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                        "column": 35,
+                        "line": 133
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('weather-forecast')\nExpected substring: \u001b[32m\"Location: Test City, DE\"\u001b[39m\nReceived string:    \u001b[31m\"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 AMslot-04Temperature105 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 AMslot-05Temperature106 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 AMslot-06Temperature107 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 AMslot-07Temperature108 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 AMslot-08Temperature109 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 AMslot-09Temperature110 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 AMslot-10Temperature111 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 12:00 PMslot-11Temperature112 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 01:00 PMslot-12Temperature113 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 PMslot-13Temperature114 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 PMslot-14Temperature115 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 PMslot-15Temperature116 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 PMslot-16Temperature117 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 PMslot-17Temperature118 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 PMslot-18Temperature119 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 PMslot-19Temperature120 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 PMslot-20Temperature121 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 PMslot-21Temperature122 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 PMslot-22Temperature123 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sThu, Jan 02, 12:00 AMslot-23Temperature124 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('weather-forecast')\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <div class=\"css-9hqrmb\" data-testid=\"weather-forecast\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"Wed, Jan 01, 01:00 AMslot-00Temperature101 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 AMslot-01Temperature102 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 AMslot-02Temperature103 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 AMslot-03Temperature104 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 AMslot-04Temperature105 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 AMslot-05Temperature106 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 AMslot-06Temperature107 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 AMslot-07Temperature108 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 AMslot-08Temperature109 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 AMslot-09Temperature110 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 AMslot-10Temperature111 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 12:00 PMslot-11Temperature112 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 01:00 PMslot-12Temperature113 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 02:00 PMslot-13Temperature114 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 03:00 PMslot-14Temperature115 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 04:00 PMslot-15Temperature116 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 05:00 PMslot-16Temperature117 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 06:00 PMslot-17Temperature118 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 07:00 PMslot-18Temperature119 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 08:00 PMslot-19Temperature120 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 09:00 PMslot-20Temperature121 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 10:00 PMslot-21Temperature122 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sWed, Jan 01, 11:00 PMslot-22Temperature123 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/sThu, Jan 02, 12:00 AMslot-23Temperature124 Â°CHumidity55 %Wind direction180Â°Wind speed2.5 m/s\"\u001b[22m\n\n\n  131 |\n  132 |     await expect(weatherForecast).toBeVisible();\n> 133 |     await expect(weatherForecast).toContainText('Location: Test City, DE');\n      |                                   ^\n  134 |     await expect(weatherForecast).toContainText('slot-00');\n  135 |     await expect(weatherForecast).toContainText('slot-23');\n  136 |     await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:133:35"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T03:14:27.211Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-70d2e-o-show-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                    "column": 35,
+                    "line": 133
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "08447af364ebeade37f0-df2929e95700ebf5951f",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_38/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T03:14:26.527Z",
+    "duration": 11511.642,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

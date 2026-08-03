@@ -1,0 +1,31 @@
+{
+  "run": "run_21",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 2,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: response.json: Protocol error (Network.getResponseBody): No data found for resource with given identifier\n\n  106 |\n  107 |     const forecastResponse = await forecastResponsePromise;\n> 108 |     const forecastPayload = (await forecastResponse.json()) as unknown;\n      |                                                     ^\n  109 |     expect(extractForecastEntryCount(forecastPayload)).toBe(24);\n  110 |\n  111 |     if (highlightBeforeClick) {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

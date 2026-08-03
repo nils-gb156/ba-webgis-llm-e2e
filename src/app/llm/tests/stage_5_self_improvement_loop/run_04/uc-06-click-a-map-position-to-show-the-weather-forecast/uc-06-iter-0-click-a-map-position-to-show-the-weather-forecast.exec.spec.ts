@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(async () => (await getMapZoomLevel(page)) ?? -1).toBeGreaterThan(-1);
+
+    const infoPanelVisible = await infoPanel.isVisible();
+    const infoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (!infoPanelVisible && infoPanelPressed !== 'true') {
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(
+        weatherForecastSection.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+    await expect(infoPanel.getByText('Click on the map to load a forecast.')).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox!.width * 0.58),
+            y: Math.round(mapBox!.height * 0.42)
+        }
+    });
+
+    await expect.poll(async () => Array.isArray(await getHighlightedCoordinate(page))).toBe(true);
+    await expect(infoPanel.getByText('Click on the map to load a forecast.')).not.toBeVisible();
+
+    await expect.poll(async () => {
+        return await weatherForecastSection.evaluate((section) => {
+            const listItems = section.querySelectorAll('[role="listitem"], li');
+            if (listItems.length > 0) {
+                return listItems.length;
+            }
+
+            const rows = Array.from(section.querySelectorAll('[role="row"], tr'));
+            const dataRows = rows.filter((row) => !row.querySelector('th, [role="columnheader"]'));
+            if (dataRows.length > 0) {
+                return dataRows.length;
+            }
+
+            const text = section.textContent ?? '';
+            const uniqueTimes = new Set(
+                Array.from(text.matchAll(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g)).map((match) => match[0])
+            );
+            if (uniqueTimes.size > 0) {
+                return uniqueTimes.size;
+            }
+
+            const candidates = [section, ...Array.from(section.querySelectorAll('*'))]
+                .map((element) =>
+                    Array.from(element.children).filter(
+                        (child) => (child.textContent ?? '').trim().length > 0
+                    ).length
+                )
+                .filter((count) => count > 0);
+
+            return candidates.length > 0 ? Math.max(...candidates) : 0;
+        });
+    }).toBe(24);
+});

@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const application = page.getByRole('application', { name: 'webgis map' });
+    const footer = page.getByTestId('footer');
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(application).toBeVisible();
+    await expect(footer).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    await expect.poll(async () => (await getMapZoomLevel(page)) ?? -1).toBeGreaterThan(0);
+
+    const getVisibleAppTextWithoutFooter = async () => {
+        const [appText, footerText] = await Promise.all([application.innerText(), footer.innerText()]);
+        return appText.replace(footerText, '');
+    };
+
+    await measurementToggle.click();
+
+    await expect.poll(async () => {
+        if ((await measurementToggle.getAttribute('aria-expanded')) === 'true') {
+            return 'expanded';
+        }
+        if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+            return 'pressed';
+        }
+        if (await page.getByRole('heading', { name: 'Measurement', exact: true }).isVisible()) {
+            return 'heading';
+        }
+        if (await page.getByRole('dialog', { name: /measurement/i }).first().isVisible()) {
+            return 'dialog';
+        }
+        const text = await getVisibleAppTextWithoutFooter();
+        return /measurement|distance|length/i.test(text) ? 'text' : '';
+    }).not.toBe('');
+
+    await mapContainer.click({ position: { x: 420, y: 220 } });
+    await mapContainer.click({ position: { x: 650, y: 320 } });
+    await mapContainer.dblclick({ position: { x: 900, y: 250 } });
+
+    await expect.poll(async () => {
+        const text = await getVisibleAppTextWithoutFooter();
+        return text.match(/\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i)?.[0] ?? '';
+    }).toMatch(/\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i);
+});

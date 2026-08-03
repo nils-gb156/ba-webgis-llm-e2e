@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 6: Click a map position to show the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 27751,
+                  "error": {
+                    "message": "Error: No tested map position produced a visible 24-entry weather forecast.\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeDefined\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mundefined\u001b[39m",
+                    "stack": "Error: No tested map position produced a visible 24-entry weather forecast.\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeDefined\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mundefined\u001b[39m\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:256:7",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                      "column": 7,
+                      "line": 256
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 254 |\u001b[39m         successfulClick\u001b[33m,\u001b[39m\n \u001b[90m 255 |\u001b[39m         \u001b[32m'No tested map position produced a visible 24-entry weather forecast.'\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 256 |\u001b[39m     )\u001b[33m.\u001b[39mtoBeDefined()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 257 |\u001b[39m\n \u001b[90m 258 |\u001b[39m     \u001b[36mawait\u001b[39m expect\n \u001b[90m 259 |\u001b[39m         \u001b[33m.\u001b[39mpoll(\u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                        "column": 7,
+                        "line": 256
+                      },
+                      "message": "Error: No tested map position produced a visible 24-entry weather forecast.\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeDefined\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mundefined\u001b[39m\n\n  254 |         successfulClick,\n  255 |         'No tested map position produced a visible 24-entry weather forecast.'\n> 256 |     ).toBeDefined();\n      |       ^\n  257 |\n  258 |     await expect\n  259 |         .poll(async () => {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:256:7"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T04:54:46.210Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-8b3d2-o-show-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_40\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+                    "column": 7,
+                    "line": 256
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "416f27eaeea82a1f8643-7e9d5946b045d9f08602",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast/uc-06-iter-4-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T04:54:45.533Z",
+    "duration": 30761.569,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

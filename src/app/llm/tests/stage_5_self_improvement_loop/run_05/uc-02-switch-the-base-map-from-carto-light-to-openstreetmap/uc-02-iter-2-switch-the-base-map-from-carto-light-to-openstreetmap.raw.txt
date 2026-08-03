@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const basemapSelector = layerSwitcher.getByRole('combobox', { name: 'Basemaps', exact: true });
+
+    await expect(layerSwitcherToggle).toBeVisible();
+    await expect(layerSwitcher).toBeVisible();
+    await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(basemapSelector).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const getBasemapOptions = async (): Promise<{ label: string; value: string; selected: boolean }[]> =>
+        await basemapSelector.evaluate((element) => {
+            if (!(element instanceof HTMLSelectElement)) {
+                return [];
+            }
+
+            return Array.from(element.options).map((option) => ({
+                label: option.text.trim(),
+                value: option.value,
+                selected: option.selected
+            }));
+        });
+
+    await expect
+        .poll(async () => (await getBasemapOptions()).map((option) => option.label))
+        .toContain('Carto Light');
+    await expect
+        .poll(async () => (await getBasemapOptions()).map((option) => option.label))
+        .toContain('OpenStreetMap');
+
+    const initialOptions = await getBasemapOptions();
+    const cartoLightOption = initialOptions.find((option) => option.label === 'Carto Light');
+    const openStreetMapOption = initialOptions.find((option) => option.label === 'OpenStreetMap');
+
+    if (!cartoLightOption) {
+        throw new Error('Basemap option "Carto Light" not found.');
+    }
+    if (!openStreetMapOption) {
+        throw new Error('Basemap option "OpenStreetMap" not found.');
+    }
+
+    await expect(basemapSelector).toHaveValue(cartoLightOption.value);
+
+    await basemapSelector.selectOption(openStreetMapOption.value);
+
+    await expect(basemapSelector).toHaveValue(openStreetMapOption.value);
+    await expect(basemapSelector).not.toHaveValue(cartoLightOption.value);
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+});

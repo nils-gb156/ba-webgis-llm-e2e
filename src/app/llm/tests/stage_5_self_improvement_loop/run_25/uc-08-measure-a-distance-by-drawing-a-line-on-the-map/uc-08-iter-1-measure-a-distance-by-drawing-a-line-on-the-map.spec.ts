@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementDialog).toBeVisible();
+    await expect(measurementDialog.getByRole('combobox', { name: 'Mode', exact: true })).toBeVisible();
+    await expect(measurementDialog.getByRole('button', { name: 'Delete measurements', exact: true })).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const point1 = {
+        x: Math.round(mapBox.width * 0.55),
+        y: Math.round(mapBox.height * 0.36)
+    };
+    const point2 = {
+        x: Math.round(mapBox.width * 0.68),
+        y: Math.round(mapBox.height * 0.48)
+    };
+    const point3 = {
+        x: Math.round(mapBox.width * 0.80),
+        y: Math.round(mapBox.height * 0.56)
+    };
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.dblclick({ position: point3 });
+
+    const lengthTooltip = page.getByRole('tooltip', {
+        name: /^\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)$/i
+    });
+
+    await expect(lengthTooltip).toBeVisible();
+
+    const resultText = ((await lengthTooltip.textContent()) ?? '').trim();
+    const resultMatch = resultText.match(/^(\d+(?:[.,]\d+)?)\s?(mm|cm|m|km)$/i);
+
+    expect(resultMatch).not.toBeNull();
+    expect(Number.parseFloat(resultMatch![1].replace(',', '.'))).toBeGreaterThan(0);
+});

@@ -1,0 +1,67 @@
+{
+  "run": "run_49",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 6,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('info-panel').getByText('EUCOS Ground Station', { exact: true })\n\n\n  78 |     await expect.poll(() => infoPanel.innerText()).not.toBe(initialInfoText);\n  79 |     await expect(infoPanel.getByText('UV-Index Station', { exact"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 1\n\n  Array [\n    1188693,\n-   6767643,\n+   6768255,\n  ]\n\nCall Log:\n- Timeout 10000ms exceeded while waiting on the predicate\n\n  87 |             return coordinate ? [Math.round(coordinate[0]), Math.round(coordinate[1])] : undefined;\n  88 |         }, { timeout: 10000 })\n> 89 |         .toEqual([1188693, 6767643]);\n     |          ^\n  90 |\n  91 |     const uviSection = page.getByTestId('uvi-station-section')"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('uvi-station-section')\nExpected substring: \"UV-Index Station\"\nTimeout: 20000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 20000ms\n  - waiting for getByTestId('uvi-station-section')\n\n\n  94 |     const uviInfo = page.getByTestId('uvi-station-info');\n  95 |\n> 96 |     await expect(uviSection).toContainText('UV-Index Station', { timeout: 20000 });\n     |                              ^\n  97"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 1\nReceived:   0\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  123 |             { timeout: 30000 }\n  124 |         )\n> 125 |         .toBeGreaterThan(1);\n      |          ^\n  126 |\n  127 |     await expect\n  128 |         .poll(\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_49\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-3-click-both-point-station-laye"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).not.toBeUndefined()\n\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n   96 |             return clickPosition;\n   97 |         })\n>  98 |         .not.toBeUndefined();\n      |              ^\n   99 |\n  100 |     await mapContainer.click({\n  101 |         position: {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_49\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-07-iter-5-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

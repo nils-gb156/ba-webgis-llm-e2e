@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_47\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_47/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 2: Switch the base map from Carto Light to OpenStreetMap",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3578,
+                  "error": {
+                    "message": "Error: locator.selectOption: Error: Element is not a <select> element\nCall log:\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Basemaps', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"open\" data-scope=\"select\" data-part=\"trigger\" aria-expanded=\"true\" aria-invalid=\"false\" aria-required=\"false\" aria-haspopup=\"listbox\" aria-labelledby=\"_r_3_\" id=\"select:_r_4_:trigger\" data-placement=\"bottom-start\" aria-controls=\"select:_r_4_:content\" class=\"basemap-switcher-select-trigger chakra-select__trigger css-lwaeyv\">â€¦</button>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    - waiting for element to be visible and enabled\u001b[22m\n",
+                    "stack": "Error: locator.selectOption: Error: Element is not a <select> element\nCall log:\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Basemaps', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"open\" data-scope=\"select\" data-part=\"trigger\" aria-expanded=\"true\" aria-invalid=\"false\" aria-required=\"false\" aria-haspopup=\"listbox\" aria-labelledby=\"_r_3_\" id=\"select:_r_4_:trigger\" data-placement=\"bottom-start\" aria-controls=\"select:_r_4_:content\" class=\"basemap-switcher-select-trigger chakra-select__trigger css-lwaeyv\">â€¦</button>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    - waiting for element to be visible and enabled\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_47\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:17:27",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_47\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                      "column": 27,
+                      "line": 17
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 15 |\u001b[39m\n \u001b[90m 16 |\u001b[39m     \u001b[36mawait\u001b[39m basemapSelector\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 17 |\u001b[39m     \u001b[36mawait\u001b[39m basemapSelector\u001b[33m.\u001b[39mselectOption({ label\u001b[33m:\u001b[39m \u001b[32m'OpenStreetMap'\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 18 |\u001b[39m\n \u001b[90m 19 |\u001b[39m     \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(() \u001b[33m=>\u001b[39m getActiveBaseLayerTitle(page))\u001b[33m.\u001b[39mtoBe(\u001b[32m'OpenStreetMap'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 20 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_47\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                        "column": 27,
+                        "line": 17
+                      },
+                      "message": "Error: locator.selectOption: Error: Element is not a <select> element\nCall log:\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Basemaps', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button dir=\"ltr\" type=\"button\" role=\"combobox\" data-state=\"open\" data-scope=\"select\" data-part=\"trigger\" aria-expanded=\"true\" aria-invalid=\"false\" aria-required=\"false\" aria-haspopup=\"listbox\" aria-labelledby=\"_r_3_\" id=\"select:_r_4_:trigger\" data-placement=\"bottom-start\" aria-controls=\"select:_r_4_:content\" class=\"basemap-switcher-select-trigger chakra-select__trigger css-lwaeyv\">â€¦</button>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    - waiting for element to be visible and enabled\u001b[22m\n\n\n  15 |\n  16 |     await basemapSelector.click();\n> 17 |     await basemapSelector.selectOption({ label: 'OpenStreetMap' });\n     |                           ^\n  18 |\n  19 |     await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');\n  20 | });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_47\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts:17:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T06:56:15.183Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-e1e72-arto-Light-to-OpenStreetMap-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_47\\uc-02-switch-the-base-map-from-carto-light-to-openstreetmap\\uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+                    "column": 27,
+                    "line": 17
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f1eceb54a54ea8e084c3-57adb200bd41c7b547d4",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_47/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap/uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T06:56:14.488Z",
+    "duration": 5493.28,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

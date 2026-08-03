@@ -1,0 +1,240 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    await expect(printToggle).toBeVisible();
+
+    if (!(await printingPanel.isVisible())) {
+        const pressed = await printToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await printToggle.click();
+        }
+    }
+
+    await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(printingPanel).toBeVisible();
+
+    const printDialog = page.getByRole('dialog', { name: 'Print Map', exact: true });
+    await expect(printDialog).toBeVisible();
+
+    const titleInput = printDialog.getByRole('textbox', { name: 'Title', exact: true });
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'E2E PNG export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const formatSelect = printDialog.getByRole('combobox', { name: 'File format', exact: true });
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption({ label: 'PNG' });
+    await expect(formatSelect).toHaveValue(/png/i);
+
+    const exportButton = printDialog.getByRole('button', { name: 'Export map', exact: true });
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+    expect(await download.failure()).toBeNull();
+
+    const downloadPath = await download.path();
+    expect(downloadPath).toBeTruthy();
+
+    const buffer = await readFile(downloadPath!);
+    expect(buffer.byteLength).toBeGreaterThan(10_000);
+    expect(
+        buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+    ).toBe(true);
+
+    const analysis = await page.evaluate(
+        async ({ base64 }) => {
+            const img = new Image();
+            const loaded = new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to load the downloaded PNG.'));
+            });
+
+            img.src = `data:image/png;base64,${base64}`;
+            await loaded;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                throw new Error('Could not create a 2D canvas context for PNG inspection.');
+            }
+
+            ctx.drawImage(img, 0, 0);
+
+            const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            const getOffset = (x: number, y: number) => (y * width + x) * 4;
+
+            const getPixel = (x: number, y: number) => {
+                const offset = getOffset(x, y);
+                return {
+                    r: data[offset],
+                    g: data[offset + 1],
+                    b: data[offset + 2],
+                    a: data[offset + 3]
+                };
+            };
+
+            const isOpaque = (x: number, y: number) => getPixel(x, y).a > 200;
+
+            const isLight = (x: number, y: number) => {
+                const { r, g, b, a } = getPixel(x, y);
+                return a > 200 && r > 225 && g > 225 && b > 225;
+            };
+
+            const isDarkNeutral = (x: number, y: number) => {
+                const { r, g, b, a } = getPixel(x, y);
+                const brightness = (r + g + b) / 3;
+                return (
+                    a > 200 &&
+                    brightness < 150 &&
+                    Math.abs(r - g) < 35 &&
+                    Math.abs(g - b) < 35 &&
+                    Math.abs(r - b) < 35
+                );
+            };
+
+            let opaquePixels = 0;
+            let baseMapPixels = 0;
+            let overlayBluePixels = 0;
+            let overlayRedPixels = 0;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const { r, g, b, a } = getPixel(x, y);
+
+                    if (a <= 200) {
+                        continue;
+                    }
+
+                    opaquePixels++;
+
+                    if (r > 170 && g > 160 && b > 110 && r >= g && g >= b - 10) {
+                        baseMapPixels++;
+                    }
+
+                    if (b > 130 && b > r + 35 && b > g + 25) {
+                        overlayBluePixels++;
+                    }
+
+                    if (r > 150 && r > g + 35 && r > b + 20) {
+                        overlayRedPixels++;
+                    }
+                }
+            }
+
+            let scaleBarMatches = 0;
+            const searchStartY = Math.floor(height * 0.55);
+            const searchEndY = Math.floor(height * 0.98);
+
+            for (let y = searchStartY; y < searchEndY; y++) {
+                let x = 0;
+
+                while (x < width) {
+                    if (!isDarkNeutral(x, y)) {
+                        x++;
+                        continue;
+                    }
+
+                    const startX = x;
+                    while (x < width && isDarkNeutral(x, y)) {
+                        x++;
+                    }
+                    const endX = x - 1;
+                    const runLength = endX - startX + 1;
+
+                    if (runLength < 20 || runLength > Math.floor(width * 0.35)) {
+                        continue;
+                    }
+
+                    let startTickPixels = 0;
+                    let endTickPixels = 0;
+                    for (let yy = Math.max(0, y - 6); yy <= Math.min(height - 1, y + 6); yy++) {
+                        if (
+                            isDarkNeutral(startX, yy) ||
+                            isDarkNeutral(Math.min(width - 1, startX + 1), yy)
+                        ) {
+                            startTickPixels++;
+                        }
+                        if (
+                            isDarkNeutral(endX, yy) ||
+                            isDarkNeutral(Math.max(0, endX - 1), yy)
+                        ) {
+                            endTickPixels++;
+                        }
+                    }
+
+                    const boxLeft = Math.max(0, startX - 10);
+                    const boxRight = Math.min(width - 1, endX + 10);
+                    const boxTop = Math.max(0, y - 22);
+                    const boxBottom = Math.min(height - 1, y + 22);
+
+                    let darkPixelsInBox = 0;
+                    let lightPixelsInBox = 0;
+
+                    for (let yy = boxTop; yy <= boxBottom; yy++) {
+                        for (let xx = boxLeft; xx <= boxRight; xx++) {
+                            if (isDarkNeutral(xx, yy)) {
+                                darkPixelsInBox++;
+                            }
+                            if (isLight(xx, yy)) {
+                                lightPixelsInBox++;
+                            }
+                        }
+                    }
+
+                    if (
+                        darkPixelsInBox >= 35 &&
+                        lightPixelsInBox >= 80 &&
+                        (startTickPixels >= 3 || endTickPixels >= 3)
+                    ) {
+                        scaleBarMatches++;
+                    }
+                }
+            }
+
+            return {
+                width,
+                height,
+                opaquePixels,
+                baseMapPixels,
+                overlayBluePixels,
+                overlayRedPixels,
+                scaleBarMatches
+            };
+        },
+        { base64: buffer.toString('base64') }
+    );
+
+    expect(analysis.width).toBeGreaterThan(300);
+    expect(analysis.height).toBeGreaterThan(200);
+    expect(analysis.baseMapPixels).toBeGreaterThan(analysis.opaquePixels * 0.03);
+    expect(analysis.overlayBluePixels + analysis.overlayRedPixels).toBeGreaterThan(100);
+    expect(analysis.scaleBarMatches).toBeGreaterThan(0);
+});

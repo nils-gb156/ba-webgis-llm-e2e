@@ -1,0 +1,91 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import {
+    getHighlightedCoordinate,
+    getMapCenter,
+    getMapZoomLevel
+} from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const mapContainer = page.getByTestId('map-container');
+
+    if (!(await infoPanel.isVisible())) {
+        const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+
+    await expect.poll(async () => {
+        const zoom = await getMapZoomLevel(page);
+        const center = await getMapCenter(page);
+        return typeof zoom === 'number' && Array.isArray(center) && center.length === 2;
+    }).toBe(true);
+
+    const previousHighlight = await getHighlightedCoordinate(page);
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round((mapBox?.width ?? 0) * 0.55),
+            y: Math.round((mapBox?.height ?? 0) * 0.45)
+        }
+    });
+
+    await expect.poll(async () => {
+        const highlight = await getHighlightedCoordinate(page);
+        if (!Array.isArray(highlight) || highlight.length !== 2) {
+            return false;
+        }
+        if (!previousHighlight) {
+            return true;
+        }
+        return highlight[0] !== previousHighlight[0] || highlight[1] !== previousHighlight[1];
+    }).toBe(true);
+
+    await expect(weatherForecastSection).toBeVisible();
+
+    const getForecastEntryCount = async () =>
+        await weatherForecastSection.evaluate((section) => {
+            const text = (section as HTMLElement).innerText ?? '';
+
+            const timeMatches = text.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g);
+            if (timeMatches && timeMatches.length > 0) {
+                return timeMatches.length;
+            }
+
+            const listItemElements = Array.from(
+                section.querySelectorAll('[role="listitem"], li')
+            );
+            if (listItemElements.length > 0) {
+                return new Set(listItemElements).size;
+            }
+
+            const bodyRows = Array.from(section.querySelectorAll('tbody tr'));
+            if (bodyRows.length > 0) {
+                return bodyRows.length;
+            }
+
+            const tableRows = Array.from(section.querySelectorAll('tr'));
+            if (tableRows.length > 0) {
+                const headerRows = tableRows.filter((row) => row.querySelector('th'));
+                return tableRows.length - headerRows.length;
+            }
+
+            return 0;
+        });
+
+    await expect.poll(() => getForecastEntryCount()).toBe(24);
+});

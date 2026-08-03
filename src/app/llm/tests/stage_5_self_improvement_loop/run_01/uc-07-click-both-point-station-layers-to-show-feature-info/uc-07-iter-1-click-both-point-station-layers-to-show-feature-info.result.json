@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_01/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 23126,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('uvi-station-section')\nExpected pattern: \u001b[32m/UV-Index Station\\s+\\S+/i\u001b[39m\nReceived string:  \u001b[31m\"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\nTimeout: 20000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 20000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('uvi-station-section')\u001b[22m\n\u001b[2m    42 Ã— locator resolved to <div data-testid=\"uvi-station-section\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('uvi-station-section')\nExpected pattern: \u001b[32m/UV-Index Station\\s+\\S+/i\u001b[39m\nReceived string:  \u001b[31m\"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\nTimeout: 20000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 20000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('uvi-station-section')\u001b[22m\n\u001b[2m    42 Ã— locator resolved to <div data-testid=\"uvi-station-section\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:121:35",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 35,
+                      "line": 121
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 119 |\u001b[39m     \u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 120 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 121 |\u001b[39m   \u001b[36mawait\u001b[39m expect(uviStationSection)\u001b[33m.\u001b[39mtoContainText(\u001b[35m/UV-Index Station\\s+\\S+/i\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m20000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 122 |\u001b[39m   \u001b[36mawait\u001b[39m expect(uviStationInfo)\u001b[33m.\u001b[39mtoContainText(\u001b[35m/Identifier/i\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m20000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 123 |\u001b[39m   \u001b[36mawait\u001b[39m expect(infoPanel)\u001b[33m.\u001b[39mtoContainText(\u001b[35m/EUCOS Ground Station\\s+\\S+/i\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m20000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 124 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 35,
+                        "line": 121
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('uvi-station-section')\nExpected pattern: \u001b[32m/UV-Index Station\\s+\\S+/i\u001b[39m\nReceived string:  \u001b[31m\"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\nTimeout: 20000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 20000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('uvi-station-section')\u001b[22m\n\u001b[2m    42 Ã— locator resolved to <div data-testid=\"uvi-station-section\">â€¦</div>\u001b[22m\n\u001b[2m       - unexpected value \"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[22m\n\n\n  119 |     .toBe(true);\n  120 |\n> 121 |   await expect(uviStationSection).toContainText(/UV-Index Station\\s+\\S+/i, { timeout: 20000 });\n      |                                   ^\n  122 |   await expect(uviStationInfo).toContainText(/Identifier/i, { timeout: 20000 });\n  123 |   await expect(infoPanel).toContainText(/EUCOS Ground Station\\s+\\S+/i, { timeout: 20000 });\n  124 | });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:121:35"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-26T17:49:16.644Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-f581a-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_01\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 35,
+                    "line": 121
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "72974c1f7966705e9c0f-aa45f752da776d27681e",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_01/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-26T17:49:15.971Z",
+    "duration": 26166.82,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

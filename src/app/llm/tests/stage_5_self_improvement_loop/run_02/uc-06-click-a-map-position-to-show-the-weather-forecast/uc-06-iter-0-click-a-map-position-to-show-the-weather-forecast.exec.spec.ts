@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate, getMapZoomLevel } from "../../../../map-model-helpers";
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    if (!(await infoPanel.isVisible())) {
+        if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(
+        weatherForecastSection.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+    await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toBeVisible();
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeUndefined();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container bounding box is not available.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox.width * 0.52),
+            y: Math.round(mapBox.height * 0.45)
+        }
+    });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+    await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toBeHidden();
+
+    await expect.poll(async () => {
+        const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+        const imageCount = await weatherForecastSection.getByRole('img').count();
+        const text = await weatherForecastSection.innerText();
+        const timeCount = (text.match(/\b\d{1,2}:\d{2}\b/g) ?? []).length;
+
+        return [listItemCount, imageCount, timeCount].includes(24)
+            ? 24
+            : Math.max(listItemCount, imageCount, timeCount);
+    }).toBe(24);
+});

@@ -1,0 +1,178 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getHighlightedCoordinate, getMapZoomLevel, isLayerRendered } from "../../../../map-model-helpers";
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanelToggle).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+  await expect(eucosLayerCheckbox).toBeChecked();
+  await expect(uviLayerCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+  if (!(await infoPanel.isVisible())) {
+    const infoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (infoPanelPressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+  const findClickablePosition = async () =>
+    page.evaluate((coordinate: [number, number]) => {
+      const map = (globalThis as any).__openPioneerMap;
+      const olMap = map?.olMap;
+      const pixel = olMap?.getPixelFromCoordinate?.(coordinate);
+
+      if (!Array.isArray(pixel) || pixel.length < 2) {
+        return undefined;
+      }
+
+      const hasFeatureAtPixel = (x: number, y: number) => {
+        let found = false;
+        olMap.forEachFeatureAtPixel(
+          [x, y],
+          () => {
+            found = true;
+            return true;
+          },
+          { hitTolerance: 6 }
+        );
+        return found;
+      };
+
+      const [baseX, baseY] = pixel;
+      for (let radius = 0; radius <= 8; radius++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          for (let dy = -radius; dy <= radius; dy++) {
+            if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) {
+              continue;
+            }
+
+            const x = Math.round(baseX + dx);
+            const y = Math.round(baseY + dy);
+
+            if (x < 0 || y < 0) {
+              continue;
+            }
+
+            if (hasFeatureAtPixel(x, y)) {
+              return { x, y, hitsVectorFeature: true };
+            }
+          }
+        }
+      }
+
+      return {
+        x: Math.round(baseX),
+        y: Math.round(baseY),
+        hitsVectorFeature: false
+      };
+    }, targetCoordinate);
+
+  await expect
+    .poll(async () => {
+      const position = await findClickablePosition();
+      return position?.hitsVectorFeature ?? false;
+    })
+    .toBe(true);
+
+  const clickPosition = await findClickablePosition();
+  if (!clickPosition) {
+    throw new Error('Failed to calculate a click position for the target map coordinate.');
+  }
+
+  const featureInfoRequestUrls: string[] = [];
+  page.on('request', (request) => {
+    if (/getfeatureinfo/i.test(request.url())) {
+      featureInfoRequestUrls.push(request.url());
+    }
+  });
+
+  const featureInfoResponsePromise = page.waitForResponse(
+    (response) => /getfeatureinfo/i.test(response.url()) && response.ok()
+  );
+
+  await Promise.all([
+    featureInfoResponsePromise,
+    mapContainer.click({ position: { x: clickPosition.x, y: clickPosition.y } })
+  ]);
+
+  await expect.poll(() => featureInfoRequestUrls.length).toBeGreaterThan(0);
+
+  await expect
+    .poll(async () => {
+      const highlighted = await getHighlightedCoordinate(page);
+      return highlighted
+        ? [Math.round(highlighted[0]), Math.round(highlighted[1])]
+        : undefined;
+    })
+    .toEqual([1188693, 6767643]);
+
+  await expect
+    .poll(async () => {
+      const panelText = (await infoPanel.textContent()) ?? '';
+      return {
+        hasUviSection: panelText.includes('UV-Index Station'),
+        hasEucosSection: panelText.includes('EUCOS Ground Station')
+      };
+    }, { timeout: 15000 })
+    .toEqual({
+      hasUviSection: true,
+      hasEucosSection: true
+    });
+
+  const uviSection = page.getByTestId('uvi-station-section');
+  const uviInfo = page.getByTestId('uvi-station-info');
+
+  await expect(uviSection).toBeVisible();
+  await expect(uviInfo).toBeVisible();
+  await expect(uviSection).toContainText('UV-Index Station');
+  await expect(uviSection).toContainText('Identifier');
+
+  const eucosSectionByTestId = page.getByTestId('eucos-station-section');
+  if ((await eucosSectionByTestId.count()) > 0) {
+    await expect(eucosSectionByTestId).toBeVisible();
+    await expect
+      .poll(async () => {
+        const text = (await eucosSectionByTestId.textContent()) ?? '';
+        return text.replace('EUCOS Ground Station', '').trim().length;
+      })
+      .toBeGreaterThan(0);
+  } else {
+    const eucosSectionTitle = infoPanel.getByText('EUCOS Ground Station', { exact: true });
+    await expect(eucosSectionTitle).toBeVisible();
+    await expect
+      .poll(async () => {
+        const text = (await infoPanel.textContent()) ?? '';
+        const title = 'EUCOS Ground Station';
+        const titleIndex = text.indexOf(title);
+        if (titleIndex === -1) {
+          return 0;
+        }
+        return text.slice(titleIndex + title.length).trim().length;
+      })
+      .toBeGreaterThan(0);
+  }
+});

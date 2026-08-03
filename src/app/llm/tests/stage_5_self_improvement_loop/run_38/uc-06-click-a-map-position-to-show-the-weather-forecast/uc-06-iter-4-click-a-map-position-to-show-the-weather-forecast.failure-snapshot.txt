@@ -1,0 +1,258 @@
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-station-info
+  - eucos-station-section
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Test City, DE"
+- paragraph: Wed, Jan 01, 01:00 AM
+- paragraph: slot-00
+- paragraph: Temperature
+- paragraph: 101 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 02:00 AM
+- paragraph: slot-01
+- paragraph: Temperature
+- paragraph: 102 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 03:00 AM
+- paragraph: slot-02
+- paragraph: Temperature
+- paragraph: 103 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 04:00 AM
+- paragraph: slot-03
+- paragraph: Temperature
+- paragraph: 104 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 05:00 AM
+- paragraph: slot-04
+- paragraph: Temperature
+- paragraph: 105 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 06:00 AM
+- paragraph: slot-05
+- paragraph: Temperature
+- paragraph: 106 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 07:00 AM
+- paragraph: slot-06
+- paragraph: Temperature
+- paragraph: 107 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 08:00 AM
+- paragraph: slot-07
+- paragraph: Temperature
+- paragraph: 108 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 09:00 AM
+- paragraph: slot-08
+- paragraph: Temperature
+- paragraph: 109 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 10:00 AM
+- paragraph: slot-09
+- paragraph: Temperature
+- paragraph: 110 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 11:00 AM
+- paragraph: slot-10
+- paragraph: Temperature
+- paragraph: 111 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 12:00 PM
+- paragraph: slot-11
+- paragraph: Temperature
+- paragraph: 112 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 01:00 PM
+- paragraph: slot-12
+- paragraph: Temperature
+- paragraph: 113 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 02:00 PM
+- paragraph: slot-13
+- paragraph: Temperature
+- paragraph: 114 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- paragraph: 2.5 m/s
+- separator
+- paragraph: Wed, Jan 01, 03:00 PM
+- paragraph: slot-14
+- paragraph: Temperature
+- paragraph: 115 °C
+- paragraph: Humidity
+- paragraph: 55 %
+- paragraph: Wind direction
+- paragraph: 180°
+- paragraph: Wind speed
+- 
+[... truncated ...]

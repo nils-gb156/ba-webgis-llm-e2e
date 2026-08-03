@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getHighlightedCoordinate, getMapZoomLevel } from "../../../../map-model-helpers";
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 15000 }).toBe('Carto Light');
+    await expect.poll(() => getMapZoomLevel(page), { timeout: 15000 }).toBeGreaterThan(0);
+
+    if (!(await infoPanel.isVisible())) {
+        const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+
+    const initialHighlight = await getHighlightedCoordinate(page);
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(box.width * 0.55),
+            y: Math.round(box.height * 0.45)
+        }
+    });
+
+    await expect
+        .poll(async () => {
+            const highlightedCoordinate = await getHighlightedCoordinate(page);
+            return (
+                Array.isArray(highlightedCoordinate) &&
+                highlightedCoordinate.length === 2 &&
+                JSON.stringify(highlightedCoordinate) !== JSON.stringify(initialHighlight)
+            );
+        }, { timeout: 15000 })
+        .toBe(true);
+
+    await expect
+        .poll(async () => {
+            const text = await weatherForecastSection.evaluate(
+                (section) => (section as HTMLElement).innerText
+            );
+            return !text.includes('Click on the map to load a forecast.');
+        }, { timeout: 20000 })
+        .toBe(true);
+
+    await expect
+        .poll(
+            () =>
+                weatherForecastSection.evaluate((section) => {
+                    const tableRows = section.querySelectorAll('tbody tr').length;
+                    if (tableRows > 0) {
+                        return tableRows;
+                    }
+
+                    const roleRows = section.querySelectorAll('[role="row"]').length;
+                    if (roleRows > 0) {
+                        const hasHeader =
+                            section.querySelectorAll('th, [role="columnheader"], [role="rowheader"]').length > 0;
+                        return Math.max(0, roleRows - (hasHeader ? 1 : 0));
+                    }
+
+                    const listItems = section.querySelectorAll('li, [role="listitem"]').length;
+                    if (listItems > 0) {
+                        return listItems;
+                    }
+
+                    const hourLabels = Array.from(section.querySelectorAll('*'))
+                        .filter((element) => element.children.length === 0)
+                        .map((element) => element.textContent?.trim() ?? '')
+                        .filter((text) => /^([01]?\d|2[0-3]):[0-5]\d$/.test(text));
+
+                    return hourLabels.length;
+                }),
+            { timeout: 20000 }
+        )
+        .toBe(24);
+});

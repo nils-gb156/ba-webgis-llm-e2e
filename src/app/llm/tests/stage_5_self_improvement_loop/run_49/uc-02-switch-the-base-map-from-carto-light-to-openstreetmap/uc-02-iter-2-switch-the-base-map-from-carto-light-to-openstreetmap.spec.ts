@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+    await expect(basemapCombobox).toBeVisible();
+
+    const getBasemapSelectorValue = async () =>
+        await basemapCombobox.evaluate((element) => {
+            if (element instanceof HTMLSelectElement) {
+                const selectedOption =
+                    element.selectedIndex >= 0 ? element.options[element.selectedIndex] : undefined;
+                return selectedOption?.textContent?.trim() ?? element.value.trim();
+            }
+
+            if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+                return element.value.trim();
+            }
+
+            return (
+                element.getAttribute('aria-valuetext')?.trim() ??
+                element.textContent?.trim() ??
+                ''
+            );
+        });
+
+    await expect.poll(getBasemapSelectorValue).toBe('Carto Light');
+
+    const tagName = await basemapCombobox.evaluate((element) => element.tagName);
+    if (tagName === 'SELECT') {
+        await basemapCombobox.selectOption({ label: 'OpenStreetMap' });
+    } else {
+        await basemapCombobox.click();
+
+        const openStreetMapOption = page.getByRole('option', { name: 'OpenStreetMap', exact: true });
+        if ((await openStreetMapOption.count()) > 0) {
+            await openStreetMapOption.click();
+        } else {
+            await page.keyboard.press('ArrowDown');
+            await page.keyboard.press('Enter');
+        }
+    }
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(getBasemapSelectorValue).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+    await expect.poll(getBasemapSelectorValue).not.toBe('Carto Light');
+});

@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const zoomInButton = page.getByTestId('zoom-in-button');
+    const zoomOutButton = page.getByTestId('zoom-out-button');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+
+    const readNumericZoom = async (): Promise<number | null> => {
+        const zoom = await getMapZoomLevel(page);
+        return typeof zoom === 'number' ? zoom : null;
+    };
+
+    await expect.poll(readNumericZoom).toEqual(expect.any(Number));
+    const initialZoom = await readNumericZoom();
+    expect(initialZoom).not.toBeNull();
+
+    await zoomInButton.click();
+
+    let zoomAfterIn: number | undefined;
+    await expect.poll(async () => {
+        const zoom = await getMapZoomLevel(page);
+        if (typeof zoom === 'number' && initialZoom !== null && zoom > initialZoom) {
+            zoomAfterIn = zoom;
+            return true;
+        }
+        return false;
+    }).toBe(true);
+
+    await zoomOutButton.click();
+
+    await expect.poll(async () => {
+        const zoom = await getMapZoomLevel(page);
+        return typeof zoom === 'number' && typeof zoomAfterIn === 'number' && zoom < zoomAfterIn;
+    }).toBe(true);
+});

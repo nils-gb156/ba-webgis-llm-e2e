@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+  getMapCenter,
+  getHighlightedCoordinate,
+  isLayerRendered
+} from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(geocoderInput).toBeEnabled();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+  await expect.poll(() => measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+  const temperatureCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+  await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+  const centerBeforeSearch = await getMapCenter(page);
+  if (!centerBeforeSearch) {
+    throw new Error('Map center was not available before the geocoder interaction.');
+  }
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const firstSearchResult = geocoderPanel.getByRole('option').first();
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    if (!center) {
+      return false;
+    }
+    return center[0] !== centerBeforeSearch[0] || center[1] !== centerBeforeSearch[1];
+  }).toBe(true);
+
+  await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    const highlight = await getHighlightedCoordinate(page);
+    if (!center || !highlight) {
+      return false;
+    }
+    return Math.abs(center[0] - highlight[0]) < 100000 && Math.abs(center[1] - highlight[1]) < 100000;
+  }).toBe(true);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(
+    infoPanel.getByText('Click on the map to load a forecast.', { exact: true })
+  ).not.toBeVisible();
+
+  await expect.poll(() =>
+    weatherForecastSection.evaluate((section) => {
+      const counts = [
+        section.querySelectorAll('[role="listitem"]').length,
+        section.querySelectorAll('li').length,
+        section.querySelectorAll('[role="row"]').length,
+        section.querySelectorAll('tbody tr').length,
+        section.querySelectorAll('article').length,
+        section.querySelectorAll('[aria-expanded]').length,
+        section.querySelectorAll('button').length,
+        section.children.length
+      ];
+      return counts.includes(24) ? 24 : Math.max(...counts);
+    })
+  ).toBe(24);
+});

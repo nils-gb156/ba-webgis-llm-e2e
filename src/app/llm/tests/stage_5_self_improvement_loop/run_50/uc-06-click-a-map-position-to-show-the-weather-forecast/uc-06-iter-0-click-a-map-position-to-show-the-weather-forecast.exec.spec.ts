@@ -1,0 +1,77 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import {
+    getHighlightedCoordinate,
+    getMapCenter,
+    getMapZoomLevel
+} from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const app = page.getByRole('application', { name: 'webgis map', exact: true });
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const forecastPlaceholder = weatherForecastSection.getByText('Click on the map to load a forecast.');
+
+    const getForecastEntryCount = async (): Promise<number> => {
+        const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+        if (listItemCount > 0) {
+            return listItemCount;
+        }
+
+        const rowCount = await weatherForecastSection.getByRole('row').count();
+        if (rowCount > 0) {
+            const headerCount = await weatherForecastSection.getByRole('columnheader').count();
+            return headerCount > 0 ? rowCount - 1 : rowCount;
+        }
+
+        const articleCount = await weatherForecastSection.getByRole('article').count();
+        if (articleCount > 0) {
+            return articleCount;
+        }
+
+        const text = (await weatherForecastSection.textContent()) ?? '';
+        return (text.match(/\b\d{1,2}:\d{2}\b/g) ?? []).length;
+    };
+
+    await expect(app).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('heading', { name: 'Information', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(forecastPlaceholder).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox.width * 0.55),
+            y: Math.round(mapBox.height * 0.45)
+        }
+    });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(forecastPlaceholder).not.toBeVisible();
+    await expect.poll(getForecastEntryCount).toBe(24);
+});

@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+    const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+    const lengthTooltip = page.getByRole('tooltip', {
+        name: /\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i
+    });
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    const panelIsVisible = async (): Promise<boolean> => {
+        const panelVisible = await measurementPanel.isVisible().catch(() => false);
+        const dialogVisible = await measurementDialog.isVisible().catch(() => false);
+        return panelVisible || dialogVisible;
+    };
+
+    if (!(await panelIsVisible())) {
+        const pressed = await measurementToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await measurementToggle.click();
+        }
+    }
+
+    await expect.poll(panelIsVisible).toBe(true);
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(measurementHeading).toBeVisible();
+    await expect(measurementDialog).toBeVisible();
+    await expect(measurementDialog.getByText('Click in the map to start a measurement.')).toBeVisible();
+    await expect(lengthTooltip).toHaveCount(0);
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    const width = mapBox!.width;
+    const height = mapBox!.height;
+
+    await mapContainer.click({
+        position: { x: Math.round(width * 0.55), y: Math.round(height * 0.32) }
+    });
+    await mapContainer.click({
+        position: { x: Math.round(width * 0.66), y: Math.round(height * 0.40) }
+    });
+    await mapContainer.click({
+        position: { x: Math.round(width * 0.76), y: Math.round(height * 0.48) }
+    });
+    await mapContainer.dblclick({
+        position: { x: Math.round(width * 0.86), y: Math.round(height * 0.56) }
+    });
+
+    await expect(lengthTooltip.first()).toBeVisible();
+    await expect(lengthTooltip.first()).toHaveText(/\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i);
+    await expect(measurementDialog).toBeVisible();
+});

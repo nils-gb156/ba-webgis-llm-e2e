@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+  getHighlightedCoordinate,
+  getMapCenter,
+  isLayerRendered
+} from '../../../../map-model-helpers';
+
+test('UC10 Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+
+  await expect.poll(() => getMapCenter(page)).toBeTruthy();
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+  await expect(page.getByTestId('precipitation-legend')).toHaveCount(0);
+
+  const initialCenter = await getMapCenter(page);
+  if (!initialCenter) {
+    throw new Error('Initial map center is unavailable.');
+  }
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect(page.getByTestId('temperature-legend')).toHaveCount(0);
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const firstSearchResult = geocoderPanel.getByText(/Münster/i).first();
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    if (!center) {
+      return 0;
+    }
+
+    return Math.hypot(center[0] - initialCenter[0], center[1] - initialCenter[1]);
+  }).toBeGreaterThan(1000);
+
+  await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    const highlight = await getHighlightedCoordinate(page);
+
+    if (!center || !highlight) {
+      return Number.POSITIVE_INFINITY;
+    }
+
+    return Math.hypot(center[0] - highlight[0], center[1] - highlight[1]);
+  }).toBeLessThan(10000);
+
+  await expect(forecastSection).toBeVisible();
+  await expect(infoPanel.getByText(/Location:\s*Münster/i)).toBeVisible();
+  await expect.poll(async () => {
+    return await forecastSection.getByTestId('weather-forecast-entry').count();
+  }).toBe(24);
+});

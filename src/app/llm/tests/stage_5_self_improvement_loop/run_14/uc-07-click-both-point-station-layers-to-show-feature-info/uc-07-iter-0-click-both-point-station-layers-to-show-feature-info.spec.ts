@@ -1,0 +1,117 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    if (!(await layerSwitcher.isVisible())) {
+        const layerSwitcherPressed = await layerSwitcherToggle.getAttribute('aria-pressed');
+        if (layerSwitcherPressed !== 'true') {
+            await layerSwitcherToggle.click();
+        }
+    }
+    await expect(layerSwitcher).toBeVisible();
+
+    if (!(await infoPanel.isVisible())) {
+        const infoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (infoPanelPressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+    await expect(infoPanel).toBeVisible();
+
+    const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (measurementPressed === 'true') {
+        await measurementToggle.click();
+        await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+    }
+
+    const eucosCheckbox = page.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviCheckbox = page.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+    let mapPixel: [number, number] | undefined;
+
+    await expect
+        .poll(async () => {
+            mapPixel = await page.evaluate((coordinate) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (coord: [number, number]) => number[] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+                const pixel = map?.olMap?.getPixelFromCoordinate?.(coordinate);
+                return Array.isArray(pixel) && pixel.length >= 2
+                    ? ([Number(pixel[0]), Number(pixel[1])] as [number, number])
+                    : undefined;
+            }, targetCoordinate);
+
+            return mapPixel !== undefined;
+        })
+        .toBe(true);
+
+    if (!mapPixel) {
+        throw new Error('Could not determine map pixel for the target coordinate.');
+    }
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    expect(mapPixel[0]).toBeGreaterThanOrEqual(0);
+    expect(mapPixel[1]).toBeGreaterThanOrEqual(0);
+    expect(mapPixel[0]).toBeLessThanOrEqual(mapBox.width);
+    expect(mapPixel[1]).toBeLessThanOrEqual(mapBox.height);
+
+    const getFeatureInfoResponsePromise = page.waitForResponse((response) =>
+        /getfeatureinfo/i.test(response.url())
+    );
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapPixel[0]),
+            y: Math.round(mapPixel[1])
+        }
+    });
+
+    const getFeatureInfoResponse = await getFeatureInfoResponsePromise;
+    expect(getFeatureInfoResponse.ok()).toBe(true);
+
+    await expect(infoPanel.getByText(/UV-Index Station/i)).toBeVisible();
+    await expect(infoPanel.getByText(/EUCOS Ground Station/i)).toBeVisible();
+});

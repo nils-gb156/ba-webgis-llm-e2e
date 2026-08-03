@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const app = page.getByRole('application', { name: 'webgis map', exact: true });
+    const mapContainer = page.getByTestId('map-container');
+    const measurementButton = page.getByTestId('measurement-toggle');
+
+    await expect(app).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementButton).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+    const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+    const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+    const isMeasurementPanelVisible = async (): Promise<boolean> => {
+        if (await measurementDialog.isVisible()) {
+            return true;
+        }
+        if (await measurementRegion.isVisible()) {
+            return true;
+        }
+        if (await measurementHeading.isVisible()) {
+            return true;
+        }
+
+        const ariaPressed = await measurementButton.getAttribute('aria-pressed');
+        const ariaExpanded = await measurementButton.getAttribute('aria-expanded');
+        return ariaPressed === 'true' || ariaExpanded === 'true';
+    };
+
+    if (!(await isMeasurementPanelVisible())) {
+        await measurementButton.click();
+    }
+
+    await expect.poll(isMeasurementPanelVisible).toBe(true);
+
+    const measurementValuePattern = /\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/gi;
+    const initialMeasurementValueCount = ((await app.innerText()).match(measurementValuePattern) ?? []).length;
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const start = {
+        x: Math.round(mapBox.width * 0.58),
+        y: Math.round(mapBox.height * 0.56)
+    };
+    const middle = {
+        x: Math.round(mapBox.width * 0.68),
+        y: Math.round(mapBox.height * 0.46)
+    };
+    const end = {
+        x: Math.round(mapBox.width * 0.78),
+        y: Math.round(mapBox.height * 0.58)
+    };
+
+    await mapContainer.click({ position: start });
+    await mapContainer.click({ position: middle });
+    await mapContainer.dblclick({ position: end });
+
+    await expect.poll(async () => {
+        const text = await app.innerText();
+        return (text.match(measurementValuePattern) ?? []).length;
+    }).toBeGreaterThan(initialMeasurementValueCount);
+});

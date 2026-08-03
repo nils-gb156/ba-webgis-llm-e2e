@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC10 Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+    await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+    await expect(page.getByTestId('temperature-legend')).toBeVisible();
+    await expect(page.getByTestId('precipitation-legend')).toHaveCount(0);
+
+    const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    const initialCenter = await getMapCenter(page);
+    if (!initialCenter) {
+        throw new Error('Map center was not available after application startup.');
+    }
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+    await expect(page.getByTestId('temperature-legend')).toHaveCount(0);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+    await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+
+    await geocoderInput.click();
+    await geocoderInput.fill('M\u00FCnster');
+
+    const geocoderResults = page.getByTestId('geocoder-results');
+    const firstSearchResult = page.getByTestId('geocoder-result-item-0');
+
+    await expect(geocoderResults).toBeVisible();
+    await expect(firstSearchResult).toBeVisible();
+    await expect(firstSearchResult).toContainText(/M.nster/i);
+    await expect(firstSearchResult).toContainText(/North Rhine-Westphalia/i);
+    await expect(firstSearchResult).toContainText(/Germany/i);
+
+    await firstSearchResult.click();
+
+    await expect(geocoderInput).toHaveValue(/M.nster/i);
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        if (!currentCenter) {
+            return false;
+        }
+
+        const dx = currentCenter[0] - initialCenter[0];
+        const dy = currentCenter[1] - initialCenter[1];
+        return Math.hypot(dx, dy) > 50000;
+    }).toBe(true);
+
+    await expect.poll(async () => {
+        const coordinate = await getHighlightedCoordinate(page);
+        if (!coordinate) {
+            return false;
+        }
+
+        const muensterApproximate3857: [number, number] = [849000, 6790000];
+        const dx = coordinate[0] - muensterApproximate3857[0];
+        const dy = coordinate[1] - muensterApproximate3857[1];
+        return Math.hypot(dx, dy) < 100000;
+    }).toBe(true);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toHaveCount(0);
+
+    await expect.poll(async () => {
+        return await weatherForecastSection.evaluate((section) => {
+            const tableRows = section.querySelectorAll('tbody tr').length;
+            if (tableRows > 0) {
+                return tableRows;
+            }
+
+            const roleRows = section.querySelectorAll('[role="row"]').length;
+            if (roleRows > 0) {
+                const hasColumnHeaders = section.querySelectorAll('[role="columnheader"]').length > 0;
+                return hasColumnHeaders ? roleRows - 1 : roleRows;
+            }
+
+            const listItems = section.querySelectorAll('[role="listitem"], li').length;
+            if (listItems > 0) {
+                return listItems;
+            }
+
+            const articles = section.querySelectorAll('article').length;
+            if (articles > 0) {
+                return articles;
+            }
+
+            const repeatedContainer = Array.from(section.querySelectorAll('div, section, ul, ol'))
+                .map((element) => element.children.length)
+                .find((count) => count === 24);
+
+            return repeatedContainer ?? 0;
+        });
+    }).toBe(24);
+});

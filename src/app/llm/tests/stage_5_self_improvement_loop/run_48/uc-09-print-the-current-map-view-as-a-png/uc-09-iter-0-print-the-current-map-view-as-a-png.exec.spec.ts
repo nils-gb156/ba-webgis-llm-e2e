@@ -1,0 +1,211 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import type { Locator, Page } from '../../../failure-snapshot-fixture';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const pickVisible = async (candidates: Locator[]): Promise<Locator | undefined> => {
+        for (const candidate of candidates) {
+            const count = await candidate.count();
+            for (let i = 0; i < count; i++) {
+                const item = candidate.nth(i);
+                if (await item.isVisible().catch(() => false)) {
+                    return item;
+                }
+            }
+        }
+        return undefined;
+    };
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('scale-viewer')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    await page.getByTestId('print-toggle').click();
+
+    const printDialog = page.getByRole('dialog');
+    const dialogVisible =
+        (await printDialog.count()) > 0 &&
+        (await printDialog.first().isVisible().catch(() => false));
+
+    if (dialogVisible) {
+        await expect(printDialog.first()).toBeVisible();
+    }
+
+    const root: Page | Locator = dialogVisible ? printDialog.first() : page;
+
+    const titleCandidates = [
+        root.getByRole('textbox', { name: /^(map )?title$/i }),
+        root.getByRole('textbox', { name: /title/i }),
+        root.getByLabel(/^(map )?title$/i),
+        root.getByLabel(/title/i)
+    ];
+
+    let titleInput = await pickVisible(titleCandidates);
+
+    if (!titleInput) {
+        const textboxes = root.getByRole('textbox');
+        const textboxCount = await textboxes.count();
+
+        for (let i = 0; i < textboxCount; i++) {
+            const textbox = textboxes.nth(i);
+            if (!(await textbox.isVisible().catch(() => false))) {
+                continue;
+            }
+
+            const placeholder = (await textbox.getAttribute('placeholder')) ?? '';
+            const ariaLabel = (await textbox.getAttribute('aria-label')) ?? '';
+            const combined = `${placeholder} ${ariaLabel}`;
+
+            if (!/search for a place|geocoder search/i.test(combined)) {
+                titleInput = textbox;
+                break;
+            }
+        }
+    }
+
+    if (!titleInput) {
+        throw new Error('Could not find the print title input after opening the print panel.');
+    }
+
+    await expect(titleInput).toBeVisible();
+    const printTitle = 'E2E PNG Map Export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    let pngSelected = false;
+
+    const pngRadio = await pickVisible([
+        root.getByRole('radio', { name: /^PNG$/i }),
+        root.getByLabel(/^PNG$/i)
+    ]);
+
+    if (pngRadio) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+        pngSelected = true;
+    }
+
+    if (!pngSelected) {
+        const pngTabOrButton = await pickVisible([
+            root.getByRole('tab', { name: /^PNG$/i }),
+            root.getByRole('button', { name: /^PNG$/i })
+        ]);
+
+        if (pngTabOrButton) {
+            await pngTabOrButton.click();
+            pngSelected = true;
+        }
+    }
+
+    if (!pngSelected) {
+        const comboboxes = root.getByRole('combobox');
+        const comboboxCount = await comboboxes.count();
+
+        for (let i = 0; i < comboboxCount; i++) {
+            const combobox = comboboxes.nth(i);
+            if (!(await combobox.isVisible().catch(() => false))) {
+                continue;
+            }
+
+            const pngOption = await combobox.evaluate((el) => {
+                if (!(el instanceof HTMLSelectElement)) {
+                    return undefined;
+                }
+
+                const option = Array.from(el.options).find((entry) =>
+                    /png/i.test(entry.label || entry.textContent || entry.value)
+                );
+
+                return option
+                    ? {
+                          value: option.value,
+                          label: option.label || option.textContent || option.value
+                      }
+                    : undefined;
+            });
+
+            if (!pngOption) {
+                continue;
+            }
+
+            await combobox.selectOption(pngOption.value);
+            await expect
+                .poll(() =>
+                    combobox.evaluate((el) => {
+                        if (!(el instanceof HTMLSelectElement)) {
+                            return '';
+                        }
+                        const selected = el.selectedOptions[0];
+                        return `${el.value} ${selected?.label || selected?.textContent || ''}`;
+                    })
+                )
+                .toMatch(/png/i);
+            pngSelected = true;
+            break;
+        }
+    }
+
+    if (!pngSelected) {
+        throw new Error('Could not find a control to select the PNG print format.');
+    }
+
+    const exportButtonCandidates = dialogVisible
+        ? [
+              root.getByRole('button', { name: /^Export$/i }),
+              root.getByRole('button', { name: /export/i }),
+              root.getByRole('button', { name: /^Download$/i }),
+              root.getByRole('button', { name: /download/i }),
+              root.getByRole('button', { name: /^Print$/i }),
+              root.getByRole('button', { name: /print/i })
+          ]
+        : [
+              root.getByRole('button', { name: /^Export$/i }),
+              root.getByRole('button', { name: /export/i }),
+              root.getByRole('button', { name: /^Download$/i }),
+              root.getByRole('button', { name: /download/i }),
+              root.getByRole('button', { name: /^Create$/i }),
+              root.getByRole('button', { name: /create/i })
+          ];
+
+    const exportButton = await pickVisible(exportButtonCandidates);
+
+    if (!exportButton) {
+        throw new Error('Could not find the export/print button in the print panel.');
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        exportButton.click()
+    ]);
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadedPath = await download.path();
+    expect(downloadedPath).not.toBeNull();
+
+    if (!downloadedPath) {
+        throw new Error('The downloaded file has no accessible local path.');
+    }
+
+    const fileBytes = await readFile(downloadedPath);
+    expect(fileBytes.byteLength).toBeGreaterThan(1000);
+    expect(fileBytes.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    );
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('scale-viewer')).toBeVisible();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

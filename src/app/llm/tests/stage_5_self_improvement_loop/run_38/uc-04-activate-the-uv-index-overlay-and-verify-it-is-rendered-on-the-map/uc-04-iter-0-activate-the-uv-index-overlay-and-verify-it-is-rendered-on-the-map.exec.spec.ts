@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+  }
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+  const uvIndexLayerToggle = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(uvIndexLayerToggle).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(false);
+
+  const requestsAfterToggle: string[] = [];
+  const requestListener = (request: { resourceType: () => string; url: () => string }) => {
+    const resourceType = request.resourceType();
+    if (resourceType === 'image' || resourceType === 'fetch' || resourceType === 'xhr') {
+      requestsAfterToggle.push(request.url());
+    }
+  };
+  page.on('request', requestListener);
+
+  const networkSettled = page.waitForLoadState('networkidle');
+  await uvIndexLayerToggle.click({ force: true });
+  await expect(uvIndexLayerToggle).toBeChecked();
+  await networkSettled;
+
+  await expect.poll(() => requestsAfterToggle.length).toBeGreaterThan(0);
+  await expect.poll(() => isLayerRendered(page, 'UV-Index')).toBe(true);
+
+  page.off('request', requestListener);
+});

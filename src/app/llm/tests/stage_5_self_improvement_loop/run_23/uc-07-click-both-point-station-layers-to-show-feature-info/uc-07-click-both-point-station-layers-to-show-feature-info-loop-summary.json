@@ -1,0 +1,49 @@
+{
+  "run": "run_23",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"EUCOS Ground Station\"\nReceived string:    \"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 02:00 AMlight rainTemperature13.77 Â°CHumidity76 %Wind direction268Â°Wind speed5.65 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.87 Â°CHumidity82 %Wind direction280Â°Wind speed4.63 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.05 Â°CHumidity84 %Wind direction294Â°Wind speed4"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 20000ms exceeded while waiting on the predicate\n\n  150 |             return rootLayers.some((layer) => layerHasMatchingFeature(layer));\n  151 |         }, targetCoordinate);\n> 152 |     }, { timeout: 20000 }).toBe(true);\n      |                            ^\n  153 |\n  154 |     const infoPanelTextBeforeClick = (await infoPanel.textContent()) ?? '';\n  155 |     const targetPixel = awai"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "ReferenceError: coordinate is not defined\n\n  89 |\n  90 |             return { x, y };\n> 91 |         }, coordinate);\n     |            ^\n  92 |     };\n  93 |\n  94 |     if ((await getTargetPixel()) === undefined) {\n    at getTargetPixel (c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_23\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:91:12)\n    at c:\\Users\\n.be"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

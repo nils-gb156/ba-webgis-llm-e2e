@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from "../../../../map-model-helpers";
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+
+    await expect(layerSwitcherToggle).toBeVisible();
+
+    if (!(await layerSwitcher.isVisible())) {
+        if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+            await layerSwitcherToggle.click();
+        }
+    }
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(basemapCombobox).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect(basemapCombobox).toContainText('Carto Light');
+
+    if ((await basemapCombobox.getAttribute('aria-expanded')) !== 'true') {
+        await basemapCombobox.click();
+    }
+
+    await expect(basemapCombobox).toHaveAttribute('aria-expanded', 'true');
+
+    const listbox = page.getByRole('listbox');
+    const cartoLightOption = listbox.getByRole('option', { name: 'Carto Light', exact: true });
+    const openStreetMapOption = listbox.getByRole('option', { name: 'OpenStreetMap', exact: true });
+
+    await expect(listbox).toBeVisible();
+    await expect(cartoLightOption).toHaveAttribute('aria-selected', 'true');
+    await expect(openStreetMapOption).not.toHaveAttribute('aria-selected', 'true');
+
+    await openStreetMapOption.click();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+    await expect(basemapCombobox).toContainText('OpenStreetMap');
+
+    if ((await basemapCombobox.getAttribute('aria-expanded')) !== 'true') {
+        await basemapCombobox.click();
+    }
+
+    const reopenedListbox = page.getByRole('listbox');
+    await expect(reopenedListbox).toBeVisible();
+    await expect(reopenedListbox.getByRole('option', { name: 'OpenStreetMap', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await expect(reopenedListbox.getByRole('option', { name: 'Carto Light', exact: true })).not.toHaveAttribute('aria-selected', 'true');
+});

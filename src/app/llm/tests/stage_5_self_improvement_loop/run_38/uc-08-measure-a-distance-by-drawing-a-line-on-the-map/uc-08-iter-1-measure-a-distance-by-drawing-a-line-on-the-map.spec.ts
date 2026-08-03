@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    if (!(await measurementPanel.isVisible())) {
+        await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+        await measurementToggle.click();
+    }
+
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(measurementPanel).toBeVisible();
+    await expect(
+        measurementPanel.getByRole('heading', { name: 'Measurement', exact: true })
+    ).toBeVisible();
+    await expect(
+        measurementPanel.getByText('Click in the map to start a measurement.', { exact: true })
+    ).toBeVisible();
+
+    await mapContainer.click({ position: { x: 500, y: 260 } });
+    await mapContainer.click({ position: { x: 680, y: 330 } });
+    await mapContainer.click({ position: { x: 860, y: 270 } });
+    await mapContainer.dblclick({ position: { x: 1040, y: 340 } });
+
+    const measurementResultTooltip = page
+        .getByRole('tooltip')
+        .filter({ hasText: /\d+(?:[.,]\d+)?\s*(?:m|km)\b/i })
+        .first();
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementResultTooltip).toBeVisible();
+    await expect(measurementResultTooltip).toHaveText(/\d+(?:[.,]\d+)?\s*(?:m|km)\b/i);
+});

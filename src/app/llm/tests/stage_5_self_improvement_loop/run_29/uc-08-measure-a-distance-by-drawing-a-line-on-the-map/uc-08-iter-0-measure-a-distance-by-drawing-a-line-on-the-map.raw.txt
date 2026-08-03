@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const application = page.getByRole('application', { name: 'webgis map' });
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(application).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const measurementPressedBefore = await measurementToggle.getAttribute('aria-pressed');
+    if (measurementPressedBefore !== 'true') {
+        await measurementToggle.click();
+    }
+
+    const measurementPressedAfter = await measurementToggle.getAttribute('aria-pressed');
+    if (measurementPressedAfter !== null) {
+        await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+    }
+
+    const box = await mapContainer.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const position = (xRatio: number, yRatio: number) => ({
+        x: Math.min(Math.max(2, Math.round(box.width * xRatio)), Math.round(box.width) - 2),
+        y: Math.min(Math.max(2, Math.round(box.height * yRatio)), Math.round(box.height) - 2)
+    });
+
+    const point1 = position(0.56, 0.38);
+    const point2 = position(0.64, 0.46);
+    const point3 = position(0.73, 0.54);
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.click({ position: point3 });
+    await mapContainer.dblclick({ position: point3 });
+
+    await expect(page.getByText(/\b(?:Length|Distance)\b/i).first()).toBeVisible();
+    await expect.poll(async () => (await application.textContent()) ?? '').toMatch(/\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i);
+});

@@ -1,0 +1,137 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+    const temperatureCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'Temperature',
+        exact: true
+    });
+    const precipitationCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'Precipitation',
+        exact: true
+    });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await expect(page.getByTestId('temperature-legend')).toBeHidden();
+    await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+    const initialCenter = await getMapCenter(page);
+    if (!initialCenter) {
+        throw new Error('Map center was not available after the map became ready.');
+    }
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    const matchingOptions = page.getByRole('option').filter({ hasText: /M.nster/i });
+    const matchingButtons = page.getByRole('button', { name: /M.nster/i });
+    const matchingLinks = page.getByRole('link', { name: /M.nster/i });
+
+    await expect.poll(async () => {
+        const [optionCount, buttonCount, linkCount] = await Promise.all([
+            matchingOptions.count(),
+            matchingButtons.count(),
+            matchingLinks.count()
+        ]);
+        return optionCount + buttonCount + linkCount;
+    }, {
+        timeout: 10000
+    }).toBeGreaterThan(0);
+
+    if (await matchingOptions.count() > 0) {
+        await matchingOptions.first().click();
+    } else if (await matchingButtons.count() > 0) {
+        await matchingButtons.first().click();
+    } else if (await matchingLinks.count() > 0) {
+        await matchingLinks.first().click();
+    } else {
+        throw new Error('No selectable geocoder result for Münster appeared.');
+    }
+
+    await expect(geocoderInput).toHaveValue(/M.nster/i);
+
+    await expect.poll(async () => (await getHighlightedCoordinate(page)) !== undefined, {
+        timeout: 15000
+    }).toBe(true);
+
+    const highlightedCoordinate = await getHighlightedCoordinate(page);
+    if (!highlightedCoordinate) {
+        throw new Error('No highlighted coordinate was created for the selected geocoder result.');
+    }
+
+    const initialDistanceToHighlight = Math.hypot(
+        initialCenter[0] - highlightedCoordinate[0],
+        initialCenter[1] - highlightedCoordinate[1]
+    );
+    expect(initialDistanceToHighlight).toBeGreaterThan(10000);
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        if (!currentCenter) {
+            return 0;
+        }
+
+        return Math.hypot(
+            currentCenter[0] - initialCenter[0],
+            currentCenter[1] - initialCenter[1]
+        );
+    }, {
+        timeout: 15000
+    }).toBeGreaterThan(10000);
+
+    const maxAllowedDistanceToTarget = Math.max(10000, Math.min(50000, initialDistanceToHighlight / 5));
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        if (!currentCenter) {
+            return Number.POSITIVE_INFINITY;
+        }
+
+        return Math.hypot(
+            currentCenter[0] - highlightedCoordinate[0],
+            currentCenter[1] - highlightedCoordinate[1]
+        );
+    }, {
+        timeout: 15000
+    }).toBeLessThan(maxAllowedDistanceToTarget);
+
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.', {
+        timeout: 20000
+    });
+    await expect(weatherForecastSection).toContainText(/Location:\s*M.nster/i, {
+        timeout: 20000
+    });
+    await expect(weatherForecastSection.getByTestId('weather-forecast-entry')).toHaveCount(24, {
+        timeout: 20000
+    });
+});

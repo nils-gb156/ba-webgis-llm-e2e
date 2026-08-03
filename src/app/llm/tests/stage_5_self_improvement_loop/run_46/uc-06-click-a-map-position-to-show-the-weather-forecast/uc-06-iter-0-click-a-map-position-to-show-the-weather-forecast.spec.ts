@@ -1,0 +1,120 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    getHighlightedCoordinate,
+    getMapCenter,
+    getMapZoomLevel
+} from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapCenter(page)).toBeDefined();
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    if (!(await infoPanel.isVisible())) {
+        const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round((mapBox as NonNullable<typeof mapBox>).width * 0.55),
+            y: Math.round((mapBox as NonNullable<typeof mapBox>).height * 0.45)
+        }
+    });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeDefined();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+    await expect.poll(async () => {
+        return await weatherForecastSection.evaluate((sectionElement) => {
+            const section = sectionElement as HTMLElement;
+            const candidateCounts = new Set<number>();
+
+            const addCount = (count: number) => {
+                if (count > 0) {
+                    candidateCounts.add(count);
+                }
+            };
+
+            addCount(section.querySelectorAll('[role="listitem"]').length);
+            addCount(section.querySelectorAll('li').length);
+
+            const bodyRows = section.querySelectorAll('tbody > tr').length;
+            if (bodyRows > 0) {
+                addCount(bodyRows);
+            } else {
+                addCount(section.querySelectorAll('table tr').length);
+            }
+
+            addCount(section.querySelectorAll('img').length);
+
+            const text = section.innerText ?? '';
+
+            const hourly24h = text.match(/\b(?:[01]?\d|2[0-3]):00\b/g);
+            if (hourly24h) {
+                addCount(hourly24h.length);
+            }
+
+            const hourly12h = text.match(/\b(?:1[0-2]|0?[1-9])\s?(?:AM|PM)\b/gi);
+            if (hourly12h) {
+                addCount(hourly12h.length);
+            }
+
+            const isoDateTime = text.match(/\b\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\b/g);
+            if (isoDateTime) {
+                addCount(isoDateTime.length);
+            }
+
+            const temperatures = text.match(/-?\d+(?:\.\d+)?\s*°C\b/g);
+            if (temperatures && temperatures.length <= 24) {
+                addCount(temperatures.length);
+            }
+
+            for (const child of Array.from(section.children)) {
+                const childElement = child as HTMLElement;
+                const childText = childElement.innerText?.trim() ?? '';
+                if (
+                    !childText ||
+                    /^weather forecast$/i.test(childText) ||
+                    /click on the map to load a forecast/i.test(childText)
+                ) {
+                    continue;
+                }
+
+                const meaningfulChildren = Array.from(childElement.children).filter((grandChild) => {
+                    const grandChildElement = grandChild as HTMLElement;
+                    return (
+                        (grandChildElement.innerText?.trim().length ?? 0) > 0 ||
+                        !!grandChildElement.querySelector('img, svg')
+                    );
+                }).length;
+
+                addCount(meaningfulChildren);
+            }
+
+            return Array.from(candidateCounts).sort((a, b) => a - b);
+        });
+    }).toContain(24);
+});

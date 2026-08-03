@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('legend')).toBeVisible();
+    await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    await page.getByTestId('print-toggle').click();
+
+    const roleTitleInput = page.getByRole('textbox', { name: /title/i });
+    const labelTitleInput = page.getByLabel(/title/i);
+    let titleInput = roleTitleInput;
+
+    try {
+        await expect(roleTitleInput).toBeVisible({ timeout: 5000 });
+    } catch {
+        titleInput = labelTitleInput;
+        await expect(titleInput).toBeVisible();
+    }
+
+    await titleInput.fill('Current weather map');
+
+    const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+    const formatCombobox = page.getByRole('combobox', { name: /format|file format|output format|file type/i });
+    const pngButton = page.getByRole('button', { name: /^PNG$/i });
+
+    if ((await pngRadio.count()) > 0) {
+        await expect(pngRadio).toBeVisible();
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else if ((await formatCombobox.count()) > 0) {
+        await expect(formatCombobox).toBeVisible();
+
+        const pngOptionValue = await formatCombobox.evaluate((element) => {
+            if (!(element instanceof HTMLSelectElement)) {
+                return null;
+            }
+
+            const option = Array.from(element.options).find(
+                (entry) =>
+                    /png/i.test(entry.label) ||
+                    /png/i.test(entry.text) ||
+                    /png/i.test(entry.value)
+            );
+
+            return option?.value ?? null;
+        });
+
+        if (pngOptionValue !== null) {
+            await formatCombobox.selectOption(pngOptionValue);
+            await expect.poll(() =>
+                formatCombobox.evaluate((element) => {
+                    if (!(element instanceof HTMLSelectElement)) {
+                        return '';
+                    }
+                    return element.selectedOptions[0]?.textContent?.trim() ?? '';
+                })
+            ).toMatch(/png/i);
+        } else {
+            await formatCombobox.click();
+            const pngOption = page.getByRole('option', { name: /png/i }).first();
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+        }
+    } else {
+        await expect(pngButton).toBeVisible();
+        await pngButton.click();
+    }
+
+    let exportButton = page.getByRole('button', { name: /^Export$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Download$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Generate$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Create$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Print$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Export\b/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Download\b/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        const printMapButtons = page.getByRole('button', { name: /^Print Map$/i });
+        if ((await printMapButtons.count()) > 1) {
+            exportButton = printMapButtons.last();
+        } else {
+            exportButton = page.getByRole('button', { name: /^Print\b/i }).last();
+        }
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadedFilePath = test.info().outputPath('use-case-9-print.png');
+    await download.saveAs(downloadedFilePath);
+
+    const fileBuffer = await readFile(downloadedFilePath);
+    expect(fileBuffer.length).toBeGreaterThan(1024);
+    expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

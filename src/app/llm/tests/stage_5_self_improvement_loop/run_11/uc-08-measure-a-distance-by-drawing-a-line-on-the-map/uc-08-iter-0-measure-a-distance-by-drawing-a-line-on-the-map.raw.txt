@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementDialog = page.getByRole('dialog', { name: /^Measurement$/i });
+    const measurementRegion = page.getByRole('region', { name: /^Measurement$/i });
+    const measurementHeading = page.getByRole('heading', { name: /^Measurement$/i });
+
+    const isMeasurementPanelVisible = async () => {
+        return (
+            (await measurementDialog.isVisible()) ||
+            (await measurementRegion.isVisible()) ||
+            (await measurementHeading.isVisible())
+        );
+    };
+
+    await expect(measurementToggle).toBeVisible();
+
+    if (!(await isMeasurementPanelVisible())) {
+        const pressed = await measurementToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await measurementToggle.click();
+        }
+    }
+
+    await expect(measurementDialog.or(measurementRegion).or(measurementHeading).first()).toBeVisible();
+
+    const map = page.getByTestId('map-container');
+    await map.click({ position: { x: 700, y: 320 } });
+    await map.click({ position: { x: 820, y: 390 } });
+    await map.dblclick({ position: { x: 940, y: 470 } });
+
+    if (await measurementDialog.isVisible()) {
+        await expect(measurementDialog.getByText(/\d[\d.,]*\s*(?:mm|cm|m|km)\b/i)).toBeVisible();
+    } else if (await measurementRegion.isVisible()) {
+        await expect(measurementRegion.getByText(/\d[\d.,]*\s*(?:mm|cm|m|km)\b/i)).toBeVisible();
+    } else {
+        await expect.poll(async () => {
+            return page.evaluate(() => {
+                const footer = document.querySelector('[data-testid="footer"]');
+
+                const isVisible = (element: Element) => {
+                    const htmlElement = element as HTMLElement;
+                    const style = window.getComputedStyle(htmlElement);
+                    return (
+                        style.display !== 'none' &&
+                        style.visibility !== 'hidden' &&
+                        htmlElement.offsetParent !== null
+                    );
+                };
+
+                const texts = Array.from(document.querySelectorAll('body *'))
+                    .filter((element) => !footer?.contains(element))
+                    .filter((element) => isVisible(element))
+                    .map((element) => element.textContent?.trim() ?? '')
+                    .filter((text) => /\d[\d.,]*\s*(?:mm|cm|m|km)\b/i.test(text));
+
+                return texts.join(' ');
+            });
+        }).toMatch(/\d[\d.,]*\s*(?:mm|cm|m|km)\b/i);
+    }
+});

@@ -1,0 +1,49 @@
+{
+  "run": "run_01",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 4,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected pattern: /EUCOS Ground Station/i\nReceived string:  \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 08:00 PMlight rainTemperature16.44 Â°CHumidity63 %Wind direction232Â°Wind speed5.34 m/sSun, Jul 26, 11:00 PMlight rainTemperature16.73 Â°CHumidity72 %Wind direction254Â°Wind speed6.23 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.4 Â°CHumidity84 %Wind direction270Â°Wind speed5.89 "
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('uvi-station-section')\nExpected pattern: /UV-Index Station\\s+\\S+/i\nReceived string:  \"UV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\nTimeout: 20000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 20000ms\n  - waiting for getByTestId('uvi-station-section')\n    42 Ã— locator resolved to <div data-testid=\"uvi-station-section\">â€¦</div>\n       - unexpected v"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected pattern: /EUCOS Ground Station/i\nReceived string:  \"InformationWeather ForecastLocation: Darlingerode, DESun, Jul 26, 08:00 PMlight rainTemperature16.44 Â°CHumidity63 %Wind direction232Â°Wind speed5.34 m/sSun, Jul 26, 11:00 PMlight rainTemperature16.73 Â°CHumidity72 %Wind direction254Â°Wind speed6.23 m/sMon, Jul 27, 02:00 AMlight rainTemperature15.4 Â°CHumidity84 %Wind direction270Â°Wind speed5.89 "
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

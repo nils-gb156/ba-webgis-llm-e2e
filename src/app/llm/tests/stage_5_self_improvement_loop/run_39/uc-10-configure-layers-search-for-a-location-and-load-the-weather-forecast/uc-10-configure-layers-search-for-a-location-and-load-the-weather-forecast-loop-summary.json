@@ -1,0 +1,103 @@
+{
+  "run": "run_39",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": false,
+  "iterations_used": 10,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 2\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  120 |\n  121 |     return maxChildCount;\n> 122 |   }).toBe(24);\n      |      ^\n  123 | });\n  124 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "timeout",
+      "error_excerpt": "Error: expect(received).not.toMatch(expected)\n\nExpected pattern: not /Fehler beim Laden der Wetterdaten|Click on the map to load a forecast/i\nReceived string:      \"Weather ForecastFehler beim Laden der Wetterdaten\"\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  104 |       return text.replace(/\\s+/g, ' ').trim();\n  105 |     }, { timeout: 30000 })\n> 106 |     .not.toMatch(/Fehler beim Laden der Wetterdaten|Click on the map to load a forecast/i);\n      |          ^\n  107 |\n  108 |   await expe"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).not.toMatch(expected)\n\nExpected pattern: not /Fehler beim Laden der Wetterdaten|Click on the map to load a forecast/i\nReceived string:      \"Weather ForecastFehler beim Laden der Wetterdaten\"\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate\n\n  179 |       return text.replace(/\\s+/g, ' ').trim();\n  180 |     }, { timeout: 30000 })\n> 181 |     .not.toMatch(/Fehler beim Laden der Wetterdaten|Click on the map to load a forecast/i);\n      |          ^\n  182"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-10-iter-3-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).not.toMatch(expected)\n\nExpected pattern: not /Fehler beim Laden der Wetterdaten|Click on the map to load a forecast/i\nReceived string:      \"Weather ForecastFehler beim Laden der Wetterdaten\"\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate\n\n  138 |       return text.replace(/\\s+/g, ' ').trim();\n  139 |     }, { timeout: 30000 })\n> 140 |     .not.toMatch(/Fehler beim Laden der Wetterdaten|Click on the map to load a forecast/i);\n      |          ^\n  141"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\n  258 |   }\n  259 |\n> 260 |   expect(forecastLoaded).toBe(true);\n      |                          ^\n  261 |   await expect(weatherForecastSection).not.toContainText('Fehler beim Laden der Wetterdaten');\n  262 |   await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast');\n  263 |   await expect.poll(getForecastEntryCounts, { timeout: 30000 }).toContain(24);\n    at c:\\U"
+    },
+    {
+      "iteration": 5,
+      "spec": "uc-10-iter-5-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"loaded\"\nReceived: \"error\"\n\nCall Log:\n- Timeout 45000ms exceeded while waiting on the predicate\n\n  191 |       { timeout: 45000 }\n  192 |     )\n> 193 |     .toBe('loaded');\n      |      ^\n  194 |\n  195 |   await expect(weatherForecastSection).not.toContainText(/Fehler beim Laden der Wetterdaten/i);\n  196 |   await expect(weatherForecastSection).not.toContainText(/Click on the map to load a forecast/i);\n    at c:\\Users\\n.beik"
+    },
+    {
+      "iteration": 6,
+      "spec": "uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate\n\n  199 |           { timeout: 30000 }\n  200 |         )\n> 201 |         .toBe(true);\n      |          ^\n  202 |       forecastLoaded = true;\n  203 |       break;\n  204 |     } catch (error) {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-10-configure-layers-search-for-a-locati"
+    },
+    {
+      "iteration": 7,
+      "spec": "uc-10-iter-7-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 60000ms exceeded while waiting on the predicate\n\n  184 |       { timeout: 60000 }\n  185 |     )\n> 186 |     .toBe(true);\n      |      ^\n  187 |\n  188 |   await expect\n  189 |     .poll(async () => {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_39\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-it"
+    },
+    {
+      "iteration": 8,
+      "spec": "uc-10-iter-8-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).not.toContainText(expected) failed\n\nLocator: getByTestId('weather-forecast-section')\nExpected pattern: not /Fehler beim Laden der Wetterdaten/i\nReceived string: \"Weather ForecastFehler beim Laden der Wetterdaten\"\nTimeout: 60000ms\n\nCall log:\n  - Expect \"not toContainText\" with timeout 60000ms\n  - waiting for getByTestId('weather-forecast-section')\n    121 Ã— locator resolved to <div data-testid=\"weather-forecast-section\">â€¦</div>\n        - unexpected value \"Weather Forecas"
+    },
+    {
+      "iteration": 9,
+      "spec": "uc-10-iter-9-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 2\n\nCall Log:\n- Timeout 60000ms exceeded while waiting on the predicate\n\n  174 |   };\n  175 |\n> 176 |   await expect.poll(getForecastEntryCount, { timeout: 60000 }).toBe(24);\n      |                                                                ^\n  177 |   await expect(weatherForecastSection).not.toContainText(/Fehler beim Laden der Wetterdaten/i);\n  178 |\n  179 |   await expect(temperatureCheckbox).not.toBeChec"
+    }
+  ]
+}

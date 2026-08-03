@@ -1,0 +1,110 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from "../../../../map-model-helpers";
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(geocoderInput).toBeEnabled();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+    await expect(page.getByText('Click on the map to load a forecast.')).toBeVisible();
+    await expect.poll(async () => (await measurementToggle.getAttribute('aria-pressed')) ?? 'false').toBe('false');
+
+    const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    const initialCenter = (await getMapCenter(page))!;
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    const firstSearchResult = geocoderPanel.getByText(/M(?:ü|u)nster/i).first();
+    await expect(firstSearchResult).toBeVisible();
+    await firstSearchResult.click();
+
+    await expect.poll(async () => {
+        const center = await getMapCenter(page);
+        if (!center) {
+            return false;
+        }
+
+        const movedDistance = Math.hypot(center[0] - initialCenter[0], center[1] - initialCenter[1]);
+        const isInMunsterArea =
+            center[0] > 700_000 &&
+            center[0] < 1_100_000 &&
+            center[1] > 6_600_000 &&
+            center[1] < 7_100_000;
+
+        return movedDistance > 100_000 && isInMunsterArea;
+    }).toBe(true);
+
+    await expect(page.getByText('Click on the map to load a forecast.')).not.toBeVisible();
+
+    await expect.poll(async () => {
+        const listItems = await weatherForecastSection.getByRole('listitem').count();
+        if (listItems > 0) {
+            return listItems;
+        }
+
+        const rows = await weatherForecastSection.getByRole('row').count();
+        if (rows > 1) {
+            return rows - 1;
+        }
+
+        const articles = await weatherForecastSection.getByRole('article').count();
+        if (articles > 0) {
+            return articles;
+        }
+
+        return await weatherForecastSection.evaluate((element) => {
+            if (element.childElementCount === 24) {
+                return 24;
+            }
+
+            const firstChild = element.firstElementChild;
+            if (firstChild?.childElementCount === 24) {
+                return 24;
+            }
+            if (firstChild?.childElementCount === 25) {
+                return 24;
+            }
+
+            const firstGrandChild = firstChild?.firstElementChild;
+            if (firstGrandChild?.childElementCount === 24) {
+                return 24;
+            }
+            if (firstGrandChild?.childElementCount === 25) {
+                return 24;
+            }
+
+            return 0;
+        });
+    }).toBe(24);
+});

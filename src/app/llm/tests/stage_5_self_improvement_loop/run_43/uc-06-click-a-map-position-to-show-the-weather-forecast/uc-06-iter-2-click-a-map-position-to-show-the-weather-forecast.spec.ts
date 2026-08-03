@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('UC-06 Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const weatherForecast = page.getByTestId('weather-forecast');
+  const forecastEntries = page.getByTestId('weather-forecast-entry');
+
+  await expect(mapContainer).toBeVisible();
+  await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(infoPanel.getByRole('heading', { name: 'Information', exact: true })).toBeVisible();
+  await expect(
+    infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })
+  ).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+  await expect(forecastEntries).toHaveCount(0);
+
+  const initialHighlight = await getHighlightedCoordinate(page);
+
+  await mapContainer.click({
+    position: {
+      x: 780,
+      y: 290,
+    },
+  });
+
+  await expect
+    .poll(async () => {
+      const coordinate = await getHighlightedCoordinate(page);
+      return coordinate ? JSON.stringify(coordinate) : undefined;
+    })
+    .not.toBe(initialHighlight ? JSON.stringify(initialHighlight) : undefined);
+
+  await expect
+    .poll(() => getHighlightedCoordinate(page))
+    .not.toBeUndefined();
+
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+  await expect(weatherForecast).toBeVisible();
+  await expect(weatherForecastSection.getByText(/^Location:/)).toBeVisible();
+  await expect(forecastEntries).toHaveCount(24);
+});

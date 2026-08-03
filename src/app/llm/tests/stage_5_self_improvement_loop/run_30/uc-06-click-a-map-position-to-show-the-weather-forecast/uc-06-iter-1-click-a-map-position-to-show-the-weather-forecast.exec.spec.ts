@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+
+    if (!(await infoPanel.isVisible())) {
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(
+        weatherForecastSection.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeUndefined();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox.width * 0.62),
+            y: Math.round(mapBox.height * 0.58)
+        }
+    });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+    await expect(
+        weatherForecastSection.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+
+    await expect
+        .poll(async () => {
+            return await weatherForecastSection.evaluate((section) => {
+                const isVisible = (element: Element) => {
+                    const style = window.getComputedStyle(element);
+                    return (
+                        style.display !== 'none' &&
+                        style.visibility !== 'hidden' &&
+                        (element as HTMLElement).offsetParent !== null
+                    );
+                };
+
+                const countVisible = (selector: string) =>
+                    Array.from(section.querySelectorAll(selector)).filter(isVisible).length;
+
+                const text = section.textContent ?? '';
+                const timeMatches24h = text.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g)?.length ?? 0;
+                const timeMatches12h =
+                    text.match(/\b(?:1[0-2]|0?[1-9])\s?(?:AM|PM)\b/gi)?.length ?? 0;
+
+                const candidates = [
+                    countVisible('[role="listitem"]'),
+                    countVisible('li'),
+                    countVisible('tbody tr'),
+                    Math.max(0, countVisible('[role="row"]') - 1),
+                    countVisible('article'),
+                    countVisible('time'),
+                    countVisible('[datetime]'),
+                    timeMatches24h,
+                    timeMatches12h
+                ];
+
+                return candidates.find((count) => count === 24) ?? Math.max(...candidates, 0);
+            });
+        })
+        .toBe(24);
+});

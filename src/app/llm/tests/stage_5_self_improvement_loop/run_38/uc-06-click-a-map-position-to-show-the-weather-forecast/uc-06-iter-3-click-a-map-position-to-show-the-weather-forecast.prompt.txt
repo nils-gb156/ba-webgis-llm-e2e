@@ -1,0 +1,637 @@
+The following Playwright end-to-end test (TypeScript) was generated for the use case
+below, but it FAILED when executed against the live application.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context extracted automatically from the running application (initial page state):
+data-testid attributes found in the app:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree (roles, names, states):
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 6: Click a map position to show the weather forecast
+
+**Description:** The user clicks a position on the map and checks that the weather forecast appears in the info panel.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The info panel is visible.
+- The map canvas is interactive.
+
+**Steps:**
+
+1. The user clicks on a position on the map canvas.
+2. The user waits for the info panel to load the forecast.
+
+**Expected results:**
+
+- The clicked position is highlighted on the map.
+- The info panel displays a weather forecast section.
+- The forecast contains 24 entries.
+
+**Complexity:** hard
+
+Previous test code (failing):
+```typescript
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter, getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const weatherForecastHeading = page.getByRole('heading', { name: 'Weather Forecast', exact: true });
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastHeading).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+    type ResponseSummary = {
+        status: number;
+        url: string;
+        count?: number;
+    };
+
+    const normalizeText = (value: string | null | undefined) => (value ?? '').replace(/\s+/g, ' ').trim();
+
+    const extractForecastEntryCount = (value: unknown): number | undefined => {
+        const visited = new Set<unknown>();
+
+        const visit = (node: unknown): number | undefined => {
+            if (node == null || typeof node !== 'object') {
+                return undefined;
+            }
+            if (visited.has(node)) {
+                return undefined;
+            }
+            visited.add(node);
+
+            if (Array.isArray(node)) {
+                const informativeItems = node.filter((item) => {
+                    if (item == null) {
+                        return false;
+                    }
+                    if (typeof item === 'object') {
+                        return Object.keys(item as Record<string, unknown>).length > 0;
+                    }
+                    if (typeof item === 'string') {
+                        return item.trim().length > 0;
+                    }
+                    return typeof item === 'number' || typeof item === 'boolean';
+                }).length;
+
+                if (node.length === 24 && informativeItems >= 20) {
+                    return 24;
+                }
+
+                for (const item of node) {
+                    const nested = visit(item);
+                    if (nested !== undefined) {
+                        return nested;
+                    }
+                }
+            } else {
+                for (const nestedValue of Object.values(node as Record<string, unknown>)) {
+                    const nested = visit(nestedValue);
+                    if (nested !== undefined) {
+                        return nested;
+                    }
+                }
+            }
+
+            return undefined;
+        };
+
+        return visit(value);
+    };
+
+    const countRenderedForecastEntries = async (): Promise<number> => {
+        return await weatherForecastSection.evaluate((section) => {
+            const normalize = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
+            const text = normalize(section.textContent);
+
+            const times = (text.match(/\b(?:[01]?\d|2[0-3]):\d{2}\b/g) ?? []).map((time) =>
+                time.length === 4 ? `0${time}` : time
+            );
+            if (new Set(times).size === 24) {
+                return 24;
+            }
+
+            const informativeChildrenCount = (element: Element): number =>
+                Array.from(element.children).filter((child) => {
+                    const childText = normalize(child.textContent);
+                    return childText.length > 0 || child.querySelector('img,svg,canvas') !== null;
+                }).length;
+
+            const candidates = [section, ...Array.from(section.querySelectorAll('*'))];
+            for (const element of candidates) {
+                const childCount = element.children.length;
+                const informativeCount = informativeChildrenCount(element);
+                if (childCount === 24 && informativeCount >= 20) {
+                    return 24;
+                }
+                if ((childCount === 25 || childCount === 26) && informativeCount >= 24) {
+                    return 24;
+                }
+            }
+
+            return 0;
+        });
+    };
+
+    const recordedResponses: Response[] = [];
+    const analyzedResponses = new WeakMap<Response, ResponseSummary>();
+
+    page.on('response', (response) => {
+        if (['fetch', 'xhr'].includes(response.request().resourceType())) {
+            recordedResponses.push(response);
+        }
+    });
+
+    const analyzeResponse = async (response: Response): Promise<ResponseSummary> => {
+        const cached = analyzedResponses.get(response);
+        if (cached) {
+            return cached;
+        }
+
+        const summary: ResponseSummary = {
+            status: response.status(),
+            url: response.url()
+        };
+
+        try {
+            const bodyText = await response.text();
+            if (bodyText.trim().length > 0) {
+                try {
+                    const parsed = JSON.parse(bodyText);
+                    summary.count = extractForecastEntryCount(parsed);
+                } catch {
+                    // Ignore non-JSON bodies.
+                }
+            }
+        } catch {
+            // Ignore unreadable bodies.
+        }
+
+        analyzedResponses.set(response, summary);
+        return summary;
+    };
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const layerSwitcherBox = await layerSwitcher.boundingBox();
+    const infoPanelBox = await infoPanel.boundingBox();
+
+    const safeLeft = Math.max(
+        20,
+        layerSwitcherBox ? Math.round(layerSwitcherBox.x + layerSwitcherBox.width - mapBox.x + 20) : Math.round(mapBox.width * 0.25)
+    );
+    const safeRight = Math.min(
+        Math.round(mapBox.width - 20),
+        infoPanelBox ? Math.round(infoPanelBox.x - mapBox.x - 20) : Math.round(mapBox.width * 0.75)
+    );
+
+    const centerX = Math.round((safeLeft + safeRight) / 2);
+    const midY = Math.round(mapBox.height * 0.52);
+    const lowerY = Math.round(mapBox.height * 0.60);
+    const upperY = Math.round(mapBox.height * 0.44);
+
+    const clickPositions = [
+        { x: Math.max(safeLeft + 40, centerX - 60), y: midY },
+        { x: centerX, y: midY },
+        { x: Math.min(safeRight - 40, centerX + 60), y: upperY },
+        { x: Math.max(safeLeft + 40, centerX - 100), y: lowerY }
+    ];
+
+    let successfulForecast: ResponseSummary | undefined;
+
+    for (const position of clickPositions) {
+        const responseStartIndex = recordedResponses.length;
+
+        await mapContainer.click({ position });
+        await expect.poll(() => getHighlightedCoordinate(page), { timeout: 5000 }).not.toBeUndefined();
+
+        try {
+            await expect
+                .poll(
+                    async () => {
+                        for (let index = responseStartIndex; index < recordedResponses.length; index++) {
+                            const summary = await analyzeResponse(recordedResponses[index]);
+                            if (summary.status >= 200 && summary.status < 300 && summary.count === 24) {
+                                successfulForecast = summary;
+                                return 24;
+                            }
+                        }
+                        return 0;
+                    },
+                    { timeout: 6000 }
+                )
+                .toBe(24);
+            break;
+        } catch {
+            // Try another map position.
+        }
+    }
+
+    if (!successfulForecast) {
+        const latestSectionText = normalizeText(await weatherForecastSection.textContent());
+        const recentResponses = await Promise.all(
+            recordedResponses.slice(-6).map(async (response) => {
+                const summary = await analyzeResponse(response);
+                return `${summary.status} ${summary.url}${summary.count !== undefined ? ` (count=${summary.count})` : ''}`;
+            })
+        );
+
+        throw new Error(
+            `No successful weather forecast response with 24 entries was received after clicking the map. ` +
+                `Latest section text: "${latestSectionText}". ` +
+                `Recent fetch/xhr responses: ${recentResponses.join(' | ')}`
+        );
+    }
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastHeading).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+
+    await expect
+        .poll(async () => normalizeText(await weatherForecastSection.textContent()), { timeout: 10000 })
+        .not.toMatch(/Click on the map to load a forecast\.|Fehler beim Laden der Wetterdaten/);
+
+    await expect.poll(async () => countRenderedForecastEntries(), { timeout: 10000 }).toBe(24);
+    await expect.poll(() => Promise.resolve(successfulForecast?.count)).toBe(24);
+});
+```
+
+Playwright error output:
+Error: No successful weather forecast response with 24 entries was received after clicking the map. Latest section text: "Weather ForecastFehler beim Laden der Wetterdaten". Recent fetch/xhr responses: 429 https://api.openweathermap.org/data/2.5/forecast?lat=51.0218783067879&lon=10.403551273338445&appid=6b904086651c872d0e2c58c1529d2dcb&units=metric&cnt=24 | 200 http://localhost:5173/dwd-wms?REQUEST=GetFeatureInfo&QUERY_LAYERS=Uv_Stationen&SERVICE=WMS&VERSION=1.3.0&FORMAT=image%2Fpng&STYLES=&TRANSPARENT=TRUE&CRS=EPSG%3A3857&dpiMode=7&featureCount=10&LAYERS=Uv_Stationen&tilePixelRatio=0&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=5&BUFFER=10&I=178&J=214&WIDTH=256&HEIGHT=256&BBOX=939258.2035682462%2C6574807.42497772%2C1252344.2714243282%2C6887893.492833802 | 429 https://api.openweathermap.org/data/2.5/forecast?lat=51.59191997169532&lon=11.062730960838445&appid=6b904086651c872d0e2c58c1529d2dcb&units=metric&cnt=24 | 200 http://localhost:5173/dwd-wms?REQUEST=GetFeatureInfo&QUERY_LAYERS=Uv_Stationen&SERVICE=WMS&VERSION=1.3.0&FORMAT=image%2Fpng&STYLES=&TRANSPARENT=TRUE&CRS=EPSG%3A3857&dpiMode=7&featureCount=10&LAYERS=Uv_Stationen&tilePixelRatio=0&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=5&BUFFER=10&I=238&J=131&WIDTH=256&HEIGHT=256&BBOX=939258.2035682462%2C6574807.42497772%2C1252344.2714243282%2C6887893.492833802 | 429 https://api.openweathermap.org/data/2.5/forecast?lat=50.44474037638645&lon=9.304918460838445&appid=6b904086651c872d0e2c58c1529d2dcb&units=metric&cnt=24 | 200 http://localhost:5173/dwd-wms?REQUEST=GetFeatureInfo&QUERY_LAYERS=Uv_Stationen&SERVICE=WMS&VERSION=1.3.0&FORMAT=image%2Fpng&STYLES=&TRANSPARENT=TRUE&CRS=EPSG%3A3857&dpiMode=7&featureCount=10&LAYERS=Uv_Stationen&tilePixelRatio=0&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=5&BUFFER=10&I=78&J=41&WIDTH=256&HEIGHT=256&BBOX=939258.2035682462%2C6261721.357121639%2C1252344.2714243282%2C6574807.424977721
+
+  228 |         );
+  229 |
+> 230 |         throw new Error(
+      |               ^
+  231 |             `No successful weather forecast response with 24 entries was received after clicking the map. ` +
+  232 |                 `Latest section text: "${latestSectionText}". ` +
+  233 |                 `Recent fetch/xhr responses: ${recentResponses.join(' | ')}`
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_38\uc-06-click-a-map-position-to-show-the-weather-forecast\uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.exec.spec.ts:230:15
+
+Application state at the point of failure (data-testids and accessibility tree
+captured AFTER the test steps that did run — elements listed here may not exist
+in the initial page state):
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Fehler beim Laden der Wetterdaten
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph: 9°18'17.71"(E) 50°26'41.07"(N) EPSG:4326
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+A screenshot of the application at the point of failure is attached as an image. It shows the visual state including the canvas-rendered map, which is not represented in the accessibility tree.
+
+Fix the test so that it correctly verifies the use case and passes.
+Do not weaken or remove assertions just to make the test pass — the test must
+still verify the behaviour described in the use case.
+Return only the corrected test code.

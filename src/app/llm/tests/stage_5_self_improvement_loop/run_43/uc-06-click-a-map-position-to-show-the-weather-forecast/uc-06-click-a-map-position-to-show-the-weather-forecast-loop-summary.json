@@ -1,0 +1,40 @@
+{
+  "run": "run_43",
+  "use_case_id": 6,
+  "title": "Click a map position to show the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-06-iter-0-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 24\nReceived: 4\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  60 |     const matches = text.match(/\\b(?:[01]?\\d|2[0-3]):[0-5]\\d\\b/g) ?? [];\n  61 |     return new Set(matches).size;\n> 62 |   }).toBe(24);\n     |      ^\n  63 | });\n  64 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_43\\uc-06-click-a-map-position-to-show-the-weather-forecast\\uc-06-ite"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-06-iter-1-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('weather-forecast-section').getByTestId('weather-forecast')\nExpected substring: \"Location:\"\nReceived string:    \"Mon, Jul 27, 08:00 AMovercast cloudsTemperature16.75 Â°CHumidity99 %Wind direction294Â°Wind speed7.53 m/sMon, Jul 27, 11:00 AMovercast cloudsTemperature17.5 Â°CHumidity87 %Wind direction310Â°Wind speed7.64 m/sMon, Jul 27, 02:00 PMbroken cloudsTemperature20.22 Â°CHumidity61 %Wind direction303Â°Wind speed7.22 m/"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-06-iter-2-click-a-map-position-to-show-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

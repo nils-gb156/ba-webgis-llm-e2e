@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const mapToolbar = page.getByTestId('map-toolbar');
+    await expect(mapToolbar).toBeVisible();
+
+    const measurementButton = page.getByTestId('measurement-toggle');
+    await expect(measurementButton).toBeVisible();
+
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+
+    const measurementPanel = page.getByRole('dialog').first();
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementButton.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+
+    await mapContainer.click({ position: { x: 460, y: 260 } });
+    await mapContainer.click({ position: { x: 590, y: 340 } });
+    await mapContainer.dblclick({ position: { x: 740, y: 410 } });
+
+    await expect(measurementPanel).toContainText(/\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i);
+});

@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+
+test('Use Case 1: Show and hide the layer switcher via the toolbar button', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcherPanel = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+
+  await expect(mapContainer).toBeVisible();
+
+  await expect(layerSwitcherPanel).toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+
+  await layerSwitcherToggle.click();
+
+  await expect(layerSwitcherPanel).not.toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'false');
+
+  await layerSwitcherToggle.click();
+
+  await expect(layerSwitcherPanel).toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+});

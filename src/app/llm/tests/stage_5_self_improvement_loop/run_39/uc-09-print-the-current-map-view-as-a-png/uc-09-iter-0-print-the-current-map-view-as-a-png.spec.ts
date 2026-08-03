@@ -1,0 +1,207 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Download, Locator } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const findVisibleLocatorIndex = async (locators: Locator[]): Promise<number> => {
+        for (let i = 0; i < locators.length; i++) {
+            if (await locators[i].first().isVisible()) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Print Map', exact: true })).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const titleCandidates: Locator[] = [
+        page.getByRole('textbox', { name: /title/i }),
+        page.getByLabel(/title/i),
+        page.getByPlaceholder(/title/i)
+    ];
+
+    let titleIndex = await findVisibleLocatorIndex(titleCandidates);
+    if (titleIndex === -1) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect.poll(async () => {
+        titleIndex = await findVisibleLocatorIndex(titleCandidates);
+        return titleIndex;
+    }).toBeGreaterThan(-1);
+
+    const titleInput = titleCandidates[titleIndex].first();
+    await expect(titleInput).toBeVisible();
+    await expect(titleInput).toBeEditable();
+
+    const printDialog = page.getByRole('dialog').filter({ has: titleInput }).first();
+    const dialogVisible = await printDialog.isVisible();
+
+    const printTitle = 'playwright-map-export';
+    await titleInput.fill(printTitle);
+
+    let pngSelected = false;
+
+    const pngRadioCandidates: Locator[] = dialogVisible
+        ? [
+              printDialog.getByRole('radio', { name: /^PNG$/i }),
+              printDialog.getByLabel(/^PNG$/i),
+              page.getByRole('radio', { name: /^PNG$/i }),
+              page.getByLabel(/^PNG$/i)
+          ]
+        : [page.getByRole('radio', { name: /^PNG$/i }), page.getByLabel(/^PNG$/i)];
+
+    for (const radio of pngRadioCandidates) {
+        if (await radio.first().isVisible()) {
+            await radio.first().click({ force: true });
+            await expect(radio.first()).toBeChecked();
+            pngSelected = true;
+            break;
+        }
+    }
+
+    if (!pngSelected) {
+        const formatComboboxCandidates: Locator[] = dialogVisible
+            ? [
+                  printDialog.getByRole('combobox', { name: /format|file format|type/i }),
+                  printDialog.getByLabel(/format|file format|type/i),
+                  page.getByRole('combobox', { name: /format|file format|type/i }),
+                  page.getByLabel(/format|file format|type/i)
+              ]
+            : [
+                  page.getByRole('combobox', { name: /format|file format|type/i }),
+                  page.getByLabel(/format|file format|type/i)
+              ];
+
+        for (const combobox of formatComboboxCandidates) {
+            if (!(await combobox.first().isVisible())) {
+                continue;
+            }
+
+            let selectedValues: string[] = [];
+            try {
+                selectedValues = await combobox.first().selectOption({ label: 'PNG' });
+            } catch {
+                try {
+                    selectedValues = await combobox.first().selectOption('png');
+                } catch {
+                    try {
+                        selectedValues = await combobox.first().selectOption('PNG');
+                    } catch {
+                        await combobox.first().click();
+                        const popupPngCandidates: Locator[] = dialogVisible
+                            ? [
+                                  printDialog.getByRole('option', { name: /^PNG$/i }),
+                                  printDialog.getByRole('menuitemradio', { name: /^PNG$/i }),
+                                  printDialog.getByRole('button', { name: /^PNG$/i }),
+                                  page.getByRole('option', { name: /^PNG$/i }),
+                                  page.getByRole('menuitemradio', { name: /^PNG$/i }),
+                                  page.getByRole('button', { name: /^PNG$/i })
+                              ]
+                            : [
+                                  page.getByRole('option', { name: /^PNG$/i }),
+                                  page.getByRole('menuitemradio', { name: /^PNG$/i }),
+                                  page.getByRole('button', { name: /^PNG$/i })
+                              ];
+
+                        const popupPngIndex = await findVisibleLocatorIndex(popupPngCandidates);
+                        if (popupPngIndex !== -1) {
+                            await popupPngCandidates[popupPngIndex].first().click();
+                            pngSelected = true;
+                        }
+                    }
+                }
+            }
+
+            if (selectedValues.length > 0) {
+                expect(selectedValues.join(',')).toMatch(/png/i);
+                pngSelected = true;
+            }
+
+            if (pngSelected) {
+                break;
+            }
+        }
+    }
+
+    if (!pngSelected) {
+        const pngButtonCandidates: Locator[] = dialogVisible
+            ? [
+                  printDialog.getByRole('button', { name: /^PNG$/i }),
+                  page.getByRole('button', { name: /^PNG$/i })
+              ]
+            : [page.getByRole('button', { name: /^PNG$/i })];
+
+        for (const button of pngButtonCandidates) {
+            if (await button.first().isVisible()) {
+                await button.first().click();
+                pngSelected = true;
+                break;
+            }
+        }
+    }
+
+    expect(pngSelected).toBe(true);
+
+    const exportButtonCandidates: Locator[] = dialogVisible
+        ? [
+              printDialog.getByRole('button', { name: /^Export$/i }),
+              printDialog.getByRole('button', { name: /^Print$/i }),
+              printDialog.getByRole('button', { name: /^Download$/i }),
+              printDialog.getByRole('button', { name: /^Create$/i }),
+              printDialog.getByRole('button', { name: /^Print Map$/i }),
+              page.getByRole('button', { name: /^Export$/i }),
+              page.getByRole('button', { name: /^Print$/i }),
+              page.getByRole('button', { name: /^Download$/i }),
+              page.getByRole('button', { name: /^Create$/i }),
+              page.getByRole('button', { name: /^Print Map$/i }).nth(1)
+          ]
+        : [
+              page.getByRole('button', { name: /^Export$/i }),
+              page.getByRole('button', { name: /^Print$/i }),
+              page.getByRole('button', { name: /^Download$/i }),
+              page.getByRole('button', { name: /^Create$/i }),
+              page.getByRole('button', { name: /^Print Map$/i }).nth(1)
+          ];
+
+    let exportIndex = -1;
+    await expect.poll(async () => {
+        exportIndex = await findVisibleLocatorIndex(exportButtonCandidates);
+        return exportIndex;
+    }).toBeGreaterThan(-1);
+
+    const exportButton = exportButtonCandidates[exportIndex].first();
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download: Download = await downloadPromise;
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileContent = await readFile(downloadPath);
+        expect(fileContent.length).toBeGreaterThan(1000);
+        expect(fileContent.subarray(0, 8)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    }
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

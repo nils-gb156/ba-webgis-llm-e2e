@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    if (!(await measurementDialog.isVisible())) {
+        if ((await measurementToggle.getAttribute('aria-pressed')) !== 'true') {
+            await measurementToggle.click();
+        }
+    }
+
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(measurementDialog).toBeVisible();
+    await expect(measurementDialog.getByRole('heading', { name: 'Measurement', exact: true })).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const points = [
+        { x: Math.round(mapBox.width * 0.64), y: Math.round(mapBox.height * 0.36) },
+        { x: Math.round(mapBox.width * 0.75), y: Math.round(mapBox.height * 0.50) },
+        { x: Math.round(mapBox.width * 0.82), y: Math.round(mapBox.height * 0.64) },
+        { x: Math.round(mapBox.width * 0.70), y: Math.round(mapBox.height * 0.44) }
+    ];
+
+    await mapContainer.click({ position: points[0] });
+    await mapContainer.click({ position: points[1] });
+    await mapContainer.click({ position: points[2] });
+    await mapContainer.dblclick({ position: points[3] });
+
+    await expect(measurementDialog).toBeVisible();
+
+    const measurementResultTooltip = page.getByRole('tooltip', {
+        name: /\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+    });
+
+    await expect(measurementResultTooltip).toBeVisible();
+    await expect(measurementResultTooltip).toHaveText(/\d+(?:[.,]\d+)?\s?(?:m|km)\b/i);
+});

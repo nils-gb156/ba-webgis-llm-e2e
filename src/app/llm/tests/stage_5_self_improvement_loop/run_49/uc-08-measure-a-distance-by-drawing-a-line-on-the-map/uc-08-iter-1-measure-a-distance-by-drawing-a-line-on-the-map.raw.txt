@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('measurement-toggle')).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Measurement', exact: true })).toBeVisible();
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+
+    const mapContainer = page.getByTestId('map-container');
+    await mapContainer.click({ position: { x: 620, y: 260 } });
+    await mapContainer.click({ position: { x: 840, y: 360 } });
+    await mapContainer.dblclick({ position: { x: 980, y: 470 } });
+
+    const lengthTooltip = page.getByRole('tooltip', {
+        name: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/
+    });
+
+    await expect(lengthTooltip).toBeVisible();
+    await expect(lengthTooltip).toHaveText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/);
+    await expect(measurementPanel).toBeVisible();
+});

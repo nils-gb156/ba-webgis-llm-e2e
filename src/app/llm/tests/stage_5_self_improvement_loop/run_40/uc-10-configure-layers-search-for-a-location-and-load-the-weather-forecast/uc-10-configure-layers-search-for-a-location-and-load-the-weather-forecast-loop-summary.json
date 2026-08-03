@@ -1,0 +1,40 @@
+{
+  "run": "run_40",
+  "use_case_id": 10,
+  "title": "Configure layers, search for a location and load the weather forecast",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-10-iter-0-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "other",
+      "error_excerpt": "Error: response.json: Protocol error (Network.getResponseBody): No data found for resource with given identifier\n\n  129 |\n  130 |     const forecastResponse = await forecastResponsePromise;\n> 131 |     const forecastPayload = (await forecastResponse.json()) as unknown;\n      |                                                     ^\n  132 |\n  133 |     const collectArrayLengths = (value: unknown): number[] => {\n  134 |         if (Array.isArray(value)) {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-10-iter-1-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('weather-forecast')\nExpected pattern: /Location:\\s*MÃ¼nster/i\nReceived string:  \"Mon, Jul 27, 08:00 AMbroken cloudsTemperature15.48 Â°CHumidity93 %Wind direction299Â°Wind speed3.67 m/sMon, Jul 27, 11:00 AMbroken cloudsTemperature16.87 Â°CHumidity82 %Wind direction290Â°Wind speed4.05 m/sMon, Jul 27, 02:00 PMlight rainTemperature17.81 Â°CHumidity71 %Wind direction265Â°Wind speed6.09 m/sMon, Jul 27, 05:00 PMlight rainTemper"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-10-iter-2-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

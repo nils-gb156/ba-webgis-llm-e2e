@@ -1,0 +1,115 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import {
+    getActiveBaseLayerTitle,
+    getMapCenter,
+    isLayerRendered
+} from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    const initialCenter = await getMapCenter(page);
+    expect(initialCenter).toBeDefined();
+    const [initialX, initialY] = initialCenter as [number, number];
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    const geocoderOptionResults = geocoderPanel.getByRole('option').filter({ hasText: /Münster/i });
+    const geocoderButtonResults = geocoderPanel.getByRole('button').filter({ hasText: /Münster/i });
+    const geocoderLinkResults = geocoderPanel.getByRole('link').filter({ hasText: /Münster/i });
+    const geocoderListItemResults = geocoderPanel.getByRole('listitem').filter({ hasText: /Münster/i });
+
+    await expect.poll(async () => {
+        return (
+            (await geocoderOptionResults.count()) +
+            (await geocoderButtonResults.count()) +
+            (await geocoderLinkResults.count()) +
+            (await geocoderListItemResults.count())
+        );
+    }).toBeGreaterThan(0);
+
+    if ((await geocoderOptionResults.count()) > 0) {
+        await geocoderOptionResults.first().click();
+    } else if ((await geocoderButtonResults.count()) > 0) {
+        await geocoderButtonResults.first().click();
+    } else if ((await geocoderLinkResults.count()) > 0) {
+        await geocoderLinkResults.first().click();
+    } else {
+        await geocoderInput.press('ArrowDown');
+        await geocoderInput.press('Enter');
+    }
+
+    await expect.poll(async () => {
+        const currentCenter = await getMapCenter(page);
+        if (!currentCenter) {
+            return 0;
+        }
+        return Math.hypot(currentCenter[0] - initialX, currentCenter[1] - initialY);
+    }).toBeGreaterThan(1000);
+
+    await expect.poll(async () => {
+        return await weatherForecastSection.evaluate((element) => {
+            const roleListItems = element.querySelectorAll('[role="listitem"]').length;
+            if (roleListItems > 0) {
+                return roleListItems;
+            }
+
+            const listItems = element.querySelectorAll('li').length;
+            if (listItems > 0) {
+                return listItems;
+            }
+
+            const tableRows = element.querySelectorAll('tbody tr').length;
+            if (tableRows > 0) {
+                return tableRows;
+            }
+
+            let maxSiblingGroup = 0;
+            const allElements = [element, ...Array.from(element.querySelectorAll('*'))];
+            for (const current of allElements) {
+                const meaningfulChildren = Array.from(current.children).filter((child) => {
+                    const tagName = child.tagName;
+                    return !['H1', 'H2', 'H3', 'P'].includes(tagName) || child.children.length > 0;
+                });
+                maxSiblingGroup = Math.max(maxSiblingGroup, meaningfulChildren.length);
+            }
+
+            return maxSiblingGroup;
+        });
+    }).toBe(24);
+});

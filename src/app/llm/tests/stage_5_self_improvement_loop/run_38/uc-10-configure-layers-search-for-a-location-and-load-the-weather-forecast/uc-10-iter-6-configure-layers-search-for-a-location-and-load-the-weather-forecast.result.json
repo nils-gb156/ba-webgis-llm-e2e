@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_38/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "UC10 Configure layers, search for a location and load the weather forecast",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 40107,
+                  "error": {
+                    "message": "Error: Weather forecast did not load successfully for the searched location. Last state: {\"hasError\":true,\"hasPrompt\":false,\"count\":0}",
+                    "stack": "Error: Weather forecast did not load successfully for the searched location. Last state: {\"hasError\":true,\"hasPrompt\":false,\"count\":0}\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:250:15",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                      "column": 15,
+                      "line": 250
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 248 |\u001b[39m\n \u001b[90m 249 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mforecastLoaded) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 250 |\u001b[39m         \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\n \u001b[90m     |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 251 |\u001b[39m             \u001b[32m`Weather forecast did not load successfully for the searched location. Last state: ${JSON.stringify(lastForecastState)}`\u001b[39m\n \u001b[90m 252 |\u001b[39m         )\u001b[33m;\u001b[39m\n \u001b[90m 253 |\u001b[39m     }\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                        "column": 15,
+                        "line": 250
+                      },
+                      "message": "Error: Weather forecast did not load successfully for the searched location. Last state: {\"hasError\":true,\"hasPrompt\":false,\"count\":0}\n\n  248 |\n  249 |     if (!forecastLoaded) {\n> 250 |         throw new Error(\n      |               ^\n  251 |             `Weather forecast did not load successfully for the searched location. Last state: ${JSON.stringify(lastForecastState)}`\n  252 |         );\n  253 |     }\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:250:15"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T03:36:08.262Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-32c66-d-load-the-weather-forecast-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_38\\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\\uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+                    "column": 15,
+                    "line": 250
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "92bb1feaee73f724f580-afa372a5163ae7b6946d",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_38/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast/uc-10-iter-6-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T03:36:07.557Z",
+    "duration": 43124.151999999995,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

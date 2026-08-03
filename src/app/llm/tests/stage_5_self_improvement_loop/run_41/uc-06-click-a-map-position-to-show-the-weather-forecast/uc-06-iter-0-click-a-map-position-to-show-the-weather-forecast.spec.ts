@@ -1,0 +1,144 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    getHighlightedCoordinate,
+    getMapCenter,
+    getMapZoomLevel
+} from '../../../../map-model-helpers';
+
+function getForecastEntryCount(payload: unknown): number | undefined {
+    if (Array.isArray(payload)) {
+        if (payload.length === 24) {
+            return 24;
+        }
+
+        for (const item of payload) {
+            const nestedCount = getForecastEntryCount(item);
+            if (nestedCount !== undefined) {
+                return nestedCount;
+            }
+        }
+
+        return undefined;
+    }
+
+    if (payload && typeof payload === 'object') {
+        const record = payload as Record<string, unknown>;
+
+        for (const key of ['forecast', 'forecasts', 'entries', 'hours', 'timeseries', 'timeSeries']) {
+            const value = record[key];
+            if (Array.isArray(value) && value.length === 24) {
+                return 24;
+            }
+        }
+
+        const hourly = record.hourly;
+        if (hourly && typeof hourly === 'object') {
+            for (const value of Object.values(hourly as Record<string, unknown>)) {
+                if (Array.isArray(value) && value.length === 24) {
+                    return 24;
+                }
+            }
+        }
+
+        for (const key of ['time', 'times', 'timestamps']) {
+            const value = record[key];
+            if (Array.isArray(value) && value.length === 24) {
+                return 24;
+            }
+        }
+
+        for (const value of Object.values(record)) {
+            const nestedCount = getForecastEntryCount(value);
+            if (nestedCount !== undefined) {
+                return nestedCount;
+            }
+        }
+    }
+
+    return undefined;
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+    await expect.poll(() => getHighlightedCoordinate(page)).toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+    await expect(infoPanel.getByText('Click on the map to load a forecast.', { exact: true })).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    let forecastEntryCount: number | undefined;
+    const forecastResponsePromise = page.waitForResponse(
+        async (response) => {
+            if (!response.ok()) {
+                return false;
+            }
+
+            const resourceType = response.request().resourceType();
+            if (resourceType !== 'fetch' && resourceType !== 'xhr') {
+                return false;
+            }
+
+            const contentType = response.headers()['content-type']?.toLowerCase() ?? '';
+            if (!contentType.includes('application/json')) {
+                return false;
+            }
+
+            try {
+                const payload = (await response.json()) as unknown;
+                const count = getForecastEntryCount(payload);
+                if (count === 24) {
+                    forecastEntryCount = count;
+                    return true;
+                }
+            } catch {
+                return false;
+            }
+
+            return false;
+        },
+        { timeout: 15000 }
+    );
+
+    await mapContainer.click({
+        position: {
+            x: mapBox.width * 0.55,
+            y: mapBox.height * 0.45
+        }
+    });
+
+    await forecastResponsePromise;
+    expect(forecastEntryCount).toBe(24);
+
+    await expect.poll(async () => {
+        const coordinate = await getHighlightedCoordinate(page);
+        return Array.isArray(coordinate) && coordinate.length === 2;
+    }).toBe(true);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(infoPanel.getByText('Click on the map to load a forecast.', { exact: true })).toBeHidden();
+});

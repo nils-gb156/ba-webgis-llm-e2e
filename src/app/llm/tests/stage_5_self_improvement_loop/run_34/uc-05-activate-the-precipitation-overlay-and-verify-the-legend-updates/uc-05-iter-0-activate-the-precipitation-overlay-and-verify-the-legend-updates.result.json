@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_34/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 5: Activate the Precipitation overlay and verify the legend updates",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7612,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByTestId('layer-switcher-toggle')\nExpected: \u001b[32m\"\u001b[7mfals\u001b[27me\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mtru\u001b[27me\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('layer-switcher-toggle')\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_10_\" aria-label=\"Layer Switcher\" id=\"tooltip:_r_10_:trigger\" data-testid=\"layer-switcher-toggle\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button>\u001b[22m\n\u001b[2m       - unexpected value \"true\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByTestId('layer-switcher-toggle')\nExpected: \u001b[32m\"\u001b[7mfals\u001b[27me\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mtru\u001b[27me\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('layer-switcher-toggle')\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_10_\" aria-label=\"Layer Switcher\" id=\"tooltip:_r_10_:trigger\" data-testid=\"layer-switcher-toggle\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button>\u001b[22m\n\u001b[2m       - unexpected value \"true\"\u001b[22m\n\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts:21:43",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+                      "column": 43,
+                      "line": 21
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 19 |\u001b[39m\n \u001b[90m 20 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39m(\u001b[36mawait\u001b[39m layerSwitcher\u001b[33m.\u001b[39misVisible())) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 21 |\u001b[39m         \u001b[36mawait\u001b[39m expect(layerSwitcherToggle)\u001b[33m.\u001b[39mtoHaveAttribute(\u001b[32m'aria-pressed'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'false'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 22 |\u001b[39m         \u001b[36mawait\u001b[39m layerSwitcherToggle\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 23 |\u001b[39m     }\n \u001b[90m 24 |\u001b[39m     \u001b[36mawait\u001b[39m expect(layerSwitcher)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+                        "column": 43,
+                        "line": 21
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByTestId('layer-switcher-toggle')\nExpected: \u001b[32m\"\u001b[7mfals\u001b[27me\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mtru\u001b[27me\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('layer-switcher-toggle')\u001b[22m\n\u001b[2m    13 Ã— locator resolved to <button dir=\"ltr\" type=\"button\" data-pressed=\"\" data-part=\"trigger\" aria-pressed=\"true\" data-state=\"closed\" data-scope=\"tooltip\" data-ownedby=\"_r_10_\" aria-label=\"Layer Switcher\" id=\"tooltip:_r_10_:trigger\" data-testid=\"layer-switcher-toggle\" class=\"chakra-button chakra-tooltip__trigger tool-button tool-button--active css-19u3ixl\">â€¦</button>\u001b[22m\n\u001b[2m       - unexpected value \"true\"\u001b[22m\n\n\n  19 |\n  20 |     if (!(await layerSwitcher.isVisible())) {\n> 21 |         await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'false');\n     |                                           ^\n  22 |         await layerSwitcherToggle.click();\n  23 |     }\n  24 |     await expect(layerSwitcher).toBeVisible();\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts:21:43"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T02:05:01.555Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-ace38-d-verify-the-legend-updates-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_34\\uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates\\uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+                    "column": 43,
+                    "line": 21
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "fe6f2dee3fdeb926b9f9-e87e7bcf9624b87a7492",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_34/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates/uc-05-iter-0-activate-the-precipitation-overlay-and-verify-the-legend-updates.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T02:05:00.882Z",
+    "duration": 10792.148000000001,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

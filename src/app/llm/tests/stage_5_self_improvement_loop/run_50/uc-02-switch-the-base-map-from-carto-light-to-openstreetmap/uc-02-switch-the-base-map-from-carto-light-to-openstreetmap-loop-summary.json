@@ -1,0 +1,40 @@
+{
+  "run": "run_50",
+  "use_case_id": 2,
+  "title": "Switch the base map from Carto Light to OpenStreetMap",
+  "complexity": "easy",
+  "passed": true,
+  "iterations_used": 3,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-02-iter-0-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"Carto Light\"\nReceived: undefined\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  22 |       )\n  23 |     )\n> 24 |     .toBe('Carto Light');\n     |      ^\n  25 |\n  26 |   await baseMapSelector.click();\n  27 |   await baseMapSelector.selectOption({ label: 'OpenStreetMap' });\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-02-switch-the-base-map-"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-02-iter-1-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"Carto Light\"\nReceived: undefined\n\nCall Log:\n- Timeout 10000ms exceeded while waiting on the predicate\n\n  23 |\n  24 |   await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 20000 }).toBe('Carto Light');\n> 25 |   await expect.poll(getSelectedBaseMapLabel, { timeout: 10000 }).toBe('Carto Light');\n     |                                                                  ^\n  26 |\n  27 |   await baseMapSelector.selectO"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-02-iter-2-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getHighlightedCoordinate } from '../../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page), { timeout: 30000 }).toBe('Carto Light');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(
+        weatherForecastSection.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+
+    const initialForecastMessage = weatherForecastSection.getByText(
+        'Click on the map to load a forecast.',
+        { exact: true }
+    );
+    await expect(initialForecastMessage).toBeVisible();
+
+    await expect.poll(() => getHighlightedCoordinate(page), { timeout: 10000 }).toBeUndefined();
+
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox!.width * 0.6),
+            y: Math.round(mapBox!.height * 0.55)
+        }
+    });
+
+    await expect.poll(() => getHighlightedCoordinate(page), { timeout: 30000 }).not.toBeUndefined();
+    await expect(initialForecastMessage).not.toBeVisible();
+
+    await expect.poll(
+        async () =>
+            weatherForecastSection.evaluate((section) => {
+                const candidates = [
+                    section.querySelectorAll('[role="listitem"]').length,
+                    section.querySelectorAll('li').length,
+                    section.querySelectorAll('tbody tr').length,
+                    Math.max(
+                        section.querySelectorAll('tr').length -
+                            section.querySelectorAll('thead tr').length,
+                        0
+                    ),
+                    section.querySelectorAll('article').length
+                ].filter((count) => count > 0);
+
+                if (candidates.includes(24)) {
+                    return 24;
+                }
+
+                if (candidates.length > 0) {
+                    return Math.max(...candidates);
+                }
+
+                const text = section.textContent ?? '';
+                const hourlyLabels = text.match(/\b(?:[01]\d|2[0-3]):00\b/g) ?? [];
+                return hourlyLabels.length;
+            }),
+        { timeout: 30000 }
+    ).toBe(24);
+});

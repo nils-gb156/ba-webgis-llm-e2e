@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+    const lengthPattern = /\b\d[\d.,]*\s?(?:m|km)\b/i;
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    if (!(await measurementPanel.isVisible())) {
+        if ((await measurementToggle.getAttribute('aria-pressed')) !== 'true') {
+            await measurementToggle.click();
+        }
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementDialog).toBeVisible();
+    await expect(
+        measurementDialog.getByRole('heading', { name: 'Measurement', exact: true })
+    ).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const positions = [
+        { x: mapBox.width * 0.45, y: mapBox.height * 0.62 },
+        { x: mapBox.width * 0.52, y: mapBox.height * 0.56 },
+        { x: mapBox.width * 0.60, y: mapBox.height * 0.50 },
+        { x: mapBox.width * 0.68, y: mapBox.height * 0.44 }
+    ];
+
+    await mapContainer.click({ position: positions[0] });
+    await mapContainer.click({ position: positions[1] });
+    await mapContainer.click({ position: positions[2] });
+    await mapContainer.dblclick({ position: positions[3] });
+
+    const collectMeasurementTexts = async (): Promise<string[]> => {
+        const texts: string[] = [];
+
+        if ((await measurementPanel.count()) > 0) {
+            texts.push(...(await measurementPanel.allTextContents()));
+        }
+
+        const measurementOverlay = page.getByTestId('measurement');
+        if ((await measurementOverlay.count()) > 0) {
+            texts.push(...(await measurementOverlay.allTextContents()));
+        }
+
+        texts.push(...(await page.getByRole('tooltip').allTextContents()));
+
+        return texts.map((text) => text.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    };
+
+    await expect.poll(async () => {
+        const texts = await collectMeasurementTexts();
+        return texts.find((text) => lengthPattern.test(text)) ?? '';
+    }).toMatch(lengthPattern);
+});

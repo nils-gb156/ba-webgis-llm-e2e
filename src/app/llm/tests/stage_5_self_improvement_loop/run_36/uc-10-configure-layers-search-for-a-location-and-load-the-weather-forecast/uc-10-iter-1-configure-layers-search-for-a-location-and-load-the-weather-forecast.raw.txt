@@ -1,0 +1,120 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+    page
+}) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+    const geocoderTextbox = page.getByRole('textbox', {
+        name: 'Geocoder search',
+        exact: true
+    });
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    const temperatureCheckbox = page.getByRole('checkbox', {
+        name: 'Temperature',
+        exact: true
+    });
+    const precipitationCheckbox = page.getByRole('checkbox', {
+        name: 'Precipitation',
+        exact: true
+    });
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(geocoderTextbox).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    await expect
+        .poll(async () => {
+            const center = await getMapCenter(page);
+            return center ? center.length : 0;
+        })
+        .toBe(2);
+
+    const initialCenter = await getMapCenter(page);
+    if (!initialCenter) {
+        throw new Error('The map center was not available after the application loaded.');
+    }
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await geocoderTextbox.click();
+    await geocoderTextbox.fill('Münster');
+
+    const optionResults = geocoderPanel.getByRole('option').filter({ hasText: /Münster/i });
+    const buttonResults = geocoderPanel.getByRole('button').filter({ hasText: /Münster/i });
+    const listItemResults = geocoderPanel.getByRole('listitem').filter({ hasText: /Münster/i });
+
+    await expect
+        .poll(async () => {
+            const optionCount = await optionResults.count();
+            if (optionCount > 0) {
+                return 'option';
+            }
+
+            const buttonCount = await buttonResults.count();
+            if (buttonCount > 0) {
+                return 'button';
+            }
+
+            const listItemCount = await listItemResults.count();
+            if (listItemCount > 0) {
+                return 'listitem';
+            }
+
+            return 'none';
+        })
+        .not.toBe('none');
+
+    if ((await optionResults.count()) > 0) {
+        await optionResults.first().click();
+    } else if ((await buttonResults.count()) > 0) {
+        await buttonResults.first().click();
+    } else {
+        await listItemResults.first().click();
+    }
+
+    await expect(geocoderTextbox).toHaveValue(/Münster/i);
+
+    await expect
+        .poll(async () => {
+            const currentCenter = await getMapCenter(page);
+            if (!currentCenter) {
+                return 0;
+            }
+
+            return Math.hypot(
+                currentCenter[0] - initialCenter[0],
+                currentCenter[1] - initialCenter[1]
+            );
+        })
+        .toBeGreaterThan(10000);
+
+    await expect(infoPanel).toContainText(/Location:\s*Münster,\s*DE/i);
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+    await expect(weatherForecastSection.getByTestId('weather-forecast-entry')).toHaveCount(24);
+});

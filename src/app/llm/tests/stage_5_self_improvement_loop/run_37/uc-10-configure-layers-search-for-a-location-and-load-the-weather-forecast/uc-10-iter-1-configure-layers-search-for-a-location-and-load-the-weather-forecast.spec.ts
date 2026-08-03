@@ -1,0 +1,104 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC-10 Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+    await layerSwitcherToggle.click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+    await infoPanelToggle.click();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  await expect(page.getByTestId('geocoder-panel')).toBeVisible();
+  await expect(page.getByTestId('geocoder-input')).toBeVisible();
+  await expect(page.getByTestId('measurement-toggle')).not.toHaveAttribute('aria-pressed', 'true');
+
+  await expect.poll(async () => (await getMapCenter(page))?.length ?? 0).toBe(2);
+
+  const initialCenter = await getMapCenter(page);
+  if (!initialCenter) {
+    throw new Error('Map center is not available.');
+  }
+
+  const temperatureCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  const geocoderInput = page.getByTestId('geocoder-input');
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const geocoderResults = page.getByTestId('geocoder-results');
+  const firstSearchResult = page.getByTestId('geocoder-result-item-0');
+
+  await expect(geocoderResults).toBeVisible();
+  await expect(firstSearchResult).toBeVisible();
+  await expect(firstSearchResult).toContainText('Münster');
+
+  await firstSearchResult.click();
+
+  await expect(geocoderResults).toBeHidden();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    if (!center) {
+      return 0;
+    }
+    return Math.hypot(center[0] - initialCenter[0], center[1] - initialCenter[1]);
+  }).toBeGreaterThan(1000);
+
+  await expect.poll(async () => (await getHighlightedCoordinate(page))?.length ?? 0).toBe(2);
+
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect.poll(async () => {
+    return await weatherForecastSection.evaluate((element) => {
+      const text = element.textContent ?? '';
+      if (text.includes('Click on the map to load a forecast.')) {
+        return 0;
+      }
+
+      const count = (selector: string) => element.querySelectorAll(selector).length;
+      const candidates = new Set<number>([
+        count('[role="listitem"]'),
+        count('li'),
+        count('[role="row"]'),
+        Math.max(count('[role="row"]') - 1, 0),
+        count('article'),
+        count('[data-testid*="forecast"]'),
+        element.children.length
+      ]);
+
+      for (const node of Array.from(element.querySelectorAll('*'))) {
+        candidates.add((node as Element).children.length);
+      }
+
+      return candidates.has(24) ? 24 : Math.max(...candidates, 0);
+    });
+  }).toBe(24);
+});

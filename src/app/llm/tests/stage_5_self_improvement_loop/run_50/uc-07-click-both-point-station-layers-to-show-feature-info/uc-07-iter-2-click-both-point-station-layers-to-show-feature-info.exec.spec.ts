@@ -1,0 +1,224 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+    await expect(infoPanelToggle).toBeVisible();
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    await expect(layerSwitcherToggle).toBeVisible();
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+        await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeVisible();
+
+    await expect(measurementToggle).toBeVisible();
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect.poll(() => measurementToggle.getAttribute('aria-pressed')).toBe('false');
+
+    const eucosCheckbox = page.getByRole('checkbox', {
+        name: 'EUCOS Ground Stations',
+        exact: true
+    });
+    if (!(await eucosCheckbox.isChecked())) {
+        await eucosCheckbox.click({ force: true });
+    }
+    await expect(eucosCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviCheckbox = page.getByRole('checkbox', {
+        name: 'UV-Index Stations',
+        exact: true
+    });
+    if (!(await uviCheckbox.isChecked())) {
+        await uviCheckbox.click({ force: true });
+    }
+    await expect(uviCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+
+    await expect(mapContainer).toBeVisible();
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const clickPosition = await expect
+        .poll(
+            async () => {
+                const pixelInfo = await page.evaluate((coord) => {
+                    const map = (globalThis as { __openPioneerMap?: { olMap?: { getPixelFromCoordinate?: (coordinate: number[]) => number[] | undefined; getSize?: () => number[] | undefined } } }).__openPioneerMap;
+                    const pixel = map?.olMap?.getPixelFromCoordinate?.(coord);
+                    const size = map?.olMap?.getSize?.();
+
+                    if (
+                        !Array.isArray(pixel) ||
+                        pixel.length < 2 ||
+                        !Array.isArray(size) ||
+                        size.length < 2
+                    ) {
+                        return undefined;
+                    }
+
+                    if (
+                        !Number.isFinite(pixel[0]) ||
+                        !Number.isFinite(pixel[1]) ||
+                        pixel[0] < 0 ||
+                        pixel[1] < 0 ||
+                        pixel[0] > size[0] ||
+                        pixel[1] > size[1]
+                    ) {
+                        return undefined;
+                    }
+
+                    return {
+                        x: Math.round(pixel[0]),
+                        y: Math.round(pixel[1])
+                    };
+                }, targetCoordinate);
+
+                return pixelInfo;
+            },
+            { timeout: 15000 }
+        )
+        .toBeTruthy()
+        .then(async () => {
+            const pixelInfo = await page.evaluate((coord) => {
+                const map = (globalThis as { __openPioneerMap?: { olMap?: { getPixelFromCoordinate?: (coordinate: number[]) => number[] | undefined; getSize?: () => number[] | undefined } } }).__openPioneerMap;
+                const pixel = map?.olMap?.getPixelFromCoordinate?.(coord);
+                const size = map?.olMap?.getSize?.();
+
+                if (
+                    !Array.isArray(pixel) ||
+                    pixel.length < 2 ||
+                    !Array.isArray(size) ||
+                    size.length < 2
+                ) {
+                    return undefined;
+                }
+
+                if (
+                    !Number.isFinite(pixel[0]) ||
+                    !Number.isFinite(pixel[1]) ||
+                    pixel[0] < 0 ||
+                    pixel[1] < 0 ||
+                    pixel[0] > size[0] ||
+                    pixel[1] > size[1]
+                ) {
+                    return undefined;
+                }
+
+                return {
+                    x: Math.round(pixel[0]),
+                    y: Math.round(pixel[1])
+                };
+            }, targetCoordinate);
+
+            if (!pixelInfo) {
+                throw new Error('Could not calculate click position for the target map coordinate.');
+            }
+
+            return pixelInfo;
+        });
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect(infoPanel).not.toContainText('Click on the map to load a forecast.', {
+        timeout: 30000
+    });
+
+    await expect.poll(async () => (await infoPanel.textContent()) ?? '', { timeout: 30000 }).toMatch(
+        /UV-Index Station/
+    );
+    await expect.poll(async () => (await infoPanel.textContent()) ?? '', { timeout: 30000 }).toMatch(
+        /EUCOS Ground Station/
+    );
+
+    const uviStationInfo = page.getByTestId('uvi-station-info');
+    await expect(uviStationInfo).toContainText('Identifier', { timeout: 30000 });
+
+    await expect
+        .poll(
+            async () =>
+                await infoPanel.evaluate((panel) => {
+                    const sectionTitles = new Set([
+                        'Information',
+                        'Weather Forecast',
+                        'UV-Index Station',
+                        'EUCOS Ground Station'
+                    ]);
+
+                    const normalize = (text: string | null | undefined): string =>
+                        (text ?? '').replace(/\s+/g, ' ').trim();
+
+                    const elements = Array.from(panel.querySelectorAll('*'));
+
+                    const findExactTextElements = (title: string): Element[] => {
+                        return elements.filter((el) => normalize(el.textContent) === title);
+                    };
+
+                    const hasSectionDetails = (title: string): boolean => {
+                        for (const titleElement of findExactTextElements(title)) {
+                            const parent = titleElement.parentElement;
+                            if (parent && parent !== panel) {
+                                const parentTextWithoutTitle = normalize(parent.textContent).replace(
+                                    new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`),
+                                    ''
+                                );
+                                if (parentTextWithoutTitle.length > 0) {
+                                    return true;
+                                }
+                            }
+
+                            let sibling = titleElement.nextElementSibling;
+                            let siblingText = '';
+
+                            while (sibling) {
+                                const text = normalize(sibling.textContent);
+                                if (sectionTitles.has(text)) {
+                                    break;
+                                }
+                                siblingText += ` ${text}`;
+                                sibling = sibling.nextElementSibling;
+                            }
+
+                            if (siblingText.trim().length > 0) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    };
+
+                    const panelText = normalize(panel.textContent);
+
+                    return {
+                        uviSectionPresent: panelText.includes('UV-Index Station'),
+                        uviHasDetails: hasSectionDetails('UV-Index Station'),
+                        eucosSectionPresent: panelText.includes('EUCOS Ground Station'),
+                        eucosHasDetails: hasSectionDetails('EUCOS Ground Station')
+                    };
+                }),
+            { timeout: 30000 }
+        )
+        .toEqual({
+            uviSectionPresent: true,
+            uviHasDetails: true,
+            eucosSectionPresent: true,
+            eucosHasDetails: true
+        });
+});

@@ -1,0 +1,255 @@
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-clear-button
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - precipitation-legend
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - uvi-stations-legend
+  - weather-forecast
+  - weather-forecast-entry
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation" [checked]
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature"
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Precipitation (mm)" [level=1]
+    - paragraph: "0"
+    - paragraph: "50"
+    - paragraph: "100"
+    - paragraph: "150"
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: "Location: Münster, DE"
+- paragraph: Sun, Jul 26, 11:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 17.93 °C
+- paragraph: Humidity
+- paragraph: 91 %
+- paragraph: Wind direction
+- paragraph: 268°
+- paragraph: Wind speed
+- paragraph: 5.49 m/s
+- separator
+- paragraph: Mon, Jul 27, 02:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 17.07 °C
+- paragraph: Humidity
+- paragraph: 91 %
+- paragraph: Wind direction
+- paragraph: 283°
+- paragraph: Wind speed
+- paragraph: 5.24 m/s
+- separator
+- paragraph: Mon, Jul 27, 05:00 AM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 14.93 °C
+- paragraph: Humidity
+- paragraph: 93 %
+- paragraph: Wind direction
+- paragraph: 287°
+- paragraph: Wind speed
+- paragraph: 4.37 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 15.59 °C
+- paragraph: Humidity
+- paragraph: 83 %
+- paragraph: Wind direction
+- paragraph: 303°
+- paragraph: Wind speed
+- paragraph: 4.12 m/s
+- separator
+- paragraph: Mon, Jul 27, 11:00 AM
+- paragraph: scattered clouds
+- paragraph: Temperature
+- paragraph: 18.91 °C
+- paragraph: Humidity
+- paragraph: 56 %
+- paragraph: Wind direction
+- paragraph: 288°
+- paragraph: Wind speed
+- paragraph: 3.99 m/s
+- separator
+- paragraph: Mon, Jul 27, 02:00 PM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 18.34 °C
+- paragraph: Humidity
+- paragraph: 53 %
+- paragraph: Wind direction
+- paragraph: 269°
+- paragraph: Wind speed
+- paragraph: 4.64 m/s
+- separator
+- paragraph: Mon, Jul 27, 05:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 21.23 °C
+- paragraph: Humidity
+- paragraph: 56 %
+- paragraph: Wind direction
+- paragraph: 277°
+- paragraph: Wind speed
+- paragraph: 7.42 m/s
+- separator
+- paragraph: Mon, Jul 27, 08:00 PM
+- paragraph: light rain
+- paragraph: Temperature
+- paragraph: 20.01 °C
+- paragraph: Humidity
+- paragraph: 45 %
+- paragraph: Wind direction
+- paragraph: 293°
+- paragraph: Wind speed
+- paragraph: 6.24 m/s
+- separator
+- paragraph: Mon, Jul 27, 11:00 PM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 15.47 °C
+- paragraph: Humidity
+- paragraph: 60 %
+- paragraph: Wind direction
+- paragraph: 286°
+- paragraph: Wind speed
+- paragraph: 3.59 m/s
+- separator
+- paragraph: Tue, Jul 28, 02:00 AM
+- paragraph: clear sky
+- paragraph: Temperature
+- paragraph: 14.12 °C
+- paragraph: Humidity
+- paragraph: 78 %
+- paragraph: Wind direction
+- paragraph: 283°
+- paragraph: Wind speed
+- paragraph: 2.21 m/s
+- separator
+- paragraph: Tue, Jul 28, 05:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 13.25 °C
+- paragraph: Humidity
+- paragraph: 83 %
+- paragraph: Wind direction
+- paragraph: 245°
+- paragraph: Wind speed
+- paragraph: 1.79 m/s
+- separator
+- paragraph: Tue, Jul 28, 08:00 AM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 16.73 °C
+- paragraph: Humidity
+- paragraph: 65 %
+- paragraph: Wind direction
+- paragraph: 214°
+- paragraph: Wind speed
+- paragraph: 2.35 m/s
+- separator
+- paragraph: Tue, Jul 28, 11:00 AM
+- paragraph: overcast clouds
+- paragraph: Temperature
+- paragraph: 22.7 °C
+- paragraph: Humidity
+- paragraph: 47 %
+- paragraph: Wind direction
+- paragraph: 232°
+- paragraph: Wind speed
+- paragraph: 3.09 m/s
+- separator
+- paragraph: Tue, Jul 28, 02:00 PM
+- paragraph: broken clouds
+- paragraph: Temperature
+- paragraph: 27.19 °C
+- paragraph: Humidity
+- paragraph: 34 %
+- paragraph: Wind direction
+- paragraph: 259°
+- paragraph: Wind speed
+- paragraph: 3.46 m/s
+- separator
+- paragraph: Tue, Jul 28, 05:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- paragraph: 29.4 °C
+- paragraph: Humidity
+- paragraph: 32 %
+- paragraph: Wind direction
+- paragraph: 301°
+- paragraph: Wind speed
+- paragraph: 2.88 m/s
+- separator
+- paragraph: Tue, Jul 28, 08:00 PM
+- paragraph: few clouds
+- paragraph: Temperature
+- par
+[... truncated ...]

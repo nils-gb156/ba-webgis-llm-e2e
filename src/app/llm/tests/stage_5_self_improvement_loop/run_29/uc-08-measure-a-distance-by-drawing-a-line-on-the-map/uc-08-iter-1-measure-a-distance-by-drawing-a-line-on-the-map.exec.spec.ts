@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { getActiveBaseLayerTitle } from '../../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const application = page.getByRole('application', { name: 'webgis map' });
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementResult = page.getByTestId('measurement');
+
+    await expect(application).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+
+    const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (measurementPressed !== null) {
+        await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+    }
+
+    const box = await mapContainer.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const relativePosition = (xRatio: number, yRatio: number) => ({
+        x: Math.min(Math.max(5, Math.round(box.width * xRatio)), Math.round(box.width) - 5),
+        y: Math.min(Math.max(5, Math.round(box.height * yRatio)), Math.round(box.height) - 5)
+    });
+
+    const toPagePosition = (position: { x: number; y: number }) => ({
+        x: box.x + position.x,
+        y: box.y + position.y
+    });
+
+    const point1 = toPagePosition(relativePosition(0.56, 0.36));
+    const point2 = toPagePosition(relativePosition(0.69, 0.45));
+    const point3 = toPagePosition(relativePosition(0.82, 0.55));
+
+    await page.mouse.move(point1.x, point1.y);
+    await page.mouse.click(point1.x, point1.y);
+
+    await page.mouse.move(point2.x, point2.y);
+    await page.mouse.click(point2.x, point2.y);
+
+    await page.mouse.move(point3.x, point3.y);
+    await page.mouse.dblclick(point3.x, point3.y);
+
+    await expect(page.getByRole('tooltip', { name: 'Double click to end the measurement.' })).toBeHidden();
+
+    await expect(measurementResult).toBeVisible();
+    await expect.poll(async () => (await measurementResult.textContent()) ?? '').toMatch(/\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i);
+    await expect.poll(async () => (await measurementPanel.textContent()) ?? '').toMatch(/\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i);
+});

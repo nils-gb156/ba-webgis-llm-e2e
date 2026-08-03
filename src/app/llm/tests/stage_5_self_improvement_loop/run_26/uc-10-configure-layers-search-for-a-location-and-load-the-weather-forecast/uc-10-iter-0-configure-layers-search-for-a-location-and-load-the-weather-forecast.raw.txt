@@ -1,0 +1,169 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getMapCenter, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+
+    const temperatureCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'Temperature',
+        exact: true
+    });
+    const precipitationCheckbox = layerSwitcher.getByRole('checkbox', {
+        name: 'Precipitation',
+        exact: true
+    });
+
+    await expect(temperatureCheckbox).toBeChecked();
+    await expect(precipitationCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    await temperatureCheckbox.click({ force: true });
+    await expect(temperatureCheckbox).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationCheckbox.click({ force: true });
+    await expect(precipitationCheckbox).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    const initialCenter = await getMapCenter(page);
+    if (!initialCenter) {
+        throw new Error('Map center was not available after the map became ready.');
+    }
+
+    const hasForecastArrayLength = (
+        value: unknown,
+        wantedLength: number,
+        path = ''
+    ): boolean => {
+        if (Array.isArray(value)) {
+            const normalizedPath = path.toLowerCase();
+            const looksLikeForecastData = [
+                'forecast',
+                'hourly',
+                'timeseries',
+                'time_series',
+                'weather'
+            ].some((token) => normalizedPath.includes(token));
+
+            if (looksLikeForecastData && value.length === wantedLength) {
+                return true;
+            }
+
+            return value.some((item) => hasForecastArrayLength(item, wantedLength, path));
+        }
+
+        if (value && typeof value === 'object') {
+            return Object.entries(value as Record<string, unknown>).some(([key, child]) =>
+                hasForecastArrayLength(child, wantedLength, path ? `${path}.${key}` : key)
+            );
+        }
+
+        return false;
+    };
+
+    let forecastResponseContained24Entries = false;
+    page.on('response', async (response) => {
+        const contentType = response.headers()['content-type'] ?? '';
+        if (!contentType.includes('application/json')) {
+            return;
+        }
+
+        try {
+            const body = await response.json();
+            if (hasForecastArrayLength(body, 24)) {
+                forecastResponseContained24Entries = true;
+            }
+        } catch {
+            // Ignore responses that cannot be parsed as JSON.
+        }
+    });
+
+    const searchInput = geocoderPanel.getByRole('textbox', {
+        name: 'Geocoder search',
+        exact: true
+    });
+    const placePattern = /M.nster/i;
+
+    await expect(searchInput).toBeVisible();
+    await searchInput.click();
+    await searchInput.fill('Münster');
+
+    const resultOption = geocoderPanel.getByRole('option', { name: placePattern });
+    const resultListItem = geocoderPanel.getByRole('listitem', { name: placePattern });
+    const resultButton = geocoderPanel.getByRole('button', { name: placePattern });
+
+    await expect
+        .poll(async () => {
+            return Math.max(
+                await resultOption.count(),
+                await resultListItem.count(),
+                await resultButton.count()
+            );
+        })
+        .toBeGreaterThan(0);
+
+    if ((await resultOption.count()) > 0) {
+        await resultOption.first().click();
+    } else if ((await resultListItem.count()) > 0) {
+        await resultListItem.first().click();
+    } else if ((await resultButton.count()) > 0) {
+        await resultButton.first().click();
+    } else {
+        await searchInput.press('ArrowDown');
+        await searchInput.press('Enter');
+    }
+
+    await expect(searchInput).toHaveValue(placePattern);
+
+    await expect
+        .poll(async () => {
+            const currentCenter = await getMapCenter(page);
+            if (!currentCenter) {
+                return 0;
+            }
+
+            return Math.hypot(
+                currentCenter[0] - initialCenter[0],
+                currentCenter[1] - initialCenter[1]
+            );
+        })
+        .toBeGreaterThan(50000);
+
+    await expect
+        .poll(async () => {
+            const sectionText = (await weatherForecastSection.textContent()) ?? '';
+            const placeholderGone = !sectionText.includes('Click on the map to load a forecast.');
+            const domShows24Entries = await weatherForecastSection.evaluate((element) => {
+                const candidateCounts = [
+                    element.querySelectorAll('[role="listitem"]').length,
+                    element.querySelectorAll('li').length,
+                    element.querySelectorAll('[role="row"]').length,
+                    element.querySelectorAll('tr').length,
+                    element.querySelectorAll('article').length
+                ];
+
+                return candidateCounts.some((count) => count === 24 || count - 1 === 24);
+            });
+
+            return placeholderGone && (domShows24Entries || forecastResponseContained24Entries);
+        })
+        .toBe(true);
+});

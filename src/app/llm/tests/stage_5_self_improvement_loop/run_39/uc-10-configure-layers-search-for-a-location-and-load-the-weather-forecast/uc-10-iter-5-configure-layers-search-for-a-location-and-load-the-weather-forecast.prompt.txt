@@ -1,0 +1,661 @@
+The following Playwright end-to-end test (TypeScript) was generated for the use case
+below, but it FAILED when executed against the live application.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+UI context extracted automatically from the running application (initial page state):
+data-testid attributes found in the app:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - temperature-legend
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree (roles, names, states):
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation"
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature" [checked]
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Temperature (°C)" [level=1]
+    - paragraph: "-65 - -55"
+    - paragraph: "-55 - -45"
+    - paragraph: "-45 - -40"
+    - paragraph: "-40 - -30"
+    - paragraph: "-30 - -20"
+    - paragraph: "-20 - -10"
+    - paragraph: "-10 - 0"
+    - paragraph: 0 - 10
+    - paragraph: 10 - 20
+    - paragraph: 20 - 25
+    - paragraph: 25 - 30
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Click on the map to load a forecast.
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+- region "Footer Bar":
+  - region:
+    - paragraph
+    - text: 50 km
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+## Map Model Helper Functions
+
+The following TypeScript helper functions are available and must be imported
+in the test from "../../../../map-model-helpers" (relative to the generated test file).
+Use them to assert map state that is not accessible through DOM locators.
+
+map-model-helpers:
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import type { Page } from "@playwright/test";
+import type { MapModel } from "@open-pioneer/map";
+
+/**
+ * Map model query helpers for E2E tests.
+ *
+ * The OpenLayers map renders into a `<canvas>`, so its actual state (active base
+ * layer, rendered operational layers, zoom, center, highlighted marker) is *not*
+ * observable through the DOM. To make this state testable, `MapComponent` exposes
+ * the Open Pioneer map model on `globalThis.__openPioneerMap` (see the `useEffect`
+ * that assigns `(globalThis).__openPioneerMap = map`).
+ *
+ * The exposed value is the Open Pioneer {@link MapModel} (the same object returned
+ * by `useMapModel`), *not* the raw OpenLayers map. From it you can reach:
+ * - `map.layers` — the layer collection (base + operational layers),
+ * - `map.olMap` — the underlying raw OpenLayers map (view, layers, sources),
+ * - `map.highlights` — the highlight API.
+ *
+ * Each helper below wraps a `page.evaluate(...)` call that reads from that map
+ * model inside the browser context and returns a plain, serializable value.
+ *
+ * Usage in a generated Playwright test:
+ *
+ * ```ts
+ * import { test, expect } from "@playwright/test";
+ * import { getMapZoomLevel, isLayerRendered } from "../../llm/map-model-helpers";
+ *
+ * test("activating the UV-Index overlay renders it", async ({ page }) => {
+ *     await page.goto("/");
+ *     // ...interact with the UI...
+ *     await expect.poll(() => isLayerRendered(page, "UV-Index Stations")).toBe(true);
+ * });
+ * ```
+ *
+ * Notes for the test generator:
+ * - All helpers take the Playwright `page` as their first argument.
+ * - Returned values are read once; for state that changes after a UI action use
+ *   `expect.poll(() => helper(page))` so the assertion retries until it settles.
+ * - Coordinates are returned in the map projection (EPSG:3857), not lon/lat.
+ */
+
+/** The type of the value exposed on `globalThis.__openPioneerMap` (see `MapComponent`). */
+type ExposedMapModel = MapModel;
+
+/**
+ * Returns the title of the currently active base layer (e.g. `"Carto Light"`),
+ * or `undefined` if no base layer is active / the map is not ready.
+ */
+export function getActiveBaseLayerTitle(page: Page): Promise<string | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.layers.getActiveBaseLayer()?.title;
+    });
+}
+
+/**
+ * Returns `true` if the operational layer with the given `title` is currently
+ * rendered on the map. `visible === true` means the layer is actually drawn
+ * (this is not observable through the DOM). Returns `false` if the layer is
+ * hidden, unknown, or the map is not ready.
+ */
+export function isLayerRendered(page: Page, title: string): Promise<boolean> {
+    return page.evaluate((layerTitle) => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const layer = map?.layers
+            .getOperationalLayers()
+            .find((entry) => entry.title === layerTitle);
+        return layer?.visible === true;
+    }, title);
+}
+
+/**
+ * Returns the current zoom level of the map, or `undefined` if the map is not
+ * ready. The value increases when zooming in and decreases when zooming out.
+ */
+export function getMapZoomLevel(page: Page): Promise<number | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        return map?.olMap.getView().getZoom();
+    });
+}
+
+/**
+ * Returns the current center of the map in the map projection (EPSG:3857) as
+ * `[x, y]`, or `undefined` if the map is not ready.
+ */
+export function getMapCenter(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        const center = map?.olMap.getView().getCenter();
+        return center && center.length >= 2
+            ? ([center[0], center[1]] as [number, number])
+            : undefined;
+    });
+}
+
+/**
+ * Returns the coordinate of the first active highlight on the map in the map
+ * projection (EPSG:3857) as `[x, y]`, or `undefined` if no highlight exists or
+ * the map is not ready.
+ */
+export function getHighlightedCoordinate(page: Page): Promise<[number, number] | undefined> {
+    return page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: ExposedMapModel }).__openPioneerMap;
+        if (!map) return undefined;
+        // The Highlights class registers a VectorLayer with className "highlight-layer"
+        // on the underlying OL map. Iterate all OL layers to find it.
+        const layers = map.olMap.getLayers().getArray();
+        const highlightLayer = layers.find(
+            (l) => (l as { getClassName?: () => string }).getClassName?.() === "highlight-layer"
+        ) as
+            | {
+                  getSource?: () => {
+                      getFeatures?: () => {
+                          getGeometry?: () => { getCoordinates?: () => number[] };
+                      }[];
+                  };
+              }
+            | undefined;
+        const features = highlightLayer?.getSource?.()?.getFeatures?.() ?? [];
+        const coords = features[0]?.getGeometry?.()?.getCoordinates?.();
+        return Array.isArray(coords) && coords.length >= 2
+            ? ([coords[0], coords[1]] as [number, number])
+            : undefined;
+    });
+}
+
+
+
+Use case:
+## Use Case 10: Configure layers, search for a location and load the weather forecast
+
+**Description:** The user reconfigures the layer visibility, searches for a location using the geocoder, navigates the map to the selected result, and loads the weather forecast for that position.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The layer switcher (TOC) is visible.
+- The Temperature overlay layer is initially visible.
+- The Precipitation overlay layer is initially hidden.
+- The search field (geocoder) is accessible.
+- The info panel is visible.
+- No measurement tool is active.
+
+**Steps:**
+
+1. The user clicks the visibility toggle of the Temperature overlay layer to hide it.
+2. The user clicks the visibility toggle of the Precipitation overlay layer to show it.
+3. The user clicks the search field and types a place name (e.g. 'Münster').
+4. The user waits for the result list to appear and selects the first result.
+5. The user waits for the map to navigate to the selected location.
+6. The user waits for the info panel to load the forecast.
+
+**Expected results:**
+
+- The Precipitation overlay layer toggle is in the disabled state.
+- The Temperature overlay layer toggle is in the enabled state.
+- After selecting the search result, the map navigates to the searched location.
+- The info panel displays a weather forecast section with 24 entries.
+
+**Complexity:** hard
+
+Previous test code (failing):
+```typescript
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getHighlightedCoordinate, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  test.setTimeout(90000);
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const mapContainer = page.getByTestId('map-container');
+  const footer = page.getByTestId('footer');
+
+  const temperatureCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  const getNormalizedForecastText = async () => {
+    return ((await weatherForecastSection.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+  };
+
+  const getForecastEntryCounts = async () => {
+    return await weatherForecastSection.evaluate((section) => {
+      const counts = new Set<number>();
+
+      counts.add(section.querySelectorAll('li').length);
+      counts.add(section.querySelectorAll('[role="listitem"]').length);
+
+      const tbodyRowCount = section.querySelectorAll('tbody tr').length;
+      if (tbodyRowCount > 0) {
+        counts.add(tbodyRowCount);
+      }
+
+      const allRowCount = section.querySelectorAll('tr').length;
+      if (allRowCount > 1) {
+        counts.add(allRowCount - 1);
+      }
+
+      const informativeCount = (elements: Element[]) =>
+        elements.filter((element) => {
+          const text = element.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+          return text.length > 0 || element.querySelector('img, svg, canvas') !== null;
+        }).length;
+
+      for (const container of [section, ...Array.from(section.querySelectorAll('*'))]) {
+        const children = Array.from(container.children);
+        if (children.length === 0) {
+          continue;
+        }
+
+        if (informativeCount(children) === children.length) {
+          counts.add(children.length);
+        }
+      }
+
+      return [...counts].sort((a, b) => a - b);
+    });
+  };
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).toContainText(/Click on the map to load a forecast/i);
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  let initialCenter: [number, number] | undefined;
+  await expect
+    .poll(async () => {
+      initialCenter = await getMapCenter(page);
+      return Array.isArray(initialCenter) ? initialCenter.length : 0;
+    })
+    .toBe(2);
+
+  if (!initialCenter) {
+    throw new Error('Initial map center is not available.');
+  }
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+  await expect(page.getByTestId('temperature-legend')).toHaveCount(0);
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+  await expect(page.getByTestId('precipitation-legend')).toBeVisible();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const resultOption = geocoderPanel.getByRole('option').filter({ hasText: /Münster/i }).first();
+  const resultButton = geocoderPanel.getByRole('button').filter({ hasText: /Münster/i }).first();
+  const resultText = geocoderPanel.getByText(/Münster/i).first();
+
+  let resultLocatorType: 'option' | 'button' | 'text' | 'none' = 'none';
+  await expect
+    .poll(async () => {
+      if (await resultOption.isVisible().catch(() => false)) {
+        resultLocatorType = 'option';
+        return 'ready';
+      }
+      if (await resultButton.isVisible().catch(() => false)) {
+        resultLocatorType = 'button';
+        return 'ready';
+      }
+      if (await resultText.isVisible().catch(() => false)) {
+        resultLocatorType = 'text';
+        return 'ready';
+      }
+      resultLocatorType = 'none';
+      return 'pending';
+    }, { timeout: 30000 })
+    .toBe('ready');
+
+  if (resultLocatorType === 'option') {
+    await resultOption.click();
+  } else if (resultLocatorType === 'button') {
+    await resultButton.click();
+  } else if (resultLocatorType === 'text') {
+    await resultText.click();
+  } else {
+    throw new Error('No geocoder result became selectable.');
+  }
+
+  await expect(geocoderInput).toHaveValue(/Münster/i);
+  await expect(page.getByTestId('geocoder-clear-button')).toBeVisible();
+
+  let highlightedCoordinate: [number, number] | undefined;
+  await expect
+    .poll(async () => {
+      highlightedCoordinate = await getHighlightedCoordinate(page);
+      return Array.isArray(highlightedCoordinate) ? highlightedCoordinate.length : 0;
+    }, { timeout: 30000 })
+    .toBe(2);
+
+  if (!highlightedCoordinate) {
+    throw new Error('Highlighted geocoder coordinate is not available.');
+  }
+
+  await expect
+    .poll(async () => {
+      const currentCenter = await getMapCenter(page);
+      if (!currentCenter) {
+        return 0;
+      }
+      const dx = currentCenter[0] - initialCenter[0];
+      const dy = currentCenter[1] - initialCenter[1];
+      return Math.hypot(dx, dy);
+    }, { timeout: 30000 })
+    .toBeGreaterThan(1000);
+
+  await expect
+    .poll(async () => {
+      const currentCenter = await getMapCenter(page);
+      if (!currentCenter) {
+        return Number.POSITIVE_INFINITY;
+      }
+      const dx = currentCenter[0] - highlightedCoordinate[0];
+      const dy = currentCenter[1] - highlightedCoordinate[1];
+      return Math.hypot(dx, dy);
+    }, { timeout: 30000 })
+    .toBeLessThan(1000);
+
+  let previousCenter: [number, number] | undefined;
+  await expect
+    .poll(async () => {
+      const currentCenter = await getMapCenter(page);
+      if (!currentCenter) {
+        return false;
+      }
+      const stable =
+        previousCenter !== undefined &&
+        Math.hypot(currentCenter[0] - previousCenter[0], currentCenter[1] - previousCenter[1]) < 1;
+      previousCenter = currentCenter;
+      return stable;
+    }, { timeout: 30000 })
+    .toBe(true);
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box is not available.');
+  }
+
+  const layerSwitcherBox = await layerSwitcher.boundingBox();
+  const infoPanelBox = await infoPanel.boundingBox();
+  const geocoderPanelBox = await geocoderPanel.boundingBox();
+  const footerBox = await footer.boundingBox();
+
+  const leftLimit =
+    layerSwitcherBox ? Math.max(20, Math.round(layerSwitcherBox.x + layerSwitcherBox.width - mapBox.x + 20)) : 20;
+  const rightLimit =
+    infoPanelBox ? Math.min(Math.round(mapBox.width - 20), Math.round(infoPanelBox.x - mapBox.x - 20)) : Math.round(mapBox.width - 20);
+  const topLimit =
+    geocoderPanelBox ? Math.max(20, Math.round(geocoderPanelBox.y + geocoderPanelBox.height - mapBox.y + 20)) : 20;
+  const bottomLimit =
+    footerBox ? Math.min(Math.round(mapBox.height - 20), Math.round(footerBox.y - mapBox.y - 20)) : Math.round(mapBox.height - 20);
+
+  const unobscuredCenter = {
+    x: Math.round(leftLimit < rightLimit ? (leftLimit + rightLimit) / 2 : mapBox.width / 2),
+    y: Math.round(topLimit < bottomLimit ? (topLimit + bottomLimit) / 2 : mapBox.height / 2)
+  };
+
+  const rawCenter = {
+    x: Math.round(mapBox.width / 2),
+    y: Math.round(mapBox.height / 2)
+  };
+
+  const clickPositions =
+    unobscuredCenter.x === rawCenter.x && unobscuredCenter.y === rawCenter.y
+      ? [unobscuredCenter]
+      : [unobscuredCenter, rawCenter];
+
+  let forecastLoaded = false;
+
+  for (const position of clickPositions) {
+    await mapContainer.click({ position });
+
+    let loadOutcome: 'loaded' | 'error' | 'unsettled' = 'unsettled';
+
+    try {
+      await expect
+        .poll(async () => {
+          const text = await getNormalizedForecastText();
+          const counts = await getForecastEntryCounts();
+
+          if (counts.includes(24)) {
+            loadOutcome = 'loaded';
+            return true;
+          }
+
+          if (/Fehler beim Laden der Wetterdaten/i.test(text)) {
+            loadOutcome = 'error';
+            return true;
+          }
+
+          return false;
+        }, { timeout: 20000 })
+        .toBe(true);
+    } catch {
+      loadOutcome = 'unsettled';
+    }
+
+    if (loadOutcome === 'loaded') {
+      forecastLoaded = true;
+      break;
+    }
+  }
+
+  expect(forecastLoaded).toBe(true);
+  await expect(weatherForecastSection).not.toContainText('Fehler beim Laden der Wetterdaten');
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast');
+  await expect.poll(getForecastEntryCounts, { timeout: 30000 }).toContain(24);
+});
+```
+
+Playwright error output:
+Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+  258 |   }
+  259 |
+> 260 |   expect(forecastLoaded).toBe(true);
+      |                          ^
+  261 |   await expect(weatherForecastSection).not.toContainText('Fehler beim Laden der Wetterdaten');
+  262 |   await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast');
+  263 |   await expect.poll(getForecastEntryCounts, { timeout: 30000 }).toContain(24);
+    at c:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\app\llm\tests\stage_5_self_improvement_loop\run_39\uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast\uc-10-iter-4-configure-layers-search-for-a-location-and-load-the-weather-forecast.exec.spec.ts:260:26
+
+Application state at the point of failure (data-testids and accessibility tree
+captured AFTER the test steps that did run — elements listed here may not exist
+in the initial page state):
+data-testid attributes at failure:
+  - coordinate-viewer
+  - eucos-stations-legend
+  - footer
+  - geocoder-clear-button
+  - geocoder-input
+  - geocoder-panel
+  - info-panel
+  - info-panel-toggle
+  - initial-extent-button
+  - layer-switcher
+  - layer-switcher-toggle
+  - legend
+  - legend-toggle
+  - map-container
+  - map-controls-panel
+  - map-toolbar
+  - measurement-toggle
+  - precipitation-legend
+  - print-toggle
+  - scale-bar
+  - scale-viewer
+  - uvi-stations-legend
+  - weather-forecast-section
+  - zoom-in-button
+  - zoom-out-button
+
+Accessibility tree at failure:
+- application "webgis map"
+- heading "Layer Switcher" [level=1]
+- heading "Basemaps" [level=2]
+- combobox "Basemaps": Carto Light
+- heading "Operational layers Map tools" [level=2]:
+  - paragraph: Operational layers
+  - button "Map tools"
+- list "Operational layers":
+  - listitem:
+    - checkbox "EUCOS Ground Stations" [checked]
+    - text: EUCOS Ground Stations
+  - listitem:
+    - checkbox "UV-Index Stations" [checked]
+    - text: UV-Index Stations
+  - listitem:
+    - checkbox "Clouds"
+    - text: Clouds
+  - listitem:
+    - checkbox "Precipitation" [checked]
+    - text: Precipitation
+  - listitem:
+    - checkbox "Temperature"
+    - text: Temperature
+  - listitem:
+    - checkbox "UV-Index"
+    - text: UV-Index
+- separator
+- heading "Legend" [level=1]
+- list:
+  - listitem:
+    - heading "EUCOS Ground Stations" [level=1]
+    - paragraph: Type 0
+    - paragraph: Type 1
+    - paragraph: Type 2
+    - paragraph: Type 3
+  - listitem:
+    - heading "UV-Index Stations" [level=1]
+    - img "UV-Index Stations legend"
+  - listitem:
+    - heading "Precipitation (mm)" [level=1]
+    - paragraph: "0"
+    - paragraph: "50"
+    - paragraph: "100"
+    - paragraph: "150"
+- button "Zoom to initial extent"
+- button "Zoom in map"
+- button "Zoom out map"
+- button "Measurement"
+- button "Print Map"
+- button "Layer Switcher" [pressed]
+- button "Legend Switcher" [pressed]
+- button "Info Panel Switcher" [pressed]
+- heading "Information" [level=1]
+- heading "Weather Forecast" [level=1]
+- paragraph: Fehler beim Laden der Wetterdaten
+- textbox "Geocoder search":
+  - /placeholder: Search for a place
+  - text: Münster, North Rhine-Westphalia, Germany
+- button "Clear search": ✕
+- region "Footer Bar":
+  - region:
+    - paragraph: 7°37'30.68"(E) 51°57'44.85"(N) EPSG:4326
+    - text: 500 m
+    - region "Scale": "Current scale: 1 to 2739072"
+- region "Notifications"
+
+A screenshot of the application at the point of failure is attached as an image. It shows the visual state including the canvas-rendered map, which is not represented in the accessibility tree.
+
+Fix the test so that it correctly verifies the use case and passes.
+Do not weaken or remove assertions just to make the test pass — the test must
+still verify the behaviour described in the use case.
+Return only the corrected test code.

@@ -1,0 +1,129 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const titleCandidates = [
+        page.getByRole('textbox', { name: /title/i }),
+        page.getByLabel(/title/i),
+        page.getByPlaceholder(/title/i)
+    ];
+
+    let printPanelOpen = false;
+    for (const candidate of titleCandidates) {
+        if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+            printPanelOpen = true;
+            break;
+        }
+    }
+
+    if (!printPanelOpen) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    let titleInput = page.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = page.getByLabel(/title/i);
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = page.getByPlaceholder(/title/i);
+    }
+    titleInput = titleInput.first();
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Current Weather Map');
+
+    const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+    if ((await pngRadio.count()) > 0) {
+        await expect(pngRadio.first()).toBeVisible();
+        await pngRadio.first().click({ force: true });
+        await expect(pngRadio.first()).toBeChecked();
+    } else {
+        let formatControl = page.getByRole('combobox', { name: /format/i });
+        if ((await formatControl.count()) === 0) {
+            formatControl = page.getByLabel(/format/i);
+        }
+
+        if ((await formatControl.count()) > 0) {
+            const control = formatControl.first();
+            await expect(control).toBeVisible();
+
+            try {
+                await control.selectOption({ label: 'PNG' });
+            } catch {
+                await control.click();
+                const pngOption = page.getByRole('option', { name: /^PNG$/i });
+                if ((await pngOption.count()) > 0) {
+                    await expect(pngOption.first()).toBeVisible();
+                    await pngOption.first().click();
+                } else {
+                    const pngButton = page.getByRole('button', { name: /^PNG$/i });
+                    await expect(pngButton.first()).toBeVisible();
+                    await pngButton.first().click();
+                }
+            }
+        } else {
+            const pngButton = page.getByRole('button', { name: /^PNG$/i });
+            await expect(pngButton.first()).toBeVisible();
+            await pngButton.first().click();
+        }
+    }
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    let exportButton = page.getByRole('button', { name: /^Export$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Download$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = page.getByRole('button', { name: /^Print$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        const printMapButtons = page.getByRole('button', { name: /^Print Map$/i });
+        if ((await printMapButtons.count()) > 1) {
+            exportButton = printMapButtons.nth((await printMapButtons.count()) - 1);
+        } else {
+            exportButton = printMapButtons;
+        }
+    }
+
+    const downloadPromise = page.waitForEvent('download');
+    await expect(exportButton.first()).toBeVisible();
+    await exportButton.first().click();
+
+    const download = await downloadPromise;
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (!downloadPath) {
+        throw new Error('Expected a downloaded PNG file, but no download path was available.');
+    }
+
+    const fileContent = await readFile(downloadPath);
+    expect(fileContent.byteLength).toBeGreaterThan(1000);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    const width = fileContent.readUInt32BE(16);
+    const height = fileContent.readUInt32BE(20);
+    expect(width).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+});

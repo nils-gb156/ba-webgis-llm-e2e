@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '../../../failure-snapshot-fixture';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC9 - Print the current map view as a PNG', async ({ page }, testInfo) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printPanel = page.getByTestId('printing-panel');
+
+    if (!(await printPanel.isVisible())) {
+        const pressed = await printToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await printToggle.click();
+        }
+    }
+
+    await expect(printPanel).toBeVisible();
+    await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+
+    const printDialog = page.getByRole('dialog', { name: 'Print Map', exact: true });
+    await expect(printDialog).toBeVisible();
+
+    const titleInput = printDialog.getByRole('textbox', { name: 'Title', exact: true });
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'Weather map export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const formatSelect = printDialog.getByRole('combobox', { name: 'File format', exact: true });
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption({ label: 'PNG' });
+
+    await expect.poll(() =>
+        formatSelect.evaluate((element) =>
+            element instanceof HTMLSelectElement ? element.selectedOptions[0]?.text ?? '' : ''
+        )
+    ).toBe('PNG');
+
+    const exportButton = printDialog.getByRole('button', { name: 'Export map', exact: true });
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+    expect(await download.failure()).toBeNull();
+
+    const outputFile = testInfo.outputPath(download.suggestedFilename());
+    await download.saveAs(outputFile);
+
+    const fileBytes = await readFile(outputFile);
+    expect(fileBytes.length).toBeGreaterThan(10_000);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    const width = fileBytes.readUInt32BE(16);
+    const height = fileBytes.readUInt32BE(20);
+    expect(width).toBeGreaterThan(200);
+    expect(height).toBeGreaterThan(200);
+});

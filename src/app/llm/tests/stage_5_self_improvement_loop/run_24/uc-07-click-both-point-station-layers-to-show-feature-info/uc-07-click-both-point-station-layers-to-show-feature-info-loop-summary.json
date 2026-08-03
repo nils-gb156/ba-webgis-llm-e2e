@@ -1,0 +1,58 @@
+{
+  "run": "run_24",
+  "use_case_id": 7,
+  "title": "Click both point station layers to show feature info",
+  "complexity": "hard",
+  "passed": true,
+  "iterations_used": 5,
+  "max_iterations": 10,
+  "screenshots_enabled": true,
+  "final_spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+  "history": [
+    {
+      "iteration": 0,
+      "spec": "uc-07-iter-0-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByTestId('info-panel')\nExpected substring: \"EUCOS Ground Station\"\nReceived string:    \"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 02:00 AMlight rainTemperature13.77 Â°CHumidity74 %Wind direction268Â°Wind speed5.65 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.87 Â°CHumidity81 %Wind direction280Â°Wind speed4.63 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.05 Â°CHumidity83 %Wind direction294Â°Wind speed4"
+    },
+    {
+      "iteration": 1,
+      "spec": "uc-07-iter-1-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 1\n\n  Array [\n    1188693,\n-   6767643,\n+   6768255,\n  ]\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate\n\n  129 |         : undefined;\n  130 |     })\n> 131 |     .toEqual([1188693, 6767643]);\n      |      ^\n  132 |\n  133 |   await expect\n  134 |     .poll(async () => {\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_24\\uc-07-click-both-"
+    },
+    {
+      "iteration": 2,
+      "spec": "uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "element_not_found",
+      "error_excerpt": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByTestId('uvi-station-section')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 5000ms\n  - waiting for getByTestId('uvi-station-section')\n\n\n  90 |   await expect.poll(() => featureInfoRequests.length).toBeGreaterThan(0);\n  91 |\n> 92 |   await expect(uviSection).toBeVisible();\n     |                            ^\n  93 |   await expect(uviInfo).toBeVisible();\n  94 |   await expect"
+    },
+    {
+      "iteration": 3,
+      "spec": "uc-07-iter-3-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": false,
+      "failure_snapshot_captured": true,
+      "failure_screenshot_captured": true,
+      "error_type": "assertion_fail",
+      "error_excerpt": "Error: expect(received).toMatch(expected)\n\nExpected pattern: /UV-Index Station .*? Identifier (.+?) Name (.+?) (?:Alias|Station Height)/\nReceived string:  \"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 02:00 AMlight rainTemperature13.77 Â°CHumidity74 %Wind direction268Â°Wind speed5.65 m/sMon, Jul 27, 05:00 AMlight rainTemperature13.87 Â°CHumidity81 %Wind direction280Â°Wind speed4.63 m/sMon, Jul 27, 08:00 AMlight rainTemperature15.05 Â°CHumidity83 %Wind direction294Â°Wind spee"
+    },
+    {
+      "iteration": 4,
+      "spec": "uc-07-iter-4-click-both-point-station-layers-to-show-feature-info.spec.ts",
+      "passed": true,
+      "failure_snapshot_captured": false,
+      "failure_screenshot_captured": false,
+      "error_type": "none",
+      "error_excerpt": ""
+    }
+  ]
+}

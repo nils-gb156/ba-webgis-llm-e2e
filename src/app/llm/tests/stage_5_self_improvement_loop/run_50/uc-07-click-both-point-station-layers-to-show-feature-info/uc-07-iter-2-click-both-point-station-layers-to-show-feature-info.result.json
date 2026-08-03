@@ -1,0 +1,136 @@
+{
+  "config": {
+    "configFile": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\playwright.config.ts",
+    "rootDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "c:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 11,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "file": "llm/tests/stage_5_self_improvement_loop/run_50/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Use Case 7: Click both point station layers to show feature info",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 29776,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/EUCOS Ground Station/\u001b[39m\nReceived string:  \u001b[31m\"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 11:00 AMlight rainTemperature14.81 Â°CHumidity74 %Wind direction293Â°Wind speed4.04 m/sMon, Jul 27, 02:00 PMlight rainTemperature16.12 Â°CHumidity70 %Wind direction283Â°Wind speed5.52 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature18.49 Â°CHumidity64 %Wind direction279Â°Wind speed4.33 m/sMon, Jul 27, 08:00 PMlight rainTemperature16.6 Â°CHumidity78 %Wind direction284Â°Wind speed3.49 m/sMon, Jul 27, 11:00 PMlight rainTemperature13.88 Â°CHumidity96 %Wind direction261Â°Wind speed1.79 m/sTue, Jul 28, 02:00 AMfew cloudsTemperature13.07 Â°CHumidity97 %Wind direction241Â°Wind speed1.8 m/sTue, Jul 28, 05:00 AMfew cloudsTemperature10.55 Â°CHumidity96 %Wind direction247Â°Wind speed2.11 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature15.06 Â°CHumidity78 %Wind direction257Â°Wind speed2.15 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.32 Â°CHumidity49 %Wind direction274Â°Wind speed3.09 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature24.79 Â°CHumidity46 %Wind direction265Â°Wind speed3.94 m/sTue, Jul 28, 05:00 PMscattered cloudsTemperature25.91 Â°CHumidity46 %Wind direction286Â°Wind speed3.85 m/sTue, Jul 28, 08:00 PMscattered cloudsTemperature22.74 Â°CHumidity63 %Wind direction277Â°Wind speed0.88 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature18.27 Â°CHumidity73 %Wind direction216Â°Wind speed0.69 m/sWed, Jul 29, 02:00 AMscattered cloudsTemperature17.73 Â°CHumidity73 %Wind direction181Â°Wind speed1.51 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature16.06 Â°CHumidity74 %Wind direction190Â°Wind speed1.5 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature20.89 Â°CHumidity61 %Wind direction181Â°Wind speed1.38 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature26.42 Â°CHumidity40 %Wind direction193Â°Wind speed1.99 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature29.07 Â°CHumidity33 %Wind direction184Â°Wind speed2.79 m/sWed, Jul 29, 05:00 PMclear skyTemperature30.11 Â°CHumidity31 %Wind direction178Â°Wind speed2.19 m/sWed, Jul 29, 08:00 PMclear skyTemperature25.74 Â°CHumidity51 %Wind direction206Â°Wind speed0.55 m/sWed, Jul 29, 11:00 PMclear skyTemperature21.62 Â°CHumidity52 %Wind direction157Â°Wind speed1.8 m/sThu, Jul 30, 02:00 AMclear skyTemperature20.71 Â°CHumidity53 %Wind direction181Â°Wind speed2.41 m/sThu, Jul 30, 05:00 AMclear skyTemperature21.27 Â°CHumidity49 %Wind direction193Â°Wind speed2.3 m/sThu, Jul 30, 08:00 AMclear skyTemperature25.52 Â°CHumidity48 %Wind direction195Â°Wind speed2.37 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\n\nCall Log:\n- Test timeout of 30000ms exceeded",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/EUCOS Ground Station/\u001b[39m\nReceived string:  \u001b[31m\"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 11:00 AMlight rainTemperature14.81 Â°CHumidity74 %Wind direction293Â°Wind speed4.04 m/sMon, Jul 27, 02:00 PMlight rainTemperature16.12 Â°CHumidity70 %Wind direction283Â°Wind speed5.52 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature18.49 Â°CHumidity64 %Wind direction279Â°Wind speed4.33 m/sMon, Jul 27, 08:00 PMlight rainTemperature16.6 Â°CHumidity78 %Wind direction284Â°Wind speed3.49 m/sMon, Jul 27, 11:00 PMlight rainTemperature13.88 Â°CHumidity96 %Wind direction261Â°Wind speed1.79 m/sTue, Jul 28, 02:00 AMfew cloudsTemperature13.07 Â°CHumidity97 %Wind direction241Â°Wind speed1.8 m/sTue, Jul 28, 05:00 AMfew cloudsTemperature10.55 Â°CHumidity96 %Wind direction247Â°Wind speed2.11 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature15.06 Â°CHumidity78 %Wind direction257Â°Wind speed2.15 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.32 Â°CHumidity49 %Wind direction274Â°Wind speed3.09 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature24.79 Â°CHumidity46 %Wind direction265Â°Wind speed3.94 m/sTue, Jul 28, 05:00 PMscattered cloudsTemperature25.91 Â°CHumidity46 %Wind direction286Â°Wind speed3.85 m/sTue, Jul 28, 08:00 PMscattered cloudsTemperature22.74 Â°CHumidity63 %Wind direction277Â°Wind speed0.88 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature18.27 Â°CHumidity73 %Wind direction216Â°Wind speed0.69 m/sWed, Jul 29, 02:00 AMscattered cloudsTemperature17.73 Â°CHumidity73 %Wind direction181Â°Wind speed1.51 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature16.06 Â°CHumidity74 %Wind direction190Â°Wind speed1.5 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature20.89 Â°CHumidity61 %Wind direction181Â°Wind speed1.38 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature26.42 Â°CHumidity40 %Wind direction193Â°Wind speed1.99 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature29.07 Â°CHumidity33 %Wind direction184Â°Wind speed2.79 m/sWed, Jul 29, 05:00 PMclear skyTemperature30.11 Â°CHumidity31 %Wind direction178Â°Wind speed2.19 m/sWed, Jul 29, 08:00 PMclear skyTemperature25.74 Â°CHumidity51 %Wind direction206Â°Wind speed0.55 m/sWed, Jul 29, 11:00 PMclear skyTemperature21.62 Â°CHumidity52 %Wind direction157Â°Wind speed1.8 m/sThu, Jul 30, 02:00 AMclear skyTemperature20.71 Â°CHumidity53 %Wind direction181Â°Wind speed2.41 m/sThu, Jul 30, 05:00 AMclear skyTemperature21.27 Â°CHumidity49 %Wind direction193Â°Wind speed2.3 m/sThu, Jul 30, 08:00 AMclear skyTemperature25.52 Â°CHumidity48 %Wind direction195Â°Wind speed2.37 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\n\nCall Log:\n- Test timeout of 30000ms exceeded\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:147:94",
+                    "location": {
+                      "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                      "column": 94,
+                      "line": 147
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 145 |\u001b[39m         \u001b[35m/UV-Index Station/\u001b[39m\n \u001b[90m 146 |\u001b[39m     )\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 147 |\u001b[39m     \u001b[36mawait\u001b[39m expect\u001b[33m.\u001b[39mpoll(\u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m (\u001b[36mawait\u001b[39m infoPanel\u001b[33m.\u001b[39mtextContent()) \u001b[33m?\u001b[39m\u001b[33m?\u001b[39m \u001b[32m''\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m30000\u001b[39m })\u001b[33m.\u001b[39mtoMatch(\n \u001b[90m     |\u001b[39m                                                                                              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 148 |\u001b[39m         \u001b[35m/EUCOS Ground Station/\u001b[39m\n \u001b[90m 149 |\u001b[39m     )\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                        "column": 94,
+                        "line": 147
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/EUCOS Ground Station/\u001b[39m\nReceived string:  \u001b[31m\"InformationWeather ForecastLocation: Darlingerode, DEMon, Jul 27, 11:00 AMlight rainTemperature14.81 Â°CHumidity74 %Wind direction293Â°Wind speed4.04 m/sMon, Jul 27, 02:00 PMlight rainTemperature16.12 Â°CHumidity70 %Wind direction283Â°Wind speed5.52 m/sMon, Jul 27, 05:00 PMovercast cloudsTemperature18.49 Â°CHumidity64 %Wind direction279Â°Wind speed4.33 m/sMon, Jul 27, 08:00 PMlight rainTemperature16.6 Â°CHumidity78 %Wind direction284Â°Wind speed3.49 m/sMon, Jul 27, 11:00 PMlight rainTemperature13.88 Â°CHumidity96 %Wind direction261Â°Wind speed1.79 m/sTue, Jul 28, 02:00 AMfew cloudsTemperature13.07 Â°CHumidity97 %Wind direction241Â°Wind speed1.8 m/sTue, Jul 28, 05:00 AMfew cloudsTemperature10.55 Â°CHumidity96 %Wind direction247Â°Wind speed2.11 m/sTue, Jul 28, 08:00 AMscattered cloudsTemperature15.06 Â°CHumidity78 %Wind direction257Â°Wind speed2.15 m/sTue, Jul 28, 11:00 AMfew cloudsTemperature18.32 Â°CHumidity49 %Wind direction274Â°Wind speed3.09 m/sTue, Jul 28, 02:00 PMscattered cloudsTemperature24.79 Â°CHumidity46 %Wind direction265Â°Wind speed3.94 m/sTue, Jul 28, 05:00 PMscattered cloudsTemperature25.91 Â°CHumidity46 %Wind direction286Â°Wind speed3.85 m/sTue, Jul 28, 08:00 PMscattered cloudsTemperature22.74 Â°CHumidity63 %Wind direction277Â°Wind speed0.88 m/sTue, Jul 28, 11:00 PMfew cloudsTemperature18.27 Â°CHumidity73 %Wind direction216Â°Wind speed0.69 m/sWed, Jul 29, 02:00 AMscattered cloudsTemperature17.73 Â°CHumidity73 %Wind direction181Â°Wind speed1.51 m/sWed, Jul 29, 05:00 AMovercast cloudsTemperature16.06 Â°CHumidity74 %Wind direction190Â°Wind speed1.5 m/sWed, Jul 29, 08:00 AMovercast cloudsTemperature20.89 Â°CHumidity61 %Wind direction181Â°Wind speed1.38 m/sWed, Jul 29, 11:00 AMbroken cloudsTemperature26.42 Â°CHumidity40 %Wind direction193Â°Wind speed1.99 m/sWed, Jul 29, 02:00 PMscattered cloudsTemperature29.07 Â°CHumidity33 %Wind direction184Â°Wind speed2.79 m/sWed, Jul 29, 05:00 PMclear skyTemperature30.11 Â°CHumidity31 %Wind direction178Â°Wind speed2.19 m/sWed, Jul 29, 08:00 PMclear skyTemperature25.74 Â°CHumidity51 %Wind direction206Â°Wind speed0.55 m/sWed, Jul 29, 11:00 PMclear skyTemperature21.62 Â°CHumidity52 %Wind direction157Â°Wind speed1.8 m/sThu, Jul 30, 02:00 AMclear skyTemperature20.71 Â°CHumidity53 %Wind direction181Â°Wind speed2.41 m/sThu, Jul 30, 05:00 AMclear skyTemperature21.27 Â°CHumidity49 %Wind direction193Â°Wind speed2.3 m/sThu, Jul 30, 08:00 AMclear skyTemperature25.52 Â°CHumidity48 %Wind direction195Â°Wind speed2.37 m/sUV-Index StationIdentifier10454NameWernigerodeAliasWernigerodeStation Height234Alpha-3 CodeDEUCountryGermany\r\"\u001b[39m\n\nCall Log:\n- Test timeout of 30000ms exceeded\n\n  145 |         /UV-Index Station/\n  146 |     );\n> 147 |     await expect.poll(async () => (await infoPanel.textContent()) ?? '', { timeout: 30000 }).toMatch(\n      |                                                                                              ^\n  148 |         /EUCOS Ground Station/\n  149 |     );\n  150 |\n    at c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts:147:94"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-27T08:28:11.883Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\test-results\\llm-tests-stage_5_self_imp-81396-layers-to-show-feature-info-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "c:\\Users\\n.beikel\\repos\\ba-webgis-llm-e2e\\src\\app\\llm\\tests\\stage_5_self_improvement_loop\\run_50\\uc-07-click-both-point-station-layers-to-show-feature-info\\uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+                    "column": 94,
+                    "line": 147
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "ef9f403d98821eca0997-43e8a041435598b6da5a",
+          "file": "llm/tests/stage_5_self_improvement_loop/run_50/uc-07-click-both-point-station-layers-to-show-feature-info/uc-07-iter-2-click-both-point-station-layers-to-show-feature-info.exec.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-27T08:28:10.978Z",
+    "duration": 33035.58,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

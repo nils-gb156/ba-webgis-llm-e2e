@@ -1,0 +1,169 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../../map-model-helpers';
+
+test('UC9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    let titleInput = page.getByRole('textbox', { name: /title/i });
+
+    if (!(await titleInput.isVisible().catch(() => false))) {
+        await printToggle.click();
+    }
+
+    titleInput = page.getByRole('textbox', { name: /title/i });
+    await expect(titleInput).toBeVisible();
+
+    const namedFormatCombobox = page.getByRole('combobox', { name: /format/i });
+    const pngRadio = page.getByRole('radio', { name: /^png$/i });
+    const pngButton = page.getByRole('button', { name: /^png$/i });
+
+    await expect.poll(async () => {
+        if (await namedFormatCombobox.isVisible().catch(() => false)) {
+            return 'named-combobox';
+        }
+
+        const allComboboxes = page.getByRole('combobox');
+        if ((await allComboboxes.count()) > 1) {
+            return 'fallback-combobox';
+        }
+
+        if (await pngRadio.isVisible().catch(() => false)) {
+            return 'radio';
+        }
+
+        if (await pngButton.isVisible().catch(() => false)) {
+            return 'button';
+        }
+
+        return 'none';
+    }).not.toBe('none');
+
+    const printTitle = 'UC9 Playwright PNG Export';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    let pngSelected = false;
+
+    if (await namedFormatCombobox.isVisible().catch(() => false)) {
+        const attempts: Array<{ label?: string; value?: string }> = [
+            { label: 'PNG' },
+            { label: 'Png' },
+            { value: 'png' },
+            { value: 'PNG' },
+            { value: 'image/png' }
+        ];
+
+        for (const attempt of attempts) {
+            try {
+                await namedFormatCombobox.selectOption(attempt);
+                pngSelected = true;
+                break;
+            } catch {
+                // try next option mapping
+            }
+        }
+
+        if (pngSelected) {
+            await expect
+                .poll(async () => (await namedFormatCombobox.inputValue()).toLowerCase())
+                .toContain('png');
+        }
+    }
+
+    if (!pngSelected) {
+        const allComboboxes = page.getByRole('combobox');
+        if ((await allComboboxes.count()) > 1) {
+            const fallbackFormatCombobox = allComboboxes.nth(1);
+            const attempts: Array<{ label?: string; value?: string }> = [
+                { label: 'PNG' },
+                { label: 'Png' },
+                { value: 'png' },
+                { value: 'PNG' },
+                { value: 'image/png' }
+            ];
+
+            for (const attempt of attempts) {
+                try {
+                    await fallbackFormatCombobox.selectOption(attempt);
+                    pngSelected = true;
+                    break;
+                } catch {
+                    // try next option mapping
+                }
+            }
+
+            if (pngSelected) {
+                await expect
+                    .poll(async () => (await fallbackFormatCombobox.inputValue()).toLowerCase())
+                    .toContain('png');
+            }
+        }
+    }
+
+    if (!pngSelected && (await pngRadio.isVisible().catch(() => false))) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+        pngSelected = true;
+    }
+
+    if (!pngSelected && (await pngButton.isVisible().catch(() => false))) {
+        await pngButton.click();
+        pngSelected = true;
+    }
+
+    expect(pngSelected).toBe(true);
+
+    const exportButton = page.getByRole('button', { name: /^export$/i });
+    const printButton = page.getByRole('button', { name: /^print$/i });
+    const downloadButton = page.getByRole('button', { name: /^download$/i });
+    const generateButton = page.getByRole('button', { name: /^generate$/i });
+
+    let actionButton = exportButton;
+
+    if (await exportButton.isVisible().catch(() => false)) {
+        actionButton = exportButton;
+    } else if (await printButton.isVisible().catch(() => false)) {
+        actionButton = printButton;
+    } else if (await downloadButton.isVisible().catch(() => false)) {
+        actionButton = downloadButton;
+    } else if (await generateButton.isVisible().catch(() => false)) {
+        actionButton = generateButton;
+    } else {
+        const printMapButtons = page.getByRole('button', { name: /^print map$/i });
+        expect(await printMapButtons.count()).toBeGreaterThan(1);
+        actionButton = printMapButtons.last();
+    }
+
+    await expect(actionButton).toBeVisible();
+    await expect(actionButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await actionButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const outputFile = test.info().outputPath(download.suggestedFilename());
+    await download.saveAs(outputFile);
+
+    const fileContent = await readFile(outputFile);
+    expect(fileContent.length).toBeGreaterThan(5_000);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});
