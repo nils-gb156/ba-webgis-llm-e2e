@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const forecastPlaceholder = weatherForecastSection.getByText('Click on the map to load a forecast.');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanelToggle).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(forecastPlaceholder).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(mapBox.width * 0.5),
+      y: Math.round(mapBox.height * 0.5)
+    }
+  });
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(forecastPlaceholder).not.toBeVisible();
+
+  await expect.poll(async () => {
+    const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+    const rowCount = await weatherForecastSection.getByRole('row').count();
+    const columnHeaderCount = await weatherForecastSection.getByRole('columnheader').count();
+    const adjustedRowCount = rowCount > 0 && columnHeaderCount > 0 ? rowCount - 1 : rowCount;
+    const sectionText = await weatherForecastSection.innerText();
+    const hourMatches = sectionText.match(/\b\d{1,2}:\d{2}\b/g) ?? [];
+    const uniqueHourCount = new Set(hourMatches).size;
+
+    return Math.max(listItemCount, adjustedRowCount, uniqueHourCount);
+  }).toBe(24);
+});

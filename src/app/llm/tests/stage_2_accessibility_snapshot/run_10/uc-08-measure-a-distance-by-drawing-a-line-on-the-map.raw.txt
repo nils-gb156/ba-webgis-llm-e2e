@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementButton = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementButton).toBeVisible();
+
+  const measurementPanelIndicator = page
+    .getByRole('dialog', { name: /measurement/i })
+    .or(page.getByRole('region', { name: /measurement/i }))
+    .or(page.getByRole('heading', { name: 'Measurement', exact: true }));
+
+  const isMeasurementPanelVisibleBeforeClick = await measurementPanelIndicator.first().isVisible().catch(() => false);
+  if (!isMeasurementPanelVisibleBeforeClick) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementPanelIndicator.first()).toBeVisible();
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = box!.width;
+  const height = box!.height;
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(width * 0.25),
+      y: Math.round(height * 0.35)
+    }
+  });
+  await mapContainer.click({
+    position: {
+      x: Math.round(width * 0.45),
+      y: Math.round(height * 0.42)
+    }
+  });
+  await mapContainer.click({
+    position: {
+      x: Math.round(width * 0.62),
+      y: Math.round(height * 0.52)
+    }
+  });
+  await mapContainer.dblclick({
+    position: {
+      x: Math.round(width * 0.78),
+      y: Math.round(height * 0.6)
+    }
+  });
+
+  const lengthValue = page.getByText(/\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i).first();
+  await expect(lengthValue).toBeVisible();
+  await expect(lengthValue).toHaveText(/\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i);
+});

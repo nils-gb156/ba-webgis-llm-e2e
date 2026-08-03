@@ -1,0 +1,147 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Basemaps', exact: true })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+
+  let titleInput = page.getByRole('textbox', { name: /title/i });
+  if (!(await titleInput.isVisible())) {
+    await printToggle.click();
+  }
+
+  titleInput = page.getByRole('textbox', { name: /title/i });
+  if ((await titleInput.count()) === 0) {
+    titleInput = page.getByLabel(/title/i);
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const printDialog = page.getByRole('dialog').filter({ has: titleInput });
+  const hasPrintDialog = (await printDialog.count()) > 0;
+  if (hasPrintDialog) {
+    await expect(printDialog).toBeVisible();
+  }
+
+  const printTitle = 'Playwright PNG export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  let pngSelected = false;
+
+  const pngRadio = hasPrintDialog
+    ? printDialog.getByRole('radio', { name: /^PNG$/i })
+    : page.getByRole('radio', { name: /^PNG$/i });
+
+  if ((await pngRadio.count()) > 0) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+    pngSelected = true;
+  }
+
+  if (!pngSelected) {
+    const formatCombobox = hasPrintDialog
+      ? printDialog.getByRole('combobox', { name: /format/i })
+      : page.getByRole('combobox', { name: /format/i });
+
+    await expect(formatCombobox).toBeVisible();
+
+    const tagName = await formatCombobox.evaluate((element) => element.tagName);
+
+    if (tagName === 'SELECT') {
+      const pngValue = await formatCombobox.evaluate((element) => {
+        if (!(element instanceof HTMLSelectElement)) {
+          return null;
+        }
+
+        const option = Array.from(element.options).find(
+          (entry) => /png/i.test(entry.label) || /png/i.test(entry.value)
+        );
+
+        return option?.value ?? null;
+      });
+
+      expect(pngValue).not.toBeNull();
+
+      if (pngValue !== null) {
+        await formatCombobox.selectOption(pngValue);
+      }
+
+      await expect(formatCombobox).toHaveValue(/png/i);
+    } else {
+      await formatCombobox.click();
+
+      const pngOption = hasPrintDialog
+        ? printDialog.getByRole('option', { name: /^PNG$/i })
+        : page.getByRole('option', { name: /^PNG$/i });
+
+      if ((await pngOption.count()) > 0) {
+        await pngOption.click();
+      } else {
+        const pngText = hasPrintDialog ? printDialog.getByText(/^PNG$/i) : page.getByText(/^PNG$/i);
+        await pngText.click();
+      }
+
+      await expect(formatCombobox).toContainText(/png/i);
+    }
+
+    pngSelected = true;
+  }
+
+  expect(pngSelected).toBeTruthy();
+
+  let exportButton = hasPrintDialog
+    ? printDialog.getByRole('button', { name: /^Export$/i })
+    : page.getByRole('button', { name: /^Export$/i });
+
+  if ((await exportButton.count()) === 0) {
+    exportButton = hasPrintDialog
+      ? printDialog.getByRole('button', { name: /^Download$/i })
+      : page.getByRole('button', { name: /^Download$/i });
+  }
+
+  if ((await exportButton.count()) === 0) {
+    exportButton = hasPrintDialog
+      ? printDialog.getByRole('button', { name: /^Generate/i })
+      : page.getByRole('button', { name: /^Generate/i });
+  }
+
+  if ((await exportButton.count()) === 0) {
+    exportButton = hasPrintDialog
+      ? printDialog.getByRole('button', { name: /^Print$/i })
+      : page.getByRole('button', { name: /^Print$/i });
+  }
+
+  if ((await exportButton.count()) === 0) {
+    exportButton = hasPrintDialog
+      ? printDialog.getByRole('button', { name: /^Print Map$/i })
+      : page.getByRole('button', { name: /^Print Map$/i }).last();
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+  expect(await download.failure()).toBeNull();
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  if (downloadPath) {
+    const fileContent = await readFile(downloadPath);
+    expect(fileContent.length).toBeGreaterThan(1024);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+  }
+});

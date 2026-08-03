@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapApplication = page.getByRole('application', { name: 'webgis map' });
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapApplication).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanelToggle).toBeVisible();
+
+  const infoPanelVisible = await infoPanel.isVisible();
+  const infoPanelPressed = await infoPanelToggle.getAttribute('aria-pressed');
+  if (!infoPanelVisible || infoPanelPressed !== 'true') {
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(forecastSection).toBeVisible();
+  await expect(forecastSection).toContainText('Click on the map to load a forecast.');
+
+  const findForecastEntryCount = (value: unknown): number | undefined => {
+    if (Array.isArray(value)) {
+      const looksLikeForecastObjects =
+        value.length === 24 &&
+        value.every(
+          (item) =>
+            item !== null &&
+            typeof item === 'object' &&
+            Object.keys(item as Record<string, unknown>).some((key) =>
+              /(time|date|temp|icon|wind|cloud|precip|uv|humidity)/i.test(key)
+            )
+        );
+
+      if (looksLikeForecastObjects) {
+        return 24;
+      }
+
+      for (const item of value) {
+        const nestedCount = findForecastEntryCount(item);
+        if (nestedCount !== undefined) {
+          return nestedCount;
+        }
+      }
+
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+      const seriesKeys = Object.entries(record).filter(
+        ([key, nested]) =>
+          Array.isArray(nested) &&
+          nested.length === 24 &&
+          /(time|date|temp|icon|wind|cloud|precip|uv|humidity)/i.test(key)
+      );
+
+      if (seriesKeys.length > 0) {
+        return 24;
+      }
+
+      for (const nested of Object.values(record)) {
+        const nestedCount = findForecastEntryCount(nested);
+        if (nestedCount !== undefined) {
+          return nestedCount;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  const observedRequestUrls: string[] = [];
+  const observedForecastResponseCounts: number[] = [];
+
+  page.on('request', (request) => {
+    if (request.resourceType() === 'fetch' || request.resourceType() === 'xhr') {
+      observedRequestUrls.push(request.url());
+    }
+  });
+
+  page.on('response', async (response) => {
+    if (response.request().resourceType() !== 'fetch' && response.request().resourceType() !== 'xhr') {
+      return;
+    }
+
+    const contentType = response.headers()['content-type'] ?? '';
+    if (!contentType.includes('application/json')) {
+      return;
+    }
+
+    try {
+      const body = await response.json();
+      const count = findForecastEntryCount(body);
+      if (count !== undefined) {
+        observedForecastResponseCounts.push(count);
+      }
+    } catch {
+      // Ignore non-JSON or unreadable responses.
+    }
+  });
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await mapContainer.click({
+    position: {
+      x: Math.round((mapBox?.width ?? 800) * 0.35),
+      y: Math.round((mapBox?.height ?? 600) * 0.45)
+    }
+  });
+
+  await expect.poll(() => observedRequestUrls.length).toBeGreaterThan(0);
+  await expect(forecastSection).toBeVisible();
+  await expect(forecastSection).not.toContainText('Click on the map to load a forecast.');
+  await expect.poll(() => observedForecastResponseCounts).toContain(24);
+});

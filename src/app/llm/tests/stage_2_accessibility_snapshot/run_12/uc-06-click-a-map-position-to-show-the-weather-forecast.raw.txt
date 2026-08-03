@@ -1,0 +1,75 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  const forecastPlaceholder = forecastSection.getByText('Click on the map to load a forecast.', { exact: true });
+
+  await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(forecastSection).toBeVisible();
+  await expect(forecastPlaceholder).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('The map container has no bounding box and cannot be clicked.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(mapBox.width * 0.5),
+      y: Math.round(mapBox.height * 0.5)
+    }
+  });
+
+  await expect(forecastSection).toBeVisible();
+
+  const getForecastEntryCount = async (): Promise<number> => {
+    return await forecastSection.evaluate((section) => {
+      const exactCountSelectors = ['[role="listitem"]', 'li', '[role="row"]', 'tr', 'article'];
+
+      for (const selector of exactCountSelectors) {
+        const count = section.querySelectorAll(selector).length;
+        if (count === 24) {
+          return 24;
+        }
+      }
+
+      const text = section.textContent ?? '';
+      const timeMatches = text.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g) ?? [];
+      if (timeMatches.length === 24) {
+        return 24;
+      }
+
+      const containers = [section, ...Array.from(section.querySelectorAll('*'))];
+      for (const container of containers) {
+        const visibleChildren = Array.from(container.children).filter((child) => {
+          const style = window.getComputedStyle(child);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+
+        if (visibleChildren.length === 24) {
+          return 24;
+        }
+      }
+
+      return 0;
+    });
+  };
+
+  await expect.poll(getForecastEntryCount).toBe(24);
+});

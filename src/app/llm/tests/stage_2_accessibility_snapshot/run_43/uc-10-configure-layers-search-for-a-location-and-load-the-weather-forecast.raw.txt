@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC10 Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  const temperatureToggle = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+  const initialCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const firstSearchResult = geocoderPanel.getByRole('option').first();
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await expect.poll(async () => {
+    const currentScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+    const currentCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+    return currentScaleText !== initialScaleText || currentCoordinateText !== initialCoordinateText;
+  }).toBe(true);
+
+  await expect(forecastSection).toBeVisible();
+  await expect(forecastSection.getByRole('listitem')).toHaveCount(24);
+});

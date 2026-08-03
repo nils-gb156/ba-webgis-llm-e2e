@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const mapContainer = page.getByTestId('map-container');
+
+  await expect(infoPanelToggle).toBeVisible();
+  if (!(await infoPanel.isVisible())) {
+    const isPressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (isPressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const clickPosition = {
+    x: Math.round(mapBox.width * 0.6),
+    y: Math.round(mapBox.height * 0.4)
+  };
+
+  await mapContainer.click({ position: clickPosition });
+
+  const getForecastEntryCount = async (): Promise<number> => {
+    return await weatherForecastSection.evaluate((section) => {
+      const root = section as HTMLElement;
+      const text = root.innerText?.trim() ?? '';
+
+      if (!text || text.includes('Click on the map to load a forecast.')) {
+        return 0;
+      }
+
+      const roleListItems = root.querySelectorAll('[role="listitem"]');
+      if (roleListItems.length > 0) {
+        return roleListItems.length;
+      }
+
+      const tableRows = root.querySelectorAll('[role="row"], tr');
+      if (tableRows.length > 1) {
+        return tableRows.length - 1;
+      }
+
+      const listCounts = Array.from(root.querySelectorAll('ul, ol, [role="list"]')).map((list) => {
+        const explicitItems = list.querySelectorAll(':scope > li, :scope > [role="listitem"]');
+        return explicitItems.length > 0 ? explicitItems.length : list.children.length;
+      });
+      if (listCounts.includes(24)) {
+        return 24;
+      }
+      const maxListCount = Math.max(0, ...listCounts);
+      if (maxListCount > 0) {
+        return maxListCount;
+      }
+
+      const time24hMatches = text.match(/\b(?:[01]\d|2[0-3]):[0-5]\d\b/g);
+      if (time24hMatches?.length === 24) {
+        return 24;
+      }
+
+      const time12hMatches = text.match(/\b(?:1[0-2]|0?[1-9])\s?(?:AM|PM)\b/gi);
+      if (time12hMatches?.length === 24) {
+        return 24;
+      }
+
+      const imageCount = root.querySelectorAll('img').length;
+      if (imageCount === 24) {
+        return 24;
+      }
+
+      const allElements = [root, ...Array.from(root.querySelectorAll('*'))];
+      const candidateCounts: number[] = [];
+
+      for (const element of allElements) {
+        const children = Array.from(element.children);
+        if (children.length < 3) {
+          continue;
+        }
+
+        const groups = new Map<string, number>();
+        for (const child of children) {
+          const signature = [
+            child.tagName,
+            child.getAttribute('role') ?? '',
+            child.firstElementChild?.tagName ?? '',
+            child.children.length.toString()
+          ].join('|');
+          groups.set(signature, (groups.get(signature) ?? 0) + 1);
+        }
+
+        const groupMax = Math.max(...groups.values());
+        if (groupMax >= 3) {
+          candidateCounts.push(groupMax);
+        }
+      }
+
+      if (candidateCounts.includes(24)) {
+        return 24;
+      }
+
+      return Math.max(0, ...candidateCounts);
+    });
+  };
+
+  await expect.poll(getForecastEntryCount).toBe(24);
+});

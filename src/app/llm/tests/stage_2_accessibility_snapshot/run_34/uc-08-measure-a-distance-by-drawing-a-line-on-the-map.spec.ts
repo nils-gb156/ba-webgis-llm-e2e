@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  if (!(await measurementHeading.isVisible())) {
+    await measurementToggle.click();
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = box!.width;
+  const height = box!.height;
+
+  const firstPoint = { x: Math.round(width * 0.6), y: Math.round(height * 0.3) };
+  const secondPoint = { x: Math.round(width * 0.72), y: Math.round(height * 0.42) };
+  const thirdPoint = { x: Math.round(width * 0.84), y: Math.round(height * 0.56) };
+
+  await mapContainer.click({ position: firstPoint });
+  await mapContainer.click({ position: secondPoint });
+  await mapContainer.dblclick({ position: thirdPoint });
+
+  const lengthValue = page.getByText(/\b(?:[1-9]\d*)(?:[.,]\d+)?\s?(?:m|km)\b/).first();
+  await expect(lengthValue).toBeVisible();
+});

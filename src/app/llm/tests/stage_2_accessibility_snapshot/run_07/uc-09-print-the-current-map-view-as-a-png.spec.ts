@@ -1,0 +1,153 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { readFile, stat } from 'node:fs/promises';
+
+test('UC9 - Print the current map view as a PNG', async ({ page }) => {
+  const isVisible = async (locator: Locator): Promise<boolean> => {
+    if ((await locator.count()) === 0) {
+      return false;
+    }
+    try {
+      return await locator.first().isVisible();
+    } catch {
+      return false;
+    }
+  };
+
+  const findVisible = async (candidates: Locator[]): Promise<Locator> => {
+    await expect
+      .poll(async () => {
+        for (let index = 0; index < candidates.length; index++) {
+          if (await isVisible(candidates[index])) {
+            return index;
+          }
+        }
+        return -1;
+      })
+      .not.toBe(-1);
+
+    for (const candidate of candidates) {
+      if (await isVisible(candidate)) {
+        return candidate.first();
+      }
+    }
+
+    throw new Error('No visible locator found.');
+  };
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('map-toolbar')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  const basemapSelect = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(basemapSelect).toBeVisible();
+  await expect(basemapSelect).not.toHaveValue('');
+
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(eucosCheckbox).toBeChecked();
+  await expect(temperatureCheckbox).toBeChecked();
+
+  await expect(page.getByTestId('eucos-stations-legend')).toBeVisible();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  await expect(page.getByTestId('print-toggle')).toBeVisible();
+  await page.getByTestId('print-toggle').click();
+
+  const titleInput = await findVisible([
+    page.getByRole('textbox', { name: /title/i }),
+    page.getByLabel(/title/i),
+    page.getByPlaceholder(/title/i),
+  ]);
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'Weather Map PNG Export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: 'PNG', exact: true });
+  if (await isVisible(pngRadio)) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatControl = await findVisible([
+      page.getByRole('combobox', { name: /format/i }),
+      page.getByLabel(/format/i),
+    ]);
+
+    const optionCount = await formatControl.locator('option').count();
+    if (optionCount > 0) {
+      const optionLabels = (await formatControl.locator('option').allTextContents()).map((label) => label.trim());
+      const pngLabel = optionLabels.find((label) => /png/i.test(label));
+      expect(pngLabel).toBeTruthy();
+
+      await formatControl.selectOption({ label: pngLabel! });
+      await expect(formatControl).toHaveValue(/png/i);
+    } else {
+      await formatControl.click();
+
+      const pngOption = await findVisible([
+        page.getByRole('option', { name: 'PNG', exact: true }),
+        page.getByRole('menuitemradio', { name: 'PNG', exact: true }),
+        page.getByRole('menuitem', { name: 'PNG', exact: true }),
+        page.getByRole('button', { name: 'PNG', exact: true }),
+      ]);
+      await pngOption.click({ force: true });
+    }
+  }
+
+  let printPanel: Locator | undefined;
+  for (const candidate of [
+    page.getByRole('dialog').filter({ has: titleInput }),
+    page.getByRole('region').filter({ has: titleInput }),
+    page.getByRole('group').filter({ has: titleInput }),
+  ]) {
+    if (await isVisible(candidate)) {
+      printPanel = candidate.first();
+      break;
+    }
+  }
+
+  const exportCandidates: Locator[] = [];
+  if (printPanel) {
+    exportCandidates.push(
+      printPanel.getByRole('button', { name: 'Export', exact: true }),
+      printPanel.getByRole('button', { name: 'Print', exact: true }),
+      printPanel.getByRole('button', { name: 'Download', exact: true }),
+    );
+  }
+  exportCandidates.push(
+    page.getByRole('button', { name: 'Export', exact: true }),
+    page.getByRole('button', { name: 'Print', exact: true }),
+    page.getByRole('button', { name: 'Download', exact: true }),
+  );
+
+  const exportButton = await findVisible(exportCandidates);
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadFailure = await download.failure();
+  expect(downloadFailure).toBeNull();
+
+  const filePath = await download.path();
+  if (!filePath) {
+    throw new Error('Download path is not available.');
+  }
+
+  await expect.poll(async () => (await stat(filePath)).size).toBeGreaterThan(1000);
+
+  const fileBuffer = await readFile(filePath);
+  const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  expect(fileBuffer.subarray(0, 8).equals(pngSignature)).toBe(true);
+
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+});

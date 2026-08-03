@@ -1,0 +1,152 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { stat } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+    await expect(basemapCombobox).toBeVisible();
+
+    const visibleOverlayCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    await expect(visibleOverlayCheckbox).toBeChecked();
+
+    const printToggle = page.getByTestId('print-toggle');
+    await expect(printToggle).toBeVisible();
+
+    const initialTitleTextbox = page.getByRole('textbox', { name: /title/i });
+    let printPanelAlreadyOpen = false;
+    if ((await initialTitleTextbox.count()) > 0) {
+        printPanelAlreadyOpen = await initialTitleTextbox.first().isVisible();
+    }
+
+    if (!printPanelAlreadyOpen) {
+        const pressed = await printToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await printToggle.click();
+        }
+    }
+
+    let dialogCount = await page.getByRole('dialog').count();
+    const printPanel = dialogCount > 0 ? page.getByRole('dialog').last() : page;
+
+    let titleInput = printPanel.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printPanel.getByLabel(/title/i);
+    }
+
+    await expect(titleInput.first()).toBeVisible();
+
+    dialogCount = await page.getByRole('dialog').count();
+    const scopedPrintPanel = dialogCount > 0 ? page.getByRole('dialog').last() : page;
+
+    const printTitle = 'Playwright PNG export';
+    await titleInput.first().fill(printTitle);
+    await expect(titleInput.first()).toHaveValue(printTitle);
+
+    let pngSelected = false;
+
+    const pngRadio = scopedPrintPanel.getByRole('radio', { name: /^PNG$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.first().click({ force: true });
+        await expect(pngRadio.first()).toBeChecked();
+        pngSelected = true;
+    }
+
+    if (!pngSelected) {
+        const formatCombobox = scopedPrintPanel.getByRole('combobox', { name: /format/i });
+        if ((await formatCombobox.count()) > 0) {
+            const formatSelect = formatCombobox.first();
+            await expect(formatSelect).toBeVisible();
+
+            let formatChosen = false;
+            const pngOption = scopedPrintPanel.getByRole('option', { name: /png/i }).first();
+            if ((await pngOption.count()) > 0) {
+                try {
+                    const optionValue = await pngOption.getAttribute('value');
+                    if (optionValue) {
+                        await formatSelect.selectOption(optionValue);
+                    } else {
+                        const optionLabel = (await pngOption.textContent())?.trim() ?? 'PNG';
+                        await formatSelect.selectOption({ label: optionLabel });
+                    }
+                    formatChosen = true;
+                } catch {
+                    await formatSelect.click();
+                    await pngOption.click({ force: true });
+                    formatChosen = true;
+                }
+            }
+
+            if (!formatChosen) {
+                const candidateSelections = ['png', 'PNG', 'image/png'];
+                for (const candidate of candidateSelections) {
+                    try {
+                        await formatSelect.selectOption(candidate);
+                        formatChosen = true;
+                        break;
+                    } catch {
+                        // try next candidate
+                    }
+                }
+            }
+
+            if (!formatChosen) {
+                await formatSelect.selectOption({ label: 'PNG' });
+            }
+
+            await expect.poll(async () => {
+                return await formatSelect.evaluate((element) => {
+                    const control = element as HTMLInputElement | HTMLSelectElement;
+                    return 'value' in control ? control.value : '';
+                });
+            }).toMatch(/png/i);
+
+            pngSelected = true;
+        }
+    }
+
+    if (!pngSelected) {
+        const pngButton = scopedPrintPanel.getByRole('button', { name: /^PNG$/i });
+        if ((await pngButton.count()) > 0) {
+            await pngButton.first().click();
+            pngSelected = true;
+        }
+    }
+
+    expect(pngSelected).toBe(true);
+
+    let exportButton = scopedPrintPanel.getByRole('button', { name: /^Export$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = scopedPrintPanel.getByRole('button', { name: /^Download$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = scopedPrintPanel.getByRole('button', { name: /^Print$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = scopedPrintPanel.getByRole('button', { name: /export|download|print/i });
+    }
+
+    await expect(exportButton.first()).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.first().click();
+
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    if (!downloadPath) {
+        throw new Error('Expected the PNG export to be downloaded to a local file path.');
+    }
+
+    const fileInfo = await stat(downloadPath);
+    expect(fileInfo.size).toBeGreaterThan(0);
+});

@@ -1,0 +1,75 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  await expect(page.getByRole('combobox', { name: 'Basemaps', exact: true })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToolbarButton = page.getByTestId('print-toggle');
+  await expect(printToolbarButton).toBeVisible();
+
+  const titleInput = page.getByLabel(/title/i);
+  if (!(await titleInput.isVisible())) {
+    await printToolbarButton.click();
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'Current Weather Map';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+  if (await pngRadio.count()) {
+    await expect(pngRadio).toBeVisible();
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatSelect = page.getByRole('combobox', { name: /format/i });
+    await expect(formatSelect).toBeVisible();
+
+    await formatSelect.selectOption({ label: 'PNG' }).catch(async () => {
+      await formatSelect.selectOption({ value: 'png' }).catch(async () => {
+        await formatSelect.selectOption('PNG').catch(async () => {
+          await formatSelect.selectOption('png');
+        });
+      });
+    });
+
+    await expect.poll(async () => (await formatSelect.inputValue()).toLowerCase()).toContain('png');
+  }
+
+  let exportButton = page.getByRole('button', { name: /^Export$/i });
+  if (!(await exportButton.count())) {
+    exportButton = page.getByRole('button', { name: /^Print$/i });
+  }
+  if (!(await exportButton.count())) {
+    exportButton = page.getByRole('button', { name: /^Download$/i });
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  await expect(await download.failure()).toBeNull();
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  const fileContent = await readFile(downloadPath as string);
+  expect(fileContent.length).toBeGreaterThan(1024);
+  expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

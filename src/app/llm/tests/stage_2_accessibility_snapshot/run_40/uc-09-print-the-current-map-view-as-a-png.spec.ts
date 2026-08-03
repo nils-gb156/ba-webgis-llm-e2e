@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('map-toolbar')).toBeVisible();
+  await expect(page.getByTestId('print-toggle')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  await expect(page.getByRole('combobox', { name: 'Basemaps', exact: true })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+  await expect(page.getByTestId('legend')).toBeVisible();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToggle = page.getByTestId('print-toggle');
+  const printHeading = page.getByRole('heading', { name: /print/i });
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+  const formatCombobox = page.getByRole('combobox', { name: /format/i });
+  const pngRadio = page.getByRole('radio', { name: /^png$/i });
+
+  const panelAlreadyVisible =
+    (await titleInput.isVisible().catch(() => false)) ||
+    (await formatCombobox.isVisible().catch(() => false)) ||
+    (await pngRadio.isVisible().catch(() => false)) ||
+    (await printHeading.isVisible().catch(() => false));
+
+  if (!panelAlreadyVisible) {
+    const pressed = await printToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printToggle.click();
+    }
+  }
+
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Current weather map');
+
+  if (await formatCombobox.isVisible().catch(() => false)) {
+    const pngValue = await formatCombobox.evaluate((element) => {
+      if (element.tagName.toLowerCase() !== 'select') {
+        return null;
+      }
+      const select = element as HTMLSelectElement;
+      const option = Array.from(select.options).find(
+        (entry) => /png/i.test(entry.label) || /png/i.test(entry.value)
+      );
+      return option?.value ?? null;
+    });
+
+    if (pngValue) {
+      await formatCombobox.selectOption(pngValue);
+      await expect(formatCombobox).toHaveValue(pngValue);
+    } else {
+      await formatCombobox.click();
+      await page.getByRole('option', { name: /png/i }).click();
+    }
+  } else {
+    await expect(pngRadio).toBeVisible();
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  }
+
+  const exportButton = page.getByRole('button', { name: /^(export|print|download|generate)$/i });
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+  expect(await download.failure()).toBeNull();
+});

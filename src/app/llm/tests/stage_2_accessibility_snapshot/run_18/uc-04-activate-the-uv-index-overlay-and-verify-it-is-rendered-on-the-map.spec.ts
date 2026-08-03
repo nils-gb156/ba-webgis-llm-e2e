@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import crypto from 'node:crypto';
+
+function isUvIndexTileRequest(url: string, postData?: string | null): boolean {
+    const haystack = `${url}\n${postData ?? ''}`.toLowerCase();
+    const referencesUvIndex = /\buv[-_ ]?index\b|\buvi\b/.test(haystack);
+    const excludesStations = !/\bstations?\b/.test(haystack);
+    const looksLikeMapImageRequest =
+        /service=wms|request=getmap|wmts|\/tile\b|\/tiles\b|format=image|transparent=true|bbox=|width=\d+&height=\d+|\.png(\?|$)|\.jpe?g(\?|$)|\.webp(\?|$)/.test(
+            haystack
+        );
+
+    return referencesUvIndex && excludesStations && looksLikeMapImageRequest;
+}
+
+function hashBuffer(buffer: Buffer): string {
+    return crypto.createHash('sha1').update(buffer).digest('hex');
+}
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const mapContainer = page.getByTestId('map-container');
+    const uvIndexCheckbox = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+    const mapCanvas = mapContainer.locator('canvas').first();
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+    await expect(mapCanvas).toBeVisible();
+    await expect(uvIndexCheckbox).not.toBeChecked();
+
+    const getMapHash = async (): Promise<string> => {
+        const screenshot = await mapContainer.screenshot();
+        return hashBuffer(screenshot);
+    };
+
+    let previousMapHash: string | undefined;
+    await expect
+        .poll(
+            async () => {
+                const currentMapHash = await getMapHash();
+                const isStable = currentMapHash === previousMapHash;
+                previousMapHash = currentMapHash;
+                return isStable;
+            },
+            {
+                message: 'expected the initial map rendering to settle before enabling the UV-Index overlay',
+                timeout: 15000
+            }
+        )
+        .toBe(true);
+
+    const mapHashBeforeEnablingUvIndex = await getMapHash();
+
+    const uvIndexTileRequests: string[] = [];
+    page.on('request', request => {
+        if (isUvIndexTileRequest(request.url(), request.postData())) {
+            uvIndexTileRequests.push(request.url());
+        }
+    });
+
+    const uvIndexTileResponsePromise = page.waitForResponse(
+        response => response.ok() && isUvIndexTileRequest(response.url(), response.request().postData()),
+        { timeout: 15000 }
+    );
+
+    await uvIndexCheckbox.click({ force: true });
+
+    await expect(uvIndexCheckbox).toBeChecked();
+
+    const uvIndexTileResponse = await uvIndexTileResponsePromise;
+    expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+    await expect
+        .poll(() => uvIndexTileRequests.length, {
+            message: 'expected at least one UV-Index tile request after enabling the overlay',
+            timeout: 15000
+        })
+        .toBeGreaterThan(0);
+
+    await expect
+        .poll(
+            async () => {
+                const currentMapHash = await getMapHash();
+                return currentMapHash !== mapHashBeforeEnablingUvIndex;
+            },
+            {
+                message: 'expected the rendered map canvas to change after the UV-Index overlay tiles loaded',
+                timeout: 15000
+            }
+        )
+        .toBe(true);
+});

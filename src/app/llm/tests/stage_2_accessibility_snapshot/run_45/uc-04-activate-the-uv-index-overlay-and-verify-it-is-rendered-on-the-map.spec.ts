@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  const mapCanvas = mapContainer.locator('canvas').first();
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+  await expect(mapCanvas).toBeVisible();
+
+  const beforeMapScreenshot = await mapCanvas.screenshot();
+
+  const normalizeUrl = (url: string) => {
+    try {
+      return decodeURIComponent(url);
+    } catch {
+      return url;
+    }
+  };
+
+  const isUvIndexTileRequest = (url: string) => {
+    const normalizedUrl = normalizeUrl(url);
+    return /(uv-?index|uv[_-]?index|uvi)/i.test(normalizedUrl) &&
+      !/stations?/i.test(normalizedUrl) &&
+      !/GetLegendGraphic/i.test(normalizedUrl) &&
+      /(GetMap|request=GetMap|bbox=|tile(matrix|col|row)=|\/\d+\/\d+\/\d+(?:\.\w+)?)/i.test(normalizedUrl);
+  };
+
+  const matchedUvIndexTileRequests: string[] = [];
+
+  page.on('request', request => {
+    if (request.resourceType() === 'image' && isUvIndexTileRequest(request.url())) {
+      matchedUvIndexTileRequests.push(request.url());
+    }
+  });
+
+  const uvIndexTileResponsePromise = page.waitForResponse(response => {
+    return response.ok() &&
+      response.request().resourceType() === 'image' &&
+      isUvIndexTileRequest(response.url());
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  await uvIndexTileResponsePromise;
+  await expect.poll(() => matchedUvIndexTileRequests.length).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const afterMapScreenshot = await mapCanvas.screenshot();
+    return afterMapScreenshot.equals(beforeMapScreenshot);
+  }).toBe(false);
+});

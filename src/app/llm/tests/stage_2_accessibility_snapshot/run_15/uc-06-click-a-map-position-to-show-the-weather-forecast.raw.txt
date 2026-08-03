@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  const containsArrayWith24Entries = (value: unknown): boolean => {
+    if (Array.isArray(value)) {
+      return value.length === 24 || value.some((item) => containsArrayWith24Entries(item));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.values(value as Record<string, unknown>).some((nestedValue) =>
+        containsArrayWith24Entries(nestedValue)
+      );
+    }
+
+    return false;
+  };
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const initialForecastHint = infoPanel.getByText('Click on the map to load a forecast.');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(initialForecastHint).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  const forecastResponsePromise = page.waitForResponse(async (response) => {
+    if (!response.ok()) {
+      return false;
+    }
+
+    const resourceType = response.request().resourceType();
+    if (resourceType !== 'fetch' && resourceType !== 'xhr') {
+      return false;
+    }
+
+    const contentType = response.headers()['content-type'] ?? '';
+    if (!contentType.toLowerCase().includes('json')) {
+      return false;
+    }
+
+    try {
+      return containsArrayWith24Entries(await response.json());
+    } catch {
+      return false;
+    }
+  });
+
+  const [forecastResponse] = await Promise.all([
+    forecastResponsePromise,
+    mapContainer.click({
+      position: {
+        x: Math.round(mapBox!.width * 0.75),
+        y: Math.round(mapBox!.height * 0.55)
+      }
+    })
+  ]);
+
+  await expect(forecastResponse).toBeOK();
+  expect(containsArrayWith24Entries(await forecastResponse.json())).toBe(true);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(initialForecastHint).toBeHidden();
+  await expect.poll(async () => await weatherForecastSection.getByRole('listitem').count()).toBe(24);
+});

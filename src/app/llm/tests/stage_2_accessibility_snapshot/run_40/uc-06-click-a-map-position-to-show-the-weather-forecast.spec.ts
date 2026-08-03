@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const forecastPlaceholder = weatherForecastSection.getByText('Click on the map to load a forecast.', {
+    exact: true
+  });
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(forecastPlaceholder).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(mapBox.width * 0.75),
+      y: Math.round(mapBox.height * 0.5)
+    }
+  });
+
+  await expect(forecastPlaceholder).not.toBeVisible();
+
+  const countForecastEntries = async () => {
+    return await weatherForecastSection.evaluate((section) => {
+      const roleListItems = section.querySelectorAll('[role="listitem"]').length;
+      if (roleListItems > 0) {
+        return roleListItems;
+      }
+
+      const listItems = section.querySelectorAll('li').length;
+      if (listItems > 0) {
+        return listItems;
+      }
+
+      const tbodyRows = section.querySelectorAll('tbody tr').length;
+      if (tbodyRows > 0) {
+        return tbodyRows;
+      }
+
+      const roleRows = section.querySelectorAll('[role="row"]').length;
+      if (roleRows > 0) {
+        const hasColumnHeaders = section.querySelectorAll('[role="columnheader"]').length > 0;
+        return hasColumnHeaders ? roleRows - 1 : roleRows;
+      }
+
+      const tableRows = section.querySelectorAll('tr').length;
+      if (tableRows > 0) {
+        const headerRows = section.querySelectorAll('thead tr').length;
+        return tableRows - headerRows;
+      }
+
+      const articles = section.querySelectorAll('article').length;
+      if (articles > 0) {
+        return articles;
+      }
+
+      const containers = Array.from(section.querySelectorAll('*'));
+      const exactChildMatch = containers.find((element) => element.children.length === 24);
+      return exactChildMatch ? exactChildMatch.children.length : 0;
+    });
+  };
+
+  await expect.poll(countForecastEntries).toBe(24);
+});

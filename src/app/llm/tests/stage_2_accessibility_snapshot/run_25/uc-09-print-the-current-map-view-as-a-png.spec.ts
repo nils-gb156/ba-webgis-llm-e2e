@@ -1,0 +1,102 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+  await expect(page.getByRole('combobox', { name: /^Basemaps$/ })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: /^EUCOS Ground Stations$/ })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: /^Temperature$/ })).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+  const titleInputVisibleBeforeClick =
+    (await titleInput.count()) > 0 ? await titleInput.first().isVisible() : false;
+
+  if (!titleInputVisibleBeforeClick) {
+    await printToggle.click();
+  }
+
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Current weather map');
+
+  const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+  if (await pngRadio.count()) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatCombobox = page.getByRole('combobox', { name: /format/i });
+    await expect(formatCombobox).toBeVisible();
+    await formatCombobox.click();
+
+    const pngOption = page.getByRole('option', { name: /^PNG$/i });
+    if (await pngOption.count()) {
+      await pngOption.click();
+    } else {
+      await formatCombobox.selectOption({ label: 'PNG' });
+    }
+
+    await expect
+      .poll(async () => {
+        const inputValue = await formatCombobox.inputValue().catch(() => '');
+        if (inputValue) {
+          return inputValue;
+        }
+        return (await formatCombobox.textContent()) ?? '';
+      })
+      .toMatch(/png/i);
+  }
+
+  const exportCandidates = [
+    page.getByRole('button', { name: /^Export$/i }),
+    page.getByRole('button', { name: /^Export (?:Map|Print|Image)$/i }),
+    page.getByRole('button', { name: /^Print$/i }),
+    page.getByRole('button', { name: /^Download$/i }),
+    page.getByRole('button', { name: /^Generate$/i }),
+    page.getByRole('button', { name: /^Create printout$/i })
+  ];
+
+  let exportButton = exportCandidates[0];
+  let exportButtonFound = false;
+
+  for (const candidate of exportCandidates) {
+    if (await candidate.count()) {
+      exportButton = candidate.first();
+      exportButtonFound = true;
+      break;
+    }
+  }
+
+  expect(exportButtonFound).toBe(true);
+  await expect(exportButton).toBeVisible();
+  await expect(exportButton).toBeEnabled();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(await download.failure()).toBeNull();
+  await expect.poll(() => download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = path.join(os.tmpdir(), `uc9-print-${Date.now()}.png`);
+  await download.saveAs(downloadPath);
+
+  const buffer = await fs.readFile(downloadPath);
+  expect(buffer.length).toBeGreaterThan(1024);
+  expect(buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true);
+  expect(buffer.readUInt32BE(16)).toBeGreaterThan(0);
+  expect(buffer.readUInt32BE(20)).toBeGreaterThan(0);
+
+  await fs.unlink(downloadPath).catch(() => {});
+});

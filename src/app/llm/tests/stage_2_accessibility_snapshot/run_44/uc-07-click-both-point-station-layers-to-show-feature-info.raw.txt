@@ -1,0 +1,174 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const initialExtentButton = page.getByTestId('initial-extent-button');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const eucosStationsCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'EUCOS Ground Stations',
+    exact: true
+  });
+  const uviStationsCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'UV-Index Stations',
+    exact: true
+  });
+
+  if (!(await eucosStationsCheckbox.isChecked())) {
+    await eucosStationsCheckbox.click({ force: true });
+  }
+  await expect(eucosStationsCheckbox).toBeChecked();
+
+  if (!(await uviStationsCheckbox.isChecked())) {
+    await uviStationsCheckbox.click({ force: true });
+  }
+  await expect(uviStationsCheckbox).toBeChecked();
+
+  await expect(page.getByTestId('eucos-stations-legend')).toBeVisible();
+  await expect(page.getByTestId('uvi-stations-legend')).toBeVisible();
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect.poll(async () => await measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+  await initialExtentButton.click();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  type Point = { x: number; y: number };
+
+  const clampToMap = (point: Point): Point => ({
+    x: Math.min(mapBox.width - 1, Math.max(1, Math.round(point.x))),
+    y: Math.min(mapBox.height - 1, Math.max(1, Math.round(point.y)))
+  });
+
+  const parseCoordinateText = (text: string | null): Point | undefined => {
+    if (!text) {
+      return undefined;
+    }
+
+    const matches = text.match(/-?\d+(?:\.\d+)?/g);
+    if (!matches || matches.length < 2) {
+      return undefined;
+    }
+
+    return {
+      x: Number(matches[0]),
+      y: Number(matches[1])
+    };
+  };
+
+  const hoverAndReadCoordinate = async (position: Point): Promise<Point | undefined> => {
+    await mapContainer.hover({ position });
+    return parseCoordinateText(await coordinateViewer.textContent());
+  };
+
+  const readCoordinateAt = async (position: Point): Promise<Point> => {
+    let coordinate: Point | undefined;
+
+    await expect
+      .poll(async () => {
+        coordinate = await hoverAndReadCoordinate(position);
+        return coordinate !== undefined;
+      })
+      .toBe(true);
+
+    if (!coordinate) {
+      throw new Error('Failed to read map coordinates from the coordinate viewer.');
+    }
+
+    return coordinate;
+  };
+
+  const centerPixel = clampToMap({ x: mapBox.width / 2, y: mapBox.height / 2 });
+
+  let previousCenterCoordinate: Point | undefined;
+  await expect
+    .poll(async () => {
+      const currentCenterCoordinate = await hoverAndReadCoordinate(centerPixel);
+      if (!currentCenterCoordinate) {
+        return false;
+      }
+
+      const isStable =
+        previousCenterCoordinate !== undefined &&
+        Math.abs(currentCenterCoordinate.x - previousCenterCoordinate.x) < 1 &&
+        Math.abs(currentCenterCoordinate.y - previousCenterCoordinate.y) < 1;
+
+      previousCenterCoordinate = currentCenterCoordinate;
+      return isStable;
+    })
+    .toBe(true);
+
+  const rightPixel = clampToMap({ x: mapBox.width * 0.8, y: mapBox.height / 2 });
+  const bottomPixel = clampToMap({ x: mapBox.width / 2, y: mapBox.height * 0.8 });
+
+  const centerCoordinate = await readCoordinateAt(centerPixel);
+  const rightCoordinate = await readCoordinateAt(rightPixel);
+  const bottomCoordinate = await readCoordinateAt(bottomPixel);
+
+  const mapUnitsPerPixelX = (rightCoordinate.x - centerCoordinate.x) / (rightPixel.x - centerPixel.x);
+  const mapUnitsPerPixelY = (bottomCoordinate.y - centerCoordinate.y) / (bottomPixel.y - centerPixel.y);
+
+  expect(Math.abs(mapUnitsPerPixelX)).toBeGreaterThan(0);
+  expect(Math.abs(mapUnitsPerPixelY)).toBeGreaterThan(0);
+
+  const targetCoordinate: Point = { x: 1188692.84, y: 6767643.28 };
+
+  let targetPixel = clampToMap({
+    x: centerPixel.x + (targetCoordinate.x - centerCoordinate.x) / mapUnitsPerPixelX,
+    y: centerPixel.y + (targetCoordinate.y - centerCoordinate.y) / mapUnitsPerPixelY
+  });
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const currentCoordinate = await readCoordinateAt(targetPixel);
+    targetPixel = clampToMap({
+      x: targetPixel.x + (targetCoordinate.x - currentCoordinate.x) / mapUnitsPerPixelX,
+      y: targetPixel.y + (targetCoordinate.y - currentCoordinate.y) / mapUnitsPerPixelY
+    });
+  }
+
+  const resolvedTargetCoordinate = await readCoordinateAt(targetPixel);
+
+  expect(Math.abs(resolvedTargetCoordinate.x - targetCoordinate.x)).toBeLessThanOrEqual(
+    Math.abs(mapUnitsPerPixelX) * 2
+  );
+  expect(Math.abs(resolvedTargetCoordinate.y - targetCoordinate.y)).toBeLessThanOrEqual(
+    Math.abs(mapUnitsPerPixelY) * 2
+  );
+
+  await mapContainer.click({ position: targetPixel });
+
+  await expect(infoPanel).toContainText(/UV-Index Station/);
+  await expect(infoPanel).toContainText(/EUCOS Ground Station/);
+});

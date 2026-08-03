@@ -1,0 +1,142 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const isVisible = async (locator: Locator): Promise<boolean> => {
+    if ((await locator.count()) === 0) {
+      return false;
+    }
+    return await locator.first().isVisible();
+  };
+
+  const waitForFirstVisible = async (candidates: Locator[]): Promise<Locator> => {
+    await expect
+      .poll(async () => {
+        for (let index = 0; index < candidates.length; index += 1) {
+          if (await isVisible(candidates[index])) {
+            return index;
+          }
+        }
+        return -1;
+      })
+      .not.toBe(-1);
+
+    for (const candidate of candidates) {
+      if (await isVisible(candidate)) {
+        return candidate.first();
+      }
+    }
+
+    throw new Error('No visible locator found.');
+  };
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+  const layerSwitcherPanel = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  await expect(layerSwitcherToggle).toBeVisible();
+
+  if (!(await isVisible(layerSwitcherPanel))) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+  }
+
+  await expect(layerSwitcherPanel).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Basemaps' })).toHaveValue(/\S+/);
+  await expect(page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true })).toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  const printTitleCandidates = [
+    page.getByRole('textbox', { name: /title/i }),
+    page.getByLabel(/title/i),
+    page.getByPlaceholder(/title/i)
+  ];
+
+  let printPanelOpen = false;
+  for (const candidate of printTitleCandidates) {
+    if (await isVisible(candidate)) {
+      printPanelOpen = true;
+      break;
+    }
+  }
+
+  if (!printPanelOpen) {
+    await page.getByTestId('print-toggle').click();
+  }
+
+  const titleInput = await waitForFirstVisible(printTitleCandidates);
+  await expect(titleInput).toBeVisible();
+
+  const exportButton = await waitForFirstVisible([
+    page.getByRole('button', { name: /^export$/i }),
+    page.getByRole('button', { name: /^download$/i }),
+    page.getByRole('button', { name: /^create print$/i }),
+    page.getByRole('button', { name: /^create printout$/i }),
+    page.getByRole('button', { name: /^export map$/i }),
+    page.getByRole('button', { name: /^print$/i })
+  ]);
+  await expect(exportButton).toBeVisible();
+
+  const printTitle = 'E2E PNG map export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /^png$/i });
+  const pngLabelControl = page.getByLabel(/^png$/i);
+  const formatCombobox = page.getByRole('combobox', { name: /format/i });
+
+  const getFormatControlType = async (): Promise<'radio' | 'label' | 'combobox' | ''> => {
+    if ((await pngRadio.count()) > 0) {
+      return 'radio';
+    }
+    if ((await pngLabelControl.count()) > 0) {
+      return 'label';
+    }
+    if (await isVisible(formatCombobox)) {
+      return 'combobox';
+    }
+    return '';
+  };
+
+  await expect.poll(getFormatControlType).not.toBe('');
+
+  const formatControlType = await getFormatControlType();
+
+  if (formatControlType === 'radio') {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else if (formatControlType === 'label') {
+    await pngLabelControl.click({ force: true });
+    await expect(pngLabelControl).toBeChecked();
+  } else {
+    try {
+      await formatCombobox.selectOption({ label: 'PNG' });
+    } catch {
+      await formatCombobox.click();
+      await page.getByRole('option', { name: /^png$/i }).click();
+    }
+    await expect(formatCombobox).toHaveValue(/png/i);
+  }
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  const fileBuffer = await readFile(downloadPath!);
+  expect(fileBuffer.length).toBeGreaterThan(1000);
+  expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

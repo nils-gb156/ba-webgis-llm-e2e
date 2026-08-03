@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  const measurementPanelAlreadyVisible =
+    (await measurementDialog.isVisible()) || (await measurementHeading.isVisible());
+
+  if (!measurementPanelAlreadyVisible) {
+    await measurementToggle.click();
+  }
+
+  if (await measurementDialog.isVisible()) {
+    await expect(measurementDialog).toBeVisible();
+  } else {
+    await expect(measurementHeading).toBeVisible();
+  }
+
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const p1 = { x: Math.round(box.width * 0.58), y: Math.round(box.height * 0.35) };
+  const p2 = { x: Math.round(box.width * 0.68), y: Math.round(box.height * 0.45) };
+  const p3 = { x: Math.round(box.width * 0.78), y: Math.round(box.height * 0.55) };
+  const p4 = { x: Math.round(box.width * 0.70), y: Math.round(box.height * 0.68) };
+
+  await mapContainer.click({ position: p1 });
+  await mapContainer.click({ position: p2 });
+  await mapContainer.click({ position: p3 });
+  await mapContainer.dblclick({ position: p4 });
+
+  const lengthValueWithUnit = page.getByText(
+    /\b(?:\d{1,3}(?:[.,\s]\d{3})*|\d+)(?:[.,]\d+)?\s?(?:mm|cm|m|km|ft|yd|mi)\b/i
+  );
+
+  await expect(lengthValueWithUnit.first()).toBeVisible();
+});

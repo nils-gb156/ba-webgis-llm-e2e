@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const mapContainer = page.getByTestId('map-container');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  if (!(await infoPanel.isVisible())) {
+    const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Weather Forecast', exact: true })
+  ).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(
+    weatherForecastSection.getByText('Click on the map to load a forecast.')
+  ).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(mapBox.width * 0.5),
+      y: Math.round(mapBox.height * 0.5)
+    }
+  });
+
+  await expect(
+    weatherForecastSection.getByText('Click on the map to load a forecast.')
+  ).not.toBeVisible();
+
+  await expect.poll(async () => {
+    return await weatherForecastSection.evaluate((section) => {
+      const textOf = (element: Element) =>
+        (element.textContent ?? '').replace(/\s+/g, ' ').trim();
+
+      const listItems = section.querySelectorAll('[role="listitem"], li');
+      if (listItems.length > 0) {
+        return listItems.length;
+      }
+
+      const rows = Array.from(section.querySelectorAll('[role="row"], tr')).filter(
+        (row) => !row.querySelector('th')
+      );
+      if (rows.length > 0) {
+        return rows.length;
+      }
+
+      const timePattern = /\b(?:[01]?\d|2[0-3]):[0-5]\d\b/;
+      const timePatternGlobal = /\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g;
+
+      const leafTimeElements = Array.from(section.querySelectorAll('*')).filter((element) => {
+        const text = textOf(element);
+        if (!timePattern.test(text)) {
+          return false;
+        }
+
+        return !Array.from(element.children).some((child) => timePattern.test(textOf(child)));
+      });
+
+      const uniqueTimes = new Set<string>();
+      for (const element of leafTimeElements) {
+        const matches = textOf(element).match(timePatternGlobal) ?? [];
+        for (const match of matches) {
+          uniqueTimes.add(match);
+        }
+      }
+
+      if (uniqueTimes.size > 0) {
+        return uniqueTimes.size;
+      }
+
+      const candidateChildCounts = Array.from(section.querySelectorAll('*'))
+        .map((element) => Array.from(element.children).filter((child) => textOf(child).length > 0).length)
+        .filter((count) => count > 0);
+
+      return candidateChildCounts.length > 0 ? Math.max(...candidateChildCounts) : 0;
+    });
+  }).toBe(24);
+});

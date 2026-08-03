@@ -1,0 +1,212 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const initialExtentButton = page.getByTestId('initial-extent-button');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+  } else {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  if (!(await layerSwitcher.isVisible())) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeVisible();
+  } else {
+    await expect(layerSwitcher).toBeVisible();
+  }
+
+  const uviStationsCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const eucosStationsCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+
+  if (!(await uviStationsCheckbox.isChecked())) {
+    await uviStationsCheckbox.click({ force: true });
+  }
+  await expect(uviStationsCheckbox).toBeChecked();
+
+  if (!(await eucosStationsCheckbox.isChecked())) {
+    await eucosStationsCheckbox.click({ force: true });
+  }
+  await expect(eucosStationsCheckbox).toBeChecked();
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  await initialExtentButton.click();
+  await expect(coordinateViewer).toBeVisible();
+
+  const parseLocalizedNumber = (token: string): number => {
+    const compact = token.replace(/\s+/g, '');
+    const lastDot = compact.lastIndexOf('.');
+    const lastComma = compact.lastIndexOf(',');
+
+    if (lastDot !== -1 && lastComma !== -1) {
+      return lastDot > lastComma
+        ? Number(compact.replace(/,/g, ''))
+        : Number(compact.replace(/\./g, '').replace(',', '.'));
+    }
+
+    if (lastComma !== -1) {
+      const parts = compact.split(',');
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+        return Number(compact.replace(/,/g, ''));
+      }
+      return Number(compact.replace(',', '.'));
+    }
+
+    if (lastDot !== -1) {
+      const parts = compact.split('.');
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+        return Number(compact.replace(/\./g, ''));
+      }
+      return Number(compact);
+    }
+
+    return Number(compact);
+  };
+
+  const parseCoordinateText = (text: string): [number, number] | undefined => {
+    const tokens = text.match(/-?\d[\d.,]*/g) ?? [];
+    const values = tokens
+      .map((token) => parseLocalizedNumber(token))
+      .filter((value) => Number.isFinite(value));
+
+    const largeValues = values.filter((value) => Math.abs(value) >= 100000);
+    const source = largeValues.length >= 2 ? largeValues : values;
+
+    if (source.length < 2) {
+      return undefined;
+    }
+
+    return [source[0], source[1]];
+  };
+
+  const hoverAndReadCoordinate = async (
+    position: { x: number; y: number },
+    previous?: [number, number]
+  ): Promise<[number, number]> => {
+    await mapContainer.hover({ position });
+
+    let coordinate: [number, number] | undefined;
+    await expect
+      .poll(async () => {
+        coordinate = parseCoordinateText((await coordinateViewer.textContent()) ?? '');
+        if (!coordinate) {
+          return false;
+        }
+        if (!previous) {
+          return true;
+        }
+        return (
+          Math.abs(coordinate[0] - previous[0]) > 500 ||
+          Math.abs(coordinate[1] - previous[1]) > 500
+        );
+      })
+      .toBe(true);
+
+    return coordinate!;
+  };
+
+  await mapContainer.scrollIntoViewIfNeeded();
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = Math.round(box!.width);
+  const height = Math.round(box!.height);
+
+  const leftSamplePosition = { x: Math.round(width * 0.2), y: Math.round(height * 0.5) };
+  const rightSamplePosition = { x: Math.round(width * 0.8), y: Math.round(height * 0.5) };
+  const topSamplePosition = { x: Math.round(width * 0.5), y: Math.round(height * 0.2) };
+  const bottomSamplePosition = { x: Math.round(width * 0.5), y: Math.round(height * 0.8) };
+
+  const leftCoordinate = await hoverAndReadCoordinate(leftSamplePosition);
+  const rightCoordinate = await hoverAndReadCoordinate(rightSamplePosition, leftCoordinate);
+  const topCoordinate = await hoverAndReadCoordinate(topSamplePosition, rightCoordinate);
+  const bottomCoordinate = await hoverAndReadCoordinate(bottomSamplePosition, topCoordinate);
+
+  expect(Math.abs(rightCoordinate[0] - leftCoordinate[0])).toBeGreaterThan(1000);
+  expect(Math.abs(bottomCoordinate[1] - topCoordinate[1])).toBeGreaterThan(1000);
+
+  const targetMapCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+  const xPerPixel =
+    (rightCoordinate[0] - leftCoordinate[0]) /
+    (rightSamplePosition.x - leftSamplePosition.x);
+  const yPerPixel =
+    (bottomCoordinate[1] - topCoordinate[1]) /
+    (bottomSamplePosition.y - topSamplePosition.y);
+
+  const targetPixelX =
+    leftSamplePosition.x + (targetMapCoordinate[0] - leftCoordinate[0]) / xPerPixel;
+  const targetPixelY =
+    topSamplePosition.y + (targetMapCoordinate[1] - topCoordinate[1]) / yPerPixel;
+
+  const uvIndexStationSection = infoPanel.getByText('UV-Index Station', { exact: true });
+  const eucosGroundStationSection = infoPanel.getByText('EUCOS Ground Station', { exact: true });
+
+  const candidateOffsets = [
+    { x: 0, y: 0 },
+    { x: -8, y: 0 },
+    { x: 8, y: 0 },
+    { x: 0, y: -8 },
+    { x: 0, y: 8 },
+    { x: -12, y: -12 },
+    { x: 12, y: -12 },
+    { x: -12, y: 12 },
+    { x: 12, y: 12 }
+  ];
+
+  let foundFeatureInfo = false;
+
+  for (const offset of candidateOffsets) {
+    const clickX = Math.max(2, Math.min(width - 2, Math.round(targetPixelX + offset.x)));
+    const clickY = Math.max(2, Math.min(height - 2, Math.round(targetPixelY + offset.y)));
+
+    await mapContainer.click({
+      position: {
+        x: clickX,
+        y: clickY
+      }
+    });
+
+    try {
+      await expect
+        .poll(async () => {
+          return (await uvIndexStationSection.isVisible()) && (await eucosGroundStationSection.isVisible());
+        }, { timeout: 8000 })
+        .toBe(true);
+      foundFeatureInfo = true;
+      break;
+    } catch {
+      // try the next nearby click position
+    }
+  }
+
+  expect(foundFeatureInfo).toBe(true);
+  await expect(uvIndexStationSection).toBeVisible();
+  await expect(eucosGroundStationSection).toBeVisible();
+  await expect(infoPanel).toContainText('UV-Index Station');
+  await expect(infoPanel).toContainText('EUCOS Ground Station');
+});

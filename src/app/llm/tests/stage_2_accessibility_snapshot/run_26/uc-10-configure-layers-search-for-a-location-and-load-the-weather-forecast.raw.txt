@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  const temperatureToggle = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+  const initialCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const munsterPattern = /m[üu]nster/i;
+
+  await expect.poll(async () => {
+    const optionCount = await geocoderPanel.getByRole('option', { name: munsterPattern }).count();
+    const buttonCount = await geocoderPanel.getByRole('button', { name: munsterPattern }).count();
+    const listItemCount = await geocoderPanel.getByRole('listitem').filter({ hasText: munsterPattern }).count();
+    return optionCount + buttonCount + listItemCount;
+  }).toBeGreaterThan(0);
+
+  let firstResult = geocoderPanel.getByRole('option', { name: munsterPattern }).first();
+  if (await geocoderPanel.getByRole('option', { name: munsterPattern }).count() === 0) {
+    if (await geocoderPanel.getByRole('button', { name: munsterPattern }).count() > 0) {
+      firstResult = geocoderPanel.getByRole('button', { name: munsterPattern }).first();
+    } else {
+      firstResult = geocoderPanel.getByRole('listitem').filter({ hasText: munsterPattern }).first();
+    }
+  }
+
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  await expect.poll(async () => {
+    const currentScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+    const currentCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+    return currentScaleText !== initialScaleText || (currentCoordinateText !== '' && currentCoordinateText !== initialCoordinateText);
+  }).toBe(true);
+
+  await expect(weatherForecastSection).toBeVisible();
+
+  await expect.poll(async () => {
+    const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+    if (listItemCount > 0) {
+      return listItemCount;
+    }
+
+    const rowGroups = weatherForecastSection.getByRole('rowgroup');
+    const rowGroupCount = await rowGroups.count();
+    if (rowGroupCount > 1) {
+      return await rowGroups.nth(1).getByRole('row').count();
+    }
+
+    const rowCount = await weatherForecastSection.getByRole('row').count();
+    if (rowCount > 0) {
+      return rowCount;
+    }
+
+    return await weatherForecastSection.getByRole('img').count();
+  }).toBe(24);
+
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+});

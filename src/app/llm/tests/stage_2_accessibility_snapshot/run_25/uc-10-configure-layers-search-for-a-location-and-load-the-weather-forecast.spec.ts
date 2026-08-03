@@ -1,0 +1,94 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  const temperatureLayerToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationLayerToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  const geocoderSearch = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const emptyForecastMessage = weatherForecastSection.getByText('Click on the map to load a forecast.');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(geocoderSearch).toBeVisible();
+  await expect(temperatureLayerToggle).toBeChecked();
+  await expect(precipitationLayerToggle).not.toBeChecked();
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+  await expect(emptyForecastMessage).toBeVisible();
+
+  await temperatureLayerToggle.click({ force: true });
+  await expect(temperatureLayerToggle).not.toBeChecked();
+
+  await precipitationLayerToggle.click({ force: true });
+  await expect(precipitationLayerToggle).toBeChecked();
+
+  await geocoderSearch.click();
+  await geocoderSearch.fill('Münster');
+
+  const geocoderOptions = page.getByRole('option');
+  const geocoderListItems = geocoderPanel.getByRole('listitem');
+
+  await expect
+    .poll(
+      async () => {
+        const [optionCount, listItemCount] = await Promise.all([
+          geocoderOptions.count(),
+          geocoderListItems.count(),
+        ]);
+        return Math.max(optionCount, listItemCount);
+      },
+      { message: 'Expected at least one geocoder result to appear' }
+    )
+    .toBeGreaterThan(0);
+
+  if ((await geocoderOptions.count()) > 0) {
+    await expect(geocoderOptions.first()).toBeVisible();
+    await geocoderOptions.first().click();
+  } else {
+    const firstListItem = geocoderListItems.first();
+    await expect(firstListItem).toBeVisible();
+
+    const nestedButtons = firstListItem.getByRole('button');
+    const nestedLinks = firstListItem.getByRole('link');
+
+    if ((await nestedButtons.count()) > 0) {
+      await nestedButtons.first().click();
+    } else if ((await nestedLinks.count()) > 0) {
+      await nestedLinks.first().click();
+    } else {
+      await geocoderSearch.press('ArrowDown');
+      await geocoderSearch.press('Enter');
+    }
+  }
+
+  await expect(emptyForecastMessage).not.toBeVisible();
+
+  await expect
+    .poll(
+      async () => {
+        const [listItemCount, rowCount, articleCount] = await Promise.all([
+          weatherForecastSection.getByRole('listitem').count(),
+          weatherForecastSection.getByRole('row').count(),
+          weatherForecastSection.getByRole('article').count(),
+        ]);
+        return [listItemCount, rowCount, articleCount].find((count) => count === 24) ?? Math.max(listItemCount, rowCount, articleCount);
+      },
+      { message: 'Expected the weather forecast section to display 24 entries' }
+    )
+    .toBe(24);
+
+  await expect(precipitationLayerToggle).toBeChecked();
+  await expect(temperatureLayerToggle).not.toBeChecked();
+});

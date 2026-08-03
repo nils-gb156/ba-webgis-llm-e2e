@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapApplication = page.getByRole('application', { name: 'webgis map', exact: true });
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const scaleViewer = page.getByTestId('scale-viewer');
+
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(mapApplication).toBeVisible();
+
+  // Preconditions
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect.poll(async () => (await measurementToggle.getAttribute('aria-pressed')) ?? 'false').not.toBe('true');
+  await expect(weatherForecastSection).toBeVisible();
+
+  // Step 1: Hide Temperature overlay layer.
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  // Step 2: Show Precipitation overlay layer.
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  // Step 3: Click the search field and type a place name.
+  await geocoderInput.click();
+  await geocoderInput.pressSequentially('Münster');
+
+  // Step 4: Wait for the result list to appear and select the first result.
+  const geocoderOptionResults = geocoderPanel.getByRole('option').filter({ hasText: /Münster/i });
+  const geocoderButtonResults = geocoderPanel.getByRole('button').filter({ hasText: /Münster/i });
+  const geocoderLinkResults = geocoderPanel.getByRole('link').filter({ hasText: /Münster/i });
+
+  await expect
+    .poll(async () => {
+      const optionCount = await geocoderOptionResults.count();
+      const buttonCount = await geocoderButtonResults.count();
+      const linkCount = await geocoderLinkResults.count();
+      return optionCount + buttonCount + linkCount;
+    })
+    .toBeGreaterThan(0);
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+  expect(initialScaleText).not.toBe('');
+
+  if ((await geocoderOptionResults.count()) > 0) {
+    await geocoderOptionResults.first().click();
+  } else if ((await geocoderButtonResults.count()) > 0) {
+    await geocoderButtonResults.first().click();
+  } else {
+    await geocoderLinkResults.first().click();
+  }
+
+  // Step 5: Wait for the map to navigate to the selected location.
+  await expect.poll(async () => ((await scaleViewer.textContent()) ?? '').trim()).not.toBe(initialScaleText);
+
+  // Step 6: Wait for the info panel to load the forecast.
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).not.toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+      if (listItemCount > 0) {
+        return listItemCount;
+      }
+
+      const articleCount = await weatherForecastSection.getByRole('article').count();
+      if (articleCount > 0) {
+        return articleCount;
+      }
+
+      const rowCount = await weatherForecastSection.getByRole('row').count();
+      if (rowCount > 1) {
+        return rowCount - 1;
+      }
+
+      return 0;
+    })
+    .toBe(24);
+
+  // Expected results: Temperature hidden, Precipitation shown, map navigated, forecast loaded.
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect(precipitationCheckbox).toBeChecked();
+});

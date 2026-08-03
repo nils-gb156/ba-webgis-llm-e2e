@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementButton = page.getByTestId('measurement-toggle');
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementButton).toBeVisible();
+
+  const measurementPanelAlreadyVisible =
+    (await measurementHeading.isVisible()) ||
+    (await measurementDialog.isVisible()) ||
+    (await measurementRegion.isVisible()) ||
+    (await measurementButton.getAttribute('aria-pressed')) === 'true';
+
+  if (!measurementPanelAlreadyVisible) {
+    await measurementButton.click();
+  }
+
+  await expect.poll(async () => {
+    if (await measurementHeading.isVisible()) {
+      return true;
+    }
+    if (await measurementDialog.isVisible()) {
+      return true;
+    }
+    if (await measurementRegion.isVisible()) {
+      return true;
+    }
+    return (await measurementButton.getAttribute('aria-pressed')) === 'true';
+  }).toBe(true);
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const points = [
+    { x: Math.round(mapBox.width * 0.62), y: Math.round(mapBox.height * 0.34) },
+    { x: Math.round(mapBox.width * 0.72), y: Math.round(mapBox.height * 0.42) },
+    { x: Math.round(mapBox.width * 0.80), y: Math.round(mapBox.height * 0.50) },
+    { x: Math.round(mapBox.width * 0.88), y: Math.round(mapBox.height * 0.58) }
+  ];
+
+  await mapContainer.click({ position: points[0] });
+  await mapContainer.click({ position: points[1] });
+  await mapContainer.click({ position: points[2] });
+  await mapContainer.dblclick({ position: points[3] });
+
+  const lengthValue = page.getByText(/\b\d[\d\s.,]*\s?(?:mm|cm|m|km)\b/i).first();
+  await expect(lengthValue).toBeVisible();
+});

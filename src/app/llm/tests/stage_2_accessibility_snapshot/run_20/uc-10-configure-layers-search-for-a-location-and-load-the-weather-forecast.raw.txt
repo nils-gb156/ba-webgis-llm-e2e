@@ -1,0 +1,129 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const searchInput = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(searchInput).toBeVisible();
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  const findForecastEntryCount = (value: unknown): number | undefined => {
+    if (!value || typeof value !== 'object') {
+      return undefined;
+    }
+
+    if (Array.isArray(value)) {
+      return undefined;
+    }
+
+    const record = value as Record<string, unknown>;
+
+    for (const key of ['timeseries', 'forecast', 'entries', 'items', 'data']) {
+      const candidate = record[key];
+      if (Array.isArray(candidate) && candidate.length === 24) {
+        return candidate.length;
+      }
+    }
+
+    const hourly = record.hourly;
+    if (hourly && typeof hourly === 'object' && !Array.isArray(hourly)) {
+      const hourlyRecord = hourly as Record<string, unknown>;
+      for (const candidate of Object.values(hourlyRecord)) {
+        if (Array.isArray(candidate) && candidate.length === 24) {
+          return candidate.length;
+        }
+      }
+    }
+
+    for (const child of Object.values(record)) {
+      const count = findForecastEntryCount(child);
+      if (count !== undefined) {
+        return count;
+      }
+    }
+
+    return undefined;
+  };
+
+  let capturePostSelectionRequests = false;
+  const postSelectionMapRequests: string[] = [];
+  let forecastEntryCount: number | undefined;
+
+  page.on('request', request => {
+    if (!capturePostSelectionRequests) {
+      return;
+    }
+
+    const url = request.url().toLowerCase();
+    if (
+      request.resourceType() === 'image' ||
+      url.includes('service=wms') ||
+      url.includes('/tile') ||
+      url.includes('/tiles')
+    ) {
+      postSelectionMapRequests.push(request.url());
+    }
+  });
+
+  page.on('response', async response => {
+    if (!capturePostSelectionRequests || !response.ok()) {
+      return;
+    }
+
+    const url = response.url().toLowerCase();
+    const contentType = response.headers()['content-type'] ?? '';
+    const isLikelyForecastResponse =
+      url.includes('weather') || url.includes('forecast') || url.includes('open-meteo');
+
+    if (!contentType.includes('application/json') && !isLikelyForecastResponse) {
+      return;
+    }
+
+    try {
+      const data = await response.json();
+      const count = findForecastEntryCount(data);
+      if (count !== undefined) {
+        forecastEntryCount = count;
+      }
+    } catch {
+      // Ignore non-JSON or unreadable responses.
+    }
+  });
+
+  await searchInput.click();
+  await searchInput.fill('Münster');
+
+  await expect(geocoderPanel).toBeVisible();
+  const firstResult = geocoderPanel.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+
+  capturePostSelectionRequests = true;
+  await firstResult.click();
+
+  await expect.poll(() => postSelectionMapRequests.length).toBeGreaterThan(0);
+  await expect(weatherForecastSection).toBeVisible();
+  await expect.poll(() => forecastEntryCount).toBe(24);
+
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect(precipitationCheckbox).toBeChecked();
+});

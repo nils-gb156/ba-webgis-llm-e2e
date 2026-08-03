@@ -1,0 +1,107 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('map-toolbar')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  const basemapSelector = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(basemapSelector).toBeVisible();
+  await expect(basemapSelector).toHaveValue(/.+/);
+
+  const visibleOverlayCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(visibleOverlayCheckbox).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+  await printToggle.click();
+
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Weather map export');
+  await expect(titleInput).toHaveValue('Weather map export');
+
+  const pngRadio = page.getByRole('radio', { name: /png/i }).first();
+  const pngRadioVisible = await pngRadio.isVisible().catch(() => false);
+
+  if (pngRadioVisible) {
+    if (!(await pngRadio.isChecked())) {
+      await pngRadio.click({ force: true });
+    }
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatCombobox = page.getByRole('combobox', { name: /format/i }).first();
+    await expect(formatCombobox).toBeVisible();
+
+    const pngValue = await formatCombobox.evaluate((element) => {
+      if (element instanceof HTMLSelectElement) {
+        const option = Array.from(element.options).find(
+          (candidate) => /png/i.test(candidate.label) || /png/i.test(candidate.value)
+        );
+        return option?.value;
+      }
+      return undefined;
+    });
+
+    if (pngValue) {
+      await formatCombobox.selectOption(pngValue);
+      await expect
+        .poll(async () => {
+          return await formatCombobox.evaluate((element) => {
+            if (element instanceof HTMLSelectElement) {
+              const selected = element.selectedOptions[0];
+              return selected ? `${selected.label} ${selected.value}` : '';
+            }
+            return '';
+          });
+        })
+        .toMatch(/png/i);
+    } else {
+      await formatCombobox.click();
+      const pngOption = page.getByRole('option', { name: /png/i }).first();
+      await expect(pngOption).toBeVisible();
+      await pngOption.click();
+    }
+  }
+
+  let exportButton = page.getByRole('button', { name: /^export$/i }).first();
+  if (!(await exportButton.isVisible().catch(() => false))) {
+    exportButton = page.getByRole('button', { name: /^export map$/i }).first();
+  }
+  if (!(await exportButton.isVisible().catch(() => false))) {
+    exportButton = page.getByRole('button', { name: /^download$/i }).first();
+  }
+  if (!(await exportButton.isVisible().catch(() => false))) {
+    exportButton = page.getByRole('button', { name: /^print$/i }).first();
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  await expect.poll(async () => await download.failure()).toBeNull();
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const downloadDir = await mkdtemp(join(tmpdir(), 'playwright-print-'));
+  const downloadPath = join(downloadDir, download.suggestedFilename());
+  await download.saveAs(downloadPath);
+
+  const fileContents = await readFile(downloadPath);
+  expect(fileContents.length).toBeGreaterThan(8);
+  expect(
+    fileContents
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  ).toBe(true);
+});

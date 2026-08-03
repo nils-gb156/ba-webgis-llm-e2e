@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const mapContainer = page.getByTestId('map-container');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(coordinateViewer).toBeVisible();
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  expect(measurementPressed).not.toBe('true');
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const centerPosition = {
+    x: mapBox.width / 2,
+    y: mapBox.height / 2
+  };
+
+  await mapContainer.hover({ position: centerPosition });
+  await expect.poll(async () => ((await coordinateViewer.textContent()) ?? '').trim()).toMatch(/\S+/);
+  const initialCoordinate = ((await coordinateViewer.textContent()) ?? '').trim();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const firstSearchResult = geocoderPanel.getByText(/Münster/i).first();
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await mapContainer.hover({
+    position: {
+      x: Math.max(centerPosition.x - 10, 1),
+      y: Math.max(centerPosition.y - 10, 1)
+    }
+  });
+  await mapContainer.hover({ position: centerPosition });
+
+  await expect.poll(async () => ((await coordinateViewer.textContent()) ?? '').trim()).not.toBe(initialCoordinate);
+
+  await mapContainer.click({ position: centerPosition });
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(page.getByText('Click on the map to load a forecast.')).not.toBeVisible();
+  await expect(weatherForecastSection.getByRole('listitem')).toHaveCount(24);
+});

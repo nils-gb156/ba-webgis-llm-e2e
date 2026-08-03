@@ -1,0 +1,127 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('map-toolbar')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  const basemapCombobox = page.getByRole('combobox', { name: 'Basemaps' });
+  await expect(basemapCombobox).toBeVisible();
+
+  const eucosLayerCheckbox = page.getByRole('checkbox', {
+    name: 'EUCOS Ground Stations',
+    exact: true
+  });
+  const temperatureLayerCheckbox = page.getByRole('checkbox', {
+    name: 'Temperature',
+    exact: true
+  });
+  await expect(eucosLayerCheckbox).toBeChecked();
+  await expect(temperatureLayerCheckbox).toBeChecked();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+
+  const titleCandidates = [
+    page.getByLabel(/title/i),
+    page.getByRole('textbox', { name: /title/i }),
+    page.getByPlaceholder(/title/i)
+  ];
+
+  let titleInputVisible = false;
+  for (const candidate of titleCandidates) {
+    if (await candidate.isVisible().catch(() => false)) {
+      titleInputVisible = true;
+      break;
+    }
+  }
+
+  if (!titleInputVisible) {
+    await printToggle.click();
+  }
+
+  let titleInput = titleCandidates[0];
+  let titleInputFound = false;
+  for (const candidate of titleCandidates) {
+    if ((await candidate.count()) > 0) {
+      titleInput = candidate;
+      titleInputFound = true;
+      break;
+    }
+  }
+
+  expect(titleInputFound).toBe(true);
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'Use Case 9 PNG Export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /^PNG$/ });
+  if ((await pngRadio.count()) > 0) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    let formatControl = page.getByRole('combobox', { name: /format/i });
+    if ((await formatControl.count()) === 0) {
+      formatControl = page.getByLabel(/format/i);
+    }
+
+    await expect(formatControl).toBeVisible();
+
+    let selectedWithNativeSelect = false;
+    for (const option of [
+      { label: 'PNG' },
+      { label: 'png' },
+      { value: 'PNG' },
+      { value: 'png' }
+    ]) {
+      try {
+        await formatControl.selectOption(option);
+        selectedWithNativeSelect = true;
+        break;
+      } catch {
+        // try next format selector strategy
+      }
+    }
+
+    if (selectedWithNativeSelect) {
+      await expect(formatControl).toHaveValue(/png/i);
+    } else {
+      await formatControl.click();
+      const pngOption = page.getByRole('option', { name: /^PNG$/ });
+      await expect(pngOption).toBeVisible();
+      await pngOption.click();
+      await expect(formatControl).toContainText(/png/i);
+    }
+  }
+
+  let exportButton = page.getByRole('button', { name: /^Export$/i });
+  if ((await exportButton.count()) === 0) {
+    exportButton = page.getByRole('button', { name: /^Print$/i });
+  }
+  if ((await exportButton.count()) === 0) {
+    exportButton = page.getByRole('button', { name: /^Download$/i });
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  const fileBuffer = await readFile(downloadPath as string);
+  expect(fileBuffer.byteLength).toBeGreaterThan(8);
+  expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

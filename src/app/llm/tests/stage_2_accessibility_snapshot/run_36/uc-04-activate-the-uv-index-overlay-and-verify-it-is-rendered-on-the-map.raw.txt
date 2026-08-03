@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  const initialMapImage = (await mapContainer.screenshot()).toString('base64');
+
+  const isUvIndexTileRequest = (url: string): boolean => {
+    const decodedUrl = decodeURIComponent(url).toLowerCase();
+    const mentionsUvIndex =
+      decodedUrl.includes('uv-index') ||
+      decodedUrl.includes('uv_index') ||
+      decodedUrl.includes('uv%20index') ||
+      decodedUrl.includes('uvi');
+    const mentionsStations = decodedUrl.includes('station');
+    const looksLikeTileOrMapImage =
+      decodedUrl.includes('getmap') ||
+      decodedUrl.includes('tile') ||
+      decodedUrl.includes('.png') ||
+      decodedUrl.includes('.jpg') ||
+      decodedUrl.includes('.jpeg') ||
+      decodedUrl.includes('.webp');
+
+    return mentionsUvIndex && !mentionsStations && looksLikeTileOrMapImage;
+  };
+
+  const uvIndexTileRequests: string[] = [];
+  page.on('request', request => {
+    if (request.resourceType() === 'image' && isUvIndexTileRequest(request.url())) {
+      uvIndexTileRequests.push(request.url());
+    }
+  });
+
+  const uvIndexTileResponsePromise = page.waitForResponse(response => {
+    const request = response.request();
+    return request.resourceType() === 'image' && isUvIndexTileRequest(request.url());
+  });
+
+  await uvIndexToggle.click({ force: true });
+
+  await expect(uvIndexToggle).toBeChecked();
+  await expect.poll(() => uvIndexTileRequests.length).toBeGreaterThan(0);
+
+  const uvIndexTileResponse = await uvIndexTileResponsePromise;
+  expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+  await expect.poll(async () => {
+    return (await mapContainer.screenshot()).toString('base64');
+  }).not.toBe(initialMapImage);
+});

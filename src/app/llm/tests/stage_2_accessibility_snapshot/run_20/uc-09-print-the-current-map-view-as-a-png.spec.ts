@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('map-toolbar')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+  const basemapSelect = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(basemapSelect).toBeVisible();
+  await expect(basemapSelect).toHaveValue(/.+/);
+
+  const temperatureLayerCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureLayerCheckbox).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+  await printToggle.click();
+
+  const titleInput = page.getByRole('textbox', { name: /title/i }).first();
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Current weather map');
+
+  const formatSelect = page.getByRole('combobox', { name: /format/i }).first();
+  if (await formatSelect.isVisible()) {
+    const options = await formatSelect.locator('option').evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        value: (node as HTMLOptionElement).value,
+        label: node.textContent?.trim() ?? ''
+      }))
+    );
+
+    const pngOption = options.find((option) => /png/i.test(option.label) || /png/i.test(option.value));
+    expect(pngOption).toBeTruthy();
+    if (!pngOption) {
+      throw new Error('PNG option not found in print format selector.');
+    }
+
+    await formatSelect.selectOption(pngOption.value);
+    await expect(formatSelect).toHaveValue(pngOption.value);
+  } else {
+    const pngRadio = page.getByRole('radio', { name: /png/i }).first();
+    await expect(pngRadio).toBeVisible();
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  }
+
+  let exportButton = page.getByRole('button', { name: 'Export', exact: true });
+  if (!(await exportButton.isVisible())) {
+    exportButton = page.getByRole('button', { name: 'Print', exact: true });
+  }
+  if (!(await exportButton.isVisible())) {
+    exportButton = page.getByRole('button', { name: 'Download', exact: true });
+  }
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename).toMatch(/\.png$/i);
+
+  const downloadPath = testInfo.outputPath(suggestedFilename);
+  await download.saveAs(downloadPath);
+
+  const fileContent = await readFile(downloadPath);
+  expect(fileContent.length).toBeGreaterThan(8);
+  expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(temperatureLayerCheckbox).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+});

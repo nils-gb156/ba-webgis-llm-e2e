@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapContainer = page.getByTestId('map-container');
+  const mapControlsPanel = page.getByTestId('map-controls-panel');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(mapControlsPanel).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  const initialBodyText = await page.evaluate(() => document.body.innerText);
+  const panelTextRegex = /double-?click|draw.*line|length|distance|clear|finish|area/i;
+
+  const pressedBefore = await measurementToggle.getAttribute('aria-pressed');
+  const panelVisibleBefore = panelTextRegex.test(initialBodyText) || pressedBefore === 'true';
+
+  if (!panelVisibleBefore) {
+    await measurementToggle.click();
+  }
+
+  const pressedAfterOpenAttempt = await measurementToggle.getAttribute('aria-pressed');
+  if (pressedAfterOpenAttempt !== null) {
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+  }
+
+  await expect
+    .poll(async () => {
+      const bodyText = await page.evaluate(() => document.body.innerText);
+      const pressed = await measurementToggle.getAttribute('aria-pressed');
+      return panelTextRegex.test(bodyText) || bodyText !== initialBodyText || pressed === 'true';
+    })
+    .toBeTruthy();
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map container bounding box is not available.');
+  }
+
+  const points = [
+    { x: Math.round(box.width * 0.7), y: Math.round(box.height * 0.32) },
+    { x: Math.round(box.width * 0.82), y: Math.round(box.height * 0.44) },
+    { x: Math.round(box.width * 0.74), y: Math.round(box.height * 0.58) },
+    { x: Math.round(box.width * 0.88), y: Math.round(box.height * 0.7) }
+  ];
+
+  await mapContainer.click({ position: points[0] });
+  await mapContainer.click({ position: points[1] });
+  await mapContainer.click({ position: points[2] });
+  await mapContainer.dblclick({ position: points[3] });
+
+  const lengthRegex = /\b\d[\d.,]*\s?(?:mm|cm|m|km)\b/i;
+
+  await expect
+    .poll(async () => {
+      const controlsText = await mapControlsPanel.innerText();
+      const bodyText = await page.evaluate(() => document.body.innerText);
+      const match = controlsText.match(lengthRegex) ?? bodyText.match(lengthRegex);
+      return match?.[0] ?? '';
+    })
+    .toMatch(lengthRegex);
+});

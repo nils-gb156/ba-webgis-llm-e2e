@@ -1,0 +1,217 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await page.getByTestId('info-panel-toggle').click();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    await page.getByTestId('layer-switcher-toggle').click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const uviStationsCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  if (!(await uviStationsCheckbox.isChecked())) {
+    await uviStationsCheckbox.click({ force: true });
+  }
+  await expect(uviStationsCheckbox).toBeChecked();
+
+  const eucosStationsCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  if (!(await eucosStationsCheckbox.isChecked())) {
+    await eucosStationsCheckbox.click({ force: true });
+  }
+  await expect(eucosStationsCheckbox).toBeChecked();
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  await page.getByTestId('initial-extent-button').click();
+
+  const mapContainerHandle = await mapContainer.elementHandle();
+  if (!mapContainerHandle) {
+    throw new Error('Map container element not found.');
+  }
+
+  type ClickPosition = { x: number; y: number };
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+  let clickPosition: ClickPosition | null = null;
+
+  await expect
+    .poll(
+      async () => {
+        clickPosition = await mapContainerHandle.evaluate(
+          (container, coordinate) => {
+            const isObjectLike = (value: unknown): value is Record<PropertyKey, unknown> =>
+              (typeof value === 'object' || typeof value === 'function') && value !== null;
+
+            const looksLikeMap = (
+              value: unknown
+            ): value is {
+              getPixelFromCoordinate: (coordinate: [number, number]) => [number, number] | null | undefined;
+              getCoordinateFromPixel: (pixel: [number, number]) => [number, number] | null | undefined;
+              getTargetElement: () => Element | null | undefined;
+            } =>
+              isObjectLike(value) &&
+              typeof (value as { getPixelFromCoordinate?: unknown }).getPixelFromCoordinate === 'function' &&
+              typeof (value as { getCoordinateFromPixel?: unknown }).getCoordinateFromPixel === 'function' &&
+              typeof (value as { getTargetElement?: unknown }).getTargetElement === 'function';
+
+            const ignoredKeys = new Set<PropertyKey>([
+              'parentNode',
+              'parentElement',
+              'children',
+              'childNodes',
+              'firstChild',
+              'lastChild',
+              'nextSibling',
+              'previousSibling',
+              'ownerDocument',
+              'offsetParent'
+            ]);
+
+            const reactSeeds = Reflect.ownKeys(container)
+              .filter(
+                (key) =>
+                  typeof key === 'string' && (key.startsWith('__reactFiber') || key.startsWith('__reactProps'))
+              )
+              .map((key) => (container as Record<PropertyKey, unknown>)[key]);
+
+            const queue: unknown[] = [container, ...reactSeeds];
+            const seen = new WeakSet<object>();
+            let inspected = 0;
+
+            while (queue.length > 0 && inspected < 15000) {
+              const current = queue.shift();
+
+              if (!isObjectLike(current)) {
+                continue;
+              }
+
+              if (seen.has(current)) {
+                continue;
+              }
+              seen.add(current);
+              inspected += 1;
+
+              if (looksLikeMap(current)) {
+                try {
+                  const target = current.getTargetElement();
+                  if (!(target instanceof Element)) {
+                    continue;
+                  }
+
+                  if (!(container.contains(target) || target.contains(container) || target === container)) {
+                    continue;
+                  }
+
+                  const pixel = current.getPixelFromCoordinate(coordinate);
+                  if (
+                    !Array.isArray(pixel) ||
+                    pixel.length !== 2 ||
+                    !Number.isFinite(pixel[0]) ||
+                    !Number.isFinite(pixel[1])
+                  ) {
+                    continue;
+                  }
+
+                  const containerRect = container.getBoundingClientRect();
+                  const targetRect = target.getBoundingClientRect();
+                  const x = pixel[0] + targetRect.left - containerRect.left;
+                  const y = pixel[1] + targetRect.top - containerRect.top;
+
+                  if (x < 0 || y < 0 || x > containerRect.width || y > containerRect.height) {
+                    continue;
+                  }
+
+                  return { x, y };
+                } catch {
+                  continue;
+                }
+              }
+
+              if (current instanceof Map) {
+                for (const value of current.values()) {
+                  if (isObjectLike(value)) {
+                    queue.push(value);
+                  }
+                }
+                continue;
+              }
+
+              if (current instanceof Set) {
+                for (const value of current.values()) {
+                  if (isObjectLike(value)) {
+                    queue.push(value);
+                  }
+                }
+                continue;
+              }
+
+              if (current instanceof Node && current !== container) {
+                continue;
+              }
+
+              let keys: PropertyKey[] = [];
+              try {
+                keys = Reflect.ownKeys(current);
+              } catch {
+                continue;
+              }
+
+              for (const key of keys) {
+                if (ignoredKeys.has(key)) {
+                  continue;
+                }
+
+                let value: unknown;
+                try {
+                  value = (current as Record<PropertyKey, unknown>)[key];
+                } catch {
+                  continue;
+                }
+
+                if (isObjectLike(value)) {
+                  queue.push(value);
+                }
+              }
+            }
+
+            return null;
+          },
+          targetCoordinate
+        );
+
+        return clickPosition !== null;
+      },
+      { timeout: 15000 }
+    )
+    .toBe(true);
+
+  if (!clickPosition) {
+    throw new Error('Could not resolve click position for target map coordinate.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(clickPosition.x),
+      y: Math.round(clickPosition.y)
+    }
+  });
+
+  await expect(infoPanel).toContainText(/UV-Index Station/i);
+  await expect(infoPanel).toContainText(/EUCOS Ground Station/i);
+});

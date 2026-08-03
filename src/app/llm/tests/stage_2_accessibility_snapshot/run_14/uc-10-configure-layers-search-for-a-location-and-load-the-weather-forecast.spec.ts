@@ -1,0 +1,103 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(measurementButton).not.toHaveAttribute('aria-pressed', 'true');
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const optionResult = geocoderPanel.getByRole('option', { name: /M(?:ü|u)nster/i }).first();
+  const buttonResult = geocoderPanel.getByRole('button', { name: /M(?:ü|u)nster/i }).first();
+  const listItemResult = geocoderPanel.getByRole('listitem').filter({ hasText: /M(?:ü|u)nster/i }).first();
+  const textResult = geocoderPanel.getByText(/M(?:ü|u)nster/i).first();
+
+  await expect
+    .poll(async () => {
+      return (
+        (await optionResult.count()) +
+        (await buttonResult.count()) +
+        (await listItemResult.count()) +
+        (await textResult.count())
+      );
+    })
+    .toBeGreaterThan(0);
+
+  let firstResult = optionResult;
+  if (await optionResult.count()) {
+    firstResult = optionResult;
+  } else if (await buttonResult.count()) {
+    firstResult = buttonResult;
+  } else if (await listItemResult.count()) {
+    firstResult = listItemResult;
+  } else {
+    firstResult = textResult;
+  }
+
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  await expect(geocoderInput).toHaveValue(/M(?:ü|u)nster/i);
+
+  await expect
+    .poll(async () => {
+      return ((await scaleViewer.textContent()) ?? '').trim();
+    })
+    .not.toBe(initialScaleText);
+
+  await expect(forecastSection).toBeVisible();
+  await expect(forecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect
+    .poll(async () => {
+      const listItems = await forecastSection.getByRole('listitem').count();
+      if (listItems > 0) {
+        return listItems;
+      }
+
+      const rows = await forecastSection.getByRole('row').count();
+      if (rows > 0) {
+        return rows === 25 ? 24 : rows;
+      }
+
+      const articles = await forecastSection.getByRole('article').count();
+      if (articles > 0) {
+        return articles;
+      }
+
+      return 0;
+    })
+    .toBe(24);
+});

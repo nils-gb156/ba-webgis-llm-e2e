@@ -1,0 +1,202 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const map = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const initialExtentButton = page.getByTestId('initial-extent-button');
+
+  await expect(map).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+  } else {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  if (!(await layerSwitcher.isVisible())) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeVisible();
+  } else {
+    await expect(layerSwitcher).toBeVisible();
+  }
+
+  const eucosCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'EUCOS Ground Stations',
+    exact: true
+  });
+  const uviCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'UV-Index Stations',
+    exact: true
+  });
+
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+  await expect(eucosCheckbox).toBeChecked();
+
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+  await expect(uviCheckbox).toBeChecked();
+
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressed === 'true') {
+    await measurementToggle.click();
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  await initialExtentButton.click();
+  await expect(coordinateViewer).toBeVisible();
+
+  const parseNumberToken = (token: string): number => {
+    const cleaned = token.replace(/\s/g, '');
+
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+      if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
+        return Number(cleaned.replace(/\./g, '').replace(',', '.'));
+      }
+      return Number(cleaned.replace(/,/g, ''));
+    }
+
+    if (cleaned.includes(',')) {
+      const parts = cleaned.split(',');
+      if (parts.length === 2 && parts[1].length !== 3) {
+        return Number(cleaned.replace(',', '.'));
+      }
+      return Number(cleaned.replace(/,/g, ''));
+    }
+
+    return Number(cleaned);
+  };
+
+  const extractCoordinates = (text: string): { x: number; y: number } | undefined => {
+    const matches = text.match(/-?\d[\d.,\s]*/g);
+    if (!matches || matches.length < 2) {
+      return undefined;
+    }
+
+    const values = matches
+      .map((match) => parseNumberToken(match.trim()))
+      .filter((value) => Number.isFinite(value));
+
+    if (values.length < 2) {
+      return undefined;
+    }
+
+    return { x: values[0], y: values[1] };
+  };
+
+  const mapBox = await map.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map bounding box is not available.');
+  }
+
+  const mapWidth = Math.floor(mapBox.width);
+  const mapHeight = Math.floor(mapBox.height);
+
+  const clamp = (value: number, min: number, max: number): number =>
+    Math.min(max, Math.max(min, value));
+
+  const hoverAndReadCoordinates = async (position: { x: number; y: number }) => {
+    const safePosition = {
+      x: clamp(Math.round(position.x), 5, mapWidth - 5),
+      y: clamp(Math.round(position.y), 5, mapHeight - 5)
+    };
+
+    const nudgePosition = {
+      x: clamp(safePosition.x + 1, 5, mapWidth - 5),
+      y: safePosition.y
+    };
+
+    await map.hover({ position: nudgePosition });
+    await map.hover({ position: safePosition });
+
+    await expect
+      .poll(async () => {
+        const text = (await coordinateViewer.textContent()) ?? '';
+        const coordinates = extractCoordinates(text);
+        return coordinates ? `${coordinates.x},${coordinates.y}` : '';
+      })
+      .toMatch(/^-?\d/);
+
+    const text = (await coordinateViewer.textContent()) ?? '';
+    const coordinates = extractCoordinates(text);
+    if (!coordinates) {
+      throw new Error(`Could not parse coordinates from coordinate viewer text: "${text}"`);
+    }
+
+    return coordinates;
+  };
+
+  const midX = Math.round(mapWidth * 0.5);
+  const midY = Math.round(mapHeight * 0.5);
+  const leftX = Math.round(mapWidth * 0.25);
+  const rightX = Math.round(mapWidth * 0.75);
+  const topY = Math.round(mapHeight * 0.25);
+  const bottomY = Math.round(mapHeight * 0.75);
+
+  const leftSample = await hoverAndReadCoordinates({ x: leftX, y: midY });
+  const rightSample = await hoverAndReadCoordinates({ x: rightX, y: midY });
+  const topSample = await hoverAndReadCoordinates({ x: midX, y: topY });
+  const bottomSample = await hoverAndReadCoordinates({ x: midX, y: bottomY });
+
+  const unitsPerPixelX = (rightSample.x - leftSample.x) / (rightX - leftX);
+  const unitsPerPixelY = (bottomSample.y - topSample.y) / (bottomY - topY);
+
+  expect(Math.abs(unitsPerPixelX)).toBeGreaterThan(0);
+  expect(Math.abs(unitsPerPixelY)).toBeGreaterThan(0);
+
+  const targetMapCoordinate = { x: 1188692.84, y: 6767643.28 };
+
+  let targetPosition = {
+    x: clamp(leftX + (targetMapCoordinate.x - leftSample.x) / unitsPerPixelX, 5, mapWidth - 5),
+    y: clamp(topY + (targetMapCoordinate.y - topSample.y) / unitsPerPixelY, 5, mapHeight - 5)
+  };
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const currentCoordinate = await hoverAndReadCoordinates(targetPosition);
+    const deltaPixelsX = (targetMapCoordinate.x - currentCoordinate.x) / unitsPerPixelX;
+    const deltaPixelsY = (targetMapCoordinate.y - currentCoordinate.y) / unitsPerPixelY;
+
+    if (Math.abs(deltaPixelsX) <= 1 && Math.abs(deltaPixelsY) <= 1) {
+      break;
+    }
+
+    targetPosition = {
+      x: clamp(targetPosition.x + deltaPixelsX, 5, mapWidth - 5),
+      y: clamp(targetPosition.y + deltaPixelsY, 5, mapHeight - 5)
+    };
+  }
+
+  const finalCoordinate = await hoverAndReadCoordinates(targetPosition);
+  expect(Math.abs(finalCoordinate.x - targetMapCoordinate.x)).toBeLessThanOrEqual(
+    Math.abs(unitsPerPixelX) * 3
+  );
+  expect(Math.abs(finalCoordinate.y - targetMapCoordinate.y)).toBeLessThanOrEqual(
+    Math.abs(unitsPerPixelY) * 3
+  );
+
+  await map.click({
+    position: {
+      x: Math.round(targetPosition.x),
+      y: Math.round(targetPosition.y)
+    }
+  });
+
+  await expect(infoPanel).toContainText(/UV-Index Station/i);
+  await expect(infoPanel).toContainText(/EUCOS Ground Station/i);
+});

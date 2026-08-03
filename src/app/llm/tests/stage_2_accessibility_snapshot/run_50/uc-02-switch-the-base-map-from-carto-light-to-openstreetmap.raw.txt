@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const basemapSelector = layerSwitcher.getByRole('combobox', {
+    name: 'Basemaps',
+    exact: true
+  });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(basemapSelector).toBeVisible();
+
+  await expect
+    .poll(async () =>
+      basemapSelector.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return select.selectedOptions[0]?.textContent?.trim() ?? '';
+      })
+    )
+    .toBe('Carto Light');
+
+  await basemapSelector.selectOption({ label: 'OpenStreetMap' });
+
+  await expect
+    .poll(async () =>
+      basemapSelector.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return {
+          selectedLabel: select.selectedOptions[0]?.textContent?.trim() ?? '',
+          openStreetMapSelected: Array.from(select.options).some(
+            (option) => option.text.trim() === 'OpenStreetMap' && option.selected
+          ),
+          cartoLightSelected: Array.from(select.options).some(
+            (option) => option.text.trim() === 'Carto Light' && option.selected
+          )
+        };
+      })
+    )
+    .toEqual({
+      selectedLabel: 'OpenStreetMap',
+      openStreetMapSelected: true,
+      cartoLightSelected: false
+    });
+});

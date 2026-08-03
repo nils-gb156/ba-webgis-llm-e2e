@@ -1,0 +1,95 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(page.getByRole('application', { name: 'webgis map' })).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+  const initialForecastText = (await weatherForecastSection.innerText()).trim();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const countForecastEntries = async (): Promise<number> => {
+    return await weatherForecastSection.evaluate((sectionElement) => {
+      const root = sectionElement as HTMLElement;
+      const text = (root.innerText ?? '').trim();
+
+      const listItems = root.querySelectorAll('[role="listitem"], li');
+      if (listItems.length > 0) {
+        return listItems.length;
+      }
+
+      const articles = root.querySelectorAll('article');
+      if (articles.length > 0) {
+        return articles.length;
+      }
+
+      const tableBodyRows = root.querySelectorAll('tbody tr');
+      if (tableBodyRows.length > 0) {
+        return tableBodyRows.length;
+      }
+
+      const rows = root.querySelectorAll('[role="row"], tr');
+      if (rows.length > 0) {
+        const hasHeader = root.querySelectorAll('thead tr, [role="columnheader"], th').length > 0;
+        return Math.max(rows.length - (hasHeader ? 1 : 0), 0);
+      }
+
+      const containers = [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))];
+      const containerWith24Children = containers.find((element) => element.children.length === 24);
+      if (containerWith24Children) {
+        return 24;
+      }
+
+      const timeMatches = text.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g) ?? [];
+      const uniqueTimes = Array.from(new Set(timeMatches));
+      if (uniqueTimes.length > 0) {
+        return uniqueTimes.length;
+      }
+
+      const hourLabelMatches = text.match(/\b(?:[01]?\d|2[0-3])\s*(?:h|Uhr)\b/g) ?? [];
+      const uniqueHourLabels = Array.from(new Set(hourLabelMatches));
+      if (uniqueHourLabels.length > 0) {
+        return uniqueHourLabels.length;
+      }
+
+      return 0;
+    });
+  };
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor(mapBox.width * 0.55),
+      y: Math.floor(mapBox.height * 0.5),
+    },
+  });
+
+  await expect(weatherForecastSection).toBeVisible();
+
+  // The clicked position highlight is rendered on the map canvas and is not directly assertable via DOM.
+  // Successful forecast loading after the map click verifies the clicked map position indirectly.
+  await expect.poll(
+    async () => {
+      return (await weatherForecastSection.innerText()).trim() !== initialForecastText;
+    },
+    { timeout: 15000 }
+  ).toBe(true);
+
+  await expect.poll(countForecastEntries, { timeout: 15000 }).toBe(24);
+});

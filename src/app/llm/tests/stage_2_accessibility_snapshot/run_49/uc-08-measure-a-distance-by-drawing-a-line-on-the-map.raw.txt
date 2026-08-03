@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  const measurementPressedBefore = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressedBefore !== 'true') {
+    await measurementToggle.click();
+  }
+
+  await expect.poll(async () => {
+    const ariaPressed = await measurementToggle.getAttribute('aria-pressed');
+    const dialogVisible = await page.getByRole('dialog', { name: /measurement/i }).first().isVisible();
+    const headingVisible = await page.getByRole('heading', { name: 'Measurement', exact: true }).first().isVisible();
+    const regionVisible = await page.getByRole('region', { name: /measurement/i }).first().isVisible();
+    const helperTextVisible = await page
+      .getByText(/click.*map.*(measure|measurement)|draw.*line|distance/i)
+      .first()
+      .isVisible();
+
+    return ariaPressed === 'true' || dialogVisible || headingVisible || regionVisible || helperTextVisible;
+  }).toBe(true);
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const firstPoint = {
+    x: Math.round(mapBox.width * 0.3),
+    y: Math.round(mapBox.height * 0.35),
+  };
+  const secondPoint = {
+    x: Math.round(mapBox.width * 0.5),
+    y: Math.round(mapBox.height * 0.45),
+  };
+  const thirdPoint = {
+    x: Math.round(mapBox.width * 0.7),
+    y: Math.round(mapBox.height * 0.55),
+  };
+
+  await mapContainer.click({ position: firstPoint });
+  await mapContainer.click({ position: secondPoint });
+  await mapContainer.dblclick({ position: thirdPoint });
+
+  await expect(page.getByText(/\d+(?:[.,]\d+)?\s?(?:m|km)\b/i).first()).toBeVisible();
+});

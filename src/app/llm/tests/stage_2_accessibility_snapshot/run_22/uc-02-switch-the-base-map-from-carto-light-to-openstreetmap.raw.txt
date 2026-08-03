@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const basemapCombobox = layerSwitcher.getByRole('combobox', { name: 'Basemaps', exact: true });
+
+  await expect(layerSwitcherToggle).toBeVisible();
+
+  const layerSwitcherPressed = await layerSwitcherToggle.getAttribute('aria-pressed');
+  if (layerSwitcherPressed !== 'true') {
+    await layerSwitcherToggle.click();
+  }
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(basemapCombobox).toBeVisible();
+  await expect(basemapCombobox).toBeEnabled();
+
+  const getSelectedBasemapLabel = async () =>
+    await basemapCombobox.evaluate((element) => {
+      const select = element as HTMLSelectElement;
+      const selectedOption = select.selectedOptions.item(0);
+      return selectedOption?.label ?? selectedOption?.text ?? '';
+    });
+
+  await expect.poll(getSelectedBasemapLabel).toBe('Carto Light');
+
+  await basemapCombobox.click();
+  await basemapCombobox.selectOption({ label: 'OpenStreetMap' });
+
+  await expect.poll(getSelectedBasemapLabel).toBe('OpenStreetMap');
+  await expect
+    .poll(async () =>
+      await basemapCombobox.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return Array.from(select.selectedOptions).map((option) => option.label || option.text);
+      })
+    )
+    .not.toContain('Carto Light');
+});

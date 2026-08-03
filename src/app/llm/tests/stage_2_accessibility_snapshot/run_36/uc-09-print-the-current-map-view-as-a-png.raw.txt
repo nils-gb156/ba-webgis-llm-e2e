@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+  const basemapSelect = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(basemapSelect).toBeVisible();
+
+  const temperatureLayerCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureLayerCheckbox).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  await page.getByTestId('print-toggle').click();
+
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Current weather map');
+
+  let formatSelected = false;
+  const formatCombobox = page.getByRole('combobox', { name: /format/i });
+  const pngRadio = page.getByRole('radio', { name: 'PNG', exact: true });
+  const pngButton = page.getByRole('button', { name: 'PNG', exact: true });
+
+  if ((await formatCombobox.count()) > 0) {
+    await expect(formatCombobox).toBeVisible();
+    try {
+      await formatCombobox.selectOption({ label: 'PNG' });
+    } catch {
+      try {
+        await formatCombobox.selectOption({ value: 'png' });
+      } catch {
+        await formatCombobox.selectOption({ value: 'image/png' });
+      }
+    }
+    formatSelected = true;
+  } else if ((await pngRadio.count()) > 0) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+    formatSelected = true;
+  } else if ((await pngButton.count()) > 0) {
+    await expect(pngButton).toBeVisible();
+    await pngButton.click();
+    formatSelected = true;
+  }
+
+  expect(formatSelected).toBeTruthy();
+
+  const downloadPromise = page.waitForEvent('download');
+
+  let exportTriggered = false;
+  const exportButton = page.getByRole('button', { name: 'Export', exact: true });
+  const printButton = page.getByRole('button', { name: 'Print', exact: true });
+  const downloadButton = page.getByRole('button', { name: 'Download', exact: true });
+  const exportMapButton = page.getByRole('button', { name: 'Export Map', exact: true });
+
+  if ((await exportButton.count()) > 0) {
+    await exportButton.click();
+    exportTriggered = true;
+  } else if ((await printButton.count()) > 0) {
+    await printButton.click();
+    exportTriggered = true;
+  } else if ((await downloadButton.count()) > 0) {
+    await downloadButton.click();
+    exportTriggered = true;
+  } else if ((await exportMapButton.count()) > 0) {
+    await exportMapButton.click();
+    exportTriggered = true;
+  }
+
+  expect(exportTriggered).toBeTruthy();
+
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const filePath = test.info().outputPath(download.suggestedFilename());
+  await download.saveAs(filePath);
+
+  const fileContent = await fs.readFile(filePath);
+  expect(fileContent.length).toBeGreaterThan(8);
+  expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

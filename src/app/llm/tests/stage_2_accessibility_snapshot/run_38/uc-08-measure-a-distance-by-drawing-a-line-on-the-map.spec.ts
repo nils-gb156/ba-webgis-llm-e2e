@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+  const measurementGroup = page.getByRole('group', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  const controlledPanelId = await measurementToggle.getAttribute('aria-controls');
+  let measurementPanel: any = controlledPanelId ? page.locator(`[id="${controlledPanelId}"]`) : null;
+
+  const panelAlreadyVisible =
+    (measurementPanel ? await measurementPanel.isVisible() : false) ||
+    (await measurementDialog.isVisible()) ||
+    (await measurementRegion.isVisible()) ||
+    (await measurementGroup.isVisible()) ||
+    (await measurementHeading.isVisible());
+
+  if (!panelAlreadyVisible) {
+    const ariaPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (ariaPressed !== 'true') {
+      await measurementToggle.click();
+    }
+  }
+
+  await expect
+    .poll(async () => {
+      if (measurementPanel && (await measurementPanel.isVisible())) {
+        return true;
+      }
+
+      for (const candidate of [measurementDialog, measurementRegion, measurementGroup, measurementHeading]) {
+        if (await candidate.isVisible()) {
+          measurementPanel = candidate;
+          return true;
+        }
+      }
+
+      return false;
+    })
+    .toBe(true);
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const points = [
+    { x: Math.round(mapBox.width * 0.35), y: Math.round(mapBox.height * 0.3) },
+    { x: Math.round(mapBox.width * 0.5), y: Math.round(mapBox.height * 0.4) },
+    { x: Math.round(mapBox.width * 0.65), y: Math.round(mapBox.height * 0.5) },
+    { x: Math.round(mapBox.width * 0.8), y: Math.round(mapBox.height * 0.65) }
+  ];
+
+  await mapContainer.click({ position: points[0] });
+  await mapContainer.click({ position: points[1] });
+  await mapContainer.click({ position: points[2] });
+  await mapContainer.dblclick({ position: points[3] });
+
+  await expect
+    .poll(async () => {
+      for (const candidate of [measurementPanel, measurementDialog, measurementRegion, measurementGroup]) {
+        if (candidate && candidate !== measurementHeading && (await candidate.isVisible())) {
+          return (((await candidate.textContent()) ?? '') as string).replace(/\s+/g, ' ');
+        }
+      }
+
+      if (await measurementHeading.isVisible()) {
+        const surroundingText = await measurementHeading.evaluate((node) => {
+          const texts = [
+            node.parentElement?.textContent ?? '',
+            node.parentElement?.parentElement?.textContent ?? '',
+            node.parentElement?.parentElement?.parentElement?.textContent ?? ''
+          ];
+          return texts.join(' ');
+        });
+        return surroundingText.replace(/\s+/g, ' ');
+      }
+
+      return '';
+    })
+    .toMatch(/\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i);
+});

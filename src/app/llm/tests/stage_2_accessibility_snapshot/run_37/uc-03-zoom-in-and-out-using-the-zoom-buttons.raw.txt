@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const zoomInButton = page.getByTestId('zoom-in-button');
+  const zoomOutButton = page.getByTestId('zoom-out-button');
+  const scaleViewer = page.getByTestId('scale-viewer');
+
+  const parseScaleDenominator = (text: string | null): number | undefined => {
+    if (!text) {
+      return undefined;
+    }
+
+    const matches = [...text.matchAll(/\d[\d.,\s]*/g)];
+    const lastNumber = matches.at(-1)?.[0];
+    if (!lastNumber) {
+      return undefined;
+    }
+
+    const digitsOnly = lastNumber.replace(/[^\d]/g, '');
+    if (!digitsOnly) {
+      return undefined;
+    }
+
+    return Number.parseInt(digitsOnly, 10);
+  };
+
+  const readScaleDenominator = async (): Promise<number | undefined> => {
+    return parseScaleDenominator(await scaleViewer.textContent());
+  };
+
+  await expect(mapContainer).toBeVisible();
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await expect(scaleViewer).toBeVisible();
+
+  await expect.poll(readScaleDenominator).toBeGreaterThan(0);
+  const initialScaleDenominator = (await readScaleDenominator())!;
+
+  await zoomInButton.click();
+
+  await expect.poll(readScaleDenominator).toBeLessThan(initialScaleDenominator);
+  const zoomedInScaleDenominator = (await readScaleDenominator())!;
+
+  await zoomOutButton.click();
+
+  await expect.poll(readScaleDenominator).toBeGreaterThan(zoomedInScaleDenominator);
+});

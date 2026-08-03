@@ -1,0 +1,152 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('UC9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const pickVisible = async (candidates: any[]) => {
+        await expect
+            .poll(async () => {
+                for (let i = 0; i < candidates.length; i++) {
+                    if (await candidates[i].isVisible()) {
+                        return i;
+                    }
+                }
+                return -1;
+            })
+            .not.toBe(-1);
+
+        for (const candidate of candidates) {
+            if (await candidate.isVisible()) {
+                return candidate;
+            }
+        }
+
+        throw new Error('No visible locator found.');
+    };
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('layer-switcher')).toBeVisible();
+    await expect(page.getByTestId('legend')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect(page.getByRole('combobox', { name: /^Basemaps$/ })).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: /^EUCOS Ground Stations$/ })).toBeChecked();
+    await expect(page.getByRole('checkbox', { name: /^Temperature$/ })).toBeChecked();
+
+    const printToggle = page.getByTestId('print-toggle');
+    await expect(printToggle).toBeVisible();
+    await printToggle.click();
+
+    const titleInput = await pickVisible([
+        page.getByLabel(/^Title$/i).first(),
+        page.getByRole('textbox', { name: /title/i }).first(),
+        page.getByRole('textbox').nth(1)
+    ]);
+
+    const formatPresence = await pickVisible([
+        page.getByRole('radio', { name: /^PNG$/i }).first(),
+        page.getByRole('button', { name: /^PNG$/i }).first(),
+        page.getByRole('tab', { name: /^PNG$/i }).first(),
+        page.getByRole('combobox', { name: /format/i }).first(),
+        page.getByLabel(/format/i).first()
+    ]);
+
+    await expect(titleInput).toBeVisible();
+    await expect(formatPresence).toBeVisible();
+
+    const printTitle = `Map export ${new Date().toISOString()}`;
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = page.getByRole('radio', { name: /^PNG$/i }).first();
+    const pngButton = page.getByRole('button', { name: /^PNG$/i }).first();
+    const pngTab = page.getByRole('tab', { name: /^PNG$/i }).first();
+
+    if (await pngRadio.isVisible()) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else if (await pngButton.isVisible()) {
+        await pngButton.click();
+    } else if (await pngTab.isVisible()) {
+        await pngTab.click();
+        await expect(pngTab).toHaveAttribute('aria-selected', 'true');
+    } else {
+        const formatControl = await pickVisible([
+            page.getByRole('combobox', { name: /format/i }).first(),
+            page.getByLabel(/format/i).first()
+        ]);
+
+        const tagName = await formatControl.evaluate((element: Element) => element.tagName.toLowerCase());
+
+        if (tagName === 'select') {
+            const pngValue = await formatControl.evaluate((selectElement: Element) => {
+                const select = selectElement as HTMLSelectElement;
+                const match = Array.from(select.options).find(
+                    option =>
+                        /png/i.test(option.label) ||
+                        /png/i.test(option.value) ||
+                        /png/i.test(option.textContent ?? '')
+                );
+                return match?.value ?? null;
+            });
+
+            expect(pngValue).not.toBeNull();
+            await formatControl.selectOption(pngValue);
+            await expect
+                .poll(async () => {
+                    return await formatControl.evaluate((selectElement: Element) => {
+                        const select = selectElement as HTMLSelectElement;
+                        const selected = select.selectedOptions[0];
+                        return selected?.label ?? selected?.textContent ?? '';
+                    });
+                })
+                .toMatch(/png/i);
+        } else {
+            await formatControl.click();
+            const pngOption = await pickVisible([
+                page.getByRole('option', { name: /png/i }).first(),
+                page.getByRole('menuitemradio', { name: /png/i }).first(),
+                page.getByRole('listitem').getByText(/png/i).first()
+            ]);
+            await pngOption.click({ force: true });
+        }
+    }
+
+    let panelScope: any = page;
+    const namedDialog = page.getByRole('dialog', { name: /print/i }).first();
+    const anyDialog = page.getByRole('dialog').first();
+
+    if (await namedDialog.isVisible()) {
+        panelScope = namedDialog;
+    } else if (await anyDialog.isVisible()) {
+        panelScope = anyDialog;
+    }
+
+    const exportButton = await pickVisible([
+        panelScope.getByRole('button', { name: /^Export$/i }).first(),
+        panelScope.getByRole('button', { name: /^Print$/i }).first(),
+        panelScope.getByRole('button', { name: /^Download$/i }).first(),
+        panelScope.getByRole('button', { name: /generate/i }).first(),
+        panelScope.getByRole('button', { name: /create/i }).first()
+    ]);
+
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileBytes = await readFile(downloadPath!);
+    expect(fileBytes.length).toBeGreaterThan(8);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

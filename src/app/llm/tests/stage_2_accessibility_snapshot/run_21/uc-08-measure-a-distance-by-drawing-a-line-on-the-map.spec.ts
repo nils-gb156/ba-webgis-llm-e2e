@@ -1,0 +1,84 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const map = page.getByTestId('map-container');
+  const measurementButton = page.getByTestId('measurement-toggle');
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  await expect(map).toBeVisible();
+  await expect(measurementButton).toBeVisible();
+
+  const measurementPanelVisible = async () => {
+    if (await measurementDialog.count()) {
+      return await measurementDialog.isVisible();
+    }
+    if (await measurementHeading.count()) {
+      return await measurementHeading.isVisible();
+    }
+    return false;
+  };
+
+  if (!(await measurementPanelVisible())) {
+    await measurementButton.click();
+  }
+
+  await expect.poll(measurementPanelVisible).toBe(true);
+
+  const distanceRadio = page.getByRole('radio', { name: /^(Distance|Line|Length)$/i });
+  if (await distanceRadio.count()) {
+    await distanceRadio.first().click({ force: true });
+    await expect(distanceRadio.first()).toBeChecked();
+  } else {
+    const distanceTab = page.getByRole('tab', { name: /^(Distance|Line|Length)$/i });
+    if (await distanceTab.count()) {
+      await distanceTab.first().click();
+      await expect(distanceTab.first()).toHaveAttribute('aria-selected', 'true');
+    } else {
+      const distanceButton = page.getByRole('button', { name: /^(Distance|Line|Length)$/i });
+      if (await distanceButton.count()) {
+        await distanceButton.first().click();
+      }
+    }
+  }
+
+  const box = await map.boundingBox();
+  if (!box) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const candidatePoints: { x: number; y: number }[] = [
+    { x: Math.round(box.width * 0.72), y: Math.round(box.height * 0.34) },
+    { x: Math.round(box.width * 0.58), y: Math.round(box.height * 0.46) },
+    { x: Math.round(box.width * 0.80), y: Math.round(box.height * 0.58) },
+    { x: Math.round(box.width * 0.46), y: Math.round(box.height * 0.62) },
+    { x: Math.round(box.width * 0.66), y: Math.round(box.height * 0.72) },
+  ];
+
+  const usablePoints: { x: number; y: number }[] = [];
+  for (const point of candidatePoints) {
+    try {
+      await map.click({ position: point, trial: true });
+      usablePoints.push(point);
+      if (usablePoints.length === 3) {
+        break;
+      }
+    } catch {
+      // Try the next candidate point until three clickable map positions are found.
+    }
+  }
+
+  expect(usablePoints.length).toBeGreaterThanOrEqual(3);
+
+  await map.click({ position: usablePoints[0] });
+  await map.click({ position: usablePoints[1] });
+  await map.dblclick({ position: usablePoints[2] });
+
+  await expect(
+    page.getByText(/\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i).first()
+  ).toBeVisible();
+});

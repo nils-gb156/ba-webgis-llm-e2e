@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC10 Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+  expect(initialScaleText).not.toBe('');
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  await expect.poll(async () => {
+    return ((await geocoderPanel.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+  }).toMatch(/m[üu]nster/i);
+
+  const resultOption = geocoderPanel.getByRole('option', { name: /m[üu]nster/i }).first();
+  const resultLink = geocoderPanel.getByRole('link', { name: /m[üu]nster/i }).first();
+  const resultButton = geocoderPanel.getByRole('button', { name: /m[üu]nster/i }).first();
+  const resultText = geocoderPanel.getByText(/m[üu]nster/i).first();
+
+  if (await resultOption.count()) {
+    await resultOption.click();
+  } else if (await resultLink.count()) {
+    await resultLink.click();
+  } else if (await resultButton.count()) {
+    await resultButton.click();
+  } else {
+    await resultText.click();
+  }
+
+  await expect.poll(async () => {
+    return ((await scaleViewer.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+  }).not.toBe(initialScaleText);
+
+  await expect.poll(async () => {
+    const value = await geocoderInput.inputValue();
+    return value.trim();
+  }).toMatch(/m[üu]nster/i);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect.poll(async () => {
+    const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+    if (listItemCount > 0) {
+      return listItemCount;
+    }
+
+    const rowCount = await weatherForecastSection.getByRole('row').count();
+    if (rowCount > 1) {
+      return rowCount - 1;
+    }
+
+    return await weatherForecastSection.locator('li, [role="listitem"], tr, [role="row"]').count();
+  }).toBe(24);
+});

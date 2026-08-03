@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const mapContainer = page.getByTestId('map-container');
+
+  if (!(await layerSwitcher.isVisible())) {
+    await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'false');
+    await layerSwitcherToggle.click();
+  }
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+
+  const uvIndexCheckbox = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  await expect(uvIndexCheckbox).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  const beforeMapImage = (await mapContainer.screenshot({ animations: 'disabled' })).toString('base64');
+
+  const uvIndexTileRequests: string[] = [];
+  const isUvIndexTileRequest = (url: string): boolean => {
+    const normalizedUrl = url.toLowerCase();
+    const mentionsUvIndexLayer =
+      normalizedUrl.includes('uv-index') ||
+      normalizedUrl.includes('uv_index') ||
+      normalizedUrl.includes('uvindex') ||
+      normalizedUrl.includes('uvi');
+    const mentionsStations = normalizedUrl.includes('station');
+    const looksLikeTileOrMapImage =
+      normalizedUrl.includes('bbox=') ||
+      normalizedUrl.includes('tilematrix=') ||
+      normalizedUrl.includes('request=getmap') ||
+      normalizedUrl.includes('request=gettile') ||
+      normalizedUrl.includes('/tile/');
+    return mentionsUvIndexLayer && !mentionsStations && looksLikeTileOrMapImage;
+  };
+
+  page.on('request', request => {
+    const url = request.url();
+    if (isUvIndexTileRequest(url)) {
+      uvIndexTileRequests.push(url);
+    }
+  });
+
+  const uvIndexTileResponsePromise = page.waitForResponse(response => {
+    const url = response.url();
+    const contentType = response.headers()['content-type'] ?? '';
+    return (
+      isUvIndexTileRequest(url) &&
+      response.ok() &&
+      (response.request().resourceType() === 'image' || contentType.startsWith('image/'))
+    );
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  const uvIndexTileResponse = await uvIndexTileResponsePromise;
+  expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+  await expect.poll(() => uvIndexTileRequests.length).toBeGreaterThan(0);
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = (await mapContainer.screenshot({ animations: 'disabled' })).toString('base64');
+      return currentMapImage !== beforeMapImage;
+    })
+    .toBe(true);
+});

@@ -1,0 +1,103 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  const hasArrayWithLength = (value: unknown, expectedLength: number): boolean => {
+    if (Array.isArray(value)) {
+      return value.length === expectedLength || value.some((entry) => hasArrayWithLength(entry, expectedLength));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.values(value as Record<string, unknown>).some((entry) =>
+        hasArrayWithLength(entry, expectedLength)
+      );
+    }
+
+    return false;
+  };
+
+  const getForecastEntryCount = async (): Promise<number> => {
+    return await page.getByTestId('weather-forecast-section').evaluate((section) => {
+      const text = section.textContent ?? '';
+      const roleListItems = section.querySelectorAll('[role="listitem"]').length;
+      const listItems = section.querySelectorAll('li').length;
+      const tableRows = section.querySelectorAll('tr').length;
+      const articles = section.querySelectorAll('article').length;
+      const timeMatches = text.match(/\b\d{1,2}:\d{2}\b/g)?.length ?? 0;
+      const dateTimeMatches = text.match(/\b\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}\b/g)?.length ?? 0;
+      const candidates = [roleListItems, listItems, tableRows, articles, timeMatches, dateTimeMatches];
+      return candidates.includes(24) ? 24 : Math.max(0, ...candidates);
+    });
+  };
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const initialForecastHint = weatherForecastSection.getByText('Click on the map to load a forecast.', {
+    exact: true
+  });
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(initialForecastHint).toBeVisible();
+
+  const forecastResponsePromise = page.waitForResponse(
+    async (response) => {
+      if (!response.ok()) {
+        return false;
+      }
+
+      const resourceType = response.request().resourceType();
+      if (resourceType !== 'fetch' && resourceType !== 'xhr') {
+        return false;
+      }
+
+      const contentType = response.headers()['content-type'] ?? '';
+      if (!contentType.includes('application/json')) {
+        return false;
+      }
+
+      try {
+        const body = await response.json();
+        return hasArrayWithLength(body, 24);
+      } catch {
+        return false;
+      }
+    },
+    { timeout: 30000 }
+  );
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor(mapBox.width * 0.8),
+      y: Math.floor(mapBox.height * 0.4)
+    }
+  });
+
+  const forecastResponse = await forecastResponsePromise;
+  await expect(forecastResponse.ok()).toBeTruthy();
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(initialForecastHint).toBeHidden();
+
+  await expect.poll(async () => await getForecastEntryCount()).toBe(24);
+});

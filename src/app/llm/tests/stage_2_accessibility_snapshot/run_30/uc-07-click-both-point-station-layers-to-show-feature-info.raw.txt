@@ -1,0 +1,189 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const legend = page.getByTestId('legend');
+  const legendToggle = page.getByTestId('legend-toggle');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const initialExtentButton = page.getByTestId('initial-extent-button');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(page.getByTestId('footer')).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await infoPanelToggle.click();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    await layerSwitcherToggle.click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const eucosCheckbox = page.getByRole('checkbox', {
+    name: 'EUCOS Ground Stations',
+    exact: true
+  });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+  await expect(eucosCheckbox).toBeChecked();
+
+  const uviCheckbox = page.getByRole('checkbox', {
+    name: 'UV-Index Stations',
+    exact: true
+  });
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+  await expect(uviCheckbox).toBeChecked();
+
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressed === 'true') {
+    await measurementToggle.click();
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  if (await layerSwitcher.isVisible()) {
+    await layerSwitcherToggle.click();
+    await expect(layerSwitcher).toBeHidden();
+  }
+
+  if (await legend.isVisible()) {
+    await legendToggle.click();
+    await expect(legend).toBeHidden();
+  }
+
+  await initialExtentButton.click();
+  await expect(coordinateViewer).toBeVisible();
+
+  const parseCoordinateText = (text: string | null) => {
+    if (!text) {
+      return undefined;
+    }
+    const matches = text.match(/-?\d+(?:[.,]\d+)?/g);
+    if (!matches || matches.length < 2) {
+      return undefined;
+    }
+    const [xText, yText] = matches.slice(-2);
+    return {
+      x: Number.parseFloat(xText.replace(',', '.')),
+      y: Number.parseFloat(yText.replace(',', '.'))
+    };
+  };
+
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+  const sampleAt = async (position: { x: number; y: number }, previousText?: string | null) => {
+    const beforeText = previousText ?? (await coordinateViewer.textContent());
+    await mapContainer.hover({ position });
+
+    await expect
+      .poll(async () => {
+        const currentText = (await coordinateViewer.textContent()) ?? '';
+        const parsed = parseCoordinateText(currentText);
+        if (!parsed) {
+          return '';
+        }
+        if (beforeText && currentText === beforeText) {
+          return '';
+        }
+        return `${parsed.x},${parsed.y}`;
+      })
+      .toMatch(/-?\d/);
+
+    const currentText = (await coordinateViewer.textContent()) ?? '';
+    const parsed = parseCoordinateText(currentText);
+    if (!parsed) {
+      throw new Error('Could not read map coordinates from coordinate viewer.');
+    }
+
+    return {
+      text: currentText,
+      coordinates: parsed
+    };
+  };
+
+  const box = await mapContainer.boundingBox();
+  if (!box) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const sample1Position = { x: box.width * 0.35, y: box.height * 0.35 };
+  const sample2Position = { x: box.width * 0.65, y: box.height * 0.65 };
+
+  const sample1 = await sampleAt(sample1Position);
+  const sample2 = await sampleAt(sample2Position, sample1.text);
+
+  const scaleX =
+    (sample2.coordinates.x - sample1.coordinates.x) / (sample2Position.x - sample1Position.x);
+  const scaleY =
+    (sample2.coordinates.y - sample1.coordinates.y) / (sample2Position.y - sample1Position.y);
+
+  expect(Math.abs(scaleX)).toBeGreaterThan(0);
+  expect(Math.abs(scaleY)).toBeGreaterThan(0);
+
+  const targetCoordinates = { x: 1188692.84, y: 6767643.28 };
+
+  let clickPosition = {
+    x: clamp(
+      sample1Position.x + (targetCoordinates.x - sample1.coordinates.x) / scaleX,
+      5,
+      box.width - 5
+    ),
+    y: clamp(
+      sample1Position.y + (targetCoordinates.y - sample1.coordinates.y) / scaleY,
+      5,
+      box.height - 5
+    )
+  };
+
+  const estimate = await sampleAt(clickPosition, sample2.text);
+  clickPosition = {
+    x: clamp(
+      clickPosition.x + (targetCoordinates.x - estimate.coordinates.x) / scaleX,
+      5,
+      box.width - 5
+    ),
+    y: clamp(
+      clickPosition.y + (targetCoordinates.y - estimate.coordinates.y) / scaleY,
+      5,
+      box.height - 5
+    )
+  };
+
+  const refinedEstimate = await sampleAt(clickPosition, estimate.text);
+
+  expect(Math.abs(refinedEstimate.coordinates.x - targetCoordinates.x)).toBeLessThan(
+    Math.abs(scaleX) * 3
+  );
+  expect(Math.abs(refinedEstimate.coordinates.y - targetCoordinates.y)).toBeLessThan(
+    Math.abs(scaleY) * 3
+  );
+
+  const initialInfoText = (await infoPanel.textContent()) ?? '';
+  const getFeatureInfoResponse = page.waitForResponse(
+    response => /getfeatureinfo/i.test(response.url()) && response.ok()
+  );
+
+  await Promise.all([getFeatureInfoResponse, mapContainer.click({ position: clickPosition })]);
+
+  await expect
+    .poll(async () => (await infoPanel.textContent()) ?? '', { timeout: 15000 })
+    .not.toBe(initialInfoText);
+
+  const uviSection = infoPanel.getByRole('heading', { name: 'UV-Index Station', exact: true });
+  const eucosSection = infoPanel.getByRole('heading', { name: 'EUCOS Ground Station', exact: true });
+
+  await expect(uviSection).toBeVisible({ timeout: 15000 });
+  await expect(eucosSection).toBeVisible({ timeout: 15000 });
+});

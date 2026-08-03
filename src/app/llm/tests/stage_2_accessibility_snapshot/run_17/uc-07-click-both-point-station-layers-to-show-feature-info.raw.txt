@@ -1,0 +1,158 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await infoPanelToggle.click();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    await layerSwitcherToggle.click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+  if (measurementPressed === 'true') {
+    await measurementToggle.click();
+  }
+  await expect.poll(async () => (await measurementToggle.getAttribute('aria-pressed')) ?? 'false').toBe('false');
+
+  const eucosCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'EUCOS Ground Stations',
+    exact: true
+  });
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+  await expect(eucosCheckbox).toBeChecked();
+
+  const uviStationsCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'UV-Index Stations',
+    exact: true
+  });
+  if (!(await uviStationsCheckbox.isChecked())) {
+    await uviStationsCheckbox.click({ force: true });
+  }
+  await expect(uviStationsCheckbox).toBeChecked();
+
+  await expect(coordinateViewer).toBeVisible();
+
+  const parseDisplayedCoordinates = (text: string): { x: number; y: number } | undefined => {
+    const matches = text.match(/-?\d+(?:\.\d+)?/g);
+    if (!matches || matches.length < 2) {
+      return undefined;
+    }
+
+    const values = matches.slice(-2).map((value) => Number(value));
+    if (values.some((value) => Number.isNaN(value))) {
+      return undefined;
+    }
+
+    return { x: values[0], y: values[1] };
+  };
+
+  const clamp = (value: number, min: number, max: number): number => {
+    return Math.min(Math.max(value, min), max);
+  };
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const sampleCoordinatesAt = async (x: number, y: number): Promise<{ x: number; y: number }> => {
+    const absoluteX = box.x + x;
+    const absoluteY = box.y + y;
+    let sampled: { x: number; y: number } | undefined;
+
+    await page.mouse.move(absoluteX, absoluteY);
+
+    await expect.poll(async () => {
+      await page.mouse.move(absoluteX, absoluteY);
+      sampled = parseDisplayedCoordinates(await coordinateViewer.innerText());
+      return sampled ? `${Math.round(sampled.x)},${Math.round(sampled.y)}` : '';
+    }).toMatch(/^-?\d+,-?\d+$/);
+
+    return sampled!;
+  };
+
+  const leftPosition = { x: box.width * 0.15, y: box.height * 0.5 };
+  const rightPosition = { x: box.width * 0.85, y: box.height * 0.5 };
+  const topPosition = { x: box.width * 0.5, y: box.height * 0.15 };
+  const bottomPosition = { x: box.width * 0.5, y: box.height * 0.85 };
+
+  const leftSample = await sampleCoordinatesAt(leftPosition.x, leftPosition.y);
+  const rightSample = await sampleCoordinatesAt(rightPosition.x, rightPosition.y);
+  const topSample = await sampleCoordinatesAt(topPosition.x, topPosition.y);
+  const bottomSample = await sampleCoordinatesAt(bottomPosition.x, bottomPosition.y);
+
+  const xUnitsPerPixel = (rightSample.x - leftSample.x) / (rightPosition.x - leftPosition.x);
+  const yUnitsPerPixel = (bottomSample.y - topSample.y) / (bottomPosition.y - topPosition.y);
+
+  expect(xUnitsPerPixel).not.toBe(0);
+  expect(yUnitsPerPixel).not.toBe(0);
+
+  const targetCoordinate = { x: 1188692.84, y: 6767643.28 };
+
+  let clickPosition = {
+    x: clamp(leftPosition.x + (targetCoordinate.x - leftSample.x) / xUnitsPerPixel, 1, box.width - 1),
+    y: clamp(topPosition.y + (targetCoordinate.y - topSample.y) / yUnitsPerPixel, 1, box.height - 1)
+  };
+
+  for (let iteration = 0; iteration < 3; iteration++) {
+    const sampledAtEstimate = await sampleCoordinatesAt(clickPosition.x, clickPosition.y);
+    const deltaX = targetCoordinate.x - sampledAtEstimate.x;
+    const deltaY = targetCoordinate.y - sampledAtEstimate.y;
+
+    if (
+      Math.abs(deltaX) <= Math.abs(xUnitsPerPixel) * 2 &&
+      Math.abs(deltaY) <= Math.abs(yUnitsPerPixel) * 2
+    ) {
+      break;
+    }
+
+    clickPosition = {
+      x: clamp(clickPosition.x + deltaX / xUnitsPerPixel, 1, box.width - 1),
+      y: clamp(clickPosition.y + deltaY / yUnitsPerPixel, 1, box.height - 1)
+    };
+  }
+
+  const finalSample = await sampleCoordinatesAt(clickPosition.x, clickPosition.y);
+  expect(Math.abs(finalSample.x - targetCoordinate.x)).toBeLessThanOrEqual(Math.abs(xUnitsPerPixel) * 3);
+  expect(Math.abs(finalSample.y - targetCoordinate.y)).toBeLessThanOrEqual(Math.abs(yUnitsPerPixel) * 3);
+
+  const getFeatureInfoResponsePromise = page.waitForResponse((response) => {
+    return /getfeatureinfo/i.test(response.url()) && response.ok();
+  });
+
+  await mapContainer.click({
+    position: {
+      x: clickPosition.x,
+      y: clickPosition.y
+    }
+  });
+
+  await getFeatureInfoResponsePromise;
+
+  await expect.poll(async () => await infoPanel.innerText()).toMatch(
+    /UV-Index Station[\s\S]*EUCOS Ground Station|EUCOS Ground Station[\s\S]*UV-Index Station/i
+  );
+
+  await expect(infoPanel.getByText(/UV-Index Station/i).first()).toBeVisible();
+  await expect(infoPanel.getByText(/EUCOS Ground Station/i).first()).toBeVisible();
+});

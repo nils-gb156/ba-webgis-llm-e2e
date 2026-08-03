@@ -1,0 +1,183 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+  await expect(page.getByTestId('legend')).toBeVisible();
+
+  const basemapSelect = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(basemapSelect).toBeVisible();
+  await expect(basemapSelect).toContainText(/\S+/);
+
+  const temperatureLayerCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureLayerCheckbox).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+  await printToggle.click();
+
+  const dialogLocator = page.getByRole('dialog');
+  await expect.poll(async () => (await dialogLocator.count()) > 0).toBeTruthy().catch(() => {});
+  const printScope = (await dialogLocator.count()) > 0 ? dialogLocator.last() : page;
+
+  const titleCandidates = [
+    printScope.getByRole('textbox', { name: /title/i }),
+    printScope.getByLabel(/title/i),
+    printScope.getByPlaceholder(/title/i)
+  ];
+
+  await expect
+    .poll(async () => {
+      for (const candidate of titleCandidates) {
+        if ((await candidate.count()) > 0) {
+          return true;
+        }
+      }
+      return false;
+    })
+    .toBe(true);
+
+  let titleInput = titleCandidates[0];
+  for (const candidate of titleCandidates) {
+    if ((await candidate.count()) > 0) {
+      titleInput = candidate.first();
+      break;
+    }
+  }
+
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Current Weather Map');
+
+  if ((await dialogLocator.count()) > 0) {
+    await expect(dialogLocator.last()).toBeVisible();
+  }
+
+  const formatComboboxCandidates = [
+    printScope.getByRole('combobox', { name: /format|type/i }),
+    printScope.getByLabel(/format|type/i)
+  ];
+  const pngRadio = printScope.getByRole('radio', { name: /png/i });
+  const pngButton = printScope.getByRole('button', { name: /^PNG$/i });
+
+  await expect
+    .poll(async () => {
+      for (const candidate of formatComboboxCandidates) {
+        if ((await candidate.count()) > 0) {
+          return 'combobox';
+        }
+      }
+      if ((await pngRadio.count()) > 0) {
+        return 'radio';
+      }
+      if ((await pngButton.count()) > 0) {
+        return 'button';
+      }
+      return 'none';
+    })
+    .not.toBe('none');
+
+  let formatSelected = false;
+
+  for (const candidate of formatComboboxCandidates) {
+    if ((await candidate.count()) > 0) {
+      const formatCombobox = candidate.first();
+      await expect(formatCombobox).toBeVisible();
+
+      const nativePngValue = await formatCombobox.evaluate((element) => {
+        if (!(element instanceof HTMLSelectElement)) {
+          return null;
+        }
+        const pngOption = Array.from(element.options).find((option) =>
+          /png/i.test(option.label) || /png/i.test(option.text) || /png/i.test(option.value)
+        );
+        return pngOption?.value ?? null;
+      });
+
+      if (nativePngValue) {
+        await formatCombobox.selectOption(nativePngValue);
+        await expect(formatCombobox).toHaveValue(nativePngValue);
+      } else {
+        await formatCombobox.click();
+        const pngOption = page.getByRole('option', { name: /png/i });
+        await expect(pngOption).toBeVisible();
+        await pngOption.click();
+      }
+
+      formatSelected = true;
+      break;
+    }
+  }
+
+  if (!formatSelected && (await pngRadio.count()) > 0) {
+    await expect(pngRadio.first()).toBeVisible();
+    await pngRadio.first().click({ force: true });
+    await expect(pngRadio.first()).toBeChecked();
+    formatSelected = true;
+  }
+
+  if (!formatSelected && (await pngButton.count()) > 0) {
+    await expect(pngButton.first()).toBeVisible();
+    await pngButton.first().click();
+    formatSelected = true;
+  }
+
+  if (!formatSelected) {
+    throw new Error('Could not find a control to select the PNG output format.');
+  }
+
+  const exportButtonCandidates = [
+    printScope.getByRole('button', { name: /^Export$/i }),
+    printScope.getByRole('button', { name: /^Print$/i }),
+    printScope.getByRole('button', { name: /^Download$/i })
+  ];
+
+  await expect
+    .poll(async () => {
+      for (const candidate of exportButtonCandidates) {
+        if ((await candidate.count()) > 0) {
+          return true;
+        }
+      }
+      return false;
+    })
+    .toBe(true);
+
+  let exportButton = exportButtonCandidates[0];
+  for (const candidate of exportButtonCandidates) {
+    if ((await candidate.count()) > 0) {
+      exportButton = candidate.first();
+      break;
+    }
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const stream = await download.createReadStream();
+  if (!stream) {
+    throw new Error('Expected a downloadable PNG file, but no download stream was available.');
+  }
+
+  const chunks: Buffer[] = [];
+  await new Promise<void>((resolve, reject) => {
+    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    stream.on('end', () => resolve());
+    stream.on('error', reject);
+  });
+
+  const fileBuffer = Buffer.concat(chunks);
+  expect(fileBuffer.length).toBeGreaterThan(1000);
+  expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

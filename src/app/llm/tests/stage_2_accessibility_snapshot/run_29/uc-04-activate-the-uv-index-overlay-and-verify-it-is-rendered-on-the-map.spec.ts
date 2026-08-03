@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const mapContainer = page.getByTestId('map-container');
+  const mapCanvas = mapContainer.locator('canvas').first();
+  const uvIndexCheckbox = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  await page.waitForLoadState('networkidle');
+  const beforeMapScreenshot = await mapContainer.screenshot();
+
+  const tileRequestUrls = new Set<string>();
+  const isPotentialMapTileRequest = (request: { url(): string; resourceType(): string }) => {
+    const url = request.url();
+    return (
+      /^https?:/i.test(url) &&
+      (request.resourceType() === 'image' ||
+        /(getmap|gettile|wmts|wms|tilematrix|tilecol|tilerow|bbox)/i.test(url))
+    );
+  };
+
+  page.on('request', request => {
+    if (isPotentialMapTileRequest(request)) {
+      tileRequestUrls.add(request.url());
+    }
+  });
+
+  const tileResponsePromise = page.waitForResponse(response => {
+    const request = response.request();
+    const contentType = response.headers()['content-type'] ?? '';
+    return (
+      response.ok() &&
+      /^https?:/i.test(request.url()) &&
+      (request.resourceType() === 'image' ||
+        /(getmap|gettile|wmts|wms|tilematrix|tilecol|tilerow|bbox)/i.test(request.url()) ||
+        contentType.startsWith('image/'))
+    );
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+
+  await expect(uvIndexCheckbox).toBeChecked();
+  await tileResponsePromise;
+  await expect.poll(() => tileRequestUrls.size).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const afterMapScreenshot = await mapContainer.screenshot();
+    return afterMapScreenshot.equals(beforeMapScreenshot);
+  }).toBe(false);
+
+  await expect(mapCanvas).toBeVisible();
+});

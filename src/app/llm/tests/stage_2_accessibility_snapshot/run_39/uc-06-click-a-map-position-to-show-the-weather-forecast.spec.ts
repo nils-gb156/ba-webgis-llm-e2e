@@ -1,0 +1,91 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(forecastSection).toBeVisible();
+  await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+  await expect(infoPanel.getByText('Click on the map to load a forecast.')).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box is not available.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor(mapBox.width / 2),
+      y: Math.floor(mapBox.height / 2),
+    },
+  });
+
+  await expect(forecastSection).toBeVisible();
+
+  await expect.poll(async () => {
+    return await forecastSection.evaluate((section) => {
+      const roleListItems = section.querySelectorAll('[role="listitem"]').length;
+      if (roleListItems > 0) {
+        return roleListItems;
+      }
+
+      const listItems = section.querySelectorAll('li').length;
+      if (listItems > 0) {
+        return listItems;
+      }
+
+      const tableRows = section.querySelectorAll('tr').length;
+      if (tableRows > 1) {
+        return tableRows - 1;
+      }
+
+      const roleRows = section.querySelectorAll('[role="row"]').length;
+      if (roleRows > 1) {
+        return roleRows - 1;
+      }
+
+      const articles = section.querySelectorAll('article, [role="article"]').length;
+      if (articles > 0) {
+        return articles;
+      }
+
+      let maxMeaningfulChildren = 0;
+
+      const visit = (element: Element) => {
+        const meaningfulChildren = Array.from(element.children).filter((child) => {
+          const childElement = child as HTMLElement;
+          const text = childElement.innerText?.trim() ?? '';
+          return (
+            text.length > 0 ||
+            childElement.querySelector('img, svg, canvas') !== null ||
+            childElement.children.length > 0
+          );
+        }).length;
+
+        maxMeaningfulChildren = Math.max(maxMeaningfulChildren, meaningfulChildren);
+
+        for (const child of Array.from(element.children)) {
+          visit(child);
+        }
+      };
+
+      visit(section);
+
+      return maxMeaningfulChildren;
+    });
+  }).toBe(24);
+});

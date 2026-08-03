@@ -1,0 +1,103 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+  page
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(scaleViewer).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Layer Switcher', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+
+  expect(await measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+  const temperatureLayerToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationLayerToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureLayerToggle).toBeChecked();
+  await expect(precipitationLayerToggle).not.toBeChecked();
+
+  await temperatureLayerToggle.click({ force: true });
+  await expect(temperatureLayerToggle).not.toBeChecked();
+
+  await precipitationLayerToggle.click({ force: true });
+  await expect(precipitationLayerToggle).toBeChecked();
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+  const initialCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const findVisibleGeocoderResult = async () => {
+    const candidates = [
+      geocoderPanel.getByRole('option').first(),
+      geocoderPanel.getByRole('button').filter({ hasText: /Münster/i }).first(),
+      geocoderPanel.getByRole('listitem').filter({ hasText: /Münster/i }).first(),
+      geocoderPanel.getByText(/Münster/i).first()
+    ];
+
+    for (const candidate of candidates) {
+      if (await candidate.isVisible()) {
+        return candidate;
+      }
+    }
+
+    return undefined;
+  };
+
+  await expect.poll(async () => Boolean(await findVisibleGeocoderResult())).toBe(true);
+
+  const firstResult = await findVisibleGeocoderResult();
+  expect(firstResult).toBeTruthy();
+  if (!firstResult) {
+    throw new Error('No visible geocoder result was found.');
+  }
+
+  await firstResult.click();
+  await expect(geocoderInput).toHaveValue(/Münster/i);
+
+  await expect.poll(async () => {
+    const currentScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+    const currentCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+
+    return (
+      currentScaleText !== initialScaleText || currentCoordinateText !== initialCoordinateText
+    );
+  }).toBe(true);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(infoPanel).not.toContainText('Click on the map to load a forecast.');
+
+  await expect.poll(async () => {
+    const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+    if (listItemCount > 0) {
+      return listItemCount > 24 ? listItemCount - 1 : listItemCount;
+    }
+
+    const rowCount = await weatherForecastSection.getByRole('row').count();
+    if (rowCount > 0) {
+      return rowCount > 24 ? rowCount - 1 : rowCount;
+    }
+
+    const text = ((await weatherForecastSection.textContent()) ?? '').replace(/\s+/g, ' ');
+    return (text.match(/\b\d{1,2}:\d{2}\b/g) ?? []).length;
+  }).toBe(24);
+});

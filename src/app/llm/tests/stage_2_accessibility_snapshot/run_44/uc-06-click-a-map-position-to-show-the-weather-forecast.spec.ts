@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapApplication = page.getByRole('application', { name: 'webgis map', exact: true });
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapApplication).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanelToggle).toBeVisible();
+
+  const infoPanelVisible = await infoPanel.isVisible();
+  if (!infoPanelVisible) {
+    const pressed = await infoPanelToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+
+  const forecastRequests: string[] = [];
+  const requestListener = (request: Parameters<typeof page.on>[1] extends (event: infer T) => void ? T : never) => {
+    if (request.resourceType() === 'fetch' || request.resourceType() === 'xhr') {
+      forecastRequests.push(request.url());
+    }
+  };
+  page.on('request', requestListener);
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor(mapBox!.width * 0.45),
+      y: Math.floor(mapBox!.height * 0.4)
+    }
+  });
+
+  await expect
+    .poll(() => forecastRequests.length, { timeout: 20000 })
+    .toBeGreaterThan(0);
+
+  const countForecastEntries = async () => {
+    const handle = await weatherForecastSection.elementHandle();
+    if (!handle) {
+      return 0;
+    }
+
+    const snapshot = await page.accessibility.snapshot({
+      root: handle,
+      interestingOnly: false
+    });
+
+    const countAccessibleEntries = (node: any): number => {
+      if (!node) {
+        return 0;
+      }
+
+      let count = 0;
+      const children = Array.isArray(node.children) ? node.children : [];
+      const childRoles = children.map((child: any) => child.role);
+
+      if (node.role === 'listitem' || node.role === 'article') {
+        count += 1;
+      }
+
+      if (node.role === 'row' && !childRoles.includes('columnheader')) {
+        count += 1;
+      }
+
+      for (const child of children) {
+        count += countAccessibleEntries(child);
+      }
+
+      return count;
+    };
+
+    const accessibleCount = countAccessibleEntries(snapshot);
+    if (accessibleCount > 0) {
+      return accessibleCount;
+    }
+
+    return await weatherForecastSection.evaluate((el) => {
+      const selectors = ['tbody tr', 'li', '[role="listitem"]', 'article', 'tr', '[role="row"]'];
+
+      for (const selector of selectors) {
+        let elements = Array.from(el.querySelectorAll(selector));
+
+        if (selector === 'tr' || selector === '[role="row"]') {
+          elements = elements.filter((entry) => !entry.querySelector('th, [role="columnheader"]'));
+        }
+
+        if (elements.length > 0) {
+          return elements.length;
+        }
+      }
+
+      return Array.from(el.children).filter((child) => {
+        const text = (child.textContent ?? '').trim();
+        return (
+          text.length > 0 &&
+          !/Weather Forecast/i.test(text) &&
+          !/Click on the map to load a forecast\./i.test(text)
+        );
+      }).length;
+    });
+  };
+
+  await expect.poll(countForecastEntries, { timeout: 20000 }).toBe(24);
+  await expect(weatherForecastSection).toBeVisible();
+
+  page.off('request', requestListener);
+});

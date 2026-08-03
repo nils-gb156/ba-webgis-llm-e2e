@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Basemaps', exact: true })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Temperature', exact: true })).toBeChecked();
+  await expect(page.getByTestId('temperature-legend')).toBeVisible();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+
+  let titleInput = page.getByRole('textbox', { name: /title/i }).first();
+  if (!(await titleInput.isVisible())) {
+    const pressed = await printToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printToggle.click();
+    }
+
+    try {
+      await expect(titleInput).toBeVisible({ timeout: 5000 });
+    } catch {
+      titleInput = page.getByLabel(/title/i).first();
+      await expect(titleInput).toBeVisible();
+    }
+  } else {
+    await expect(titleInput).toBeVisible();
+  }
+
+  await titleInput.fill('Playwright PNG Export');
+
+  const pngRadio = page.getByRole('radio', { name: 'PNG', exact: true }).first();
+  if (await pngRadio.isVisible()) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    let formatControl = page.getByRole('combobox', { name: /format/i }).first();
+    try {
+      await expect(formatControl).toBeVisible({ timeout: 5000 });
+    } catch {
+      formatControl = page.getByLabel(/format/i).first();
+      await expect(formatControl).toBeVisible();
+    }
+
+    try {
+      await formatControl.selectOption({ label: 'PNG' });
+    } catch {
+      await formatControl.click();
+      const pngOption = page.getByRole('option', { name: 'PNG', exact: true }).first();
+      await expect(pngOption).toBeVisible();
+      await pngOption.click();
+    }
+  }
+
+  let exportButton = page.getByRole('button', { name: /^Export$/i }).first();
+  try {
+    await expect(exportButton).toBeVisible({ timeout: 5000 });
+  } catch {
+    exportButton = page.getByRole('button', { name: /^Print$/i }).first();
+    try {
+      await expect(exportButton).toBeVisible({ timeout: 5000 });
+    } catch {
+      exportButton = page.getByRole('button', { name: /^Download$/i }).first();
+      await expect(exportButton).toBeVisible();
+    }
+  }
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(await download.failure()).toBeNull();
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+});

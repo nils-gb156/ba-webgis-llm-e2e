@@ -1,0 +1,94 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(
+    weatherForecastSection.getByText('Click on the map to load a forecast.')
+  ).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor((mapBox?.width ?? 0) * 0.5),
+      y: Math.floor((mapBox?.height ?? 0) * 0.5)
+    }
+  });
+
+  await expect(
+    weatherForecastSection.getByText('Click on the map to load a forecast.')
+  ).toBeHidden();
+  await expect(weatherForecastSection).toBeVisible();
+
+  const countForecastEntries = async () =>
+    await weatherForecastSection.evaluate((section) => {
+      const root = section as HTMLElement;
+
+      const textOf = (element: Element) =>
+        (element.textContent ?? '').replace(/\s+/g, ' ').trim();
+
+      const listItemCount = root.querySelectorAll('[role="listitem"], li').length;
+      if (listItemCount > 0) {
+        return listItemCount;
+      }
+
+      const tableRowCount = root.querySelectorAll('tbody tr').length;
+      if (tableRowCount > 0) {
+        return tableRowCount;
+      }
+
+      const headingCount = Array.from(
+        root.querySelectorAll('h1, h2, h3, h4, h5, h6, [role="heading"]')
+      )
+        .map((element) => textOf(element))
+        .filter((text) => text && !/^weather forecast$/i.test(text)).length;
+      if (headingCount > 0) {
+        return headingCount;
+      }
+
+      const timeRegex = /\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g;
+      const uniqueTimes = new Set<string>();
+      for (const element of Array.from(root.querySelectorAll('*'))) {
+        const text = textOf(element);
+        for (const match of text.matchAll(timeRegex)) {
+          uniqueTimes.add(match[0]);
+        }
+      }
+      if (uniqueTimes.size > 0) {
+        return uniqueTimes.size;
+      }
+
+      let largestRepeatedGroup = 0;
+      for (const element of Array.from(root.querySelectorAll('*'))) {
+        const childCount = Array.from(element.children).filter(
+          (child) => textOf(child).length > 0
+        ).length;
+        if (childCount > largestRepeatedGroup) {
+          largestRepeatedGroup = childCount;
+        }
+      }
+
+      return largestRepeatedGroup;
+    });
+
+  await expect.poll(countForecastEntries).toBe(24);
+});

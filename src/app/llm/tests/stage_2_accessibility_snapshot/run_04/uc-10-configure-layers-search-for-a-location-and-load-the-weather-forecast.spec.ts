@@ -1,0 +1,131 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  if (!(await layerSwitcher.isVisible())) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  const temperatureCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  if (!(await temperatureCheckbox.isChecked())) {
+    await temperatureCheckbox.click({ force: true });
+  }
+  if (await precipitationCheckbox.isChecked()) {
+    await precipitationCheckbox.click({ force: true });
+  }
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+
+  const mapContainer = page.getByTestId('map-container');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(coordinateViewer).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const mapWidth = Math.floor(mapBox.width);
+  const mapHeight = Math.floor(mapBox.height);
+  const centerPosition = {
+    x: Math.max(10, Math.min(mapWidth - 10, Math.floor(mapWidth / 2))),
+    y: Math.max(10, Math.min(mapHeight - 10, Math.floor(mapHeight / 2)))
+  };
+  const offsetPosition = {
+    x: Math.max(10, Math.min(mapWidth - 10, centerPosition.x + 30)),
+    y: Math.max(10, Math.min(mapHeight - 10, centerPosition.y + 30))
+  };
+
+  const readMapCenterCoordinate = async (): Promise<string> => {
+    await mapContainer.hover({ position: offsetPosition });
+    await mapContainer.hover({ position: centerPosition });
+    await expect.poll(async () => ((await coordinateViewer.textContent()) ?? '').trim()).not.toBe('');
+    return ((await coordinateViewer.textContent()) ?? '').trim();
+  };
+
+  const coordinateBeforeSearch = await readMapCenterCoordinate();
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = geocoderPanel.getByRole('textbox', { name: 'Geocoder search', exact: true });
+
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const firstSearchResult = page.getByRole('option').first();
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await expect(geocoderInput).toHaveValue(/Münster/i);
+
+  await expect
+    .poll(async () => await readMapCenterCoordinate(), { timeout: 20000 })
+    .not.toBe(coordinateBeforeSearch);
+
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect
+    .poll(
+      async () => {
+        const roleBasedCount = Math.max(
+          await weatherForecastSection.getByRole('listitem').count(),
+          await weatherForecastSection.getByRole('article').count(),
+          await weatherForecastSection.getByRole('img').count()
+        );
+
+        if (roleBasedCount > 0) {
+          return roleBasedCount;
+        }
+
+        return await weatherForecastSection.evaluate((section) => {
+          return Math.max(
+            section.querySelectorAll('li').length,
+            section.querySelectorAll('article').length,
+            section.querySelectorAll('img').length
+          );
+        });
+      },
+      { timeout: 20000 }
+    )
+    .toBe(24);
+});

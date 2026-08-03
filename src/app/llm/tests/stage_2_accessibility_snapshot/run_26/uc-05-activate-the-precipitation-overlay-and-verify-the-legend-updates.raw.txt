@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('load');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const legend = page.getByTestId('legend');
+  const legendToggle = page.getByTestId('legend-toggle');
+
+  await expect(layerSwitcherToggle).toBeVisible();
+  await expect(legendToggle).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'false');
+    await layerSwitcherToggle.click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  if (!(await legend.isVisible())) {
+    await expect(legendToggle).toHaveAttribute('aria-pressed', 'false');
+    await legendToggle.click();
+  }
+  await expect(legend).toBeVisible();
+
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(precipitationToggle).toBeVisible();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+
+  await expect(precipitationToggle).toBeChecked();
+  await expect(legend).toBeVisible();
+  await expect(legend).toContainText('Precipitation');
+});

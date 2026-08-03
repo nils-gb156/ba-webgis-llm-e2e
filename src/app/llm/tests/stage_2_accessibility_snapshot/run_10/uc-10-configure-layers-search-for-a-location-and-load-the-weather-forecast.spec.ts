@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+  page
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const temperatureLegend = page.getByTestId('temperature-legend');
+
+  const temperatureCheckbox = page.getByRole('checkbox', {
+    name: 'Temperature',
+    exact: true
+  });
+  const precipitationCheckbox = page.getByRole('checkbox', {
+    name: 'Precipitation',
+    exact: true
+  });
+  const searchInput = page.getByRole('textbox', {
+    name: 'Geocoder search',
+    exact: true
+  });
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderPanel).toBeVisible();
+  await expect(searchInput).toBeVisible();
+
+  await expect.poll(async () => await measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+  await expect(temperatureLegend).toBeVisible();
+  await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect(temperatureLegend).not.toBeVisible();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  await searchInput.click();
+  await searchInput.fill('Münster');
+
+  const firstSearchResult = geocoderPanel
+    .getByRole('option')
+    .or(geocoderPanel.getByRole('button', { name: /Münster/i }))
+    .or(geocoderPanel.getByRole('link', { name: /Münster/i }))
+    .or(geocoderPanel.getByRole('listitem').filter({ hasText: /Münster/i }))
+    .first();
+
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await expect(searchInput).toHaveValue(/Münster/i);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect
+    .poll(async () => {
+      const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+      if (listItemCount > 0) {
+        return listItemCount;
+      }
+
+      const articleCount = await weatherForecastSection.locator('article').count();
+      if (articleCount > 0) {
+        return articleCount;
+      }
+
+      return 0;
+    })
+    .toBe(24);
+});

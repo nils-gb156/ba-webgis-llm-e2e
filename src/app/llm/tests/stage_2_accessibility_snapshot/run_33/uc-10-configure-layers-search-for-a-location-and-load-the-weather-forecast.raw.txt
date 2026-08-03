@@ -1,0 +1,177 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const findNestedForecastEntryCount = (value: unknown): number | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return 24;
+      }
+
+      for (const item of value) {
+        const nestedCount = findNestedForecastEntryCount(item);
+        if (nestedCount === 24) {
+          return 24;
+        }
+      }
+
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      for (const nestedValue of Object.values(value as Record<string, unknown>)) {
+        const nestedCount = findNestedForecastEntryCount(nestedValue);
+        if (nestedCount === 24) {
+          return 24;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  let monitorForecastResponses = false;
+  let forecastEntryCountFromResponse: number | undefined;
+
+  page.on('response', async (response) => {
+    if (!monitorForecastResponses) {
+      return;
+    }
+
+    const contentType = response.headers()['content-type'] ?? '';
+    if (!contentType.includes('json')) {
+      return;
+    }
+
+    try {
+      const data = await response.json();
+      const nestedCount = findNestedForecastEntryCount(data);
+      if (nestedCount === 24) {
+        forecastEntryCountFromResponse = 24;
+      }
+    } catch {
+      // Ignore non-JSON or unreadable responses.
+    }
+  });
+
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  await expect(layerSwitcherToggle).toBeVisible();
+  if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+    await layerSwitcherToggle.click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  await expect(infoPanelToggle).toBeVisible();
+  if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+    await infoPanelToggle.click();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  await expect(measurementToggle).toBeVisible();
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderTextbox = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const scaleViewer = page.getByTestId('scale-viewer');
+
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderTextbox).toBeVisible();
+  await expect(scaleViewer).toBeVisible();
+
+  const initialScaleText = await scaleViewer.innerText();
+
+  await geocoderTextbox.click();
+  await geocoderTextbox.fill('Münster');
+
+  await expect.poll(async () => {
+    const optionCount = await geocoderPanel.getByRole('option').count();
+    const buttonCount = await geocoderPanel.getByRole('button', { name: /Münster/i }).count();
+    const linkCount = await geocoderPanel.getByRole('link', { name: /Münster/i }).count();
+    const listItemCount = await geocoderPanel.getByRole('listitem').filter({ hasText: /Münster/i }).count();
+
+    return Math.max(optionCount, buttonCount, linkCount, listItemCount);
+  }).toBeGreaterThan(0);
+
+  monitorForecastResponses = true;
+
+  let resultSelected = false;
+  const resultCandidates = [
+    geocoderPanel.getByRole('option').first(),
+    geocoderPanel.getByRole('button', { name: /Münster/i }).first(),
+    geocoderPanel.getByRole('link', { name: /Münster/i }).first(),
+    geocoderPanel.getByRole('listitem').filter({ hasText: /Münster/i }).first()
+  ];
+
+  for (const candidate of resultCandidates) {
+    if ((await candidate.count()) > 0) {
+      try {
+        await expect(candidate).toBeVisible();
+        await candidate.click();
+        resultSelected = true;
+        break;
+      } catch {
+        // Try the next candidate.
+      }
+    }
+  }
+
+  if (!resultSelected) {
+    await geocoderTextbox.press('ArrowDown');
+    await geocoderTextbox.press('Enter');
+  }
+
+  await expect.poll(async () => await geocoderTextbox.inputValue()).toMatch(/Münster/i);
+
+  await expect.poll(async () => {
+    const currentScaleText = await scaleViewer.innerText();
+    return currentScaleText !== initialScaleText || forecastEntryCountFromResponse === 24;
+  }).toBe(true);
+
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection.getByText('Click on the map to load a forecast.')).toBeHidden();
+
+  await expect.poll(async () => {
+    const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+    if (listItemCount === 24) {
+      return 24;
+    }
+
+    const rowCount = await weatherForecastSection.getByRole('row').count();
+    if (rowCount === 24 || rowCount === 25) {
+      return 24;
+    }
+
+    const articleCount = await weatherForecastSection.getByRole('article').count();
+    if (articleCount === 24) {
+      return 24;
+    }
+
+    return forecastEntryCountFromResponse ?? 0;
+  }).toBe(24);
+});

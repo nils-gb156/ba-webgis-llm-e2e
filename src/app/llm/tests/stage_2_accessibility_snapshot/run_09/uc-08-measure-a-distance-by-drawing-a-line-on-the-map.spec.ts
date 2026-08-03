@@ -1,0 +1,50 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementButton = page.getByTestId('measurement-toggle');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementButton).toBeVisible();
+
+  await measurementButton.click();
+
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  await expect.poll(async () => {
+    return (
+      (await measurementDialog.isVisible()) ||
+      (await measurementRegion.isVisible()) ||
+      (await measurementHeading.isVisible())
+    );
+  }).toBe(true);
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const points = [
+    { x: Math.floor(mapBox.width * 0.45), y: Math.floor(mapBox.height * 0.45) },
+    { x: Math.floor(mapBox.width * 0.55), y: Math.floor(mapBox.height * 0.52) },
+    { x: Math.floor(mapBox.width * 0.65), y: Math.floor(mapBox.height * 0.58) },
+    { x: Math.floor(mapBox.width * 0.75), y: Math.floor(mapBox.height * 0.65) }
+  ];
+
+  await mapContainer.click({ position: points[0] });
+  await mapContainer.click({ position: points[1] });
+  await mapContainer.click({ position: points[2] });
+  await mapContainer.dblclick({ position: points[3] });
+
+  const lengthValue = page.getByText(/\b\d+(?:[.,]\d+)?\s?(mm|cm|m|km)\b/i).first();
+
+  await expect(lengthValue).toBeVisible();
+});

@@ -1,0 +1,134 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+    page
+}) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const geocoderPanel = page.getByTestId('geocoder-panel');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+
+    const temperatureLayerToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+    const precipitationLayerToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(geocoderPanel).toBeVisible();
+    await expect(geocoderInput).toBeVisible();
+    await expect(measurementToggle).not.toHaveAttribute('aria-pressed', 'true');
+
+    await expect(temperatureLayerToggle).toBeChecked();
+    await expect(precipitationLayerToggle).not.toBeChecked();
+
+    await temperatureLayerToggle.click({ force: true });
+    await expect(temperatureLayerToggle).not.toBeChecked();
+
+    await precipitationLayerToggle.click({ force: true });
+    await expect(precipitationLayerToggle).toBeChecked();
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+    await expect(geocoderInput).toHaveValue('Münster');
+
+    const searchTermPattern = /m(?:ü|u)nster/i;
+    let firstSearchResult = page.getByRole('option', { name: searchTermPattern }).first();
+
+    await expect
+        .poll(async () => {
+            const optionResults = page.getByRole('option', { name: searchTermPattern });
+            const optionCount = await optionResults.count();
+            if (optionCount > 0) {
+                firstSearchResult = optionResults.first();
+                return optionCount;
+            }
+
+            const buttonResults = page.getByRole('button', { name: searchTermPattern });
+            const buttonCount = await buttonResults.count();
+            if (buttonCount > 0) {
+                firstSearchResult = buttonResults.first();
+                return buttonCount;
+            }
+
+            const listItemResults = page.getByRole('listitem').filter({ hasText: searchTermPattern });
+            const listItemCount = await listItemResults.count();
+            if (listItemCount > 0) {
+                firstSearchResult = listItemResults.first();
+                return listItemCount;
+            }
+
+            return 0;
+        })
+        .toBeGreaterThan(0);
+
+    await expect(firstSearchResult).toBeVisible();
+
+    const mapRequestsAfterResultSelection: string[] = [];
+    page.on('request', request => {
+        const url = request.url().toLowerCase();
+        if (
+            request.resourceType() === 'image' ||
+            url.includes('service=wms') ||
+            url.includes('bbox=') ||
+            url.includes('/tile/') ||
+            url.includes('wmts')
+        ) {
+            mapRequestsAfterResultSelection.push(request.url());
+        }
+    });
+
+    const forecastResponsePromise = page.waitForResponse(response => {
+        const url = response.url().toLowerCase();
+        const resourceType = response.request().resourceType();
+        return (
+            response.ok() &&
+            (resourceType === 'fetch' || resourceType === 'xhr') &&
+            (url.includes('forecast') || url.includes('weather'))
+        );
+    });
+
+    await firstSearchResult.click();
+
+    await expect.poll(() => mapRequestsAfterResultSelection.length).toBeGreaterThan(0);
+
+    const forecastResponse = await forecastResponsePromise;
+    const forecastPayload = await forecastResponse.json();
+
+    const findArrayLength24 = (value: unknown): number | undefined => {
+        if (Array.isArray(value)) {
+            if (value.length === 24) {
+                return 24;
+            }
+
+            for (const item of value) {
+                const nestedLength = findArrayLength24(item);
+                if (nestedLength !== undefined) {
+                    return nestedLength;
+                }
+            }
+
+            return undefined;
+        }
+
+        if (value && typeof value === 'object') {
+            for (const nestedValue of Object.values(value as Record<string, unknown>)) {
+                const nestedLength = findArrayLength24(nestedValue);
+                if (nestedLength !== undefined) {
+                    return nestedLength;
+                }
+            }
+        }
+
+        return undefined;
+    };
+
+    expect(findArrayLength24(forecastPayload)).toBe(24);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+});

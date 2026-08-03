@@ -1,0 +1,147 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  async function firstVisible(candidates: Locator[]): Promise<Locator | null> {
+    for (const candidate of candidates) {
+      if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+        return candidate.first();
+      }
+    }
+    return null;
+  }
+
+  async function findVisible(candidates: Locator[], description: string): Promise<Locator> {
+    await expect
+      .poll(async () => {
+        const visible = await firstVisible(candidates);
+        return visible !== null;
+      }, { message: `${description} should become visible` })
+      .toBe(true);
+
+    const visible = await firstVisible(candidates);
+    expect(visible, `${description} should be visible`).not.toBeNull();
+    return visible as Locator;
+  }
+
+  await expect(page.getByTestId('map-container')).toBeVisible();
+  await expect(page.getByTestId('scale-bar')).toBeVisible();
+  await expect(page.getByTestId('layer-switcher')).toBeVisible();
+
+  const basemapSelect = page.getByRole('combobox', { name: 'Basemaps', exact: true });
+  await expect(basemapSelect).toBeVisible();
+  await expect.poll(async () => await basemapSelect.inputValue()).toMatch(/.+/);
+
+  const temperatureLayerCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  await expect(temperatureLayerCheckbox).toBeChecked();
+
+  const printToggle = page.getByTestId('print-toggle');
+  await expect(printToggle).toBeVisible();
+
+  const printPanelCandidates = [
+    page.getByRole('dialog', { name: /print/i }),
+    page.getByRole('region', { name: /print/i }),
+    page.getByRole('heading', { name: /print/i })
+  ];
+
+  const titleFieldCandidates = [
+    page.getByRole('textbox', { name: /title/i }),
+    page.getByLabel(/title/i),
+    page.getByPlaceholder(/title/i)
+  ];
+
+  let titleField = await firstVisible(titleFieldCandidates);
+  if (!titleField) {
+    await printToggle.click();
+    titleField = await findVisible(titleFieldCandidates, 'Print title input');
+  }
+
+  const visiblePrintPanel = await firstVisible(printPanelCandidates);
+  if (visiblePrintPanel) {
+    await expect(visiblePrintPanel).toBeVisible();
+  } else {
+    await expect(titleField).toBeVisible();
+  }
+
+  const printTitle = 'Weather Map Export';
+  await titleField.fill(printTitle);
+  await expect(titleField).toHaveValue(printTitle);
+
+  const pngRadioCandidates = [
+    page.getByRole('radio', { name: /png/i }),
+    page.getByLabel(/png/i)
+  ];
+  const visiblePngRadio = await firstVisible(pngRadioCandidates);
+
+  if (visiblePngRadio) {
+    await visiblePngRadio.click({ force: true });
+    await expect(visiblePngRadio).toBeChecked();
+  } else {
+    const formatControl = await findVisible(
+      [page.getByRole('combobox', { name: /format/i }), page.getByLabel(/format/i)],
+      'Print format control'
+    );
+
+    let selectedViaNativeSelect = false;
+    try {
+      await formatControl.selectOption({ label: 'PNG' });
+      selectedViaNativeSelect = true;
+    } catch {
+      selectedViaNativeSelect = false;
+    }
+
+    if (!selectedViaNativeSelect) {
+      await formatControl.click();
+      const pngOption = await findVisible(
+        [page.getByRole('option', { name: /png/i }), page.getByRole('menuitemradio', { name: /png/i })],
+        'PNG format option'
+      );
+      await pngOption.click();
+    }
+
+    await expect
+      .poll(async () => {
+        return await formatControl.evaluate((element) => {
+          if (element instanceof HTMLSelectElement) {
+            return element.selectedOptions[0]?.textContent ?? '';
+          }
+          if (element instanceof HTMLInputElement) {
+            return element.value ?? '';
+          }
+          return element.textContent ?? '';
+        });
+      })
+      .toMatch(/png/i);
+  }
+
+  const exportButton = await findVisible(
+    [
+      page.getByRole('button', { name: /^export$/i }),
+      page.getByRole('button', { name: /^print$/i }),
+      page.getByRole('button', { name: /^download$/i }),
+      page.getByRole('button', { name: /^generate$/i }),
+      page.getByRole('button', { name: /export/i }),
+      page.getByRole('button', { name: /download/i })
+    ],
+    'Print export button'
+  );
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(await download.failure()).toBeNull();
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const outputPath = test.info().outputPath('printed-map-view.png');
+  await download.saveAs(outputPath);
+
+  const fileContent = await readFile(outputPath);
+  expect(fileContent.length).toBeGreaterThan(1000);
+  expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

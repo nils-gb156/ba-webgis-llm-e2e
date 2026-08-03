@@ -1,0 +1,90 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const weatherForecastHeading = weatherForecastSection.getByRole('heading', {
+    name: 'Weather Forecast',
+    exact: true
+  });
+  const initialInstruction = weatherForecastSection.getByText('Click on the map to load a forecast.');
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastHeading).toBeVisible();
+  await expect(initialInstruction).toBeVisible();
+
+  const mapContainer = page.getByTestId('map-container');
+  await expect(mapContainer).toBeVisible();
+
+  const initialMapScreenshot = await mapContainer.screenshot();
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(Math.max(80, mapBox!.width * 0.7)),
+      y: Math.round(Math.max(80, mapBox!.height * 0.4))
+    }
+  });
+
+  await expect
+    .poll(async () => {
+      const currentMapScreenshot = await mapContainer.screenshot();
+      return !currentMapScreenshot.equals(initialMapScreenshot);
+    })
+    .toBe(true);
+
+  await expect
+    .poll(async () => {
+      const text = (await weatherForecastSection.textContent()) ?? '';
+      return text.includes('Click on the map to load a forecast.');
+    })
+    .toBe(false);
+
+  const getForecastEntryCount = async (): Promise<number> => {
+    return await weatherForecastSection.evaluate((section) => {
+      const text = (section.textContent ?? '').replace(/\s+/g, ' ').trim();
+
+      const listItems = section.querySelectorAll('li').length;
+
+      const tbodyRows = section.querySelectorAll('tbody tr').length;
+      const tableRows = tbodyRows > 0 ? tbodyRows : Math.max(0, section.querySelectorAll('tr').length - 1);
+
+      const accordionButtons = Array.from(section.querySelectorAll('button')).filter((button) => {
+        const label = (button.textContent ?? '').trim();
+        return label.length > 0 && !/^weather forecast$/i.test(label);
+      }).length;
+
+      const itemHeadings = Array.from(
+        section.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]')
+      ).filter((heading) => {
+        const label = (heading.textContent ?? '').trim();
+        return label.length > 0 && label !== 'Weather Forecast';
+      }).length;
+
+      const timeLabels = text.match(/\b(?:[01]?\d|2[0-3]):[0-5]\d\b/g)?.length ?? 0;
+
+      const candidates = [listItems, tableRows, accordionButtons, itemHeadings, timeLabels].filter(
+        (count) => count > 0
+      );
+
+      return candidates.find((count) => count === 24) ?? (candidates.length > 0 ? Math.max(...candidates) : 0);
+    });
+  };
+
+  await expect.poll(getForecastEntryCount).toBe(24);
+});

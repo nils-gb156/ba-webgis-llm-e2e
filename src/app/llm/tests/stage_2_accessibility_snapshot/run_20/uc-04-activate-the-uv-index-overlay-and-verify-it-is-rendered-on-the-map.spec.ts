@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  const isUvIndexTileRequest = (url: string) => {
+    const lowerUrl = url.toLowerCase();
+    if (lowerUrl.includes('station')) {
+      return false;
+    }
+
+    const hasUvIndexKeyword = /uv[\W_]*index|uvi/.test(lowerUrl);
+    const looksLikeTileOrMapRequest = /getmap|wms|wmts|tile/.test(lowerUrl);
+
+    if (hasUvIndexKeyword && looksLikeTileOrMapRequest) {
+      return true;
+    }
+
+    try {
+      const parsed = new URL(url);
+      const searchParamsText = Array.from(parsed.searchParams.entries())
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&')
+        .toLowerCase();
+
+      return (
+        !searchParamsText.includes('station') &&
+        /uv[\W_]*index|uvi/.test(searchParamsText) &&
+        /layers?|layer|getmap|tilematrix|format/.test(searchParamsText)
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  const uvIndexRequests: string[] = [];
+  page.on('request', (request) => {
+    if (isUvIndexTileRequest(request.url())) {
+      uvIndexRequests.push(request.url());
+    }
+  });
+
+  const uvIndexTileResponsePromise = page.waitForResponse((response) => {
+    return response.ok() && isUvIndexTileRequest(response.url());
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  const uvIndexTileResponse = await uvIndexTileResponsePromise;
+  expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+  await expect.poll(() => uvIndexRequests.length).toBeGreaterThan(0);
+  await expect(mapContainer).toBeVisible();
+});

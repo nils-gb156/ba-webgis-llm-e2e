@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const mapContainer = page.getByTestId('map-container');
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  const mapCanvas = mapContainer.locator('canvas').first();
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  await page.waitForLoadState('networkidle');
+
+  const beforeMapImage = await mapCanvas.screenshot();
+
+  const uvIndexTileRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url();
+    const isPotentialUvIndexLayerRequest = /(uv-?index|uvi)/i.test(url);
+    const isTileOrMapRequest = /(getmap|tile|wms)/i.test(url) || request.resourceType() === 'image';
+
+    if (isPotentialUvIndexLayerRequest && isTileOrMapRequest) {
+      uvIndexTileRequests.push(url);
+    }
+  });
+
+  const uvIndexTileResponsePromise = page.waitForResponse((response) => {
+    const url = response.url();
+    const isPotentialUvIndexLayerRequest = /(uv-?index|uvi)/i.test(url);
+    const isTileOrMapRequest =
+      /(getmap|tile|wms)/i.test(url) || response.request().resourceType() === 'image';
+
+    return isPotentialUvIndexLayerRequest && isTileOrMapRequest && response.ok();
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  await expect.poll(() => uvIndexTileRequests.length).toBeGreaterThan(0);
+
+  const uvIndexTileResponse = await uvIndexTileResponsePromise;
+  await expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+  await expect.poll(async () => {
+    const afterMapImage = await mapCanvas.screenshot();
+    return afterMapImage.equals(beforeMapImage);
+  }).toBe(false);
+});

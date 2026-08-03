@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanel.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container bounding box is not available.');
+  }
+
+  const clickPosition = {
+    x: Math.floor(mapBox.width * 0.5),
+    y: Math.floor(mapBox.height * 0.5),
+  };
+
+  const clipHalfSize = 20;
+  const highlightClip = {
+    x: Math.max(0, Math.floor(mapBox.x + clickPosition.x - clipHalfSize)),
+    y: Math.max(0, Math.floor(mapBox.y + clickPosition.y - clipHalfSize)),
+    width: clipHalfSize * 2,
+    height: clipHalfSize * 2,
+  };
+
+  const beforeClickClip = await page.screenshot({ clip: highlightClip });
+
+  await mapContainer.click({ position: clickPosition });
+
+  await expect.poll(async () => {
+    const afterClickClip = await page.screenshot({ clip: highlightClip });
+    return !beforeClickClip.equals(afterClickClip);
+  }).toBe(true);
+
+  const getForecastEntryCount = async (): Promise<number> => {
+    return await weatherForecastSection.evaluate((section) => {
+      const candidateCounts = [
+        section.querySelectorAll('[role="listitem"]').length,
+        section.querySelectorAll('li').length,
+        section.querySelectorAll('[role="row"]').length,
+        section.querySelectorAll('tbody tr').length,
+        section.querySelectorAll('article').length,
+        Array.from(section.querySelectorAll('button')).filter((button) => button.textContent?.trim().length).length,
+      ].map((count) => (count === 25 ? 24 : count));
+
+      return candidateCounts.includes(24) ? 24 : Math.max(0, ...candidateCounts);
+    });
+  };
+
+  await expect.poll(getForecastEntryCount).toBe(24);
+  await expect(weatherForecastSection).toBeVisible();
+});

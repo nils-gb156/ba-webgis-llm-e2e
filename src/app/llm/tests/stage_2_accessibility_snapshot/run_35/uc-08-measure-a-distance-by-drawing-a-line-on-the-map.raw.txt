@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const map = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const lengthLabel = page.getByText(/^Length$/i);
+
+  const isMeasurementPanelVisible = async (): Promise<boolean> => {
+    return (await measurementHeading.isVisible()) || (await lengthLabel.isVisible());
+  };
+
+  await expect(map).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  const panelInitiallyVisible = await isMeasurementPanelVisible();
+  const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+
+  if (!panelInitiallyVisible && measurementPressed !== 'true') {
+    await measurementToggle.click();
+  }
+
+  await expect.poll(async () => await isMeasurementPanelVisible()).toBe(true);
+
+  if (measurementPressed !== null || (await measurementToggle.getAttribute('aria-pressed')) !== null) {
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'true');
+  }
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  const width = mapBox!.width;
+  const height = mapBox!.height;
+
+  await map.click({
+    position: { x: Math.round(width * 0.62), y: Math.round(height * 0.35) }
+  });
+  await map.click({
+    position: { x: Math.round(width * 0.74), y: Math.round(height * 0.46) }
+  });
+  await map.click({
+    position: { x: Math.round(width * 0.68), y: Math.round(height * 0.58) }
+  });
+  await map.dblclick({
+    position: { x: Math.round(width * 0.82), y: Math.round(height * 0.68) }
+  });
+
+  await expect.poll(async () => await isMeasurementPanelVisible()).toBe(true);
+
+  const measurementValue = page
+    .getByText(/\b(?:[1-9]\d*(?:[.,]\d+)?|0[.,]\d*[1-9]\d*)\s?(?:m|km)\b/i)
+    .first();
+
+  await expect(measurementValue).toBeVisible();
+});

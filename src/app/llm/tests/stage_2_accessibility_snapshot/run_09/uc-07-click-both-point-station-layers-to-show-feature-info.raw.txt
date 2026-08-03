@@ -1,0 +1,210 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const legend = page.getByTestId('legend');
+  const legendToggle = page.getByTestId('legend-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const initialExtentButton = page.getByTestId('initial-extent-button');
+
+  type MapCoordinate = { x: number; y: number };
+
+  const parseCoordinateText = (text: string): MapCoordinate | null => {
+    const normalized = text.replace(/\u00a0/g, ' ').trim();
+    const rawMatches = normalized.match(/-?\d[\d.,]*/g);
+    if (!rawMatches || rawMatches.length < 2) {
+      return null;
+    }
+
+    const numbers = rawMatches
+      .map((raw) => {
+        let value = raw.trim();
+
+        if (value.includes('.') && value.includes(',')) {
+          if (value.lastIndexOf('.') > value.lastIndexOf(',')) {
+            value = value.replace(/,/g, '');
+          } else {
+            value = value.replace(/\./g, '').replace(',', '.');
+          }
+        } else if ((value.match(/,/g) ?? []).length > 1) {
+          value = value.replace(/,/g, '');
+        } else if ((value.match(/\./g) ?? []).length > 1) {
+          value = value.replace(/\./g, '');
+        } else if (value.includes(',')) {
+          value = value.replace(',', '.');
+        }
+
+        return Number(value);
+      })
+      .filter((value) => Number.isFinite(value));
+
+    if (numbers.length < 2) {
+      return null;
+    }
+
+    const coordinateCandidates = numbers.filter((value) => Math.abs(value) > 10000);
+    const selected = coordinateCandidates.length >= 2 ? coordinateCandidates.slice(-2) : numbers.slice(-2);
+
+    return { x: selected[0], y: selected[1] };
+  };
+
+  const readCoordinateAt = async (clientX: number, clientY: number): Promise<MapCoordinate> => {
+    let parsed: MapCoordinate | null = null;
+
+    await page.mouse.move(clientX, clientY, { steps: 5 });
+
+    await expect
+      .poll(
+        async () => {
+          parsed = parseCoordinateText((await coordinateViewer.textContent()) ?? '');
+          return parsed;
+        },
+        { timeout: 3000 }
+      )
+      .not.toBeNull();
+
+    if (!parsed) {
+      throw new Error(`Could not parse coordinate viewer value at screen position (${clientX}, ${clientY}).`);
+    }
+
+    return parsed;
+  };
+
+  const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
+
+  await expect(mapContainer).toBeVisible();
+  await expect(initialExtentButton).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+      await infoPanelToggle.click();
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  if (!(await layerSwitcher.isVisible())) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layerSwitcherToggle.click();
+    }
+  }
+  await expect(layerSwitcher).toBeVisible();
+
+  const eucosCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'EUCOS Ground Stations',
+    exact: true
+  });
+  const uviCheckbox = layerSwitcher.getByRole('checkbox', {
+    name: 'UV-Index Stations',
+    exact: true
+  });
+
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+  await expect(eucosCheckbox).toBeChecked();
+
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+  await expect(uviCheckbox).toBeChecked();
+
+  await initialExtentButton.click();
+
+  if (await layerSwitcher.isVisible()) {
+    if ((await layerSwitcherToggle.getAttribute('aria-pressed')) === 'true') {
+      await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).not.toBeVisible();
+  }
+
+  if (await legend.isVisible()) {
+    if ((await legendToggle.getAttribute('aria-pressed')) === 'true') {
+      await legendToggle.click();
+    }
+    await expect(legend).not.toBeVisible();
+  }
+
+  const mapBox = await expect
+    .poll(async () => await mapContainer.boundingBox(), { timeout: 3000 })
+    .not.toBeNull()
+    .then(async () => await mapContainer.boundingBox());
+
+  if (!mapBox) {
+    throw new Error('Map container bounding box is not available.');
+  }
+
+  const inset = 20;
+  const left = mapBox.x + inset;
+  const right = mapBox.x + mapBox.width - inset;
+  const top = mapBox.y + inset;
+  const bottom = mapBox.y + mapBox.height - inset;
+  const centerX = mapBox.x + mapBox.width / 2;
+  const centerY = mapBox.y + mapBox.height / 2;
+
+  const leftSample = await readCoordinateAt(left, centerY);
+  const rightSample = await readCoordinateAt(right, centerY);
+  const topSample = await readCoordinateAt(centerX, top);
+  const bottomSample = await readCoordinateAt(centerX, bottom);
+
+  const targetCoordinate: MapCoordinate = {
+    x: 1188692.84,
+    y: 6767643.28
+  };
+
+  const minVisibleX = Math.min(leftSample.x, rightSample.x);
+  const maxVisibleX = Math.max(leftSample.x, rightSample.x);
+  const minVisibleY = Math.min(topSample.y, bottomSample.y);
+  const maxVisibleY = Math.max(topSample.y, bottomSample.y);
+
+  expect(targetCoordinate.x).toBeGreaterThanOrEqual(minVisibleX);
+  expect(targetCoordinate.x).toBeLessThanOrEqual(maxVisibleX);
+  expect(targetCoordinate.y).toBeGreaterThanOrEqual(minVisibleY);
+  expect(targetCoordinate.y).toBeLessThanOrEqual(maxVisibleY);
+
+  const scaleX = (rightSample.x - leftSample.x) / (right - left);
+  const scaleY = (bottomSample.y - topSample.y) / (bottom - top);
+
+  let targetClientX = left + (targetCoordinate.x - leftSample.x) / scaleX;
+  let targetClientY = top + (targetCoordinate.y - topSample.y) / scaleY;
+
+  targetClientX = clamp(targetClientX, left, right);
+  targetClientY = clamp(targetClientY, top, bottom);
+
+  for (let iteration = 0; iteration < 4; iteration++) {
+    const sampled = await readCoordinateAt(targetClientX, targetClientY);
+    const errorX = targetCoordinate.x - sampled.x;
+    const errorY = targetCoordinate.y - sampled.y;
+
+    targetClientX = clamp(targetClientX + errorX / scaleX, left, right);
+    targetClientY = clamp(targetClientY + errorY / scaleY, top, bottom);
+  }
+
+  const finalSample = await readCoordinateAt(targetClientX, targetClientY);
+
+  expect(Math.abs(finalSample.x - targetCoordinate.x)).toBeLessThanOrEqual(Math.abs(scaleX) * 2);
+  expect(Math.abs(finalSample.y - targetCoordinate.y)).toBeLessThanOrEqual(Math.abs(scaleY) * 2);
+
+  await mapContainer.click({
+    position: {
+      x: targetClientX - mapBox.x,
+      y: targetClientY - mapBox.y
+    }
+  });
+
+  await expect(infoPanel.getByText(/UV-Index Station/i)).toBeVisible();
+  await expect(infoPanel.getByText(/EUCOS Ground Station/i)).toBeVisible();
+});

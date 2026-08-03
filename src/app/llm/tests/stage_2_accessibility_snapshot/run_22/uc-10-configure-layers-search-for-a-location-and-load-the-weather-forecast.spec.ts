@@ -1,0 +1,77 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+  page
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const geocoderTextbox = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(geocoderTextbox).toBeVisible();
+  await expect(measurementButton).not.toHaveAttribute('aria-pressed', 'true');
+
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+  const initialCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+
+  await geocoderTextbox.click();
+  await geocoderTextbox.fill('Münster');
+
+  const firstSearchResult = page.getByRole('option').first();
+  await expect(firstSearchResult).toBeVisible();
+  await firstSearchResult.click();
+
+  await expect(geocoderTextbox).toHaveValue(/Münster/i);
+
+  await expect
+    .poll(async () => {
+      const currentScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+      const currentCoordinateText = ((await coordinateViewer.textContent()) ?? '').trim();
+      return (
+        currentScaleText !== initialScaleText || currentCoordinateText !== initialCoordinateText
+      );
+    })
+    .toBe(true);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect
+    .poll(async () => {
+      return await weatherForecastSection.evaluate((section) => {
+        const counts = [
+          section.querySelectorAll('[role="listitem"]').length,
+          section.querySelectorAll('li').length,
+          Math.max(0, section.querySelectorAll('[role="row"]').length - 1),
+          section.querySelectorAll('tbody tr').length,
+          section.querySelectorAll('article').length
+        ].filter((count) => count > 0);
+
+        return counts.length > 0 ? Math.max(...counts) : 0;
+      });
+    })
+    .toBe(24);
+});

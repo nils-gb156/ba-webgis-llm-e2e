@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const mapContainer = page.getByTestId('map-container');
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  const isUvIndexOverlayRequest = (url: string) => {
+    const decodedUrl = decodeURIComponent(url);
+    return /(?:\buv[_-]?index\b|\buvi\b)/i.test(decodedUrl) && !/(?:stations|legend)/i.test(decodedUrl);
+  };
+
+  const uvIndexRequestUrls: string[] = [];
+  const uvIndexResponseStatuses: number[] = [];
+
+  page.on('request', (request) => {
+    if (isUvIndexOverlayRequest(request.url())) {
+      uvIndexRequestUrls.push(decodeURIComponent(request.url()));
+    }
+  });
+
+  page.on('response', (response) => {
+    if (isUvIndexOverlayRequest(response.url())) {
+      uvIndexResponseStatuses.push(response.status());
+    }
+  });
+
+  const initialMapScreenshot = await mapContainer.screenshot();
+
+  const uvIndexTileResponsePromise = page.waitForResponse((response) => {
+    return isUvIndexOverlayRequest(response.url()) && response.ok();
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  const uvIndexTileResponse = await uvIndexTileResponsePromise;
+  expect(uvIndexTileResponse.ok()).toBe(true);
+
+  await expect.poll(() => uvIndexRequestUrls.length > 0).toBe(true);
+  await expect.poll(() => uvIndexResponseStatuses.some((status) => status >= 200 && status < 300)).toBe(true);
+
+  await page.waitForLoadState('networkidle');
+
+  await expect.poll(async () => {
+    const currentMapScreenshot = await mapContainer.screenshot();
+    return currentMapScreenshot.equals(initialMapScreenshot);
+  }).toBe(false);
+});

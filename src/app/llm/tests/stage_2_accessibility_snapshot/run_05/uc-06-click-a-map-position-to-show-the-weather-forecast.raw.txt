@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapApplication = page.getByRole('application', { name: 'webgis map', exact: true });
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanelToggle = page.getByRole('button', { name: 'Info Panel Switcher', exact: true });
+  const infoPanel = page.getByTestId('info-panel');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  const emptyStateText = forecastSection.getByText('Click on the map to load a forecast.', { exact: true });
+
+  await expect(mapApplication).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanelToggle).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(forecastSection).toBeVisible();
+  await expect(emptyStateText).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor(mapBox.width * 0.75),
+      y: Math.floor(mapBox.height * 0.4)
+    }
+  });
+
+  await expect(forecastSection).toBeVisible();
+  await expect(emptyStateText).toBeHidden();
+
+  const forecastEntries = forecastSection.getByRole('listitem');
+  await expect.poll(async () => await forecastEntries.count()).toBe(24);
+  await expect(forecastEntries.first()).toBeVisible();
+});

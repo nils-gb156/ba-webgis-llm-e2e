@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+  const measurementPanelIndicator = measurementHeading.or(measurementDialog).or(measurementRegion).first();
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  const panelAlreadyVisible =
+    (await measurementHeading.isVisible()) ||
+    (await measurementDialog.isVisible()) ||
+    (await measurementRegion.isVisible());
+
+  if (!panelAlreadyVisible && (await measurementToggle.getAttribute('aria-pressed')) !== 'true') {
+    await measurementToggle.click();
+  }
+
+  await expect(measurementPanelIndicator).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const points = [
+    { x: Math.round(mapBox.width * 0.45), y: Math.round(mapBox.height * 0.35) },
+    { x: Math.round(mapBox.width * 0.55), y: Math.round(mapBox.height * 0.45) },
+    { x: Math.round(mapBox.width * 0.60), y: Math.round(mapBox.height * 0.55) }
+  ];
+  const finishPoint = { x: Math.round(mapBox.width * 0.50), y: Math.round(mapBox.height * 0.65) };
+
+  for (const point of points) {
+    await mapContainer.click({ position: point });
+  }
+  await mapContainer.dblclick({ position: finishPoint });
+
+  const lengthValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i;
+  const namedMeasurementContainer = measurementDialog.or(measurementRegion).first();
+
+  if (await namedMeasurementContainer.isVisible()) {
+    await expect(namedMeasurementContainer.getByText(lengthValuePattern).first()).toBeVisible();
+  } else {
+    await expect(page.getByText(lengthValuePattern).first()).toBeVisible();
+  }
+});

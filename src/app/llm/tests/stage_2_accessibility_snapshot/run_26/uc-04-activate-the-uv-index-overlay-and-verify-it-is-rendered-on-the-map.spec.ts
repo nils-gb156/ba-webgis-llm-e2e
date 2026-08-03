@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  await page.waitForLoadState('networkidle');
+
+  const beforeScreenshot = await mapContainer.screenshot();
+
+  const uvIndexRequests: string[] = [];
+  page.on('request', request => {
+    const url = request.url();
+    if (/(?:uvi|uv[-_]?index)/i.test(url)) {
+      uvIndexRequests.push(url);
+    }
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  await expect.poll(() => uvIndexRequests.at(-1) ?? '').toMatch(/(?:uvi|uv[-_]?index)/i);
+
+  await expect.poll(async () => {
+    const afterScreenshot = await mapContainer.screenshot();
+    return beforeScreenshot.equals(afterScreenshot);
+  }).toBe(false);
+});

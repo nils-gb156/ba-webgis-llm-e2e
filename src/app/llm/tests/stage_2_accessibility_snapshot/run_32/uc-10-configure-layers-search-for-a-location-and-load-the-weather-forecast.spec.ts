@@ -1,0 +1,111 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const scaleViewer = page.getByTestId('scale-viewer');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await layerSwitcher.isVisible())) {
+    await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'false');
+    await layerSwitcherToggle.click();
+  }
+  await expect(layerSwitcher).toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+
+  await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+  await expect(geocoderInput).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+
+  const temperatureCheckbox = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+
+  const initialScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const geocoderOptions = geocoderPanel.getByRole('option');
+  const geocoderListItems = geocoderPanel.getByRole('listitem');
+  const geocoderLinks = geocoderPanel.getByRole('link');
+
+  await expect
+    .poll(async () => {
+      const optionCount = await geocoderOptions.count();
+      const listItemCount = await geocoderListItems.count();
+      const linkCount = await geocoderLinks.count();
+      return optionCount + listItemCount + linkCount;
+    })
+    .toBeGreaterThan(0);
+
+  const selectionTriggeredMapRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url().toLowerCase();
+    if (
+      request.method() === 'GET' &&
+      (url.includes('getmap') ||
+        url.includes('/tile') ||
+        url.includes('cartocdn') ||
+        url.includes('basemap') ||
+        url.includes('wms'))
+    ) {
+      selectionTriggeredMapRequests.push(request.url());
+    }
+  });
+
+  if ((await geocoderOptions.count()) > 0) {
+    await geocoderOptions.first().click();
+  } else if ((await geocoderListItems.count()) > 0) {
+    await geocoderListItems.first().click();
+  } else {
+    await geocoderLinks.first().click();
+  }
+
+  await expect
+    .poll(async () => {
+      const currentScaleText = ((await scaleViewer.textContent()) ?? '').trim();
+      return currentScaleText !== initialScaleText || selectionTriggeredMapRequests.length > 0;
+    })
+    .toBe(true);
+
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect
+    .poll(async () => {
+      const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+      const rowCount = await weatherForecastSection.getByRole('row').count();
+      const imageCount = await weatherForecastSection.getByRole('img').count();
+      const timeLabelCount = await weatherForecastSection.getByText(/\b\d{1,2}:\d{2}\b/).count();
+
+      return [listItemCount, Math.max(rowCount - 1, 0), imageCount, timeLabelCount];
+    })
+    .toContain(24);
+});

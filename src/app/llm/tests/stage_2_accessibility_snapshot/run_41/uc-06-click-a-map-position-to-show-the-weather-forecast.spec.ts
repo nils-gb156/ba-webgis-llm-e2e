@@ -1,0 +1,181 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+function findForecastEntryCount(value: unknown): number | undefined {
+    if (Array.isArray(value)) {
+        if (value.length === 24) {
+            return 24;
+        }
+
+        for (const item of value) {
+            const nestedCount = findForecastEntryCount(item);
+            if (nestedCount !== undefined) {
+                return nestedCount;
+            }
+        }
+
+        return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+        const record = value as Record<string, unknown>;
+
+        if (record.hourly && typeof record.hourly === 'object') {
+            const hourly = record.hourly as Record<string, unknown>;
+            for (const key of [
+                'time',
+                'temperature_2m',
+                'apparent_temperature',
+                'precipitation_probability',
+                'weather_code',
+                'uv_index'
+            ]) {
+                const candidate = hourly[key];
+                if (Array.isArray(candidate) && candidate.length === 24) {
+                    return 24;
+                }
+            }
+        }
+
+        for (const key of ['forecast', 'forecasts', 'entries', 'items', 'results', 'data']) {
+            const candidate = record[key];
+            if (Array.isArray(candidate) && candidate.length === 24) {
+                return 24;
+            }
+        }
+
+        for (const nested of Object.values(record)) {
+            const nestedCount = findForecastEntryCount(nested);
+            if (nestedCount !== undefined) {
+                return nestedCount;
+            }
+        }
+    }
+
+    return undefined;
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanelToggle).toBeVisible();
+
+    if ((await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+        await infoPanelToggle.click();
+    }
+
+    await expect(infoPanel).toBeVisible();
+
+    const weatherForecastSection = infoPanel.getByTestId('weather-forecast-section');
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(
+        weatherForecastSection.getByRole('heading', { name: 'Weather Forecast', exact: true })
+    ).toBeVisible();
+
+    const initialInstruction = weatherForecastSection.getByText('Click on the map to load a forecast.');
+    await expect(initialInstruction).toBeVisible();
+
+    let forecastEntryCountFromResponse: number | undefined;
+
+    page.on('response', async response => {
+        if (!response.ok()) {
+            return;
+        }
+
+        const resourceType = response.request().resourceType();
+        if (resourceType !== 'fetch' && resourceType !== 'xhr') {
+            return;
+        }
+
+        try {
+            const data = await response.json();
+            const count = findForecastEntryCount(data);
+            if (count === 24) {
+                forecastEntryCountFromResponse = count;
+            }
+        } catch {
+            // Ignore non-JSON responses.
+        }
+    });
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(mapBox!.width * 0.5),
+            y: Math.round(mapBox!.height * 0.5)
+        }
+    });
+
+    await expect(initialInstruction).toBeHidden();
+
+    await expect.poll(() => forecastEntryCountFromResponse).toBe(24);
+
+    await expect
+        .poll(async () => {
+            const domCount = await weatherForecastSection.evaluate(section => {
+                const countVisibleElements = (elements: Element[]) =>
+                    elements.filter(element => {
+                        const htmlElement = element as HTMLElement;
+                        const text = htmlElement.innerText?.trim() ?? '';
+                        return text.length > 0 || htmlElement.querySelector('img, svg, canvas') !== null;
+                    }).length;
+
+                const listItems = countVisibleElements(
+                    Array.from(section.querySelectorAll('[role="listitem"], li'))
+                );
+                if (listItems > 0) {
+                    return listItems;
+                }
+
+                const rows = Array.from(section.querySelectorAll('[role="row"], tr'));
+                if (rows.length > 0) {
+                    const hasHeader = section.querySelector('[role="columnheader"], th') !== null;
+                    return hasHeader ? rows.length - 1 : rows.length;
+                }
+
+                const articles = countVisibleElements(Array.from(section.querySelectorAll('article')));
+                if (articles > 0) {
+                    return articles;
+                }
+
+                const directChildren = Array.from(section.children).filter(child => {
+                    const tagName = child.tagName.toUpperCase();
+                    if (/^H[1-6]$/.test(tagName)) {
+                        return false;
+                    }
+
+                    const text = (child as HTMLElement).innerText?.trim() ?? '';
+                    return text.length > 0 || child.querySelector('img, svg, canvas') !== null;
+                });
+
+                if (directChildren.length === 24) {
+                    return 24;
+                }
+
+                for (const child of directChildren) {
+                    const grandchildren = Array.from(child.children).filter(grandchild => {
+                        const text = (grandchild as HTMLElement).innerText?.trim() ?? '';
+                        return text.length > 0 || grandchild.querySelector('img, svg, canvas') !== null;
+                    });
+
+                    if (grandchildren.length === 24) {
+                        return 24;
+                    }
+                }
+
+                return undefined;
+            });
+
+            return domCount ?? forecastEntryCountFromResponse;
+        })
+        .toBe(24);
+});

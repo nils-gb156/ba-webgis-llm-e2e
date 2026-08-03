@@ -1,0 +1,97 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect.poll(async () => await measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+  const temperatureLayerToggle = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationLayerToggle = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureLayerToggle).toBeChecked();
+  await expect(precipitationLayerToggle).not.toBeChecked();
+
+  await temperatureLayerToggle.click({ force: true });
+  await expect(temperatureLayerToggle).not.toBeChecked();
+
+  await precipitationLayerToggle.click({ force: true });
+  await expect(precipitationLayerToggle).toBeChecked();
+
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const coordinateViewerVisible = await coordinateViewer.isVisible();
+  const initialCoordinateText =
+    coordinateViewerVisible ? ((await coordinateViewer.textContent()) ?? '').trim() : '';
+
+  const relevantRequests: string[] = [];
+  page.on('request', request => {
+    const url = request.url();
+    if (/(forecast|weather|tile|wms|wmts|service=wms|service=wmts|geoserver)/i.test(url)) {
+      relevantRequests.push(url);
+    }
+  });
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  const firstSearchResult = geocoderPanel
+    .locator('[role="option"], [role="button"], [role="link"], li')
+    .first();
+
+  await expect(firstSearchResult).toBeVisible();
+  await expect(firstSearchResult).toContainText(/münster/i);
+
+  const requestCountBeforeSelect = relevantRequests.length;
+  await firstSearchResult.click();
+
+  await expect(geocoderInput).toHaveValue(/münster/i);
+
+  if (initialCoordinateText.length > 0) {
+    await expect.poll(async () => (((await coordinateViewer.textContent()) ?? '').trim())).not.toBe(initialCoordinateText);
+  } else {
+    await expect.poll(() => relevantRequests.length).toBeGreaterThan(requestCountBeforeSelect);
+  }
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect.poll(async () => {
+    const listItems = await weatherForecastSection.getByRole('listitem').count();
+    if (listItems > 0) {
+      return listItems;
+    }
+
+    const rows = await weatherForecastSection.getByRole('row').count();
+    if (rows > 1) {
+      return rows - 1;
+    }
+
+    const fallbackListItems = await weatherForecastSection.locator('li').count();
+    if (fallbackListItems > 0) {
+      return fallbackListItems;
+    }
+
+    const fallbackRows = await weatherForecastSection.locator('tr').count();
+    if (fallbackRows > 1) {
+      return fallbackRows - 1;
+    }
+
+    return 0;
+  }).toBe(24);
+});

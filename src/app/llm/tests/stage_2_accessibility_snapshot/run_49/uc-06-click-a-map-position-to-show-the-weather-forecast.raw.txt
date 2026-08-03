@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (await infoPanel.isVisible()) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  } else {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+    await expect(infoPanel).toBeVisible();
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  }
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor((mapBox!.width * 0.55)),
+      y: Math.floor((mapBox!.height * 0.55))
+    }
+  });
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  const countForecastEntries = async (): Promise<number> => {
+    return await weatherForecastSection.evaluate((section) => {
+      const textOf = (element: Element) => (element.textContent ?? '').replace(/\s+/g, ' ').trim();
+      const counts: number[] = [];
+
+      const lists = Array.from(section.querySelectorAll('ul, ol, [role="list"]'));
+      for (const list of lists) {
+        const items = list.matches('[role="list"]')
+          ? list.querySelectorAll(':scope > [role="listitem"]')
+          : list.querySelectorAll(':scope > li');
+        if (items.length > 0) {
+          counts.push(items.length);
+        }
+      }
+
+      const tables = Array.from(section.querySelectorAll('table, [role="table"], [role="grid"]'));
+      for (const table of tables) {
+        const bodyRows = table.querySelectorAll('tbody > tr');
+        if (bodyRows.length > 0) {
+          counts.push(bodyRows.length);
+          continue;
+        }
+
+        const roleRows = Array.from(table.querySelectorAll('[role="row"]')).filter((row) => {
+          return !row.querySelector('th, [role="columnheader"], [role="rowheader"]');
+        });
+        if (roleRows.length > 0) {
+          counts.push(roleRows.length);
+        }
+      }
+
+      const articles = section.querySelectorAll('article');
+      if (articles.length > 0) {
+        counts.push(articles.length);
+      }
+
+      const allContainers = Array.from(section.querySelectorAll('*'));
+      for (const container of allContainers) {
+        const children = Array.from(container.children).filter((child) => textOf(child).length > 0);
+        if (children.length >= 20 && children.length <= 30) {
+          const firstTag = children[0]?.tagName;
+          if (firstTag && children.every((child) => child.tagName === firstTag)) {
+            counts.push(children.length);
+          }
+        }
+      }
+
+      return counts.length > 0 ? Math.max(...counts) : 0;
+    });
+  };
+
+  await expect.poll(countForecastEntries).toBe(24);
+});

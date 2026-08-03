@@ -1,0 +1,75 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const forecastSection = page.getByTestId('weather-forecast-section');
+  const emptyStateText = forecastSection.getByText('Click on the map to load a forecast.', { exact: true });
+
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Weather Forecast', exact: true })).toBeVisible();
+  await expect(forecastSection).toBeVisible();
+  await expect(emptyStateText).toBeVisible();
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(mapBox!.width * 0.65),
+      y: Math.round(mapBox!.height * 0.4),
+    },
+  });
+
+  await expect(emptyStateText).toBeHidden();
+
+  await expect.poll(async () => {
+    return await forecastSection.evaluate((section) => {
+      const root = section as Element;
+      const selectorCounts = [
+        root.querySelectorAll('li').length,
+        root.querySelectorAll('[role="listitem"]').length,
+        root.querySelectorAll('tr').length,
+        root.querySelectorAll('[role="row"]').length,
+        root.querySelectorAll('article').length,
+        root.querySelectorAll('img').length,
+      ];
+
+      let maxRepeatedChildren = 0;
+
+      const visit = (element: Element) => {
+        const groups = new Map<string, number>();
+
+        for (const child of Array.from(element.children)) {
+          const signature = `${child.tagName}:${child.getAttribute('role') ?? ''}`;
+          groups.set(signature, (groups.get(signature) ?? 0) + 1);
+          visit(child);
+        }
+
+        for (const count of groups.values()) {
+          if (count > maxRepeatedChildren) {
+            maxRepeatedChildren = count;
+          }
+        }
+      };
+
+      visit(root);
+
+      return Math.max(0, ...selectorCounts, maxRepeatedChildren);
+    });
+  }).toBe(24);
+});

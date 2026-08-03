@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(mapContainer).toBeVisible();
+
+  if (!(await infoPanel.isVisible())) {
+    await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'false');
+    await infoPanelToggle.click();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastSection).toContainText('Click on the map to load a forecast.');
+
+  const mapBox = await mapContainer.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.floor(mapBox.width * 0.55),
+      y: Math.floor(mapBox.height * 0.6)
+    }
+  });
+
+  await expect.poll(async () => {
+    const sectionText = (await weatherForecastSection.textContent()) ?? '';
+    return sectionText.includes('Click on the map to load a forecast.');
+  }).toBe(false);
+
+  await expect(weatherForecastSection).toBeVisible();
+
+  await expect.poll(async () => {
+    const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+    if (listItemCount > 0) {
+      return listItemCount;
+    }
+
+    const rowCount = await weatherForecastSection.getByRole('row').count();
+    if (rowCount > 1) {
+      return rowCount - 1;
+    }
+
+    const articleCount = await weatherForecastSection.getByRole('article').count();
+    if (articleCount > 0) {
+      return articleCount;
+    }
+
+    const sectionText = (await weatherForecastSection.textContent()) ?? '';
+    const timeMatches = sectionText.match(/\b(?:[01]?\d|2[0-3]):00\b/g);
+    return timeMatches?.length ?? 0;
+  }).toBe(24);
+});

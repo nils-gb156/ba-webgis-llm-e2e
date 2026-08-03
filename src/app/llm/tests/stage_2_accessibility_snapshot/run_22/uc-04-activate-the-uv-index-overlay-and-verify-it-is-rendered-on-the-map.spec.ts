@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(uvIndexCheckbox).toBeVisible();
+  await expect(uvIndexCheckbox).not.toBeChecked();
+
+  const beforeActivationScreenshot = await mapContainer.screenshot();
+
+  const tileRequests: string[] = [];
+  const tileResponses: Array<{ url: string; status: number; contentType?: string }> = [];
+
+  page.on('request', request => {
+    if (request.resourceType() === 'image') {
+      tileRequests.push(request.url());
+    }
+  });
+
+  page.on('response', async response => {
+    if (response.request().resourceType() === 'image') {
+      const headers = await response.allHeaders();
+      tileResponses.push({
+        url: response.url(),
+        status: response.status(),
+        contentType: headers['content-type']
+      });
+    }
+  });
+
+  await uvIndexCheckbox.click({ force: true });
+  await expect(uvIndexCheckbox).toBeChecked();
+
+  await expect.poll(() => tileRequests.length).toBeGreaterThan(0);
+  await expect
+    .poll(() =>
+      tileResponses.filter(
+        response =>
+          response.status >= 200 &&
+          response.status < 300 &&
+          (response.contentType?.startsWith('image/') ?? false)
+      ).length
+    )
+    .toBeGreaterThan(0);
+
+  await expect
+    .poll(async () => {
+      const afterActivationScreenshot = await mapContainer.screenshot();
+      return afterActivationScreenshot.equals(beforeActivationScreenshot);
+    })
+    .toBe(false);
+});

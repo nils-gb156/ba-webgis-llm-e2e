@@ -1,0 +1,263 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const coordinateViewer = page.getByTestId('coordinate-viewer');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const initialExtentButton = page.getByTestId('initial-extent-button');
+
+  type LocatorLike = ReturnType<typeof page.getByTestId>;
+
+  const ensurePanelVisible = async (toggle: LocatorLike, panel: LocatorLike) => {
+    if (!(await panel.isVisible())) {
+      if ((await toggle.getAttribute('aria-pressed')) !== 'true') {
+        await toggle.click();
+      }
+    }
+    await expect(panel).toBeVisible();
+  };
+
+  const ensureCheckboxChecked = async (name: string) => {
+    const checkbox = page.getByRole('checkbox', { name, exact: true });
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click({ force: true });
+    }
+    await expect(checkbox).toBeChecked();
+  };
+
+  const parseViewerCoordinates = (text: string): [number, number] | null => {
+    const normalized = text
+      .replace(/(\d),(?=\d{3}(\D|$))/g, '$1')
+      .replace(/\u00a0/g, ' ');
+    const matches = [...normalized.matchAll(/-?\d+(?:\.\d+)?/g)].map((match) => Number(match[0]));
+    const largeNumbers = matches.filter((value) => Math.abs(value) >= 100000);
+    const numbers = largeNumbers.length >= 2 ? largeNumbers.slice(-2) : matches.slice(-2);
+
+    if (numbers.length < 2 || numbers.some((value) => Number.isNaN(value))) {
+      return null;
+    }
+
+    return [numbers[0], numbers[1]];
+  };
+
+  const getMapClickPositionFromOpenLayers = async (coordinate: [number, number]) => {
+    return await page.evaluate(
+      ({ coordinate, testId }) => {
+        const root = document.querySelector(`[data-testid="${testId}"]`) as HTMLElement | null;
+        if (!root) {
+          return null;
+        }
+
+        const rootRect = root.getBoundingClientRect();
+        const maxDepth = 7;
+        const maxNodes = 4000;
+        const seen = new WeakSet<object>();
+        const queue: Array<{ value: unknown; depth: number }> = [
+          { value: window, depth: 0 },
+          { value: root, depth: 0 }
+        ];
+
+        const isObjectLike = (value: unknown): value is object =>
+          (typeof value === 'object' || typeof value === 'function') && value !== null;
+
+        const isMapLike = (
+          value: unknown
+        ): value is {
+          getPixelFromCoordinate: (coordinate: [number, number]) => number[];
+          getTargetElement: () => Element | null;
+        } => {
+          return (
+            isObjectLike(value) &&
+            typeof (value as { getPixelFromCoordinate?: unknown }).getPixelFromCoordinate === 'function' &&
+            typeof (value as { getTargetElement?: unknown }).getTargetElement === 'function'
+          );
+        };
+
+        let visited = 0;
+
+        while (queue.length > 0 && visited < maxNodes) {
+          const current = queue.shift();
+          if (!current) {
+            break;
+          }
+
+          const { value, depth } = current;
+          if (!isObjectLike(value)) {
+            continue;
+          }
+
+          if (seen.has(value)) {
+            continue;
+          }
+          seen.add(value);
+          visited += 1;
+
+          try {
+            if (isMapLike(value)) {
+              const targetElement = value.getTargetElement();
+              if (targetElement instanceof Element) {
+                const related =
+                  targetElement === root || root.contains(targetElement) || targetElement.contains(root);
+
+                if (related) {
+                  const pixel = value.getPixelFromCoordinate(coordinate);
+                  if (
+                    Array.isArray(pixel) &&
+                    pixel.length === 2 &&
+                    pixel.every((entry) => typeof entry === 'number' && Number.isFinite(entry))
+                  ) {
+                    const targetRect = (targetElement as HTMLElement).getBoundingClientRect();
+                    const x = Math.round(pixel[0] + (targetRect.left - rootRect.left));
+                    const y = Math.round(pixel[1] + (targetRect.top - rootRect.top));
+
+                    if (x >= 1 && y >= 1 && x <= rootRect.width - 1 && y <= rootRect.height - 1) {
+                      return { x, y };
+                    }
+                  }
+                }
+              }
+            }
+          } catch {
+            // Ignore inaccessible objects during graph traversal.
+          }
+
+          if (depth >= maxDepth) {
+            continue;
+          }
+
+          let keys: string[] = [];
+          try {
+            keys = Object.getOwnPropertyNames(value);
+          } catch {
+            continue;
+          }
+
+          for (const key of keys) {
+            if (key === 'window' || key === 'self' || key === 'parent' || key === 'top') {
+              continue;
+            }
+
+            let nextValue: unknown;
+            try {
+              nextValue = (value as Record<string, unknown>)[key];
+            } catch {
+              continue;
+            }
+
+            if (isObjectLike(nextValue)) {
+              queue.push({ value: nextValue, depth: depth + 1 });
+            }
+          }
+        }
+
+        return null;
+      },
+      { coordinate, testId: 'map-container' }
+    );
+  };
+
+  const getMapClickPositionFromViewer = async (coordinate: [number, number]) => {
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+      return null;
+    }
+
+    const width = Math.round(box.width);
+    const height = Math.round(box.height);
+
+    const leftPos = { x: Math.round(width * 0.25), y: Math.round(height * 0.5) };
+    const rightPos = { x: Math.round(width * 0.75), y: Math.round(height * 0.5) };
+    const topPos = { x: Math.round(width * 0.5), y: Math.round(height * 0.25) };
+    const bottomPos = { x: Math.round(width * 0.5), y: Math.round(height * 0.75) };
+
+    await mapContainer.hover({ position: leftPos });
+    const leftSample = parseViewerCoordinates((await coordinateViewer.textContent()) ?? '');
+    await mapContainer.hover({ position: rightPos });
+    const rightSample = parseViewerCoordinates((await coordinateViewer.textContent()) ?? '');
+    await mapContainer.hover({ position: topPos });
+    const topSample = parseViewerCoordinates((await coordinateViewer.textContent()) ?? '');
+    await mapContainer.hover({ position: bottomPos });
+    const bottomSample = parseViewerCoordinates((await coordinateViewer.textContent()) ?? '');
+
+    if (!leftSample || !rightSample || !topSample || !bottomSample) {
+      return null;
+    }
+
+    const xUnitsPerPixel = (rightSample[0] - leftSample[0]) / (rightPos.x - leftPos.x);
+    const yUnitsPerPixel = (bottomSample[1] - topSample[1]) / (bottomPos.y - topPos.y);
+
+    if (
+      !Number.isFinite(xUnitsPerPixel) ||
+      !Number.isFinite(yUnitsPerPixel) ||
+      Math.abs(xUnitsPerPixel) < Number.EPSILON ||
+      Math.abs(yUnitsPerPixel) < Number.EPSILON
+    ) {
+      return null;
+    }
+
+    const x = Math.round(leftPos.x + (coordinate[0] - leftSample[0]) / xUnitsPerPixel);
+    const y = Math.round(topPos.y + (coordinate[1] - topSample[1]) / yUnitsPerPixel);
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return null;
+    }
+
+    if (x < 1 || y < 1 || x > width - 1 || y > height - 1) {
+      return null;
+    }
+
+    return { x, y };
+  };
+
+  await expect(mapContainer).toBeVisible();
+  await expect(coordinateViewer).toBeVisible();
+
+  await ensurePanelVisible(infoPanelToggle, infoPanel);
+  await ensurePanelVisible(layerSwitcherToggle, layerSwitcher);
+
+  if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+  }
+  await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+
+  await ensureCheckboxChecked('UV-Index Stations');
+  await ensureCheckboxChecked('EUCOS Ground Stations');
+
+  await initialExtentButton.click();
+
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+  let clickPosition: { x: number; y: number } | null = null;
+
+  await expect
+    .poll(
+      async () => {
+        clickPosition = await getMapClickPositionFromOpenLayers(targetCoordinate);
+        if (!clickPosition) {
+          clickPosition = await getMapClickPositionFromViewer(targetCoordinate);
+        }
+        return clickPosition !== null;
+      },
+      {
+        message: 'The target map coordinate should resolve to a clickable map position.',
+        timeout: 10000
+      }
+    )
+    .toBe(true);
+
+  if (!clickPosition) {
+    throw new Error('Could not determine a clickable position for the target map coordinate.');
+  }
+
+  await mapContainer.click({ position: clickPosition });
+
+  await expect(infoPanel).toContainText('UV-Index Station');
+  await expect(infoPanel).toContainText('EUCOS Ground Station');
+});

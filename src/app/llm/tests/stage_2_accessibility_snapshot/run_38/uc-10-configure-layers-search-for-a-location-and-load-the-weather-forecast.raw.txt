@@ -1,0 +1,139 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+  page
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  await expect(page.getByRole('application', { name: 'webgis map', exact: true })).toBeVisible();
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+  const infoPanel = page.getByTestId('info-panel');
+  const infoPanelToggle = page.getByTestId('info-panel-toggle');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const geocoderInput = page.getByRole('textbox', { name: 'Geocoder search', exact: true });
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const temperatureVisibilityToggle = page.getByRole('checkbox', {
+    name: 'Temperature',
+    exact: true
+  });
+  const precipitationVisibilityToggle = page.getByRole('checkbox', {
+    name: 'Precipitation',
+    exact: true
+  });
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+  const forecastPlaceholder = page.getByText('Click on the map to load a forecast.', {
+    exact: true
+  });
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(layerSwitcherToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(infoPanel).toBeVisible();
+  await expect(infoPanelToggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(geocoderPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+  expect(await measurementToggle.getAttribute('aria-pressed')).not.toBe('true');
+
+  await expect(temperatureVisibilityToggle).toBeChecked();
+  await expect(precipitationVisibilityToggle).not.toBeChecked();
+  await expect(forecastPlaceholder).toBeVisible();
+
+  await temperatureVisibilityToggle.click({ force: true });
+  await expect(temperatureVisibilityToggle).not.toBeChecked();
+
+  await precipitationVisibilityToggle.click({ force: true });
+  await expect(precipitationVisibilityToggle).toBeChecked();
+
+  const observedRequestUrls: string[] = [];
+  page.on('request', (request) => {
+    observedRequestUrls.push(request.url());
+  });
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+
+  await expect
+    .poll(
+      async () => {
+        const globalOptionCount = await page.getByRole('option').count();
+        if (globalOptionCount > 0) {
+          return globalOptionCount;
+        }
+
+        const panelListItemCount = await geocoderPanel.getByRole('listitem').count();
+        if (panelListItemCount > 0) {
+          return panelListItemCount;
+        }
+
+        const panelButtonCount = await geocoderPanel.getByRole('button').count();
+        if (panelButtonCount > 0) {
+          return panelButtonCount;
+        }
+
+        const panelLinkCount = await geocoderPanel.getByRole('link').count();
+        return panelLinkCount;
+      },
+      { timeout: 20000 }
+    )
+    .toBeGreaterThan(0);
+
+  let firstSearchResult = page.getByRole('option').first();
+  if ((await page.getByRole('option').count()) === 0) {
+    if ((await geocoderPanel.getByRole('listitem').count()) > 0) {
+      firstSearchResult = geocoderPanel.getByRole('listitem').first();
+    } else if ((await geocoderPanel.getByRole('button').count()) > 0) {
+      firstSearchResult = geocoderPanel.getByRole('button').first();
+    } else if ((await geocoderPanel.getByRole('link').count()) > 0) {
+      firstSearchResult = geocoderPanel.getByRole('link').first();
+    } else {
+      throw new Error('No geocoder result was available for selection.');
+    }
+  }
+
+  await expect(firstSearchResult).toBeVisible();
+
+  const requestCountBeforeSelection = observedRequestUrls.length;
+  await firstSearchResult.click();
+
+  await expect
+    .poll(() => observedRequestUrls.length, { timeout: 20000 })
+    .toBeGreaterThan(requestCountBeforeSelection);
+
+  await expect(forecastPlaceholder).toBeHidden();
+  await expect(weatherForecastSection).toBeVisible();
+
+  await expect
+    .poll(
+      async () => {
+        const listItemCount = await weatherForecastSection.getByRole('listitem').count();
+        if (listItemCount > 0) {
+          return listItemCount;
+        }
+
+        const rowCount = await weatherForecastSection.getByRole('row').count();
+        if (rowCount > 1) {
+          return rowCount - 1;
+        }
+
+        const articleCount = await weatherForecastSection.locator('article').count();
+        if (articleCount > 0) {
+          return articleCount;
+        }
+
+        const buttonCount = await weatherForecastSection.getByRole('button').count();
+        if (buttonCount === 24) {
+          return buttonCount;
+        }
+
+        const textContent = (await weatherForecastSection.textContent()) ?? '';
+        const hourLabels = textContent.match(/\b\d{1,2}:\d{2}\b/g)?.length ?? 0;
+        return hourLabels;
+      },
+      { timeout: 30000 }
+    )
+    .toBe(24);
+});

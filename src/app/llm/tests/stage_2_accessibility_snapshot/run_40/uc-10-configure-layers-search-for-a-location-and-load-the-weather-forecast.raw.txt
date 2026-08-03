@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+  page
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const geocoderPanel = page.getByTestId('geocoder-panel');
+  const mapContainer = page.getByTestId('map-container');
+  const scaleViewer = page.getByTestId('scale-viewer');
+  const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(mapContainer).toBeVisible();
+  await expect(scaleViewer).toBeVisible();
+  await expect(weatherForecastSection).toBeVisible();
+
+  const temperatureToggle = page.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  const scaleBeforeSearch = ((await scaleViewer.textContent()) ?? '').trim();
+  const mapBeforeSearch = await mapContainer.screenshot();
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+  await expect(geocoderPanel).toBeVisible();
+
+  const optionResults = geocoderPanel.getByRole('option');
+  const buttonResults = geocoderPanel.getByRole('button');
+  const listitemResults = geocoderPanel.getByRole('listitem');
+
+  await expect
+    .poll(async () => {
+      return (
+        (await optionResults.count()) +
+        (await buttonResults.count()) +
+        (await listitemResults.count())
+      );
+    })
+    .not.toBe(0);
+
+  const forecastResponsePromise = page.waitForResponse(
+    (response) => /forecast/i.test(response.url()) && response.ok()
+  );
+
+  if ((await optionResults.count()) > 0) {
+    await optionResults.first().click();
+  } else if ((await buttonResults.count()) > 0) {
+    await buttonResults.first().click();
+  } else if ((await listitemResults.count()) > 0) {
+    await listitemResults.first().click();
+  } else {
+    await geocoderInput.press('ArrowDown');
+    await geocoderInput.press('Enter');
+  }
+
+  const forecastResponse = await forecastResponsePromise;
+  const forecastData = await forecastResponse.json();
+
+  const forecastEntryCount = Array.isArray(forecastData?.hourly?.time)
+    ? forecastData.hourly.time.length
+    : Array.isArray(forecastData?.forecast)
+      ? forecastData.forecast.length
+      : Array.isArray(forecastData?.list)
+        ? forecastData.list.length
+        : Array.isArray(forecastData?.timeseries)
+          ? forecastData.timeseries.length
+          : 0;
+
+  expect(forecastEntryCount).toBe(24);
+
+  await expect(weatherForecastSection).not.toContainText('Click on the map to load a forecast.');
+
+  await expect.poll(async () => {
+    const listitemCount = await weatherForecastSection.getByRole('listitem').count();
+    if (listitemCount > 0) {
+      return listitemCount;
+    }
+
+    const articleCount = await weatherForecastSection.getByRole('article').count();
+    if (articleCount > 0) {
+      return articleCount;
+    }
+
+    const text = (await weatherForecastSection.textContent()) ?? '';
+    return (text.match(/\b\d{1,2}:\d{2}\b/g) ?? []).length;
+  }).toBe(24);
+
+  const scaleAfterSearch = ((await scaleViewer.textContent()) ?? '').trim();
+  const mapAfterSearch = await mapContainer.screenshot();
+
+  expect(scaleAfterSearch !== scaleBeforeSearch || !mapBeforeSearch.equals(mapAfterSearch)).toBeTruthy();
+
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+});

@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('networkidle');
+
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+    await expect(mapContainer.locator('canvas').first()).toBeVisible();
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+
+    if (!(await layerSwitcher.isVisible())) {
+        const pressed = await layerSwitcherToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await layerSwitcherToggle.click();
+        }
+    }
+    await expect(layerSwitcher).toBeVisible();
+
+    const uvIndexCheckbox = layerSwitcher.getByRole('checkbox', { name: 'UV-Index', exact: true });
+    await expect(uvIndexCheckbox).toBeVisible();
+    await expect(uvIndexCheckbox).not.toBeChecked();
+
+    const beforeMapImage = await mapContainer.screenshot();
+
+    const isUvIndexTileUrl = (urlString: string) => {
+        const url = urlString.toLowerCase();
+        const mentionsUvIndex = /uv[-_\s]?index/.test(url) || /(?:^|[^a-z])uvi(?:[^a-z]|$)/.test(url);
+        const mentionsStations = /station/.test(url);
+        const looksLikeMapTile =
+            /getmap|wmts|tilematrix|tilecol|tilerow|tiles?/.test(url) || /[?&](layers?|layer)=/.test(url);
+
+        return mentionsUvIndex && !mentionsStations && looksLikeMapTile;
+    };
+
+    const uvIndexTileRequests: string[] = [];
+    page.on('request', request => {
+        if (isUvIndexTileUrl(request.url())) {
+            uvIndexTileRequests.push(request.url());
+        }
+    });
+
+    const uvIndexTileResponsePromise = page.waitForResponse(response => {
+        return isUvIndexTileUrl(response.url()) && response.ok();
+    });
+
+    await uvIndexCheckbox.click({ force: true });
+    await expect(uvIndexCheckbox).toBeChecked();
+
+    const uvIndexTileResponse = await uvIndexTileResponsePromise;
+    expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+    await expect.poll(() => uvIndexTileRequests.length).toBeGreaterThan(0);
+
+    await expect.poll(async () => {
+        const afterMapImage = await mapContainer.screenshot();
+        return afterMapImage.equals(beforeMapImage);
+    }).toBe(false);
+});
