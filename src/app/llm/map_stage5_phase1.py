@@ -31,10 +31,15 @@ import re
 import sys
 from pathlib import Path
 
-# Identische Klassifikationslogik wie Stufen 1-4 (gleiche Datei, gleicher Ordner)
-from app.llm.run_phase1_eval import classify_runtime_result, scan_for_truncation
-
 SCRIPT_DIR = Path(__file__).resolve().parent
+
+# Eigenes Verzeichnis auf den Modulpfad legen, damit das Skript unabhängig vom
+# Aufrufort (z. B. direkt aus src/app/llm/) die Schwesterdatei findet.
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+# Identische Klassifikationslogik wie Stufen 1-4 (gleiche Datei, gleicher Ordner)
+from run_phase1_eval import classify_runtime_result, scan_for_truncation
 STAGE_NAME = "stage_5_self_improvement_loop"
 STAGE_DIR = SCRIPT_DIR / "tests" / STAGE_NAME
 JSONL_PATH = STAGE_DIR / "_stage_5_all_runs.jsonl"

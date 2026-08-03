@@ -1,0 +1,2927 @@
+stage,run,uc_id,file,exec_category,duration_s,error_summary,needs_review
+stage_4_manual_ui_map,run_01,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.68,,False
+stage_4_manual_ui_map,run_01,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,2.59,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_01,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,3.24,,False
+stage_4_manual_ui_map,run_01,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.68,,False
+stage_4_manual_ui_map,run_01,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.47,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_01,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.37,,False
+stage_4_manual_ui_map,run_01,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.4,,False
+stage_4_manual_ui_map,run_01,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.74,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded w",False
+stage_4_manual_ui_map,run_01,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.16,,False
+stage_4_manual_ui_map,run_01,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_01/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.88,,False
+stage_4_manual_ui_map,run_02,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.53,,False
+stage_4_manual_ui_map,run_02,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.25,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_02,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.84,,False
+stage_4_manual_ui_map,run_02,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.66,,False
+stage_4_manual_ui_map,run_02,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.32,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_02,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.37,,False
+stage_4_manual_ui_map,run_02,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.39,,False
+stage_4_manual_ui_map,run_02,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.94,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /(?:[1-9]\d*(?:[.,]\d+)?|0[.,]\d*[1-9]\d*)\s*(m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click i",False
+stage_4_manual_ui_map,run_02,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.47,,False
+stage_4_manual_ui_map,run_02,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_02/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.46,,False
+stage_4_manual_ui_map,run_03,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.51,,False
+stage_4_manual_ui_map,run_03,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.29,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox').first()
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-tri",False
+stage_4_manual_ui_map,run_03,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.93,,False
+stage_4_manual_ui_map,run_03,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.28,,False
+stage_4_manual_ui_map,run_03,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.33,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_03,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.38,,False
+stage_4_manual_ui_map,run_03,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.4,,False
+stage_4_manual_ui_map,run_03,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.93,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       - unexpected v",False
+stage_4_manual_ui_map,run_03,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.67,,False
+stage_4_manual_ui_map,run_03,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_03/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.89,,False
+stage_4_manual_ui_map,run_04,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.36,,False
+stage_4_manual_ui_map,run_04,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.26,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_04,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.85,,False
+stage_4_manual_ui_map,run_04,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_04,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.32,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_04,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.4,,False
+stage_4_manual_ui_map,run_04,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.56,,False
+stage_4_manual_ui_map,run_04,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.93,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to sta",False
+stage_4_manual_ui_map,run_04,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.59,,False
+stage_4_manual_ui_map,run_04,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_04/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.82,,False
+stage_4_manual_ui_map,run_05,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.46,,False
+stage_4_manual_ui_map,run_05,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.22,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_05,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.79,,False
+stage_4_manual_ui_map,run_05,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_05,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.33,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_05,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.39,,False
+stage_4_manual_ui_map,run_05,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.41,,False
+stage_4_manual_ui_map,run_05,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.87,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a m",False
+stage_4_manual_ui_map,run_05,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.64,,False
+stage_4_manual_ui_map,run_05,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_05/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,3.09,,False
+stage_4_manual_ui_map,run_06,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.38,,False
+stage_4_manual_ui_map,run_06,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.22,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_06,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.97,,False
+stage_4_manual_ui_map,run_06,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_06,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.33,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_06,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.4,,False
+stage_4_manual_ui_map,run_06,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.1,,False
+stage_4_manual_ui_map,run_06,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.81,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km|ft|mi|nm)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map",False
+stage_4_manual_ui_map,run_06,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.91,,False
+stage_4_manual_ui_map,run_06,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_06/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.94,,False
+stage_4_manual_ui_map,run_07,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.49,,False
+stage_4_manual_ui_map,run_07,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.24,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_07,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.85,,False
+stage_4_manual_ui_map,run_07,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.38,,False
+stage_4_manual_ui_map,run_07,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.33,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_07,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.31,,False
+stage_4_manual_ui_map,run_07,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,6.32,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('uvi-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('uvi-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('uvi-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+ ",False
+stage_4_manual_ui_map,run_07,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.12,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel').getByTestId('measurement')
+Expected pattern: /\d[\d.,]*\s?(mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…<",False
+stage_4_manual_ui_map,run_07,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.7,,False
+stage_4_manual_ui_map,run_07,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_07/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.89,,False
+stage_4_manual_ui_map,run_08,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.46,,False
+stage_4_manual_ui_map,run_08,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.21,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_08,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,3.04,,False
+stage_4_manual_ui_map,run_08,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.35,,False
+stage_4_manual_ui_map,run_08,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_08,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,2.04,,False
+stage_4_manual_ui_map,run_08,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,6.17,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  71 |             );
+  72 |         })
+> 73 |         .toBe(true);
+     |          ^
+  74 |
+  75 |     const clickPosition = await getClickPosition();
+  76 |     if (!clickPosi",False
+stage_4_manual_ui_map,run_08,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.05,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km|ft|mi|nm)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       -",False
+stage_4_manual_ui_map,run_08,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.67,,False
+stage_4_manual_ui_map,run_08,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_08/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.88,,False
+stage_4_manual_ui_map,run_09,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.48,,False
+stage_4_manual_ui_map,run_09,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.7,,False
+stage_4_manual_ui_map,run_09,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.58,,False
+stage_4_manual_ui_map,run_09,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.3,,False
+stage_4_manual_ui_map,run_09,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.36,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_09,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.46,,False
+stage_4_manual_ui_map,run_09,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.31,,False
+stage_4_manual_ui_map,run_09,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.02,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       - unexpe",False
+stage_4_manual_ui_map,run_09,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.09,,False
+stage_4_manual_ui_map,run_09,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_09/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.74,,False
+stage_4_manual_ui_map,run_10,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.71,,False
+stage_4_manual_ui_map,run_10,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.78,,False
+stage_4_manual_ui_map,run_10,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.51,,False
+stage_4_manual_ui_map,run_10,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.27,,False
+stage_4_manual_ui_map,run_10,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.45,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_10,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.52,,False
+stage_4_manual_ui_map,run_10,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.15,,False
+stage_4_manual_ui_map,run_10,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.03,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to sta",False
+stage_4_manual_ui_map,run_10,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.72,,False
+stage_4_manual_ui_map,run_10,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_10/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.85,,False
+stage_4_manual_ui_map,run_11,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.47,,False
+stage_4_manual_ui_map,run_11,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.69,,False
+stage_4_manual_ui_map,run_11,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.72,,False
+stage_4_manual_ui_map,run_11,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.29,,False
+stage_4_manual_ui_map,run_11,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.29,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_11,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.38,,False
+stage_4_manual_ui_map,run_11,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.23,,False
+stage_4_manual_ui_map,run_11,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.01,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel').getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km|ft|mi|nm)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-test",False
+stage_4_manual_ui_map,run_11,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.59,,False
+stage_4_manual_ui_map,run_11,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_11/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.87,,False
+stage_4_manual_ui_map,run_12,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.44,,False
+stage_4_manual_ui_map,run_12,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.24,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_12,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.91,,False
+stage_4_manual_ui_map,run_12,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.39,,False
+stage_4_manual_ui_map,run_12,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.43,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_12,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.49,,False
+stage_4_manual_ui_map,run_12,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,7.58,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId(",False
+stage_4_manual_ui_map,run_12,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,8.39,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement-panel').getByText(/\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i).first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByText(/\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i).first()
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement-panel').getByText(/\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\",False
+stage_4_manual_ui_map,run_12,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.63,,False
+stage_4_manual_ui_map,run_12,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_12/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.94,,False
+stage_4_manual_ui_map,run_13,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.55,,False
+stage_4_manual_ui_map,run_13,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.31,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_13,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.78,,False
+stage_4_manual_ui_map,run_13,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.98,,False
+stage_4_manual_ui_map,run_13,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.52,,False
+stage_4_manual_ui_map,run_13,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,2.15,,False
+stage_4_manual_ui_map,run_13,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.52,,False
+stage_4_manual_ui_map,run_13,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.93,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d[\d.,]*\s*(?:mm|cm|m|km|ft|mi|nm|meters?|kilometers?)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d[\d.,]*\s*(?:mm|cm|m|km|ft|mi|nm|meters?|kilometers?)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDis",False
+stage_4_manual_ui_map,run_13,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.88,,False
+stage_4_manual_ui_map,run_13,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_13/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,3.04,,False
+stage_4_manual_ui_map,run_14,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.44,,False
+stage_4_manual_ui_map,run_14,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.32,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_14,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.82,,False
+stage_4_manual_ui_map,run_14,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.35,,False
+stage_4_manual_ui_map,run_14,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.42,,False
+stage_4_manual_ui_map,run_14,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,2.11,,False
+stage_4_manual_ui_map,run_14,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.3,,False
+stage_4_manual_ui_map,run_14,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.91,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       - unexpe",False
+stage_4_manual_ui_map,run_14,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.71,,False
+stage_4_manual_ui_map,run_14,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_14/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.87,,False
+stage_4_manual_ui_map,run_15,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.48,,False
+stage_4_manual_ui_map,run_15,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.68,,False
+stage_4_manual_ui_map,run_15,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.77,,False
+stage_4_manual_ui_map,run_15,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.31,,False
+stage_4_manual_ui_map,run_15,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.29,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_15,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.21,,False
+stage_4_manual_ui_map,run_15,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.51,,False
+stage_4_manual_ui_map,run_15,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.56,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Tim",False
+stage_4_manual_ui_map,run_15,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.41,,False
+stage_4_manual_ui_map,run_15,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_15/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.52,,False
+stage_4_manual_ui_map,run_16,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.41,,False
+stage_4_manual_ui_map,run_16,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,INFRA_FAIL,1.23,"Error: locator.evaluate: TypeError: Cannot read properties of undefined (reading '0')
+    at eval (eval at evaluate (:302:30), <anonymous>:4:59)
+    at UtilityScript.evaluate (<anonymous>:304:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+Error: locator.evaluate: TypeError: Cannot read properties of undefined (reading '0')
+    at eval (eval at evaluate (:302:30), <anonymous>:4:59)
+    at UtilityScript.evaluate (<anonymous>:304:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    ",False
+stage_4_manual_ui_map,run_16,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.74,,False
+stage_4_manual_ui_map,run_16,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.3,,False
+stage_4_manual_ui_map,run_16,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.3,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_16,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.17,,False
+stage_4_manual_ui_map,run_16,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.16,,False
+stage_4_manual_ui_map,run_16,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.76,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d[\d.,\s]*\s?(m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a measureme",False
+stage_4_manual_ui_map,run_16,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.54,,False
+stage_4_manual_ui_map,run_16,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_16/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.89,,False
+stage_4_manual_ui_map,run_17,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.49,,False
+stage_4_manual_ui_map,run_17,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.69,,False
+stage_4_manual_ui_map,run_17,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.77,,False
+stage_4_manual_ui_map,run_17,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.35,,False
+stage_4_manual_ui_map,run_17,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.4,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_17,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.23,,False
+stage_4_manual_ui_map,run_17,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.41,,False
+stage_4_manual_ui_map,run_17,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.78,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km|ft|mi)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map ",False
+stage_4_manual_ui_map,run_17,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.48,,False
+stage_4_manual_ui_map,run_17,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_17/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,3.1,,False
+stage_4_manual_ui_map,run_18,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.41,,False
+stage_4_manual_ui_map,run_18,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.32,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_18,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.73,,False
+stage_4_manual_ui_map,run_18,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.3,,False
+stage_4_manual_ui_map,run_18,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.33,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_18,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.21,,False
+stage_4_manual_ui_map,run_18,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.2,,False
+stage_4_manual_ui_map,run_18,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.85,"Error: expect(received).not.toBe(expected) // Object.is equality
+
+Expected: not ""Click in the map to start a measurement. Mode Distance Area Delete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).not.toBe(expected) // Object.is equality
+
+Expected: not ""Click in the map to start a measurement. Mode Distance Area Delete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  48 |     await expect.poll(async () =",False
+stage_4_manual_ui_map,run_18,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.5,,False
+stage_4_manual_ui_map,run_18,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_18/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.55,,False
+stage_4_manual_ui_map,run_19,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.48,,False
+stage_4_manual_ui_map,run_19,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.21,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_19,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.73,,False
+stage_4_manual_ui_map,run_19,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.28,,False
+stage_4_manual_ui_map,run_19,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.34,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_19,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.21,,False
+stage_4_manual_ui_map,run_19,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.39,,False
+stage_4_manual_ui_map,run_19,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.79,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel').getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel').getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measu",False
+stage_4_manual_ui_map,run_19,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-09-print-the-current-map-view-as-a-png.spec.ts,INFRA_FAIL,7.67,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing-panel').getByRole('button', { name: /^(export|print)$/i }).first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('printing-panel').getByRole('button', { name: /^(export|print)$/i }).first()
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing-panel').getByRole('button', { name: /^(export|print)$/i }",False
+stage_4_manual_ui_map,run_19,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_19/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,4.06,,False
+stage_4_manual_ui_map,run_20,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.61,,False
+stage_4_manual_ui_map,run_20,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.49,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_20,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.74,,False
+stage_4_manual_ui_map,run_20,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.25,,False
+stage_4_manual_ui_map,run_20,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.38,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_20,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.2,,False
+stage_4_manual_ui_map,run_20,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.19,,False
+stage_4_manual_ui_map,run_20,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.92,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       - unexpected v",False
+stage_4_manual_ui_map,run_20,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.39,,False
+stage_4_manual_ui_map,run_20,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_20/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,3.08,,False
+stage_4_manual_ui_map,run_21,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.52,,False
+stage_4_manual_ui_map,run_21,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.32,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_21,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.75,,False
+stage_4_manual_ui_map,run_21,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.74,,False
+stage_4_manual_ui_map,run_21,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.39,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_21,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.27,,False
+stage_4_manual_ui_map,run_21,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.6,,False
+stage_4_manual_ui_map,run_21,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.77,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded w",False
+stage_4_manual_ui_map,run_21,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.56,,False
+stage_4_manual_ui_map,run_21,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_21/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.95,,False
+stage_4_manual_ui_map,run_22,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.52,,False
+stage_4_manual_ui_map,run_22,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.73,,False
+stage_4_manual_ui_map,run_22,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.56,,False
+stage_4_manual_ui_map,run_22,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.35,,False
+stage_4_manual_ui_map,run_22,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.32,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_22,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.21,,False
+stage_4_manual_ui_map,run_22,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,7.42,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId(",False
+stage_4_manual_ui_map,run_22,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.0,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms ",False
+stage_4_manual_ui_map,run_22,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.55,,False
+stage_4_manual_ui_map,run_22,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_22/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.98,,False
+stage_4_manual_ui_map,run_23,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.6,,False
+stage_4_manual_ui_map,run_23,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.25,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_23,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.69,,False
+stage_4_manual_ui_map,run_23,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.38,,False
+stage_4_manual_ui_map,run_23,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,7.36,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_23,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.2,,False
+stage_4_manual_ui_map,run_23,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.12,,False
+stage_4_manual_ui_map,run_23,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,11.89,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has value: undefined
+
+Call Log:
+- Timeout 10000ms exceeded while waiting on the predicate
+Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: received value must be a number or bigint
+
+Received has value: undefined
+
+Call Log:
+- Timeout 10000ms exceeded while waiting on the predicate
+
+  48 |         },
+  49 |         { timeout: 10000 }
+> 50 |     ).toBeGreaterThan(0)",False
+stage_4_manual_ui_map,run_23,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.93,,False
+stage_4_manual_ui_map,run_23,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_23/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.48,,False
+stage_4_manual_ui_map,run_24,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.5,,False
+stage_4_manual_ui_map,run_24,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.3,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_24,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,ASSERTION_FAIL,7.57,"Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toBeGreaterThan(expected)
+
+Matcher error: expected value must be a number or bigint
+
+Expected has value: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  24 |     const zoomAfterZoomIn = await expect
+  25 |         .poll(async () => awai",False
+stage_4_manual_ui_map,run_24,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.59,,False
+stage_4_manual_ui_map,run_24,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.28,,False
+stage_4_manual_ui_map,run_24,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,1.99,,False
+stage_4_manual_ui_map,run_24,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,7.29,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call ",False
+stage_4_manual_ui_map,run_24,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.98,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start",False
+stage_4_manual_ui_map,run_24,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.68,,False
+stage_4_manual_ui_map,run_24,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_24/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.9,,False
+stage_4_manual_ui_map,run_25,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.47,,False
+stage_4_manual_ui_map,run_25,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.27,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_25,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.97,,False
+stage_4_manual_ui_map,run_25,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.75,,False
+stage_4_manual_ui_map,run_25,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.34,,False
+stage_4_manual_ui_map,run_25,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,2.03,,False
+stage_4_manual_ui_map,run_25,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.36,,False
+stage_4_manual_ui_map,run_25,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.84,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s*(m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a measu",False
+stage_4_manual_ui_map,run_25,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-09-print-the-current-map-view-as-a-png.spec.ts,INFRA_FAIL,8.03,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing').getByRole('button', { name: 'Export', exact: true }).first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('printing').getByRole('button', { name: 'Export', exact: true }).first()
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing').getByRole('button', { name: 'Export', exact: true }).first()
+Ex",False
+stage_4_manual_ui_map,run_25,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_25/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,4.21,,False
+stage_4_manual_ui_map,run_26,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.44,,False
+stage_4_manual_ui_map,run_26,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.28,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_26,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.82,,False
+stage_4_manual_ui_map,run_26,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.35,,False
+stage_4_manual_ui_map,run_26,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.36,,False
+stage_4_manual_ui_map,run_26,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,2.02,,False
+stage_4_manual_ui_map,run_26,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,6.27,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('uvi-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('uvi-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('uvi-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+ ",False
+stage_4_manual_ui_map,run_26,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.04,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d[\d.,\s]*\s*(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a",False
+stage_4_manual_ui_map,run_26,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.73,,False
+stage_4_manual_ui_map,run_26,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.81,,False
+stage_4_manual_ui_map,run_27,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.54,,False
+stage_4_manual_ui_map,run_27,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.74,,False
+stage_4_manual_ui_map,run_27,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.48,,False
+stage_4_manual_ui_map,run_27,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_27,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.3,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_27,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.44,,False
+stage_4_manual_ui_map,run_27,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.36,,False
+stage_4_manual_ui_map,run_27,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.69,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to sta",False
+stage_4_manual_ui_map,run_27,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.05,,False
+stage_4_manual_ui_map,run_27,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_27/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,3.07,,False
+stage_4_manual_ui_map,run_28,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.47,,False
+stage_4_manual_ui_map,run_28,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.76,,False
+stage_4_manual_ui_map,run_28,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.69,,False
+stage_4_manual_ui_map,run_28,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.26,,False
+stage_4_manual_ui_map,run_28,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.31,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_28,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,3.34,,False
+stage_4_manual_ui_map,run_28,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.38,,False
+stage_4_manual_ui_map,run_28,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.79,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(?:[.,]\d+)?\s*(?:km|m|kilometers?|meters?)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(?:[.,]\d+)?\s*(?:km|m|kilometers?|meters?)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- T",False
+stage_4_manual_ui_map,run_28,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.81,,False
+stage_4_manual_ui_map,run_28,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,PASS,2.98,,False
+stage_4_manual_ui_map,run_29,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,1.47,,False
+stage_4_manual_ui_map,run_29,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.27,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_29,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.89,,False
+stage_4_manual_ui_map,run_29,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.43,,False
+stage_4_manual_ui_map,run_29,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_29,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,PASS,2.01,,False
+stage_4_manual_ui_map,run_29,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,2.22,,False
+stage_4_manual_ui_map,run_29,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.1,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s*(?:m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a mea",False
+stage_4_manual_ui_map,run_29,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.75,,False
+stage_4_manual_ui_map,run_29,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_29/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.35,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_30,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.77,,False
+stage_4_manual_ui_map,run_30,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.27,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_30,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.83,,False
+stage_4_manual_ui_map,run_30,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_30,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.28,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_30,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.2,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_30,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.4,,False
+stage_4_manual_ui_map,run_30,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.97,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?(?:\s|\u00A0)?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?(?:\s|\u00A0)?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Tim",False
+stage_4_manual_ui_map,run_30,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.52,,False
+stage_4_manual_ui_map,run_30,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_30/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.94,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_31,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.56,,False
+stage_4_manual_ui_map,run_31,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.68,,False
+stage_4_manual_ui_map,run_31,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.85,,False
+stage_4_manual_ui_map,run_31,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.31,,False
+stage_4_manual_ui_map,run_31,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.24,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_31,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.16,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_31,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,4.15,,False
+stage_4_manual_ui_map,run_31,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.78,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s?(mm|cm|m|km|meters?|kilometers?)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click i",False
+stage_4_manual_ui_map,run_31,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.33,,False
+stage_4_manual_ui_map,run_31,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_31/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.67,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_32,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.56,,False
+stage_4_manual_ui_map,run_32,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.17,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_32,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.66,,False
+stage_4_manual_ui_map,run_32,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.18,,False
+stage_4_manual_ui_map,run_32,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.22,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_32,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,7.92,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_32,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.44,,False
+stage_4_manual_ui_map,run_32,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.82,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a m",False
+stage_4_manual_ui_map,run_32,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.15,,False
+stage_4_manual_ui_map,run_32,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_32/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.69,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_33,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.54,,False
+stage_4_manual_ui_map,run_33,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.57,,False
+stage_4_manual_ui_map,run_33,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.67,,False
+stage_4_manual_ui_map,run_33,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.17,,False
+stage_4_manual_ui_map,run_33,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.21,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_33,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,7.89,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_33,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.18,,False
+stage_4_manual_ui_map,run_33,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.4,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start",False
+stage_4_manual_ui_map,run_33,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.43,,False
+stage_4_manual_ui_map,run_33,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_33/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,12.76,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_34,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.56,,False
+stage_4_manual_ui_map,run_34,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.21,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_34,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.89,,False
+stage_4_manual_ui_map,run_34,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.17,,False
+stage_4_manual_ui_map,run_34,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,30.05,"Test timeout of 30000ms exceeded.
+Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+   6 | test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+   7 |   await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+>  8 |   await page.waitForLoadState('networkidle');
+     |              ^
+   9 |
+  10 |   const layerSwitcher = page.getByTestId('layer-switcher');
+  11 |   const legend = page.getByTestId('legend');
+    at C:\Users\",True
+stage_4_manual_ui_map,run_34,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.15,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_34,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,4.8,,False
+stage_4_manual_ui_map,run_34,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.86,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       - unexpe",False
+stage_4_manual_ui_map,run_34,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.71,,False
+stage_4_manual_ui_map,run_34,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_34/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.58,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_35,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.5,,False
+stage_4_manual_ui_map,run_35,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.62,,False
+stage_4_manual_ui_map,run_35,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.5,,False
+stage_4_manual_ui_map,run_35,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.22,,False
+stage_4_manual_ui_map,run_35,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.24,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_35,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,7.88,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_35,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,8.43,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call ",False
+stage_4_manual_ui_map,run_35,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.82,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded w",False
+stage_4_manual_ui_map,run_35,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-09-print-the-current-map-view-as-a-png.spec.ts,INFRA_FAIL,8.29,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing-panel').getByRole('button', { name: /print map/i })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('printing-panel').getByRole('button', { name: /print map/i })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing-panel').getByRole('button', { name: /print map/i })
+Expected: visible
+Timeout: 5000ms
+E",False
+stage_4_manual_ui_map,run_35,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_35/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,8.78,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_36,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.54,,False
+stage_4_manual_ui_map,run_36,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.64,,False
+stage_4_manual_ui_map,run_36,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.44,,False
+stage_4_manual_ui_map,run_36,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.19,,False
+stage_4_manual_ui_map,run_36,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.23,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_36,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,7.94,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_36,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.22,,False
+stage_4_manual_ui_map,run_36,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.66,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on ",False
+stage_4_manual_ui_map,run_36,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.17,,False
+stage_4_manual_ui_map,run_36,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_36/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.58,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_37,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.5,,False
+stage_4_manual_ui_map,run_37,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.59,,False
+stage_4_manual_ui_map,run_37,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.67,,False
+stage_4_manual_ui_map,run_37,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,2.62,,False
+stage_4_manual_ui_map,run_37,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.19,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_37,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,7.9,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_37,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.0,,False
+stage_4_manual_ui_map,run_37,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.65,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a m",False
+stage_4_manual_ui_map,run_37,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.34,,False
+stage_4_manual_ui_map,run_37,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_37/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.6,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_38,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.49,,False
+stage_4_manual_ui_map,run_38,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.19,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox').first()
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-tri",False
+stage_4_manual_ui_map,run_38,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.57,,False
+stage_4_manual_ui_map,run_38,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.24,,False
+stage_4_manual_ui_map,run_38,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.21,,False
+stage_4_manual_ui_map,run_38,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,6.73,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_38,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,4.25,,False
+stage_4_manual_ui_map,run_38,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.02,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded w",False
+stage_4_manual_ui_map,run_38,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.66,,False
+stage_4_manual_ui_map,run_38,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_38/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.28,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_39,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,3.1,,False
+stage_4_manual_ui_map,run_39,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.72,,False
+stage_4_manual_ui_map,run_39,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.59,,False
+stage_4_manual_ui_map,run_39,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.36,,False
+stage_4_manual_ui_map,run_39,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.34,,False
+stage_4_manual_ui_map,run_39,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,6.84,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_39,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.77,,False
+stage_4_manual_ui_map,run_39,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.88,"Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   -1
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   -1
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  47 |         );
+  48 |         return match ? Number(match[1].replace(',', '.')) : -1;
+> 49 |     }).toBeGreaterThan(0);
+     |        ^
+  50 |
+  51 |     await expect.poll(async () => {
+  52 |        ",False
+stage_4_manual_ui_map,run_39,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.75,,False
+stage_4_manual_ui_map,run_39,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_39/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.99,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_40,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.77,,False
+stage_4_manual_ui_map,run_40,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.31,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_40,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.94,,False
+stage_4_manual_ui_map,run_40,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.34,,False
+stage_4_manual_ui_map,run_40,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.36,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_40,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.27,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_40,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.45,,False
+stage_4_manual_ui_map,run_40,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.86,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\b\d[\d.,]*\s?(?:mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a m",False
+stage_4_manual_ui_map,run_40,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.73,,False
+stage_4_manual_ui_map,run_40,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.88,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_41,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,3.43,,False
+stage_4_manual_ui_map,run_41,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.9,,False
+stage_4_manual_ui_map,run_41,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.7,,False
+stage_4_manual_ui_map,run_41,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.38,,False
+stage_4_manual_ui_map,run_41,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.44,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_41,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.24,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_41,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.68,,False
+stage_4_manual_ui_map,run_41,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.89,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d+(?:[.,]\d+)?\s?(mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a",False
+stage_4_manual_ui_map,run_41,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.71,,False
+stage_4_manual_ui_map,run_41,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_41/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.4,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_42,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.86,,False
+stage_4_manual_ui_map,run_42,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.75,,False
+stage_4_manual_ui_map,run_42,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.6,,False
+stage_4_manual_ui_map,run_42,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_42,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_42,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,6.92,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_42,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.78,,False
+stage_4_manual_ui_map,run_42,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.98,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\b\d{1,3}(?:[.\s]\d{3})*(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</d",False
+stage_4_manual_ui_map,run_42,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.75,,False
+stage_4_manual_ui_map,run_42,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_42/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.82,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_43,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.97,,False
+stage_4_manual_ui_map,run_43,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.38,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_43,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.87,,False
+stage_4_manual_ui_map,run_43,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.37,,False
+stage_4_manual_ui_map,run_43,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.38,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_43,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.27,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_43,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,7.61,"Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toBeTruthy()
+
+Received: undefined
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  78 |     const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+  79 |
+> 80 |     await expect.poll(() => getPixelForMapCoordinate(targetCoordinate)).toBeTruthy();
+     |                                                             ",False
+stage_4_manual_ui_map,run_43,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.16,"Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+
+  42 |         const text = (((await measurement.textContent()) ?? '').replace(/\s+/g, ' ')).trim();
+  43 |         return text !== initialMeasurementText && /\b(?:[1-9]\d*(?:[.",False
+stage_4_manual_ui_map,run_43,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.72,,False
+stage_4_manual_ui_map,run_43,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.66,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_44,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.88,,False
+stage_4_manual_ui_map,run_44,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.73,,False
+stage_4_manual_ui_map,run_44,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.55,,False
+stage_4_manual_ui_map,run_44,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_44,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.35,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_44,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.15,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_44,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,8.85,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call ",False
+stage_4_manual_ui_map,run_44,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.1,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d[\d.,]*\s?(mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a measu",False
+stage_4_manual_ui_map,run_44,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.79,,False
+stage_4_manual_ui_map,run_44,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_44/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,8.81,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_45,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.97,,False
+stage_4_manual_ui_map,run_45,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.36,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_45,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.84,,False
+stage_4_manual_ui_map,run_45,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.53,,False
+stage_4_manual_ui_map,run_45,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.36,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_45,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.17,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_45,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.77,,False
+stage_4_manual_ui_map,run_45,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.7,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km|meters?|metres?|kilometers?|kilometres?)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:m|km|meters?|metres?|kilometers?|kilometres?)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDis",False
+stage_4_manual_ui_map,run_45,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.99,,False
+stage_4_manual_ui_map,run_45,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_45/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.72,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_46,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.98,,False
+stage_4_manual_ui_map,run_46,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.32,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_46,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.97,,False
+stage_4_manual_ui_map,run_46,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.34,,False
+stage_4_manual_ui_map,run_46,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.36,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_46,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.35,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_46,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,8.9,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId(",False
+stage_4_manual_ui_map,run_46,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.4,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement-panel')
+Expected pattern: /\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement-panel')
+    14 × locator resolved to <div data-measurement-panel="""" data-testid=""measurement-panel"">…</div>
+       - unexpect",False
+stage_4_manual_ui_map,run_46,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-09-print-the-current-map-view-as-a-png.spec.ts,INFRA_FAIL,7.95,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing-panel').getByRole('button', { name: /^(export|print)$/i }).first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('printing-panel').getByRole('button', { name: /^(export|print)$/i }).first()
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('printing-panel').getByRole('button', { name: /^(export|print)$/i }",False
+stage_4_manual_ui_map,run_46,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_46/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,8.72,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_47,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,3.16,,False
+stage_4_manual_ui_map,run_47,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.49,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""closed"" data-scope=""select"" data-part=""trigger"" aria-invalid=""false"" aria-expanded=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" aria-controls=""select:_r_4_:content"" class=""basemap-switcher-select-trigger cha",False
+stage_4_manual_ui_map,run_47,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,2.99,,False
+stage_4_manual_ui_map,run_47,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.36,,False
+stage_4_manual_ui_map,run_47,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.34,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_47,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.26,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_47,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.76,,False
+stage_4_manual_ui_map,run_47,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.08,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d[\d.,]*\s?(mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a measu",False
+stage_4_manual_ui_map,run_47,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,4.78,,False
+stage_4_manual_ui_map,run_47,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_47/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.8,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_48,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.94,,False
+stage_4_manual_ui_map,run_48,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.7,,False
+stage_4_manual_ui_map,run_48,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.63,,False
+stage_4_manual_ui_map,run_48,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.35,,False
+stage_4_manual_ui_map,run_48,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.42,,False
+stage_4_manual_ui_map,run_48,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,6.88,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_48,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.95,,False
+stage_4_manual_ui_map,run_48,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,6.86,"Error: expect(locator).toContainText(expected) failed
+
+Locator: getByTestId('measurement')
+Expected pattern: /\d[\d.,]*\s?(mm|cm|m|km)\b/i
+Received string:  ""Click in the map to start a measurement.ModeDistanceAreaDelete measurements""
+Timeout: 5000ms
+
+Call log:
+  - Expect ""toContainText"" with timeout 5000ms
+  - waiting for getByTestId('measurement')
+    14 × locator resolved to <div class=""measurement"" data-testid=""measurement"">…</div>
+       - unexpected value ""Click in the map to start a measu",False
+stage_4_manual_ui_map,run_48,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.88,,False
+stage_4_manual_ui_map,run_48,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_48/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.76,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_49,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,3.01,,False
+stage_4_manual_ui_map,run_49,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,ASSERTION_FAIL,1.42,"Error: locator.selectOption: Error: Element is not a <select> element
+Call log:
+  - waiting for getByTestId('layer-switcher').getByRole('combobox')
+    - locator resolved to <button dir=""ltr"" type=""button"" role=""combobox"" data-state=""open"" data-scope=""select"" data-part=""trigger"" aria-expanded=""true"" aria-invalid=""false"" aria-required=""false"" aria-haspopup=""listbox"" aria-labelledby=""_r_3_"" id=""select:_r_4_:trigger"" data-placement=""bottom-start"" aria-controls=""select:_r_4_:content"" class=""basemap-",False
+stage_4_manual_ui_map,run_49,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,3.0,,False
+stage_4_manual_ui_map,run_49,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.33,,False
+stage_4_manual_ui_map,run_49,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,INFRA_FAIL,6.29,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('legend').getByText('Precipitation', { exact: true })
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('legend').getByText('Precipitation', { exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not fou",False
+stage_4_manual_ui_map,run_49,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,8.01,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_49,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,8.49,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('eucos-station-section')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('eucos-station-section')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId(",False
+stage_4_manual_ui_map,run_49,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.79,"Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+Error: expect(received).toMatch(expected)
+
+Expected pattern: /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i
+Received string:  ""MeasurementClick in the map to start a measurement.ModeDistanceAreaDelete measurements""
+
+Call Log:
+- Tim",False
+stage_4_manual_ui_map,run_49,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.23,,False
+stage_4_manual_ui_map,run_49,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_49/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.63,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('info-panel').getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('info-panel').getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect",False
+stage_4_manual_ui_map,run_50,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.53,,False
+stage_4_manual_ui_map,run_50,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,PASS,1.59,,False
+stage_4_manual_ui_map,run_50,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,PASS,1.65,,False
+stage_4_manual_ui_map,run_50,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,PASS,1.19,,False
+stage_4_manual_ui_map,run_50,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,1.22,,False
+stage_4_manual_ui_map,run_50,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,INFRA_FAIL,6.74,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
+stage_4_manual_ui_map,run_50,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,PASS,3.41,,False
+stage_4_manual_ui_map,run_50,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,6.68,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement').getByText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i).first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('measurement').getByText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i).first()
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('measurement').getByText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i).first()",False
+stage_4_manual_ui_map,run_50,uc-09,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-09-print-the-current-map-view-as-a-png.spec.ts,PASS,3.43,,False
+stage_4_manual_ui_map,run_50,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_50/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,INFRA_FAIL,7.18,"Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-forecast')
+
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByTestId('weather-forecast')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect ""toBeVisible"" with timeout 5000ms
+  - waiting for getByTestId('weather-foreca",False
