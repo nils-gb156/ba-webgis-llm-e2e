@@ -1,0 +1,219 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('load');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const parseNumericValue = (value: string | null): number | undefined => {
+    if (!value) {
+      return undefined;
+    }
+    const trimmed = value.trim();
+    if (!/^-?\d+(?:\.\d+)?$/.test(trimmed)) {
+      return undefined;
+    }
+    return Number(trimmed);
+  };
+
+  const parseZoomFromAppUrl = (currentUrl: string): number | undefined => {
+    const url = new URL(currentUrl);
+
+    for (const key of ['z', 'zoom']) {
+      const parsed = parseNumericValue(url.searchParams.get(key));
+      if (parsed !== undefined) {
+        return parsed;
+      }
+    }
+
+    const hash = url.hash.startsWith('#') ? url.hash.slice(1) : url.hash;
+    if (!hash) {
+      return undefined;
+    }
+
+    const hashParams = new URLSearchParams(hash);
+    for (const key of ['z', 'zoom']) {
+      const parsed = parseNumericValue(hashParams.get(key));
+      if (parsed !== undefined) {
+        return parsed;
+      }
+    }
+
+    const mapMatch = hash.match(/(?:^|[?&])map=(-?\d+(?:\.\d+)?)[/,:]/);
+    if (mapMatch) {
+      return Number(mapMatch[1]);
+    }
+
+    const directMatch = hash.match(/^(?:map=)?(-?\d+(?:\.\d+)?)[/,:]/);
+    if (directMatch) {
+      return Number(directMatch[1]);
+    }
+
+    return undefined;
+  };
+
+  const parseZoomFromTileUrl = (resourceUrl: string): number | undefined => {
+    try {
+      const url = new URL(resourceUrl);
+
+      for (const key of ['z', 'zoom', 'Z', 'ZOOM']) {
+        const parsed = parseNumericValue(url.searchParams.get(key));
+        if (parsed !== undefined) {
+          return parsed;
+        }
+      }
+
+      for (const key of ['tilematrix', 'TILEMATRIX']) {
+        const parsed = parseNumericValue(url.searchParams.get(key));
+        if (parsed !== undefined) {
+          return parsed;
+        }
+      }
+
+      const pathMatch = url.pathname.match(/\/(\d+)\/(\d+)\/(\d+)(?:\.[a-zA-Z0-9]+)?$/);
+      if (pathMatch) {
+        return Number(pathMatch[1]);
+      }
+
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  type ResourceEntry = {
+    name: string;
+    initiatorType: string;
+  };
+
+  const getImageResourceEntries = async (): Promise<ResourceEntry[]> => {
+    return await page.evaluate(() => {
+      return performance
+        .getEntriesByType('resource')
+        .map((entry) => {
+          const resource = entry as PerformanceResourceTiming;
+          return {
+            name: resource.name,
+            initiatorType: resource.initiatorType
+          };
+        })
+        .filter((entry) => entry.initiatorType === 'img');
+    });
+  };
+
+  const getDominantRequestedZoom = async (startIndex = 0): Promise<number | undefined> => {
+    const entries = await getImageResourceEntries();
+    const relevantEntries = entries.slice(startIndex);
+
+    const counts = new Map<number, number>();
+    for (const entry of relevantEntries) {
+      const zoom = parseZoomFromTileUrl(entry.name);
+      if (zoom !== undefined) {
+        counts.set(zoom, (counts.get(zoom) ?? 0) + 1);
+      }
+    }
+
+    if (counts.size === 0) {
+      return undefined;
+    }
+
+    let dominantZoom: number | undefined;
+    let highestCount = -1;
+
+    for (const [zoom, count] of counts.entries()) {
+      if (count > highestCount) {
+        dominantZoom = zoom;
+        highestCount = count;
+      }
+    }
+
+    return dominantZoom;
+  };
+
+  const initialUrlZoom = parseZoomFromAppUrl(page.url());
+
+  if (initialUrlZoom !== undefined) {
+    let initialZoom: number | undefined;
+    await expect.poll(async () => {
+      initialZoom = parseZoomFromAppUrl(page.url());
+      return initialZoom;
+    }).not.toBeUndefined();
+
+    if (initialZoom === undefined) {
+      throw new Error('Could not determine the initial zoom level from the URL.');
+    }
+
+    await zoomInButton.click();
+
+    let zoomAfterZoomIn: number | undefined;
+    await expect.poll(async () => {
+      zoomAfterZoomIn = parseZoomFromAppUrl(page.url());
+      return zoomAfterZoomIn !== undefined && zoomAfterZoomIn > initialZoom;
+    }).toBe(true);
+
+    if (zoomAfterZoomIn === undefined) {
+      throw new Error('Could not determine the zoom level after zooming in.');
+    }
+
+    await zoomOutButton.click();
+
+    let zoomAfterZoomOut: number | undefined;
+    await expect.poll(async () => {
+      zoomAfterZoomOut = parseZoomFromAppUrl(page.url());
+      return zoomAfterZoomOut !== undefined && zoomAfterZoomOut < zoomAfterZoomIn;
+    }).toBe(true);
+  } else {
+    await page.waitForLoadState('networkidle');
+
+    let initialZoom: number | undefined;
+    await expect.poll(async () => {
+      initialZoom = await getDominantRequestedZoom(0);
+      return initialZoom;
+    }).not.toBeUndefined();
+
+    if (initialZoom === undefined) {
+      throw new Error('Could not determine the initial zoom level from map tile requests.');
+    }
+
+    const initialImageEntryCount = (await getImageResourceEntries()).length;
+
+    await zoomInButton.click();
+
+    let zoomAfterZoomIn: number | undefined;
+    await expect.poll(async () => {
+      const currentImageEntryCount = (await getImageResourceEntries()).length;
+      if (currentImageEntryCount <= initialImageEntryCount) {
+        return false;
+      }
+
+      zoomAfterZoomIn = await getDominantRequestedZoom(initialImageEntryCount);
+      return zoomAfterZoomIn !== undefined && zoomAfterZoomIn > initialZoom;
+    }).toBe(true);
+
+    if (zoomAfterZoomIn === undefined) {
+      throw new Error('Could not determine the zoom level after zooming in from map tile requests.');
+    }
+
+    const imageEntryCountAfterZoomIn = (await getImageResourceEntries()).length;
+
+    await zoomOutButton.click();
+
+    let zoomAfterZoomOut: number | undefined;
+    await expect.poll(async () => {
+      const currentImageEntryCount = (await getImageResourceEntries()).length;
+      if (currentImageEntryCount <= imageEntryCountAfterZoomIn) {
+        return false;
+      }
+
+      zoomAfterZoomOut = await getDominantRequestedZoom(imageEntryCountAfterZoomIn);
+      return zoomAfterZoomOut !== undefined && zoomAfterZoomOut < zoomAfterZoomIn;
+    }).toBe(true);
+  }
+});

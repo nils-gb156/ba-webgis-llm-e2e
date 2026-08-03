@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const cartoLightRadio = page.getByRole('radio', { name: 'Carto Light', exact: true });
+  const openStreetMapRadio = page.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+
+  const baseMapSelectorCandidates = [
+    page.getByRole('button', { name: /^Base maps?$/i }),
+    page.getByRole('button', { name: /^Basemaps?$/i }),
+    page.getByRole('button', { name: /^Background maps?$/i }),
+    page.getByRole('tab', { name: /^Base maps?$/i }),
+    page.getByRole('tab', { name: /^Basemaps?$/i }),
+    page.getByRole('tab', { name: /^Background maps?$/i })
+  ];
+
+  for (const candidate of baseMapSelectorCandidates) {
+    if ((await candidate.count()) > 0) {
+      const selector = candidate.first();
+      if (await selector.isVisible()) {
+        const ariaExpanded = await selector.getAttribute('aria-expanded');
+        const ariaSelected = await selector.getAttribute('aria-selected');
+
+        if (ariaExpanded === 'false' || ariaSelected === 'false') {
+          await selector.click();
+        }
+        break;
+      }
+    }
+  }
+
+  await expect(cartoLightRadio).toBeAttached();
+  await expect(openStreetMapRadio).toBeAttached();
+
+  await expect(cartoLightRadio).toBeChecked();
+  await expect(openStreetMapRadio).not.toBeChecked();
+
+  await openStreetMapRadio.click({ force: true });
+
+  await expect(openStreetMapRadio).toBeChecked();
+  await expect(cartoLightRadio).not.toBeChecked();
+});

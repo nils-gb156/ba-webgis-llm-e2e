@@ -1,0 +1,165 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const isVisible = async (locator: Locator): Promise<boolean> => {
+    return await locator.isVisible().catch(() => false);
+  };
+
+  const firstVisible = async (locators: Locator[]): Promise<Locator | undefined> => {
+    for (const locator of locators) {
+      if (await isVisible(locator)) {
+        return locator;
+      }
+    }
+    return undefined;
+  };
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const scaleBar = page.locator('.ol-scale-line').first();
+  await expect(scaleBar).toBeVisible();
+  await expect(scaleBar).toContainText(/\S+/);
+
+  const printToolbarButton = page.getByRole('button', { name: 'Print Map', exact: true }).first();
+  await expect(printToolbarButton).toBeVisible();
+
+  const printPanelDialog = page.getByRole('dialog', { name: 'Print Map', exact: true }).first();
+  const printPanelHeading = page.getByRole('heading', { name: 'Print Map', exact: true }).first();
+  const titleTextboxByRole = page.getByRole('textbox', { name: /title/i }).first();
+  const titleTextboxByLabel = page.getByLabel(/title/i).first();
+  const titleTextboxByPlaceholder = page.getByPlaceholder(/title/i).first();
+
+  const panelVisibleBeforeClick = await firstVisible([
+    printPanelDialog,
+    printPanelHeading,
+    titleTextboxByRole,
+    titleTextboxByLabel,
+    titleTextboxByPlaceholder
+  ]);
+
+  if (!panelVisibleBeforeClick) {
+    const pressed = await printToolbarButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printToolbarButton.click();
+    }
+  }
+
+  await expect
+    .poll(async () => {
+      return Boolean(
+        await firstVisible([
+          printPanelDialog,
+          printPanelHeading,
+          titleTextboxByRole,
+          titleTextboxByLabel,
+          titleTextboxByPlaceholder
+        ])
+      );
+    })
+    .toBe(true);
+
+  if (await isVisible(printPanelDialog)) {
+    await expect(printPanelDialog).toBeVisible();
+  } else if (await isVisible(printPanelHeading)) {
+    await expect(printPanelHeading).toBeVisible();
+  }
+
+  const titleInput =
+    (await firstVisible([titleTextboxByRole, titleTextboxByLabel, titleTextboxByPlaceholder])) ??
+    titleTextboxByRole;
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = `Playwright PNG Export ${Date.now()}`;
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const formatCombobox = page.getByRole('combobox', { name: /format/i }).first();
+  if (await isVisible(formatCombobox)) {
+    try {
+      await formatCombobox.selectOption({ label: 'PNG' });
+    } catch {
+      try {
+        await formatCombobox.selectOption({ value: 'png' });
+      } catch {
+        await formatCombobox.selectOption({ value: 'image/png' });
+      }
+    }
+    await expect(formatCombobox).toHaveValue(/png/i);
+  } else {
+    const pngControl = await firstVisible([
+      page.getByRole('radio', { name: 'PNG', exact: true }).first(),
+      page.getByRole('option', { name: 'PNG', exact: true }).first(),
+      page.getByRole('menuitemradio', { name: 'PNG', exact: true }).first(),
+      page.getByRole('tab', { name: 'PNG', exact: true }).first(),
+      page.getByRole('button', { name: 'PNG', exact: true }).first()
+    ]);
+
+    expect(pngControl).toBeDefined();
+    await expect(pngControl!).toBeVisible();
+
+    const role = await pngControl!.getAttribute('role');
+    if (role === 'radio') {
+      await pngControl!.click({ force: true });
+      await expect(pngControl!).toBeChecked();
+    } else {
+      await pngControl!.click();
+      const ariaSelected = await pngControl!.getAttribute('aria-selected');
+      const ariaPressed = await pngControl!.getAttribute('aria-pressed');
+
+      if (ariaSelected !== null) {
+        await expect(pngControl!).toHaveAttribute('aria-selected', 'true');
+      } else if (ariaPressed !== null) {
+        await expect(pngControl!).toHaveAttribute('aria-pressed', 'true');
+      }
+    }
+  }
+
+  await expect(scaleBar).toBeVisible();
+
+  const exportButton =
+    (await firstVisible([
+      page.getByRole('button', { name: 'Export', exact: true }).first(),
+      page.getByRole('button', { name: 'Print', exact: true }).first(),
+      page.getByRole('button', { name: 'Create Print', exact: true }).first(),
+      page.getByRole('button', { name: 'Download', exact: true }).first(),
+      page.getByRole('button', { name: /export/i }).first(),
+      page.getByRole('button', { name: /download/i }).first()
+    ])) ?? page.getByRole('button', { name: 'Export', exact: true }).first();
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(await download.failure()).toBeNull();
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const downloadPath = path.join(
+    os.tmpdir(),
+    `playwright-print-${Date.now()}-${download.suggestedFilename()}`
+  );
+  await download.saveAs(downloadPath);
+
+  const fileBuffer = await fs.readFile(downloadPath);
+  const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+
+  expect(fileBuffer.subarray(0, 8).equals(pngSignature)).toBe(true);
+  expect(fileBuffer.byteLength).toBeGreaterThan(1024);
+
+  const width = fileBuffer.readUInt32BE(16);
+  const height = fileBuffer.readUInt32BE(20);
+
+  expect(width).toBeGreaterThan(0);
+  expect(height).toBeGreaterThan(0);
+});

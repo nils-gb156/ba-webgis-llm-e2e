@@ -1,0 +1,102 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  await expect(printMapButton).toBeVisible();
+
+  const scaleBar = page.locator('.ol-scale-line').first();
+  await expect(scaleBar).toBeVisible();
+
+  const printPanelHeading = page.getByRole('heading', { name: 'Print Map', exact: true });
+
+  let titleInput = page.getByRole('textbox', { name: /^title$/i });
+  if ((await titleInput.count()) === 0) {
+    titleInput = page.getByRole('textbox', { name: /title/i }).first();
+  }
+
+  let panelVisible = false;
+  if ((await printPanelHeading.count()) > 0 && (await printPanelHeading.isVisible())) {
+    panelVisible = true;
+  } else if ((await titleInput.count()) > 0 && (await titleInput.isVisible())) {
+    panelVisible = true;
+  }
+
+  if (!panelVisible) {
+    const pressed = await printMapButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printMapButton.click();
+    }
+  }
+
+  if ((await printPanelHeading.count()) > 0) {
+    await expect(printPanelHeading).toBeVisible();
+  }
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'E2E PNG Export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /^png$/i });
+  if ((await pngRadio.count()) > 0) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    let formatSelect = page.getByRole('combobox', { name: /^format$/i });
+    if ((await formatSelect.count()) === 0) {
+      formatSelect = page.getByRole('combobox', { name: /format/i }).first();
+    }
+
+    await expect(formatSelect).toBeVisible();
+
+    try {
+      await formatSelect.selectOption({ label: 'PNG' });
+    } catch {
+      try {
+        await formatSelect.selectOption({ label: 'png' });
+      } catch {
+        await formatSelect.selectOption('png');
+      }
+    }
+
+    await expect.poll(async () => await formatSelect.inputValue()).toMatch(/png/i);
+  }
+
+  let exportButton = page.getByRole('button', { name: /^export$/i });
+  if ((await exportButton.count()) === 0) {
+    exportButton = page.getByRole('button', { name: /^print$/i });
+  }
+  if ((await exportButton.count()) === 0) {
+    exportButton = page.getByRole('button', { name: /^download$/i });
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  await expect.poll(async () => await download.failure()).toBeNull();
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  if (!downloadPath) {
+    throw new Error('Expected a downloaded PNG file to be available on disk.');
+  }
+
+  const fileBuffer = await fs.readFile(downloadPath);
+  expect(fileBuffer.length).toBeGreaterThan(1024);
+  expect(
+    fileBuffer
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  ).toBe(true);
+  expect(fileBuffer.includes('IHDR')).toBe(true);
+  expect(fileBuffer.includes('IDAT')).toBe(true);
+});

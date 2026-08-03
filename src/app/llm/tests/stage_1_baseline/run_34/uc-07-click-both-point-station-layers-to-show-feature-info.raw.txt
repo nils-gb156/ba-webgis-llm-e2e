@@ -1,0 +1,232 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const findVisibleButton = async (names: string[]) => {
+    for (const name of names) {
+      const candidate = page.getByRole('button', { name, exact: true }).first();
+      if ((await candidate.count()) > 0 && (await candidate.isVisible())) {
+        return candidate;
+      }
+    }
+    return null;
+  };
+
+  const ensurePressedIfAvailable = async (names: string[]) => {
+    const button = await findVisibleButton(names);
+    if (!button) {
+      return;
+    }
+    const pressed = await button.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await button.click();
+    }
+  };
+
+  const ensureNotPressedIfAvailable = async (names: string[]) => {
+    const button = await findVisibleButton(names);
+    if (!button) {
+      return;
+    }
+    const pressed = await button.getAttribute('aria-pressed');
+    if (pressed === 'true') {
+      await button.click();
+    }
+  };
+
+  const ensureCheckboxCheckedIfAvailable = async (name: string) => {
+    const checkbox = page.getByRole('checkbox', { name, exact: true }).first();
+    if ((await checkbox.count()) === 0 || !(await checkbox.isVisible())) {
+      return;
+    }
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click({ force: true });
+    }
+    await expect(checkbox).toBeChecked();
+  };
+
+  await ensurePressedIfAvailable(['Info', 'Information']);
+  await ensureNotPressedIfAvailable(['Measure', 'Measurement']);
+
+  await ensurePressedIfAvailable(['Layers', 'Layer List']);
+  await ensureCheckboxCheckedIfAvailable('UV-Index Stations');
+  await ensureCheckboxCheckedIfAvailable('EUCOS Ground Stations');
+
+  const canvasIndex = await page.locator('canvas').evaluateAll((canvases) => {
+    let bestIndex = 0;
+    let bestArea = -1;
+
+    canvases.forEach((canvas, index) => {
+      const rect = canvas.getBoundingClientRect();
+      const style = window.getComputedStyle(canvas);
+      const visible =
+        style.display !== 'none' &&
+        style.visibility !== 'hidden' &&
+        rect.width > 0 &&
+        rect.height > 0;
+
+      if (!visible) {
+        return;
+      }
+
+      const area = rect.width * rect.height;
+      if (area > bestArea) {
+        bestArea = area;
+        bestIndex = index;
+      }
+    });
+
+    return bestIndex;
+  });
+
+  const mapCanvas = page.locator('canvas').nth(canvasIndex);
+  await expect(mapCanvas).toBeVisible();
+  await mapCanvas.scrollIntoViewIfNeeded();
+
+  const targetPixel = await page.evaluate((coordinate: [number, number]) => {
+    const isObject = (value: unknown): value is Record<string, unknown> =>
+      (typeof value === 'object' || typeof value === 'function') && value !== null;
+
+    const isMapLike = (
+      value: unknown
+    ): value is {
+      getPixelFromCoordinate: (coordinate: [number, number]) => number[];
+      getTargetElement: () => HTMLElement | null;
+      getView: () => unknown;
+    } =>
+      isObject(value) &&
+      typeof value.getPixelFromCoordinate === 'function' &&
+      typeof value.getTargetElement === 'function' &&
+      typeof value.getView === 'function';
+
+    const visited = new WeakSet<object>();
+    const queue: Array<{ value: unknown; depth: number }> = [];
+
+    const enqueue = (value: unknown, depth: number) => {
+      if (isObject(value) && !visited.has(value)) {
+        queue.push({ value, depth });
+      }
+    };
+
+    enqueue(window, 0);
+    enqueue(document, 0);
+    enqueue(document.body, 0);
+
+    const root = document.getElementById('root');
+    if (root) {
+      enqueue(root, 0);
+    }
+
+    for (const element of Array.from(document.querySelectorAll('*')).slice(0, 100)) {
+      enqueue(element, 0);
+    }
+
+    const maxDepth = 4;
+    const maxPropertiesPerObject = 100;
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (!current || !isObject(current.value) || visited.has(current.value)) {
+        continue;
+      }
+
+      visited.add(current.value);
+
+      if (isMapLike(current.value)) {
+        try {
+          const pixel = current.value.getPixelFromCoordinate(coordinate);
+          const targetElement = current.value.getTargetElement();
+
+          if (
+            targetElement instanceof HTMLElement &&
+            Array.isArray(pixel) &&
+            pixel.length === 2 &&
+            Number.isFinite(pixel[0]) &&
+            Number.isFinite(pixel[1])
+          ) {
+            return {
+              x: pixel[0],
+              y: pixel[1],
+              width: targetElement.clientWidth,
+              height: targetElement.clientHeight
+            };
+          }
+        } catch {
+          // ignore candidates that are not the active OpenLayers map
+        }
+      }
+
+      if (current.depth >= maxDepth) {
+        continue;
+      }
+
+      let propertyNames: string[] = [];
+      try {
+        propertyNames = Object.getOwnPropertyNames(current.value).slice(0, maxPropertiesPerObject);
+      } catch {
+        propertyNames = [];
+      }
+
+      for (const propertyName of propertyNames) {
+        if (
+          propertyName === 'window' ||
+          propertyName === 'self' ||
+          propertyName === 'parent' ||
+          propertyName === 'top' ||
+          propertyName === 'frames' ||
+          propertyName === 'frameElement'
+        ) {
+          continue;
+        }
+
+        try {
+          enqueue((current.value as Record<string, unknown>)[propertyName], current.depth + 1);
+        } catch {
+          // ignore inaccessible properties
+        }
+      }
+    }
+
+    return null;
+  }, [1188692.84, 6767643.28]);
+
+  const mapBox = await mapCanvas.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  let clickPosition: { x: number; y: number };
+
+  if (
+    targetPixel &&
+    targetPixel.width > 0 &&
+    targetPixel.height > 0 &&
+    targetPixel.x >= 0 &&
+    targetPixel.y >= 0 &&
+    targetPixel.x <= targetPixel.width &&
+    targetPixel.y <= targetPixel.height
+  ) {
+    clickPosition = {
+      x: Math.max(1, Math.min(Math.round(targetPixel.x), Math.round(targetPixel.width) - 1)),
+      y: Math.max(1, Math.min(Math.round(targetPixel.y), Math.round(targetPixel.height) - 1))
+    };
+  } else {
+    clickPosition = {
+      x: Math.round((mapBox?.width ?? 0) / 2),
+      y: Math.round((mapBox?.height ?? 0) / 2)
+    };
+  }
+
+  const getFeatureInfoResponse = page.waitForResponse(
+    (response) => response.ok() && response.url().toLowerCase().includes('getfeatureinfo'),
+    { timeout: 15000 }
+  );
+
+  await mapCanvas.click({ position: clickPosition });
+  await getFeatureInfoResponse;
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

@@ -1,0 +1,99 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const extractForecastEntries = (value: unknown): unknown[] | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return value;
+      }
+
+      for (const item of value) {
+        const nested = extractForecastEntries(item);
+        if (nested) {
+          return nested;
+        }
+      }
+
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      for (const nested of Object.values(value as Record<string, unknown>)) {
+        const result = extractForecastEntries(nested);
+        if (result) {
+          return result;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.getByRole('complementary').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const capturedRequests: string[] = [];
+  const capturedPayloads: unknown[] = [];
+
+  page.on('request', request => {
+    if (request.resourceType() === 'xhr' || request.resourceType() === 'fetch') {
+      capturedRequests.push(request.url());
+    }
+  });
+
+  page.on('response', response => {
+    const resourceType = response.request().resourceType();
+    if ((resourceType === 'xhr' || resourceType === 'fetch') && response.ok()) {
+      void response
+        .json()
+        .then(payload => {
+          capturedPayloads.push(payload);
+        })
+        .catch(() => {
+          // ignore non-JSON responses
+        });
+    }
+  });
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.floor(box.width * 0.35),
+      y: Math.floor(box.height * 0.35)
+    }
+  });
+
+  await expect.poll(() => capturedRequests.length).toBeGreaterThan(0);
+
+  const forecastSectionTitle = infoPanel
+    .getByRole('heading', { name: /weather forecast/i })
+    .or(infoPanel.getByText(/weather forecast/i));
+
+  await expect(forecastSectionTitle.first()).toBeVisible();
+
+  await expect
+    .poll(() => {
+      for (const payload of capturedPayloads) {
+        const entries = extractForecastEntries(payload);
+        if (entries) {
+          return entries.length;
+        }
+      }
+      return 0;
+    })
+    .toBe(24);
+});

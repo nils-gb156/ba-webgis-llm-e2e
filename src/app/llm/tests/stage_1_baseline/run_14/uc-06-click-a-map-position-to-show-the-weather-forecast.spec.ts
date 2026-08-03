@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+
+  const infoPanel = page.getByRole('complementary').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').last();
+  await expect(mapCanvas).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const initialPanelText = (await infoPanel.textContent()) ?? '';
+  const clickPosition = {
+    x: Math.max(10, Math.min(box.width - 10, box.width * 0.4)),
+    y: Math.max(10, Math.min(box.height - 10, box.height * 0.4))
+  };
+
+  await mapCanvas.click({ position: clickPosition });
+
+  await expect
+    .poll(
+      async () =>
+        (await infoPanel.getByRole('heading', { name: /weather forecast|forecast|wettervorhersage|wetter/i }).first().isVisible().catch(() => false)) ||
+        (await infoPanel.getByText(/weather forecast|forecast|wettervorhersage|wetter/i).first().isVisible().catch(() => false)),
+      { timeout: 30000 }
+    )
+    .toBe(true);
+
+  await expect
+    .poll(async () => ((await infoPanel.textContent()) ?? '').trim(), { timeout: 30000 })
+    .not.toBe(initialPanelText.trim());
+
+  await expect
+    .poll(
+      async () => {
+        const listItemCount = await infoPanel.getByRole('listitem').count();
+        if (listItemCount === 24) {
+          return 24;
+        }
+
+        const rowCount = await infoPanel.getByRole('row').count();
+        if (rowCount === 24 || rowCount === 25) {
+          return 24;
+        }
+
+        const articleCount = await infoPanel.getByRole('article').count();
+        if (articleCount === 24) {
+          return 24;
+        }
+
+        const liCount = await infoPanel.locator('li').count();
+        if (liCount === 24) {
+          return 24;
+        }
+
+        const trCount = await infoPanel.locator('tr').count();
+        if (trCount === 24 || trCount === 25) {
+          return 24;
+        }
+
+        return Math.max(
+          listItemCount,
+          rowCount > 0 ? rowCount - 1 : 0,
+          articleCount,
+          liCount,
+          trCount > 0 ? trCount - 1 : 0
+        );
+      },
+      { timeout: 30000 }
+    )
+    .toBe(24);
+});

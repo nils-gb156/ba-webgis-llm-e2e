@@ -1,0 +1,315 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const parseNumber = (value: unknown): number | undefined => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return undefined;
+  };
+
+  const extractCoordinates = (value: unknown): { lon: number; lat: number } | undefined => {
+    if (!value || typeof value !== 'object') {
+      return undefined;
+    }
+
+    const entry = value as Record<string, unknown>;
+
+    if (entry.geometry && typeof entry.geometry === 'object') {
+      const geometry = entry.geometry as Record<string, unknown>;
+      if (Array.isArray(geometry.coordinates) && geometry.coordinates.length >= 2) {
+        const lon = parseNumber(geometry.coordinates[0]);
+        const lat = parseNumber(geometry.coordinates[1]);
+        if (lon !== undefined && lat !== undefined) {
+          return { lon, lat };
+        }
+      }
+    }
+
+    if (Array.isArray(entry.center) && entry.center.length >= 2) {
+      const lon = parseNumber(entry.center[0]);
+      const lat = parseNumber(entry.center[1]);
+      if (lon !== undefined && lat !== undefined) {
+        return { lon, lat };
+      }
+    }
+
+    const lon =
+      parseNumber(entry.lon) ??
+      parseNumber(entry.lng) ??
+      parseNumber(entry.longitude) ??
+      parseNumber(entry.x);
+    const lat =
+      parseNumber(entry.lat) ??
+      parseNumber(entry.latitude) ??
+      parseNumber(entry.y);
+
+    if (lon !== undefined && lat !== undefined) {
+      return { lon, lat };
+    }
+
+    return undefined;
+  };
+
+  const extractFirstGeocoderCoordinates = (payload: unknown): { lon: number; lat: number } | undefined => {
+    if (Array.isArray(payload) && payload.length > 0) {
+      return extractCoordinates(payload[0]);
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      return undefined;
+    }
+
+    const objectPayload = payload as Record<string, unknown>;
+
+    if (Array.isArray(objectPayload.features) && objectPayload.features.length > 0) {
+      return extractCoordinates(objectPayload.features[0]);
+    }
+
+    if (Array.isArray(objectPayload.results) && objectPayload.results.length > 0) {
+      return extractCoordinates(objectPayload.results[0]);
+    }
+
+    if (Array.isArray(objectPayload.items) && objectPayload.items.length > 0) {
+      return extractCoordinates(objectPayload.items[0]);
+    }
+
+    return extractCoordinates(objectPayload);
+  };
+
+  const parseForecastRequestCoordinates = (urlString: string): { lon: number; lat: number } | undefined => {
+    try {
+      const url = new URL(urlString);
+      const lon =
+        parseNumber(url.searchParams.get('lon')) ??
+        parseNumber(url.searchParams.get('lng')) ??
+        parseNumber(url.searchParams.get('longitude')) ??
+        parseNumber(url.searchParams.get('x'));
+      const lat =
+        parseNumber(url.searchParams.get('lat')) ??
+        parseNumber(url.searchParams.get('latitude')) ??
+        parseNumber(url.searchParams.get('y'));
+
+      if (lon !== undefined && lat !== undefined) {
+        return { lon, lat };
+      }
+    } catch {
+      return undefined;
+    }
+
+    return undefined;
+  };
+
+  const countForecastEntries = (payload: unknown): number | undefined => {
+    if (!payload || typeof payload !== 'object') {
+      return undefined;
+    }
+
+    const objectPayload = payload as Record<string, unknown>;
+
+    if (Array.isArray(objectPayload.entries)) {
+      return objectPayload.entries.length;
+    }
+
+    if (Array.isArray(objectPayload.forecast)) {
+      return objectPayload.forecast.length;
+    }
+
+    if (Array.isArray(objectPayload.list)) {
+      return objectPayload.list.length;
+    }
+
+    if (Array.isArray(objectPayload.timeseries)) {
+      return objectPayload.timeseries.length;
+    }
+
+    if (objectPayload.hourly && typeof objectPayload.hourly === 'object') {
+      const hourly = objectPayload.hourly as Record<string, unknown>;
+      if (Array.isArray(hourly.time)) {
+        return hourly.time.length;
+      }
+    }
+
+    if (objectPayload.data && typeof objectPayload.data === 'object') {
+      return countForecastEntries(objectPayload.data);
+    }
+
+    return undefined;
+  };
+
+  const findFirstExistingLocator = async (locators: Array<ReturnType<typeof page.getByRole>>) => {
+    for (const locator of locators) {
+      if ((await locator.count()) > 0) {
+        return locator.first();
+      }
+    }
+    throw new Error('Expected locator was not found.');
+  };
+
+  const getLayerToggle = async (name: string) => {
+    const exactName = new RegExp(`^${escapeRegex(name)}$`, 'i');
+    return await findFirstExistingLocator([
+      page.getByRole('checkbox', { name: exactName }),
+      page.getByRole('switch', { name: exactName }),
+      page.getByRole('button', { name: exactName })
+    ]);
+  };
+
+  const readToggleState = async (toggle: ReturnType<typeof page.locator>): Promise<boolean | undefined> => {
+    const role = await toggle.getAttribute('role');
+
+    if (role === 'checkbox' || role === 'switch' || role === 'radio') {
+      return await toggle.isChecked();
+    }
+
+    const ariaChecked = await toggle.getAttribute('aria-checked');
+    if (ariaChecked !== null) {
+      return ariaChecked === 'true';
+    }
+
+    const ariaPressed = await toggle.getAttribute('aria-pressed');
+    if (ariaPressed !== null) {
+      return ariaPressed === 'true';
+    }
+
+    return undefined;
+  };
+
+  const clickToggle = async (toggle: ReturnType<typeof page.locator>) => {
+    const role = await toggle.getAttribute('role');
+    if (role === 'checkbox' || role === 'switch' || role === 'radio') {
+      await toggle.click({ force: true });
+      return;
+    }
+    await toggle.click();
+  };
+
+  const searchFieldCandidates = [
+    page.getByRole('combobox', { name: /search|suche|address|adresse|location|ort|place/i }),
+    page.getByRole('searchbox', { name: /search|suche|address|adresse|location|ort|place/i }),
+    page.getByRole('textbox', { name: /search|suche|address|adresse|location|ort|place/i }),
+    page.getByRole('combobox'),
+    page.getByRole('searchbox'),
+    page.getByRole('textbox')
+  ];
+
+  const forecastRequestUrls: string[] = [];
+  page.on('request', request => {
+    if (request.url().toLowerCase().includes('forecast')) {
+      forecastRequestUrls.push(request.url());
+    }
+  });
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const temperatureToggle = await getLayerToggle('Temperature');
+  const precipitationToggle = await getLayerToggle('Precipitation');
+  const searchField = await findFirstExistingLocator(searchFieldCandidates);
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(precipitationToggle).toBeVisible();
+  await expect(searchField).toBeVisible();
+
+  const infoPanels = page.getByRole('complementary');
+  if ((await infoPanels.count()) > 0) {
+    await expect(infoPanels.first()).toBeVisible();
+  }
+
+  const measurementCandidates = [
+    page.getByRole('button', { name: /measurement|measure|messen/i }),
+    page.getByRole('switch', { name: /measurement|measure|messen/i }),
+    page.getByRole('checkbox', { name: /measurement|measure|messen/i })
+  ];
+  for (const candidate of measurementCandidates) {
+    if ((await candidate.count()) > 0) {
+      await expect.poll(async () => await readToggleState(candidate.first())).toBe(false);
+      break;
+    }
+  }
+
+  await expect.poll(async () => await readToggleState(temperatureToggle)).toBe(true);
+  await expect.poll(async () => await readToggleState(precipitationToggle)).toBe(false);
+
+  await clickToggle(temperatureToggle);
+  await expect.poll(async () => await readToggleState(temperatureToggle)).toBe(false);
+
+  await clickToggle(precipitationToggle);
+  await expect.poll(async () => await readToggleState(precipitationToggle)).toBe(true);
+
+  const geocoderResponsePromise = page.waitForResponse(response => {
+    const url = decodeURIComponent(response.url()).toLowerCase();
+    return response.ok() && (url.includes('search') || url.includes('geocode')) && (url.includes('münster') || url.includes('munster'));
+  });
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const geocoderResponse = await geocoderResponsePromise;
+  const geocoderPayload = await geocoderResponse.json();
+  const firstResultCoordinates = extractFirstGeocoderCoordinates(geocoderPayload);
+  expect(firstResultCoordinates).toBeDefined();
+
+  const forecastRequestCountBeforeSelection = forecastRequestUrls.length;
+  const forecastResponsePromise = page.waitForResponse(response => {
+    return response.ok() && response.url().toLowerCase().includes('forecast');
+  });
+
+  const firstOption = page.getByRole('option').first();
+  if ((await firstOption.count()) > 0) {
+    await expect(firstOption).toBeVisible();
+    await firstOption.click();
+  } else {
+    const listbox = page.getByRole('listbox').first();
+    if ((await listbox.count()) > 0) {
+      await expect(listbox).toBeVisible();
+    }
+    await searchField.press('ArrowDown');
+    await searchField.press('Enter');
+  }
+
+  await expect.poll(() => {
+    const newUrls = forecastRequestUrls.slice(forecastRequestCountBeforeSelection);
+    if (newUrls.length === 0) {
+      return false;
+    }
+
+    if (!firstResultCoordinates) {
+      return true;
+    }
+
+    const parsedCoordinates = newUrls
+      .map(url => parseForecastRequestCoordinates(url))
+      .filter((coords): coords is { lon: number; lat: number } => coords !== undefined);
+
+    if (parsedCoordinates.length === 0) {
+      return true;
+    }
+
+    return parsedCoordinates.some(coords => {
+      return (
+        Math.abs(coords.lon - firstResultCoordinates.lon) < 0.2 &&
+        Math.abs(coords.lat - firstResultCoordinates.lat) < 0.2
+      );
+    });
+  }).toBe(true);
+
+  const forecastResponse = await forecastResponsePromise;
+  const forecastPayload = await forecastResponse.json();
+  expect(countForecastEntries(forecastPayload)).toBe(24);
+
+  const forecastHeading = page.getByRole('heading', {
+    name: /weather forecast|forecast|wettervorhersage|vorhersage/i
+  }).first();
+  await expect(forecastHeading).toBeVisible();
+});

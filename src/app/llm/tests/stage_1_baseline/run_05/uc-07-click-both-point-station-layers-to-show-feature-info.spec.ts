@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const measurementButtonNames = [
+    'Measurement',
+    'Measure',
+    'Measurement tool',
+    'Distance measurement'
+  ];
+
+  for (const name of measurementButtonNames) {
+    const button = page.getByRole('button', { name, exact: true });
+    if ((await button.count()) > 0 && (await button.isVisible())) {
+      const pressed = await button.getAttribute('aria-pressed');
+      if (pressed === 'true') {
+        await button.click();
+        await expect(button).toHaveAttribute('aria-pressed', 'false');
+      }
+      break;
+    }
+  }
+
+  const uvCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+
+  if ((await uvCheckbox.count()) === 0 || (await eucosCheckbox.count()) === 0) {
+    const layerButtonNames = ['Layers', 'Map Layers', 'Map layers', 'Layer List', 'Layer list'];
+
+    for (const name of layerButtonNames) {
+      const button = page.getByRole('button', { name, exact: true });
+      if ((await button.count()) > 0 && (await button.isVisible())) {
+        const pressed = await button.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+          await button.click();
+        }
+
+        if ((await uvCheckbox.count()) > 0 && (await eucosCheckbox.count()) > 0) {
+          break;
+        }
+      }
+    }
+  }
+
+  await expect(uvCheckbox).toHaveCount(1);
+  await expect(eucosCheckbox).toHaveCount(1);
+
+  if (!(await uvCheckbox.isChecked())) {
+    await uvCheckbox.click({ force: true });
+    await expect(uvCheckbox).toBeChecked();
+  }
+
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+    await expect(eucosCheckbox).toBeChecked();
+  }
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: box.width / 2,
+      y: box.height / 2
+    }
+  });
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

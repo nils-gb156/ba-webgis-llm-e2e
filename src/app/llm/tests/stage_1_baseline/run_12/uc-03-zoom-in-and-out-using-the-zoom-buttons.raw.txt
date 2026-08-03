@@ -1,0 +1,153 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const getMapZoom = async (): Promise<number | undefined> => {
+    return await page.evaluate(() => {
+      const pushIfObject = (queue: any[], seen: WeakSet<object>, value: any) => {
+        if (!value || (typeof value !== 'object' && typeof value !== 'function')) {
+          return;
+        }
+        if (seen.has(value)) {
+          return;
+        }
+        seen.add(value);
+        queue.push(value);
+      };
+
+      const queue: any[] = [];
+      const seen = new WeakSet<object>();
+
+      for (const element of Array.from(document.querySelectorAll('*'))) {
+        for (const key of Object.getOwnPropertyNames(element)) {
+          if (key.startsWith('__reactFiber$') || key.startsWith('__reactProps$')) {
+            pushIfObject(queue, seen, (element as any)[key]);
+          }
+        }
+      }
+
+      const body = document.body as any;
+      if (body) {
+        for (const key of Object.getOwnPropertyNames(body)) {
+          if (key.startsWith('__reactFiber$') || key.startsWith('__reactProps$')) {
+            pushIfObject(queue, seen, body[key]);
+          }
+        }
+      }
+
+      let inspected = 0;
+      while (queue.length > 0 && inspected < 25000) {
+        const current = queue.shift();
+        inspected += 1;
+
+        try {
+          if (
+            typeof current?.getView === 'function' &&
+            typeof current?.getTargetElement === 'function'
+          ) {
+            const view = current.getView();
+            const zoom = view?.getZoom?.();
+            if (typeof zoom === 'number' && Number.isFinite(zoom)) {
+              return zoom;
+            }
+          }
+        } catch {
+          // ignore and continue searching
+        }
+
+        let propertyNames: string[] = [];
+        try {
+          propertyNames = Object.getOwnPropertyNames(current);
+        } catch {
+          continue;
+        }
+
+        for (const propertyName of propertyNames) {
+          if (
+            propertyName === 'window' ||
+            propertyName === 'self' ||
+            propertyName === 'parent' ||
+            propertyName === 'top'
+          ) {
+            continue;
+          }
+
+          let value: any;
+          try {
+            value = current[propertyName];
+          } catch {
+            continue;
+          }
+          pushIfObject(queue, seen, value);
+        }
+
+        if (Array.isArray(current)) {
+          for (const value of current) {
+            pushIfObject(queue, seen, value);
+          }
+        }
+      }
+
+      return undefined;
+    });
+  };
+
+  const waitForStableZoom = async (predicate?: (zoom: number) => boolean): Promise<number> => {
+    let stableZoom: number | undefined;
+
+    await expect
+      .poll(async () => {
+        const first = await getMapZoom();
+
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => resolve());
+              });
+            })
+        );
+
+        const second = await getMapZoom();
+
+        if (
+          typeof first === 'number' &&
+          typeof second === 'number' &&
+          Math.abs(first - second) < 0.0001 &&
+          (!predicate || predicate(second))
+        ) {
+          stableZoom = second;
+          return true;
+        }
+
+        return false;
+      })
+      .toBe(true);
+
+    return stableZoom as number;
+  };
+
+  const initialZoom = await waitForStableZoom();
+
+  await zoomInButton.click();
+
+  const zoomAfterZoomIn = await waitForStableZoom((zoom) => zoom > initialZoom);
+  await expect.poll(async () => await getMapZoom()).toBeGreaterThan(initialZoom);
+
+  await zoomOutButton.click();
+
+  const zoomAfterZoomOut = await waitForStableZoom((zoom) => zoom < zoomAfterZoomIn);
+  await expect.poll(async () => await getMapZoom()).toBeLessThan(zoomAfterZoomIn);
+
+  expect(zoomAfterZoomIn).toBeGreaterThan(initialZoom);
+  expect(zoomAfterZoomOut).toBeLessThan(zoomAfterZoomIn);
+});

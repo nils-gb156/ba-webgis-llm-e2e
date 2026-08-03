@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+type TileZoomRequest = {
+    url: string;
+    zoom: number;
+};
+
+function extractTileZoom(url: string): number | undefined {
+    const match = url.match(/\/(\d+)\/(\d+)\/(\d+)(?:@\d+x)?(?:\.(?:png|jpe?g|webp|pbf))?(?:\?.*)?$/i);
+    if (!match) {
+        return undefined;
+    }
+    return Number.parseInt(match[1], 10);
+}
+
+function getDominantZoom(zooms: number[]): number | undefined {
+    if (zooms.length === 0) {
+        return undefined;
+    }
+
+    const counts = new Map<number, number>();
+    for (const zoom of zooms) {
+        counts.set(zoom, (counts.get(zoom) ?? 0) + 1);
+    }
+
+    let dominantZoom = zooms[0];
+    let highestCount = 0;
+
+    for (const [zoom, count] of counts.entries()) {
+        if (count > highestCount) {
+            dominantZoom = zoom;
+            highestCount = count;
+        }
+    }
+
+    return dominantZoom;
+}
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/', { waitUntil: 'commit' });
+
+    const tileZoomRequests: TileZoomRequest[] = [];
+    page.on('request', request => {
+        const url = request.url();
+        const zoom = extractTileZoom(url);
+        if (zoom !== undefined) {
+            tileZoomRequests.push({ url, zoom });
+        }
+    });
+
+    await page.waitForLoadState('domcontentloaded');
+
+    const zoomInButton = page.getByTitle('Zoom in', { exact: true });
+    const zoomOutButton = page.getByTitle('Zoom out', { exact: true });
+
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+
+    await expect
+        .poll(() => {
+            const initialZoom = getDominantZoom(tileZoomRequests.map(request => request.zoom));
+            return initialZoom ?? -1;
+        })
+        .toBeGreaterThanOrEqual(0);
+
+    const initialZoom = getDominantZoom(tileZoomRequests.map(request => request.zoom));
+    if (initialZoom === undefined) {
+        throw new Error('Could not determine the initial map zoom level from tile requests.');
+    }
+
+    const zoomInStartIndex = tileZoomRequests.length;
+    await zoomInButton.click();
+
+    await expect
+        .poll(() => {
+            return tileZoomRequests
+                .slice(zoomInStartIndex)
+                .map(request => request.zoom)
+                .filter(zoom => zoom > initialZoom).length;
+        })
+        .toBeGreaterThan(0);
+
+    const zoomInCandidates = tileZoomRequests
+        .slice(zoomInStartIndex)
+        .map(request => request.zoom)
+        .filter(zoom => zoom > initialZoom);
+    const zoomAfterIn = getDominantZoom(zoomInCandidates) ?? Math.max(...zoomInCandidates);
+
+    expect(zoomAfterIn).toBeGreaterThan(initialZoom);
+
+    const zoomOutStartIndex = tileZoomRequests.length;
+    await zoomOutButton.click();
+
+    await expect
+        .poll(() => {
+            return tileZoomRequests
+                .slice(zoomOutStartIndex)
+                .map(request => request.zoom)
+                .filter(zoom => zoom < zoomAfterIn).length;
+        })
+        .toBeGreaterThan(0);
+
+    const zoomOutCandidates = tileZoomRequests
+        .slice(zoomOutStartIndex)
+        .map(request => request.zoom)
+        .filter(zoom => zoom < zoomAfterIn);
+    const zoomAfterOut = getDominantZoom(zoomOutCandidates) ?? Math.min(...zoomOutCandidates);
+
+    expect(zoomAfterOut).toBeLessThan(zoomAfterIn);
+});

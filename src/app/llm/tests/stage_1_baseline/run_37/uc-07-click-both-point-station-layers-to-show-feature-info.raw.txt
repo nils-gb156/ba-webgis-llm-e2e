@@ -1,0 +1,130 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  let mapTarget = page.getByTestId('map');
+  if ((await mapTarget.count()) === 0) {
+    const olViewport = page.locator('.ol-viewport').first();
+    mapTarget = (await olViewport.count()) > 0 ? olViewport : page.locator('canvas').first();
+  }
+  await expect(mapTarget).toBeVisible();
+
+  const infoToggle = page.getByRole('button', { name: 'Info', exact: true }).first();
+  if ((await infoToggle.count()) > 0) {
+    const pressed = await infoToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await infoToggle.click();
+    }
+  }
+
+  const layersToggle = page.getByRole('button', { name: 'Layers', exact: true }).first();
+  if ((await layersToggle.count()) > 0) {
+    const pressed = await layersToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await layersToggle.click();
+    }
+  }
+
+  const uvStationsLayer = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true }).first();
+  if ((await uvStationsLayer.count()) > 0 && !(await uvStationsLayer.isChecked())) {
+    await uvStationsLayer.click({ force: true });
+    await expect(uvStationsLayer).toBeChecked();
+  }
+
+  const eucosLayer = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true }).first();
+  if ((await eucosLayer.count()) > 0 && !(await eucosLayer.isChecked())) {
+    await eucosLayer.click({ force: true });
+    await expect(eucosLayer).toBeChecked();
+  }
+
+  for (const measureName of ['Measurement', 'Measure']) {
+    const measureToggle = page.getByRole('button', { name: measureName, exact: true }).first();
+    if ((await measureToggle.count()) > 0) {
+      const pressed = await measureToggle.getAttribute('aria-pressed');
+      if (pressed === 'true') {
+        await measureToggle.click();
+      }
+      break;
+    }
+  }
+
+  if ((await infoToggle.count()) > 0) {
+    const pressed = await infoToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await infoToggle.click();
+    }
+  }
+
+  const uvInfoSection = page.getByText(/^UV-Index Station$/).first();
+  const eucosInfoSection = page.getByText(/^EUCOS Ground Station$/).first();
+
+  const mapBox = await mapTarget.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  const clickCandidates = [
+    { x: 0.5, y: 0.5 },
+    { x: 0.45, y: 0.5 },
+    { x: 0.55, y: 0.5 },
+    { x: 0.5, y: 0.45 },
+    { x: 0.5, y: 0.55 },
+    { x: 0.4, y: 0.4 },
+    { x: 0.6, y: 0.4 },
+    { x: 0.4, y: 0.6 },
+    { x: 0.6, y: 0.6 },
+    { x: 0.3, y: 0.5 },
+    { x: 0.7, y: 0.5 },
+    { x: 0.5, y: 0.3 },
+    { x: 0.5, y: 0.7 },
+    { x: 0.2, y: 0.2 },
+    { x: 0.8, y: 0.2 },
+    { x: 0.2, y: 0.8 },
+    { x: 0.8, y: 0.8 }
+  ];
+
+  let foundBothSections = false;
+
+  for (const candidate of clickCandidates) {
+    const featureInfoResponse = page
+      .waitForResponse(
+        response =>
+          response.request().method() === 'GET' &&
+          response.url().toLowerCase().includes('getfeatureinfo'),
+        { timeout: 5000 }
+      )
+      .catch(() => null);
+
+    await mapTarget.click({
+      position: {
+        x: Math.round(mapBox!.width * candidate.x),
+        y: Math.round(mapBox!.height * candidate.y)
+      }
+    });
+
+    await featureInfoResponse;
+
+    try {
+      await expect
+        .poll(
+          async () => {
+            const uvVisible = await uvInfoSection.isVisible().catch(() => false);
+            const eucosVisible = await eucosInfoSection.isVisible().catch(() => false);
+            return uvVisible && eucosVisible;
+          },
+          { timeout: 2000 }
+        )
+        .toBe(true);
+      foundBothSections = true;
+      break;
+    } catch {
+      // try next candidate position
+    }
+  }
+
+  expect(foundBothSections).toBe(true);
+  await expect(uvInfoSection).toBeVisible();
+  await expect(eucosInfoSection).toBeVisible();
+});

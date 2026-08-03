@@ -1,0 +1,238 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const extractFirstGeocoderResult = (payload: any) => {
+    const fromFeature = (feature: any) => {
+      const coordinates = feature?.geometry?.coordinates;
+      if (Array.isArray(coordinates) && coordinates.length >= 2) {
+        return {
+          lon: Number(coordinates[0]),
+          lat: Number(coordinates[1]),
+          label:
+            feature?.properties?.label ??
+            feature?.properties?.name ??
+            feature?.properties?.display_name ??
+            feature?.properties?.city ??
+            feature?.name,
+        };
+      }
+
+      const lon = feature?.lon ?? feature?.properties?.lon ?? feature?.properties?.longitude;
+      const lat = feature?.lat ?? feature?.properties?.lat ?? feature?.properties?.latitude;
+      if (lon !== undefined && lat !== undefined) {
+        return {
+          lon: Number(lon),
+          lat: Number(lat),
+          label:
+            feature?.properties?.label ??
+            feature?.properties?.name ??
+            feature?.properties?.display_name ??
+            feature?.display_name ??
+            feature?.name,
+        };
+      }
+
+      return undefined;
+    };
+
+    if (Array.isArray(payload?.features) && payload.features.length > 0) {
+      return fromFeature(payload.features[0]);
+    }
+
+    if (Array.isArray(payload?.results) && payload.results.length > 0) {
+      return fromFeature(payload.results[0]);
+    }
+
+    if (Array.isArray(payload) && payload.length > 0) {
+      return fromFeature(payload[0]);
+    }
+
+    return undefined;
+  };
+
+  const findForecastEntryCount = (value: any): number | undefined => {
+    const directCandidates = [
+      value?.entries,
+      value?.forecast,
+      value?.items,
+      value?.timeseries,
+      value?.properties?.timeseries,
+      value?.hourly?.entries,
+      value?.hourly?.forecast,
+      value?.hourly?.items,
+      value?.hourly?.time,
+      value?.data,
+    ];
+
+    for (const candidate of directCandidates) {
+      if (Array.isArray(candidate) && candidate.length === 24) {
+        return 24;
+      }
+    }
+
+    const visit = (node: any): number | undefined => {
+      if (Array.isArray(node)) {
+        if (node.length === 24) {
+          return 24;
+        }
+        for (const item of node) {
+          const result = visit(item);
+          if (result === 24) {
+            return result;
+          }
+        }
+        return undefined;
+      }
+
+      if (node && typeof node === 'object') {
+        for (const child of Object.values(node)) {
+          const result = visit(child);
+          if (result === 24) {
+            return result;
+          }
+        }
+      }
+
+      return undefined;
+    };
+
+    return visit(value);
+  };
+
+  let temperatureToggle = page.getByRole('checkbox', { name: /Temperature/i });
+  if ((await temperatureToggle.count()) === 0) {
+    temperatureToggle = page.getByRole('switch', { name: /Temperature/i });
+  }
+
+  let precipitationToggle = page.getByRole('checkbox', { name: /Precipitation/i });
+  if ((await precipitationToggle.count()) === 0) {
+    precipitationToggle = page.getByRole('switch', { name: /Precipitation/i });
+  }
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(precipitationToggle).toBeVisible();
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  let searchField = page.getByRole('combobox', { name: /search/i });
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('textbox', { name: /search/i });
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('combobox').first();
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('textbox').first();
+  }
+
+  await expect(searchField).toBeVisible();
+
+  const geocoderResponsePromise = page.waitForResponse((response) => {
+    let url = response.url().toLowerCase();
+    try {
+      url = decodeURIComponent(url);
+    } catch {
+      // ignore malformed encoding in URL
+    }
+
+    return (
+      response.ok() &&
+      ['fetch', 'xhr'].includes(response.request().resourceType()) &&
+      /(geocod|nominatim|photon|search)/i.test(url) &&
+      /m(?:ü|u)nster/i.test(url)
+    );
+  });
+
+  await searchField.click();
+  await searchField.fill('Münster');
+  await expect(searchField).toHaveValue(/Münster/i);
+
+  const geocoderResponse = await geocoderResponsePromise;
+  const geocoderPayload = await geocoderResponse.json();
+  const searchedLocation = extractFirstGeocoderResult(geocoderPayload);
+
+  expect(searchedLocation).toBeDefined();
+  expect(Number.isFinite(searchedLocation?.lat)).toBeTruthy();
+  expect(Number.isFinite(searchedLocation?.lon)).toBeTruthy();
+
+  let firstResult = page.getByRole('option').first();
+  if ((await firstResult.count()) === 0) {
+    firstResult = page.getByRole('listbox').getByRole('button').first();
+  }
+  if ((await firstResult.count()) === 0) {
+    firstResult = page.getByRole('button', { name: /Münster/i }).first();
+  }
+
+  await expect(firstResult).toBeVisible();
+
+  const forecastRequestUrls: string[] = [];
+  page.on('request', (request) => {
+    if (
+      ['fetch', 'xhr'].includes(request.resourceType()) &&
+      /(forecast|weather)/i.test(request.url())
+    ) {
+      forecastRequestUrls.push(request.url());
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse((response) => {
+    return (
+      response.ok() &&
+      ['fetch', 'xhr'].includes(response.request().resourceType()) &&
+      /(forecast|weather)/i.test(response.url())
+    );
+  });
+
+  await firstResult.click();
+
+  await expect(searchField).toHaveValue(/m(?:ü|u)nster/i);
+  await expect.poll(() => forecastRequestUrls.length).toBeGreaterThan(0);
+
+  const forecastRequestUrl = forecastRequestUrls[forecastRequestUrls.length - 1];
+  const forecastRequest = new URL(forecastRequestUrl);
+
+  const forecastLatParam =
+    forecastRequest.searchParams.get('lat') ??
+    forecastRequest.searchParams.get('latitude') ??
+    forecastRequest.searchParams.get('y');
+  const forecastLonParam =
+    forecastRequest.searchParams.get('lon') ??
+    forecastRequest.searchParams.get('lng') ??
+    forecastRequest.searchParams.get('longitude') ??
+    forecastRequest.searchParams.get('x');
+
+  expect(forecastLatParam).not.toBeNull();
+  expect(forecastLonParam).not.toBeNull();
+
+  const forecastLat = Number(forecastLatParam);
+  const forecastLon = Number(forecastLonParam);
+
+  expect(Number.isFinite(forecastLat)).toBeTruthy();
+  expect(Number.isFinite(forecastLon)).toBeTruthy();
+  expect(Math.abs(forecastLat - searchedLocation!.lat)).toBeLessThan(0.5);
+  expect(Math.abs(forecastLon - searchedLocation!.lon)).toBeLessThan(0.5);
+
+  const forecastResponse = await forecastResponsePromise;
+  const forecastPayload = await forecastResponse.json();
+  const forecastEntryCount = findForecastEntryCount(forecastPayload);
+
+  let forecastSectionHeading = page.getByRole('heading', { name: /forecast/i });
+  if ((await forecastSectionHeading.count()) === 0) {
+    forecastSectionHeading = page.getByText(/forecast/i).first();
+  }
+
+  await expect(forecastSectionHeading).toBeVisible();
+  expect(forecastEntryCount).toBe(24);
+});

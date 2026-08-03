@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await expect(measurementButton).toBeVisible();
+
+  const measurementPanel = page
+    .getByRole('dialog', { name: 'Measurement', exact: true })
+    .or(page.getByRole('complementary', { name: 'Measurement', exact: true }))
+    .or(page.getByRole('region', { name: 'Measurement', exact: true }));
+  const measurementPanelOrHeading = measurementPanel.or(
+    page.getByRole('heading', { name: 'Measurement', exact: true })
+  );
+
+  if (!(await measurementPanelOrHeading.first().isVisible())) {
+    await measurementButton.click();
+  }
+
+  await expect(measurementPanelOrHeading.first()).toBeVisible();
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const box = await mapViewport.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map viewport is not available for drawing.');
+  }
+
+  await mapViewport.click({
+    position: { x: box.width * 0.25, y: box.height * 0.65 }
+  });
+  await mapViewport.click({
+    position: { x: box.width * 0.4, y: box.height * 0.55 }
+  });
+  await mapViewport.click({
+    position: { x: box.width * 0.55, y: box.height * 0.45 }
+  });
+  await mapViewport.dblclick({
+    position: { x: box.width * 0.7, y: box.height * 0.35 }
+  });
+
+  const lengthWithUnit = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/;
+
+  if ((await measurementPanel.count()) > 0) {
+    await expect(measurementPanel.first().getByText(lengthWithUnit).first()).toBeVisible();
+  } else {
+    await expect(page.getByText(lengthWithUnit).first()).toBeVisible();
+  }
+});

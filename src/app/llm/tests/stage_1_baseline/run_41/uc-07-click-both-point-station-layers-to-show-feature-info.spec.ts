@@ -1,0 +1,128 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+  let clickPosition: { x: number; y: number } | null = null;
+
+  await expect
+    .poll(
+      async () => {
+        clickPosition = await page.evaluate(([coordX, coordY]) => {
+          const canvas = document.querySelector('canvas');
+          if (!canvas) {
+            return null;
+          }
+
+          const candidateTarget =
+            canvas.closest('.ol-viewport')?.parentElement ?? canvas.parentElement ?? canvas;
+
+          const queue: unknown[] = [canvas, candidateTarget, document.body, window];
+          const seen = new Set<unknown>();
+
+          const enqueue = (value: unknown) => {
+            if (!value) {
+              return;
+            }
+            const valueType = typeof value;
+            if ((valueType === 'object' || valueType === 'function') && !seen.has(value)) {
+              queue.push(value);
+            }
+          };
+
+          while (queue.length > 0 && seen.size < 20000) {
+            const current = queue.shift();
+            if (!current) {
+              continue;
+            }
+
+            const currentType = typeof current;
+            if ((currentType !== 'object' && currentType !== 'function') || seen.has(current)) {
+              continue;
+            }
+            seen.add(current);
+
+            try {
+              const maybeMap = current as {
+                getPixelFromCoordinate?: (coordinate: [number, number]) => number[] | null;
+                getTargetElement?: () => Element | null;
+                getView?: () => unknown;
+              };
+
+              if (
+                typeof maybeMap.getPixelFromCoordinate === 'function' &&
+                typeof maybeMap.getTargetElement === 'function' &&
+                typeof maybeMap.getView === 'function'
+              ) {
+                const targetElement = maybeMap.getTargetElement();
+                if (
+                  targetElement &&
+                  candidateTarget &&
+                  (targetElement === candidateTarget ||
+                    targetElement.contains(canvas) ||
+                    candidateTarget.contains(targetElement))
+                ) {
+                  const pixel = maybeMap.getPixelFromCoordinate([coordX, coordY]);
+                  if (
+                    Array.isArray(pixel) &&
+                    pixel.length === 2 &&
+                    Number.isFinite(pixel[0]) &&
+                    Number.isFinite(pixel[1])
+                  ) {
+                    const rect = (targetElement as HTMLElement).getBoundingClientRect();
+                    return {
+                      x: rect.left + pixel[0],
+                      y: rect.top + pixel[1]
+                    };
+                  }
+                }
+              }
+            } catch {
+              // ignore inaccessible objects while traversing the browser object graph
+            }
+
+            let propertyNames: string[] = [];
+            try {
+              propertyNames = Object.getOwnPropertyNames(current as object);
+            } catch {
+              propertyNames = [];
+            }
+
+            for (const propertyName of propertyNames) {
+              if (
+                propertyName === 'window' ||
+                propertyName === 'self' ||
+                propertyName === 'top' ||
+                propertyName === 'parent'
+              ) {
+                continue;
+              }
+
+              try {
+                enqueue((current as Record<string, unknown>)[propertyName]);
+              } catch {
+                // ignore getters that throw
+              }
+            }
+          }
+
+          return null;
+        }, targetCoordinate);
+
+        return clickPosition;
+      },
+      { timeout: 15000 }
+    )
+    .not.toBeNull();
+
+  await page.mouse.click(clickPosition!.x, clickPosition!.y);
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible({ timeout: 15000 });
+});

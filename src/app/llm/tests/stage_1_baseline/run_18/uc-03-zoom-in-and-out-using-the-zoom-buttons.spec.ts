@@ -1,0 +1,99 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+function extractTileZoom(url: string): number | undefined {
+    const patterns = [
+        /\/(\d+)\/\d+\/\d+(?:\.(?:png|jpg|jpeg|webp|pbf|mvt))(?:[?#].*)?$/i,
+        /[?&](?:z|zoom)=(\d+)(?:[&#]|$)/i,
+        /[?&](?:tilematrix|TILEMATRIX)=(\d+)(?:[&#]|$)/i
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) {
+            const zoom = Number.parseInt(match[1], 10);
+            if (Number.isFinite(zoom)) {
+                return zoom;
+            }
+        }
+    }
+
+    return undefined;
+}
+
+function getMostFrequentValue(values: number[]): number | undefined {
+    if (values.length === 0) {
+        return undefined;
+    }
+
+    const counts = new Map<number, number>();
+    for (const value of values) {
+        counts.set(value, (counts.get(value) ?? 0) + 1);
+    }
+
+    let mostFrequentValue: number | undefined;
+    let highestCount = -1;
+
+    for (const [value, count] of counts.entries()) {
+        if (count > highestCount) {
+            mostFrequentValue = value;
+            highestCount = count;
+        }
+    }
+
+    return mostFrequentValue;
+}
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+    const observedTileZooms: number[] = [];
+
+    page.on('request', request => {
+        const resourceType = request.resourceType();
+        if (resourceType !== 'image' && resourceType !== 'fetch' && resourceType !== 'xhr') {
+            return;
+        }
+
+        const zoom = extractTileZoom(request.url());
+        if (zoom !== undefined) {
+            observedTileZooms.push(zoom);
+        }
+    });
+
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const zoomInButton = page.getByTitle('Zoom in', { exact: true });
+    const zoomOutButton = page.getByTitle('Zoom out', { exact: true });
+
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+
+    await expect.poll(() => observedTileZooms.length).toBeGreaterThan(0);
+    const initialZoom = getMostFrequentValue(observedTileZooms);
+    expect(initialZoom).toBeDefined();
+
+    const zoomsBeforeZoomIn = observedTileZooms.length;
+    await zoomInButton.click();
+
+    await expect
+        .poll(() => {
+            const newZooms = observedTileZooms.slice(zoomsBeforeZoomIn);
+            const mostFrequentZoom = getMostFrequentValue(newZooms);
+            return mostFrequentZoom ?? -1;
+        })
+        .toBeGreaterThan(initialZoom!);
+
+    const zoomAfterZoomIn = getMostFrequentValue(observedTileZooms.slice(zoomsBeforeZoomIn));
+    expect(zoomAfterZoomIn).toBeDefined();
+
+    const zoomsBeforeZoomOut = observedTileZooms.length;
+    await zoomOutButton.click();
+
+    await expect
+        .poll(() => {
+            const newZooms = observedTileZooms.slice(zoomsBeforeZoomOut);
+            const mostFrequentZoom = getMostFrequentValue(newZooms);
+            return mostFrequentZoom ?? Number.POSITIVE_INFINITY;
+        })
+        .toBeLessThan(zoomAfterZoomIn!);
+});

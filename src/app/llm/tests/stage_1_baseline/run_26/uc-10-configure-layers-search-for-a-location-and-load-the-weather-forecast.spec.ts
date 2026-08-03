@@ -1,0 +1,331 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const findFirstExisting = async (candidates: any[]): Promise<any> => {
+    for (const candidate of candidates) {
+      if ((await candidate.count()) > 0) {
+        return candidate.first();
+      }
+    }
+    throw new Error('No matching locator found.');
+  };
+
+  const findPressedButton = async (scope: any): Promise<any | null> => {
+    const buttons = scope.getByRole('button');
+    const count = await buttons.count();
+    for (let index = 0; index < count; index += 1) {
+      const button = buttons.nth(index);
+      if ((await button.getAttribute('aria-pressed')) !== null) {
+        return button;
+      }
+    }
+    return null;
+  };
+
+  const findLayerToggle = async (name: string): Promise<any> => {
+    const exactName = new RegExp(`^${escapeRegExp(name)}$`, 'i');
+
+    const directSwitch = page.getByRole('switch', { name: exactName });
+    if ((await directSwitch.count()) > 0) {
+      return { locator: directSwitch.first(), kind: 'checkable' };
+    }
+
+    const directCheckbox = page.getByRole('checkbox', { name: exactName });
+    if ((await directCheckbox.count()) > 0) {
+      return { locator: directCheckbox.first(), kind: 'checkable' };
+    }
+
+    const directButton = page.getByRole('button', { name: exactName });
+    if ((await directButton.count()) > 0) {
+      const pressedButton = await findPressedButton(page);
+      if (pressedButton) {
+        const accessibleName = await pressedButton.getAttribute('aria-label');
+        if (!accessibleName || exactName.test(accessibleName)) {
+          return { locator: pressedButton, kind: 'pressed-button' };
+        }
+      }
+    }
+
+    const containers = [
+      page.getByRole('treeitem').filter({ has: page.getByText(exactName) }),
+      page.getByRole('listitem').filter({ has: page.getByText(exactName) }),
+      page.getByRole('row').filter({ has: page.getByText(exactName) }),
+      page.getByRole('group').filter({ has: page.getByText(exactName) })
+    ];
+
+    for (const containerCandidate of containers) {
+      if ((await containerCandidate.count()) === 0) {
+        continue;
+      }
+
+      const container = containerCandidate.first();
+
+      const switchLocator = container.getByRole('switch');
+      if ((await switchLocator.count()) > 0) {
+        return { locator: switchLocator.first(), kind: 'checkable' };
+      }
+
+      const checkboxLocator = container.getByRole('checkbox');
+      if ((await checkboxLocator.count()) > 0) {
+        return { locator: checkboxLocator.first(), kind: 'checkable' };
+      }
+
+      const pressedButton = await findPressedButton(container);
+      if (pressedButton) {
+        return { locator: pressedButton, kind: 'pressed-button' };
+      }
+    }
+
+    throw new Error(`Could not find a visibility toggle for layer "${name}".`);
+  };
+
+  const isToggleOn = async (toggle: any): Promise<boolean> => {
+    if (toggle.kind === 'checkable') {
+      return await toggle.locator.isChecked();
+    }
+
+    if (toggle.kind === 'pressed-button') {
+      return (await toggle.locator.getAttribute('aria-pressed')) === 'true';
+    }
+
+    throw new Error('Unsupported toggle type.');
+  };
+
+  const setToggleState = async (toggle: any, desiredState: boolean): Promise<void> => {
+    await expect(toggle.locator).toBeVisible();
+
+    if ((await isToggleOn(toggle)) !== desiredState) {
+      if (toggle.kind === 'checkable') {
+        await toggle.locator.click({ force: true });
+      } else {
+        await toggle.locator.click();
+      }
+    }
+
+    await expect.poll(async () => await isToggleOn(toggle)).toBe(desiredState);
+  };
+
+  const temperatureToggle = await findLayerToggle('Temperature');
+  const precipitationToggle = await findLayerToggle('Precipitation');
+
+  await expect(temperatureToggle.locator).toBeVisible();
+  await expect(precipitationToggle.locator).toBeVisible();
+
+  await expect.poll(async () => await isToggleOn(temperatureToggle)).toBe(true);
+  await expect.poll(async () => await isToggleOn(precipitationToggle)).toBe(false);
+
+  await setToggleState(temperatureToggle, false);
+  await setToggleState(precipitationToggle, true);
+
+  await expect.poll(async () => await isToggleOn(temperatureToggle)).toBe(false);
+  await expect.poll(async () => await isToggleOn(precipitationToggle)).toBe(true);
+
+  const searchField = await findFirstExisting([
+    page.getByRole('combobox', { name: /search/i }),
+    page.getByRole('searchbox', { name: /search/i }),
+    page.getByRole('textbox', { name: /search/i }),
+    page.getByLabel(/search/i)
+  ]);
+
+  await expect(searchField).toBeVisible();
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const hasSearchResult = async (): Promise<boolean> => {
+    const candidates = [
+      page.getByRole('option'),
+      page.getByRole('listbox').getByRole('button'),
+      page.getByRole('listbox').getByRole('listitem')
+    ];
+
+    for (const candidate of candidates) {
+      if ((await candidate.count()) > 0) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const findFirstSearchResult = async (): Promise<any> => {
+    return await findFirstExisting([
+      page.getByRole('option'),
+      page.getByRole('listbox').getByRole('button'),
+      page.getByRole('listbox').getByRole('listitem')
+    ]);
+  };
+
+  await expect.poll(async () => await hasSearchResult()).toBe(true);
+
+  const firstResult = await findFirstSearchResult();
+  await expect(firstResult).toBeVisible();
+
+  const selectedResultText = ((await firstResult.textContent()) ?? '').trim();
+  const selectedLocationHint = (selectedResultText.split(',')[0] || 'Münster').trim();
+
+  const forecastPayloads: any[] = [];
+  const has24ForecastEntriesInPayload = (data: any): boolean => {
+    if (data === null || data === undefined) {
+      return false;
+    }
+
+    if (Array.isArray(data)) {
+      if (data.length === 24) {
+        return true;
+      }
+      return data.some((item) => has24ForecastEntriesInPayload(item));
+    }
+
+    if (typeof data !== 'object') {
+      return false;
+    }
+
+    for (const [key, value] of Object.entries(data)) {
+      const normalizedKey = key.toLowerCase();
+
+      if (Array.isArray(value) && value.length === 24) {
+        if (
+          normalizedKey.includes('forecast') ||
+          normalizedKey.includes('hour') ||
+          normalizedKey.includes('entry') ||
+          normalizedKey.includes('item') ||
+          normalizedKey.includes('time')
+        ) {
+          return true;
+        }
+      }
+
+      if (value && typeof value === 'object') {
+        const nestedValues = Object.values(value as Record<string, unknown>);
+        const nestedArrayOf24 = nestedValues.some((nested) => Array.isArray(nested) && nested.length === 24);
+        if (
+          nestedArrayOf24 &&
+          (normalizedKey.includes('forecast') ||
+            normalizedKey.includes('hour') ||
+            normalizedKey.includes('weather') ||
+            normalizedKey.includes('time'))
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return Object.values(data).some((value) => has24ForecastEntriesInPayload(value));
+  };
+
+  page.on('response', async (response) => {
+    if (!response.ok()) {
+      return;
+    }
+
+    const contentType = response.headers()['content-type'] ?? '';
+    if (!contentType.includes('application/json')) {
+      return;
+    }
+
+    try {
+      const data = await response.json();
+      if (has24ForecastEntriesInPayload(data) || /forecast|weather|meteo|hourly/i.test(response.url())) {
+        forecastPayloads.push(data);
+      }
+    } catch {
+      // Ignore non-JSON or unreadable bodies.
+    }
+  });
+
+  await firstResult.click();
+
+  await expect.poll(async () => await hasSearchResult()).toBe(false);
+  await expect.poll(async () => await searchField.inputValue().catch(() => '')).toMatch(
+    new RegExp(escapeRegExp(selectedLocationHint), 'i')
+  );
+
+  await page.waitForLoadState('networkidle');
+
+  const forecastHeading = await findFirstExisting([
+    page.getByRole('heading', { name: /weather forecast/i }),
+    page.getByRole('heading', { name: /forecast/i }),
+    page.getByText(/weather forecast/i),
+    page.getByText(/^forecast$/i)
+  ]);
+
+  await expect(forecastHeading).toBeVisible();
+
+  const getForecastEntryCount = async (): Promise<number> => {
+    const namedContainers = [
+      page.getByRole('table', { name: /forecast/i }),
+      page.getByRole('list', { name: /forecast/i }),
+      page.getByRole('region', { name: /forecast/i }),
+      page.getByRole('group', { name: /forecast/i })
+    ];
+
+    for (const candidate of namedContainers) {
+      if ((await candidate.count()) === 0) {
+        continue;
+      }
+
+      const container = candidate.first();
+      const listItemCount = await container.getByRole('listitem').count();
+      if (listItemCount > 0) {
+        return listItemCount;
+      }
+
+      const articleCount = await container.getByRole('article').count();
+      if (articleCount > 0) {
+        return articleCount;
+      }
+
+      const rowCount = await container.getByRole('row').count();
+      if (rowCount > 0) {
+        const headerCount = await container.getByRole('columnheader').count();
+        return headerCount > 0 ? Math.max(rowCount - 1, 0) : rowCount;
+      }
+    }
+
+    const infoCandidates = [
+      page.getByRole('complementary'),
+      page.getByRole('region', { name: /info/i }),
+      page.getByRole('tabpanel')
+    ];
+
+    for (const candidate of infoCandidates) {
+      const containerCount = await candidate.count();
+
+      for (let index = 0; index < containerCount; index += 1) {
+        const container = candidate.nth(index);
+        if ((await container.getByRole('heading', { name: /forecast/i }).count()) === 0) {
+          continue;
+        }
+
+        const listItemCount = await container.getByRole('listitem').count();
+        if (listItemCount > 0) {
+          return listItemCount;
+        }
+
+        const articleCount = await container.getByRole('article').count();
+        if (articleCount > 0) {
+          return articleCount;
+        }
+
+        const rowCount = await container.getByRole('row').count();
+        if (rowCount > 0) {
+          const headerCount = await container.getByRole('columnheader').count();
+          return headerCount > 0 ? Math.max(rowCount - 1, 0) : rowCount;
+        }
+      }
+    }
+
+    return 0;
+  };
+
+  await expect.poll(async () => forecastPayloads.some((payload) => has24ForecastEntriesInPayload(payload))).toBe(true);
+  await expect.poll(async () => await getForecastEntryCount()).toBe(24);
+});

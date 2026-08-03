@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const panelVisible = await measurementHeading.isVisible().catch(() => false);
+  if (!panelVisible) {
+    const isPressed = await measurementButton.getAttribute('aria-pressed');
+    if (isPressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const getLengthTokens = async (): Promise<string[]> => {
+    const text = (await page.locator('body').textContent()) ?? '';
+    return Array.from(text.matchAll(/\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/gi), (match) => match[0].trim());
+  };
+
+  const initialLengthTokens = await getLengthTokens();
+
+  const canvasBox = await mapCanvas.boundingBox();
+  expect(canvasBox).not.toBeNull();
+
+  const width = Math.round(canvasBox!.width);
+  const height = Math.round(canvasBox!.height);
+
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.25), y: Math.round(height * 0.35) }
+  });
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.45), y: Math.round(height * 0.42) }
+  });
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.58), y: Math.round(height * 0.52) }
+  });
+  await mapCanvas.dblclick({
+    position: { x: Math.round(width * 0.72), y: Math.round(height * 0.44) }
+  });
+
+  await expect.poll(async () => {
+    const lengthTokens = await getLengthTokens();
+    return lengthTokens.some((token) => !initialLengthTokens.includes(token));
+  }).toBe(true);
+});

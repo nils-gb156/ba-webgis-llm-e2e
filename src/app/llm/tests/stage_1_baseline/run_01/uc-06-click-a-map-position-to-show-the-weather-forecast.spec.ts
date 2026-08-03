@@ -1,0 +1,94 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.getByRole('complementary').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBounds = await mapCanvas.boundingBox();
+  expect(mapBounds).not.toBeNull();
+  if (!mapBounds) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const weatherRequestPattern = /(weather|forecast|met(?:\.|-)?no|open-?meteo)/;
+  const weatherRequests: string[] = [];
+
+  page.on('request', (request) => {
+    if (
+      (request.resourceType() === 'fetch' || request.resourceType() === 'xhr') &&
+      weatherRequestPattern.test(request.url().toLowerCase())
+    ) {
+      weatherRequests.push(request.url());
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse((response) => {
+    return (
+      response.ok() &&
+      (response.request().resourceType() === 'fetch' || response.request().resourceType() === 'xhr') &&
+      weatherRequestPattern.test(response.url().toLowerCase())
+    );
+  });
+
+  await mapCanvas.click({
+    position: {
+      x: Math.floor(mapBounds.width * 0.5),
+      y: Math.floor(mapBounds.height * 0.5),
+    },
+  });
+
+  await forecastResponsePromise;
+
+  // The OpenLayers highlight is rendered on the canvas; the weather request verifies that the map click was processed.
+  await expect.poll(() => weatherRequests.length).toBeGreaterThan(0);
+
+  const weatherForecastHeading = page.getByRole('heading', { name: /weather forecast/i });
+  await expect(weatherForecastHeading).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      return await weatherForecastHeading.evaluate((heading) => {
+        let container: Element | null = heading.parentElement;
+
+        while (container) {
+          const roleListItems = container.querySelectorAll('[role="listitem"]');
+          if (roleListItems.length === 24) {
+            return 24;
+          }
+
+          const listItems = container.querySelectorAll('li');
+          if (listItems.length === 24) {
+            return 24;
+          }
+
+          const tableRows = Array.from(container.querySelectorAll('tr')).filter(
+            (row) => row.querySelectorAll('th').length === 0
+          );
+          if (tableRows.length === 24) {
+            return 24;
+          }
+
+          const directChildrenWithText = Array.from(container.children).filter((child) => {
+            const text = child.textContent?.trim() ?? '';
+            return text.length > 0 && child !== heading;
+          });
+          if (directChildrenWithText.length === 24) {
+            return 24;
+          }
+
+          container = container.parentElement;
+        }
+
+        return undefined;
+      });
+    })
+    .toBe(24);
+});

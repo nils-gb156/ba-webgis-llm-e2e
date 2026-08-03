@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const uviLayerToggle = page.getByRole('checkbox', { name: /UV-Index Stations?/i }).first();
+  if (await uviLayerToggle.count()) {
+    await expect(uviLayerToggle).toBeVisible();
+    if (!(await uviLayerToggle.isChecked())) {
+      await uviLayerToggle.click({ force: true });
+    }
+    await expect(uviLayerToggle).toBeChecked();
+  }
+
+  const eucosLayerToggle = page.getByRole('checkbox', { name: /EUCOS Ground Stations?/i }).first();
+  if (await eucosLayerToggle.count()) {
+    await expect(eucosLayerToggle).toBeVisible();
+    if (!(await eucosLayerToggle.isChecked())) {
+      await eucosLayerToggle.click({ force: true });
+    }
+    await expect(eucosLayerToggle).toBeChecked();
+  }
+
+  const mapCanvas = page.locator('canvas').last();
+  await expect(mapCanvas).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const featureInfoResponse = page.waitForResponse(
+    response => /GetFeatureInfo/i.test(response.url()) && response.ok()
+  );
+
+  await Promise.all([
+    featureInfoResponse,
+    mapCanvas.click({
+      position: {
+        x: box.width / 2,
+        y: box.height / 2
+      }
+    })
+  ]);
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

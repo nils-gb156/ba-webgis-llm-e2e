@@ -1,0 +1,201 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('load');
+  await expect(page).toHaveURL('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const findVisibleButton = async (names: string[]) => {
+    for (const name of names) {
+      const button = page.getByRole('button', { name, exact: true });
+      if (await button.isVisible().catch(() => false)) {
+        return button;
+      }
+    }
+
+    return page.getByRole('button', { name: new RegExp(`^(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$`) });
+  };
+
+  const zoomInButton = await findVisibleButton(['Zoom in', '+']);
+  const zoomOutButton = await findVisibleButton(['Zoom out', '–', '−', '-']);
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const readZoom = async (): Promise<number | undefined> => {
+    return await page.evaluate(() => {
+      const isObject = (value: unknown): value is Record<string, unknown> | Function => {
+        return (typeof value === 'object' || typeof value === 'function') && value !== null;
+      };
+
+      const isMapLike = (value: unknown): value is {
+        getView: () => { getZoom: () => number | undefined };
+        getTargetElement: () => Element | null;
+        render?: () => void;
+        renderSync?: () => void;
+      } => {
+        if (!isObject(value)) {
+          return false;
+        }
+
+        try {
+          return (
+            typeof (value as { getView?: unknown }).getView === 'function' &&
+            typeof (value as { getTargetElement?: unknown }).getTargetElement === 'function' &&
+            (typeof (value as { render?: unknown }).render === 'function' ||
+              typeof (value as { renderSync?: unknown }).renderSync === 'function') &&
+            typeof (value as { getView: () => unknown }).getView()?.['getZoom'] === 'function'
+          );
+        } catch {
+          return false;
+        }
+      };
+
+      const queue: unknown[] = [];
+      const seen = new WeakSet<object>();
+
+      const enqueue = (value: unknown) => {
+        if (!isObject(value)) {
+          return;
+        }
+
+        const objectValue = value as object;
+        if (seen.has(objectValue)) {
+          return;
+        }
+
+        seen.add(objectValue);
+        queue.push(value);
+      };
+
+      enqueue(window);
+      enqueue(document);
+      enqueue(document.body);
+
+      for (const element of Array.from(document.querySelectorAll('*'))) {
+        enqueue(element);
+
+        for (const propertyName of Object.getOwnPropertyNames(element)) {
+          if (
+            propertyName.startsWith('__reactFiber$') ||
+            propertyName.startsWith('__reactProps$') ||
+            propertyName.toLowerCase().includes('map')
+          ) {
+            try {
+              enqueue((element as Record<string, unknown>)[propertyName]);
+            } catch {
+              // ignore inaccessible properties
+            }
+          }
+        }
+      }
+
+      const preferredKeys = [
+        'map',
+        'view',
+        'current',
+        'value',
+        'memoizedState',
+        'memoizedProps',
+        'pendingProps',
+        'stateNode',
+        'child',
+        'sibling',
+        'return',
+        'alternate',
+        'dependencies',
+        'next',
+        'baseState',
+        'containerInfo',
+        'props',
+        'context'
+      ];
+
+      let iterations = 0;
+
+      while (queue.length > 0 && iterations < 10000) {
+        iterations += 1;
+        const current = queue.shift();
+
+        if (isMapLike(current)) {
+          try {
+            const zoom = current.getView().getZoom();
+            return typeof zoom === 'number' ? zoom : undefined;
+          } catch {
+            // continue searching
+          }
+        }
+
+        if (!isObject(current)) {
+          continue;
+        }
+
+        if (Array.isArray(current)) {
+          for (const item of current.slice(0, 100)) {
+            enqueue(item);
+          }
+          continue;
+        }
+
+        if (current instanceof Map || current instanceof Set) {
+          for (const item of Array.from(current.values()).slice(0, 100)) {
+            enqueue(item);
+          }
+          continue;
+        }
+
+        let keys: string[] = [];
+        try {
+          keys = Object.getOwnPropertyNames(current);
+        } catch {
+          continue;
+        }
+
+        keys.sort((left, right) => {
+          const leftLower = left.toLowerCase();
+          const rightLower = right.toLowerCase();
+
+          const leftRank = preferredKeys.includes(left)
+            ? 0
+            : leftLower.includes('map') || leftLower.includes('view')
+              ? 1
+              : 2;
+          const rightRank = preferredKeys.includes(right)
+            ? 0
+            : rightLower.includes('map') || rightLower.includes('view')
+              ? 1
+              : 2;
+
+          return leftRank - rightRank;
+        });
+
+        for (const key of keys.slice(0, 75)) {
+          try {
+            enqueue((current as Record<string, unknown>)[key]);
+          } catch {
+            // ignore inaccessible properties
+          }
+        }
+      }
+
+      return undefined;
+    });
+  };
+
+  await expect.poll(readZoom, { timeout: 15000 }).not.toBeUndefined();
+  const initialZoom = await readZoom();
+  expect(initialZoom).toBeDefined();
+
+  await zoomInButton.click();
+
+  await expect.poll(readZoom, { timeout: 15000 }).toBeGreaterThan(initialZoom!);
+  const zoomAfterZoomIn = await readZoom();
+  expect(zoomAfterZoomIn).toBeDefined();
+  expect(zoomAfterZoomIn!).toBeGreaterThan(initialZoom!);
+
+  await zoomOutButton.click();
+
+  await expect.poll(readZoom, { timeout: 15000 }).toBeLessThan(zoomAfterZoomIn!);
+});

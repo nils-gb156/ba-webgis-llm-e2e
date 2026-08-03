@@ -1,0 +1,293 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const readZoomLevel = async (): Promise<number | undefined> => {
+    return await page.evaluate(() => {
+      const win = window as Record<string, unknown>;
+      const candidates: unknown[] = [];
+      const seen = new Set<unknown>();
+
+      for (const name of [
+        'map',
+        'olMap',
+        'mapInstance',
+        '__map__',
+        '__ol_map__',
+        '__openlayersMap__',
+        'openLayersMap'
+      ]) {
+        if (name in win) {
+          candidates.push(win[name]);
+        }
+      }
+
+      for (const key of Object.getOwnPropertyNames(win)) {
+        try {
+          const value = win[key];
+          if (value && (typeof value === 'object' || typeof value === 'function')) {
+            candidates.push(value);
+            if (typeof value === 'object') {
+              for (const nestedKey of Object.keys(value as Record<string, unknown>).slice(0, 20)) {
+                candidates.push((value as Record<string, unknown>)[nestedKey]);
+              }
+            }
+          }
+        } catch {
+          // Ignore inaccessible globals.
+        }
+      }
+
+      for (const candidate of candidates) {
+        if (!candidate || seen.has(candidate)) {
+          continue;
+        }
+        seen.add(candidate);
+
+        try {
+          const obj = candidate as {
+            getView?: () => { getZoom?: () => number | undefined } | undefined;
+            getMap?: () => { getView?: () => { getZoom?: () => number | undefined } | undefined } | undefined;
+            getZoom?: () => number | undefined;
+            view?: { getZoom?: () => number | undefined };
+          };
+
+          const directZoom = typeof obj.getZoom === 'function' ? obj.getZoom() : undefined;
+          if (typeof directZoom === 'number' && Number.isFinite(directZoom)) {
+            return directZoom;
+          }
+
+          const directView = typeof obj.getView === 'function' ? obj.getView() : obj.view;
+          const directViewZoom =
+            directView && typeof directView.getZoom === 'function' ? directView.getZoom() : undefined;
+          if (typeof directViewZoom === 'number' && Number.isFinite(directViewZoom)) {
+            return directViewZoom;
+          }
+
+          const map = typeof obj.getMap === 'function' ? obj.getMap() : undefined;
+          const mapView = map && typeof map.getView === 'function' ? map.getView() : undefined;
+          const mapViewZoom =
+            mapView && typeof mapView.getZoom === 'function' ? mapView.getZoom() : undefined;
+          if (typeof mapViewZoom === 'number' && Number.isFinite(mapViewZoom)) {
+            return mapViewZoom;
+          }
+        } catch {
+          // Ignore non-map objects.
+        }
+      }
+
+      return undefined;
+    });
+  };
+
+  const getRelevantResourceUrls = async (): Promise<string[]> => {
+    return await page.evaluate(() => {
+      return performance
+        .getEntriesByType('resource')
+        .map((entry) => {
+          const resource = entry as PerformanceResourceTiming;
+          return {
+            name: resource.name,
+            initiatorType: resource.initiatorType
+          };
+        })
+        .filter(({ initiatorType }) =>
+          ['img', 'image', 'fetch', 'xmlhttprequest', 'other'].includes(initiatorType)
+        )
+        .map(({ name }) => name);
+    });
+  };
+
+  const parseSignal = (
+    rawUrl: string
+  ): { kind: 'z'; value: number } | { kind: 'resolution'; value: number } | undefined => {
+    try {
+      const url = new URL(rawUrl);
+      const params = url.searchParams;
+
+      for (const key of ['z', 'zoom', 'Z', 'ZOOM', 'TileMatrix', 'tilematrix', 'TILEMATRIX']) {
+        const rawValue = params.get(key);
+        if (!rawValue) {
+          continue;
+        }
+        const parsed = Number(rawValue.split(':').pop() ?? rawValue);
+        if (Number.isFinite(parsed)) {
+          return { kind: 'z', value: parsed };
+        }
+      }
+
+      const bbox = params.get('bbox') ?? params.get('BBOX');
+      const width = Number(params.get('width') ?? params.get('WIDTH'));
+      const height = Number(params.get('height') ?? params.get('HEIGHT'));
+
+      if (bbox && Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) {
+        const parts = bbox.split(',').map(Number);
+        if (parts.length === 4 && parts.every((value) => Number.isFinite(value))) {
+          const resolution = Math.max(
+            Math.abs(parts[2] - parts[0]) / width,
+            Math.abs(parts[3] - parts[1]) / height
+          );
+          if (Number.isFinite(resolution)) {
+            return { kind: 'resolution', value: resolution };
+          }
+        }
+      }
+
+      const pathMatch = url.pathname.match(/(?:^|\/)(\d+)\/(\d+)\/(\d+)(?:\.[a-zA-Z0-9]+)?$/);
+      if (pathMatch) {
+        return { kind: 'z', value: Number(pathMatch[1]) };
+      }
+    } catch {
+      // Ignore non-URL strings and unparseable entries.
+    }
+
+    return undefined;
+  };
+
+  const chooseMetric = (
+    urls: string[]
+  ): { kind: 'z'; value: number } | { kind: 'resolution'; value: number } | undefined => {
+    const zValues: number[] = [];
+    const resolutionValues: number[] = [];
+
+    for (const url of urls) {
+      const signal = parseSignal(url);
+      if (!signal) {
+        continue;
+      }
+      if (signal.kind === 'z') {
+        zValues.push(signal.value);
+      } else {
+        resolutionValues.push(signal.value);
+      }
+    }
+
+    if (zValues.length > 0) {
+      return { kind: 'z', value: Math.max(...zValues) };
+    }
+
+    if (resolutionValues.length > 0) {
+      return { kind: 'resolution', value: Math.min(...resolutionValues) };
+    }
+
+    return undefined;
+  };
+
+  const isZoomedInComparedTo = (
+    current:
+      | { kind: 'z'; value: number }
+      | { kind: 'resolution'; value: number }
+      | undefined,
+    previous:
+      | { kind: 'z'; value: number }
+      | { kind: 'resolution'; value: number }
+      | undefined
+  ): boolean => {
+    if (!current || !previous || current.kind !== previous.kind) {
+      return false;
+    }
+
+    return current.kind === 'z'
+      ? current.value > previous.value
+      : current.value < previous.value;
+  };
+
+  const isZoomedOutComparedTo = (
+    current:
+      | { kind: 'z'; value: number }
+      | { kind: 'resolution'; value: number }
+      | undefined,
+    previous:
+      | { kind: 'z'; value: number }
+      | { kind: 'resolution'; value: number }
+      | undefined
+  ): boolean => {
+    if (!current || !previous || current.kind !== previous.kind) {
+      return false;
+    }
+
+    return current.kind === 'z'
+      ? current.value < previous.value
+      : current.value > previous.value;
+  };
+
+  await page.waitForLoadState('networkidle');
+
+  const initialMapImage = await mapViewport.screenshot();
+  const initialZoom = await readZoomLevel();
+  const initialResourceUrls = await getRelevantResourceUrls();
+  const initialMetric = chooseMetric(initialResourceUrls);
+
+  await zoomInButton.click();
+
+  await expect
+    .poll(async () => (await mapViewport.screenshot()).equals(initialMapImage))
+    .toBe(false);
+
+  let zoomAfterIn: number | undefined;
+  let zoomInMetric:
+    | { kind: 'z'; value: number }
+    | { kind: 'resolution'; value: number }
+    | undefined;
+
+  if (typeof initialZoom === 'number') {
+    await expect.poll(async () => await readZoomLevel()).toBeGreaterThan(initialZoom);
+    zoomAfterIn = await readZoomLevel();
+  } else if (initialMetric) {
+    await expect
+      .poll(async () => {
+        const currentUrls = await getRelevantResourceUrls();
+        zoomInMetric = chooseMetric(currentUrls.slice(initialResourceUrls.length));
+        return isZoomedInComparedTo(zoomInMetric, initialMetric);
+      })
+      .toBe(true);
+  }
+
+  const zoomedInImage = await mapViewport.screenshot();
+
+  await zoomOutButton.click();
+
+  await expect
+    .poll(async () => (await mapViewport.screenshot()).equals(zoomedInImage))
+    .toBe(false);
+
+  if (typeof zoomAfterIn === 'number') {
+    await expect.poll(async () => await readZoomLevel()).toBeLessThan(zoomAfterIn);
+  } else if (zoomInMetric) {
+    const resourceUrlsAfterZoomIn = await getRelevantResourceUrls();
+
+    try {
+      await expect
+        .poll(
+          async () => {
+            const currentUrls = await getRelevantResourceUrls();
+            const zoomOutMetric = chooseMetric(currentUrls.slice(resourceUrlsAfterZoomIn.length));
+            return isZoomedOutComparedTo(zoomOutMetric, zoomInMetric);
+          },
+          { timeout: 5000 }
+        )
+        .toBe(true);
+    } catch {
+      await expect
+        .poll(async () => (await mapViewport.screenshot()).equals(initialMapImage))
+        .toBe(true);
+    }
+  } else {
+    await expect
+      .poll(async () => (await mapViewport.screenshot()).equals(initialMapImage))
+      .toBe(true);
+  }
+});

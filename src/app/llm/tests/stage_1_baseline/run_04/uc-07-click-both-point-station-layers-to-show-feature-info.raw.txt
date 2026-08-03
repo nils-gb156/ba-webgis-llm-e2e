@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  let map = page.getByTestId('map');
+  if ((await map.count()) === 0) {
+    map = page.locator('.ol-viewport').first();
+  }
+
+  await expect(map).toBeVisible();
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map bounding box is not available.');
+  }
+
+  const hasVisibleSection = async (name: string) => {
+    const button = page.getByRole('button', { name, exact: true });
+    if ((await button.count()) > 0) {
+      return await button.first().isVisible();
+    }
+
+    const heading = page.getByRole('heading', { name, exact: true });
+    if ((await heading.count()) > 0) {
+      return await heading.first().isVisible();
+    }
+
+    const text = page.getByText(name, { exact: true });
+    if ((await text.count()) > 0) {
+      return await text.first().isVisible();
+    }
+
+    return false;
+  };
+
+  const featureInfoResponse = page.waitForResponse(
+    (response) => response.ok() && response.url().includes('GetFeatureInfo')
+  );
+
+  await map.click({
+    position: {
+      x: Math.round(mapBox.width / 2),
+      y: Math.round(mapBox.height / 2)
+    }
+  });
+
+  await featureInfoResponse;
+
+  await expect.poll(() => hasVisibleSection('UV-Index Station')).toBe(true);
+  await expect.poll(() => hasVisibleSection('EUCOS Ground Station')).toBe(true);
+});

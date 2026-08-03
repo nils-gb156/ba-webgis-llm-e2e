@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapCanvas = page.locator('canvas').first();
+  const scaleBar = page.locator('.ol-scale-line').first();
+  const printMapButton = page.getByRole('button', { name: /^Print Map$/i });
+  const titleInput = page.getByRole('textbox', { name: /title/i }).first();
+
+  await expect(mapCanvas).toBeVisible();
+  await expect(scaleBar).toBeVisible();
+  await expect(printMapButton).toBeVisible();
+
+  const panelAlreadyVisible = await titleInput.isVisible().catch(() => false);
+  if (!panelAlreadyVisible) {
+    const pressed = await printMapButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printMapButton.click();
+    }
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'Use Case 9 PNG export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  let formatSelected = false;
+
+  const pngRadio = page.getByRole('radio', { name: /^PNG$/i }).first();
+  if ((await pngRadio.count()) > 0 && (await pngRadio.isVisible().catch(() => false))) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+    formatSelected = true;
+  }
+
+  const namedCombobox = page.getByRole('combobox', { name: /format|file format|output format|type/i }).first();
+  if (!formatSelected && (await namedCombobox.count()) > 0 && (await namedCombobox.isVisible().catch(() => false))) {
+    try {
+      await namedCombobox.selectOption({ label: 'PNG' });
+      await expect(namedCombobox).toHaveValue(/png/i);
+    } catch {
+      try {
+        await namedCombobox.selectOption('png');
+        await expect(namedCombobox).toHaveValue(/png/i);
+      } catch {
+        await namedCombobox.click();
+        const pngOption = page.getByRole('option', { name: /^PNG$/i }).first();
+        await expect(pngOption).toBeVisible();
+        await pngOption.click();
+        await expect(namedCombobox).toContainText(/png/i);
+      }
+    }
+    formatSelected = true;
+  }
+
+  const labeledFormatControl = page.getByLabel(/format|file format|output format|type/i).first();
+  if (!formatSelected && (await labeledFormatControl.count()) > 0 && (await labeledFormatControl.isVisible().catch(() => false))) {
+    try {
+      await labeledFormatControl.selectOption({ label: 'PNG' });
+      await expect(labeledFormatControl).toHaveValue(/png/i);
+    } catch {
+      try {
+        await labeledFormatControl.selectOption('png');
+        await expect(labeledFormatControl).toHaveValue(/png/i);
+      } catch {
+        await labeledFormatControl.click();
+        const pngOption = page.getByRole('option', { name: /^PNG$/i }).first();
+        await expect(pngOption).toBeVisible();
+        await pngOption.click();
+        await expect(labeledFormatControl).toContainText(/png/i);
+      }
+    }
+    formatSelected = true;
+  }
+
+  expect(formatSelected).toBe(true);
+
+  const exportButton = page.getByRole('button', { name: /^(Export|Print|Download)$/i }).first();
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const failure = await download.failure();
+  expect(failure).toBeNull();
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  const fileBuffer = await readFile(downloadPath!);
+  expect(fileBuffer.length).toBeGreaterThan(1024);
+  expect(fileBuffer.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+});

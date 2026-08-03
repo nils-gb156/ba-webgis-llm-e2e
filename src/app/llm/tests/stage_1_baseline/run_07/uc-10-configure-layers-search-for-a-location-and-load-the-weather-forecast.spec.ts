@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const temperatureLabel = page.getByText(/^(Temperature|Temperatur)$/i);
+  const precipitationLabel = page.getByText(/^(Precipitation|Niederschlag)$/i);
+
+  const temperatureToggle = page
+    .getByRole('checkbox', { name: /^(Temperature|Temperatur)$/i })
+    .or(page.getByRole('switch', { name: /^(Temperature|Temperatur)$/i }));
+
+  const precipitationToggle = page
+    .getByRole('checkbox', { name: /^(Precipitation|Niederschlag)$/i })
+    .or(page.getByRole('switch', { name: /^(Precipitation|Niederschlag)$/i }));
+
+  await expect(temperatureLabel).toBeVisible();
+  await expect(precipitationLabel).toBeVisible();
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  const complementaryPanels = page.getByRole('complementary');
+  if ((await complementaryPanels.count()) > 0) {
+    await expect(complementaryPanels.first()).toBeVisible();
+  }
+
+  let searchField = page.getByRole('combobox', { name: /search|suche|location|place|ort/i });
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('searchbox', { name: /search|suche|location|place|ort/i });
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('textbox', { name: /search|suche|location|place|ort/i });
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByPlaceholder(/search|suche|location|place|ort/i);
+  }
+  const geocoder = searchField.first();
+  await expect(geocoder).toBeVisible();
+
+  const measurementButtons = page.getByRole('button', { name: /measure|measurement|messen/i });
+  if ((await measurementButtons.count()) > 0) {
+    const measurementButton = measurementButtons.first();
+    const ariaPressed = await measurementButton.getAttribute('aria-pressed');
+    if (ariaPressed !== null) {
+      await expect(measurementButton).toHaveAttribute('aria-pressed', 'false');
+    }
+  }
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await geocoder.click();
+  await geocoder.fill('Münster');
+
+  const resultsList = page.getByRole('listbox');
+  if ((await resultsList.count()) > 0) {
+    await expect(resultsList.first()).toBeVisible();
+  }
+
+  let firstResult = resultsList.getByRole('option').first();
+  if ((await firstResult.count()) === 0) {
+    firstResult = page.getByRole('option').first();
+  }
+
+  await expect(firstResult).toBeVisible();
+  const selectedResultText = ((await firstResult.textContent()) ?? '').trim();
+  const selectedPlaceName = selectedResultText.split(',')[0]?.trim() || 'Münster';
+
+  await firstResult.click();
+
+  await expect(geocoder).toHaveValue(new RegExp(escapeRegExp(selectedPlaceName), 'i'));
+
+  const forecastHeading = page.getByRole('heading', {
+    name: /weather forecast|forecast|wettervorhersage|vorhersage/i
+  });
+  await expect(forecastHeading.first()).toBeVisible();
+
+  await expect.poll(async () => {
+    const lists = page.getByRole('list');
+    const listCount = await lists.count();
+    for (let i = 0; i < listCount; i++) {
+      const entryCount = await lists.nth(i).getByRole('listitem').count();
+      if (entryCount === 24) {
+        return 24;
+      }
+    }
+
+    const tables = page.getByRole('table');
+    const tableCount = await tables.count();
+    for (let i = 0; i < tableCount; i++) {
+      const rowCount = await tables.nth(i).getByRole('row').count();
+      if (rowCount === 24 || rowCount === 25) {
+        return 24;
+      }
+    }
+
+    const articleCount = await page.getByRole('article').count();
+    if (articleCount === 24) {
+      return 24;
+    }
+
+    return -1;
+  }).toBe(24);
+});

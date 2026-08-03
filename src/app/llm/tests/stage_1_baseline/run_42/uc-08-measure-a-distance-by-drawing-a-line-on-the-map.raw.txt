@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await expect(measurementButton).toBeVisible();
+
+  const controlledPanelId = await measurementButton.getAttribute('aria-controls');
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const measurementPanel = controlledPanelId ? page.locator(`#${controlledPanelId}`) : measurementHeading;
+
+  if (!(await measurementPanel.isVisible())) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementPanel).toBeVisible();
+  await expect(measurementHeading).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').last();
+  await expect(mapCanvas).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = box!.width;
+  const height = box!.height;
+
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+  const p1 = {
+    x: Math.round(clamp(width * 0.58, 80, width - 160)),
+    y: Math.round(clamp(height * 0.35, 80, height - 160))
+  };
+  const p2 = {
+    x: Math.round(clamp(width * 0.68, 120, width - 120)),
+    y: Math.round(clamp(height * 0.42, 120, height - 120))
+  };
+  const p3 = {
+    x: Math.round(clamp(width * 0.78, 160, width - 80)),
+    y: Math.round(clamp(height * 0.50, 160, height - 80))
+  };
+  const p4 = {
+    x: Math.round(clamp(width * 0.86, 200, width - 40)),
+    y: Math.round(clamp(height * 0.60, 200, height - 40))
+  };
+
+  await mapCanvas.click({ position: p1 });
+  await mapCanvas.click({ position: p2 });
+  await mapCanvas.click({ position: p3 });
+  await mapCanvas.dblclick({ position: p4 });
+
+  const lengthPattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i;
+  const lengthValue = controlledPanelId
+    ? measurementPanel.getByText(lengthPattern).first()
+    : page.getByText(lengthPattern).first();
+
+  await expect(lengthValue).toBeVisible();
+});

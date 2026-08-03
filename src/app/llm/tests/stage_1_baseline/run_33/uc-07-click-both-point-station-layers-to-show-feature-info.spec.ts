@@ -1,0 +1,174 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  for (const infoButtonName of ['Info', 'Feature Info', 'Information']) {
+    const infoToggle = page.getByRole('button', { name: infoButtonName, exact: true });
+    if (await infoToggle.count()) {
+      const pressed = await infoToggle.first().getAttribute('aria-pressed');
+      if (pressed !== 'true') {
+        await infoToggle.first().click();
+      }
+      break;
+    }
+  }
+
+  for (const measureButtonName of ['Measure', 'Measurement']) {
+    const measureToggle = page.getByRole('button', { name: measureButtonName, exact: true });
+    if (await measureToggle.count()) {
+      const pressed = await measureToggle.first().getAttribute('aria-pressed');
+      if (pressed === 'true') {
+        await measureToggle.first().click();
+      }
+      break;
+    }
+  }
+
+  const ensureLayerActive = async (layerName: string) => {
+    const checkbox = page.getByRole('checkbox', { name: layerName, exact: true });
+    const switchToggle = page.getByRole('switch', { name: layerName, exact: true });
+
+    if (!(await checkbox.count()) && !(await switchToggle.count())) {
+      const layersToggle = page.getByRole('button', { name: 'Layers', exact: true });
+      if (await layersToggle.count()) {
+        const pressed = await layersToggle.first().getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+          await layersToggle.first().click();
+        }
+      }
+    }
+
+    if (await checkbox.count()) {
+      const control = checkbox.first();
+      if (!(await control.isChecked())) {
+        await control.click({ force: true });
+      }
+      await expect(control).toBeChecked();
+      return;
+    }
+
+    if (await switchToggle.count()) {
+      const control = switchToggle.first();
+      if (!(await control.isChecked())) {
+        await control.click({ force: true });
+      }
+      await expect(control).toBeChecked();
+      return;
+    }
+
+    throw new Error(`Could not find an active-layer toggle for "${layerName}".`);
+  };
+
+  await ensureLayerActive('UV-Index Stations');
+  await ensureLayerActive('EUCOS Ground Stations');
+
+  let clickPosition: { x: number; y: number } | null = null;
+  await expect
+    .poll(async () => {
+      clickPosition = await page.evaluate(([coordX, coordY]) => {
+        const isObjectLike = (value: unknown): value is Record<string, unknown> | Function =>
+          (typeof value === 'object' || typeof value === 'function') && value !== null;
+
+        const tryMap = (candidate: any) => {
+          if (
+            candidate &&
+            typeof candidate.getPixelFromCoordinate === 'function' &&
+            typeof candidate.getViewport === 'function'
+          ) {
+            const pixel = candidate.getPixelFromCoordinate([coordX, coordY]);
+            const viewport = candidate.getViewport();
+            if (
+              Array.isArray(pixel) &&
+              pixel.length === 2 &&
+              Number.isFinite(pixel[0]) &&
+              Number.isFinite(pixel[1]) &&
+              viewport instanceof HTMLElement
+            ) {
+              return {
+                x: pixel[0],
+                y: pixel[1]
+              };
+            }
+          }
+          return null;
+        };
+
+        for (const candidate of [
+          (window as any).map,
+          (window as any).olMap,
+          (window as any).__map,
+          (window as any).__olMap
+        ]) {
+          const result = tryMap(candidate);
+          if (result) {
+            return result;
+          }
+        }
+
+        const seen = new Set<unknown>();
+        const queue: Array<{ value: unknown; depth: number }> = [{ value: window, depth: 0 }];
+        let processed = 0;
+
+        while (queue.length > 0 && processed < 2000) {
+          const current = queue.shift();
+          if (!current) {
+            break;
+          }
+
+          const { value, depth } = current;
+          if (!isObjectLike(value) || seen.has(value)) {
+            continue;
+          }
+
+          seen.add(value);
+          processed += 1;
+
+          if (!(value instanceof Element)) {
+            const result = tryMap(value);
+            if (result) {
+              return result;
+            }
+          }
+
+          if (depth >= 2) {
+            continue;
+          }
+
+          try {
+            for (const child of Object.values(value)) {
+              if (isObjectLike(child)) {
+                queue.push({ value: child, depth: depth + 1 });
+              }
+            }
+          } catch {
+            // Ignore non-enumerable/cross-origin values while searching for the map instance.
+          }
+        }
+
+        const fallbackViewport = document.querySelector('.ol-viewport');
+        if (fallbackViewport instanceof HTMLElement) {
+          return {
+            x: fallbackViewport.clientWidth / 2,
+            y: fallbackViewport.clientHeight / 2
+          };
+        }
+
+        return null;
+      }, [1188692.84, 6767643.28]);
+
+      return clickPosition;
+    })
+    .not.toBeNull();
+
+  await mapViewport.click({ position: clickPosition! });
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

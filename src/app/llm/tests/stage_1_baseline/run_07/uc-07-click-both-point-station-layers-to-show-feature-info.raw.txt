@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const map = page.locator('.ol-viewport').first();
+  await expect(map).toBeVisible();
+
+  const infoToggle = page.getByRole('button', { name: /^(Info|Information)$/i }).first();
+  if (await infoToggle.count()) {
+    const pressed = await infoToggle.getAttribute('aria-pressed');
+    if (pressed === 'false') {
+      await infoToggle.click();
+      await expect(infoToggle).toHaveAttribute('aria-pressed', 'true');
+    }
+  }
+
+  const measurementToggle = page.getByRole('button', { name: /^(Measurement|Measure)$/i }).first();
+  if (await measurementToggle.count()) {
+    const pressed = await measurementToggle.getAttribute('aria-pressed');
+    if (pressed === 'true') {
+      await measurementToggle.click();
+      await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+    }
+  }
+
+  const mapBox = await map.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map viewport is not available for clicking.');
+  }
+
+  const getFeatureInfoResponse = page.waitForResponse(
+    response => response.ok() && /GetFeatureInfo/i.test(response.url())
+  );
+
+  await map.click({
+    position: {
+      x: Math.round(mapBox.width / 2),
+      y: Math.round(mapBox.height / 2),
+    },
+  });
+
+  await getFeatureInfoResponse;
+
+  const expectSectionVisible = async (name: RegExp) => {
+    await expect
+      .poll(async () => {
+        return (
+          (await page.getByRole('heading', { name }).count()) +
+          (await page.getByRole('button', { name }).count()) +
+          (await page.getByText(name).count())
+        );
+      })
+      .toBeGreaterThan(0);
+
+    const heading = page.getByRole('heading', { name }).first();
+    if (await heading.count()) {
+      await expect(heading).toBeVisible();
+      return;
+    }
+
+    const button = page.getByRole('button', { name }).first();
+    if (await button.count()) {
+      await expect(button).toBeVisible();
+      return;
+    }
+
+    await expect(page.getByText(name).first()).toBeVisible();
+  };
+
+  await expectSectionVisible(/UV-Index Station/i);
+  await expectSectionVisible(/EUCOS Ground Station/i);
+});

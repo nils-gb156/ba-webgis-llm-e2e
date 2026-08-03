@@ -1,0 +1,27 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 3: Zoom in and out using the zoom buttons
+
+**Description:** The user changes the map zoom level using the zoom in and zoom out buttons.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The zoom in and zoom out buttons are visible on the map.
+
+**Steps:**
+
+1. The user clicks the 'Zoom in' button to increase the zoom level.
+2. The user clicks the 'Zoom out' button to decrease the zoom level.
+
+**Expected results:**
+
+- After clicking the 'Zoom in' button, the map zoom level is higher than before.
+- After clicking the 'Zoom out' button, the map zoom level is lower than after zooming in.
+
+**Complexity:** easy
+
+Return only the test code.

@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const ensureLayerActive = async (name: string) => {
+    let control = page.getByRole('checkbox', { name, exact: true });
+
+    if ((await control.count()) === 0) {
+      control = page.getByRole('switch', { name, exact: true });
+    }
+
+    await expect(control).toBeVisible();
+
+    if (!(await control.isChecked())) {
+      await control.click({ force: true });
+    }
+
+    await expect(control).toBeChecked();
+  };
+
+  await ensureLayerActive('UV-Index Stations');
+  await ensureLayerActive('EUCOS Ground Stations');
+
+  for (const name of ['Measure', 'Measurement']) {
+    const measurementToggle = page.getByRole('button', { name, exact: true });
+
+    if ((await measurementToggle.count()) > 0) {
+      if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+      }
+
+      await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+      break;
+    }
+  }
+
+  let mapTarget = page.locator('.ol-viewport').first();
+
+  if ((await mapTarget.count()) === 0) {
+    const canvases = page.locator('canvas');
+    const canvasCount = await canvases.count();
+
+    if (canvasCount === 0) {
+      throw new Error('No visible map target was found.');
+    }
+
+    let largestArea = 0;
+    let largestCanvas = canvases.first();
+
+    for (let index = 0; index < canvasCount; index++) {
+      const candidate = canvases.nth(index);
+      const box = await candidate.boundingBox();
+
+      if (box) {
+        const area = box.width * box.height;
+        if (area > largestArea) {
+          largestArea = area;
+          largestCanvas = candidate;
+        }
+      }
+    }
+
+    mapTarget = largestCanvas;
+  }
+
+  await expect(mapTarget).toBeVisible();
+
+  const getFeatureInfoRequests: string[] = [];
+  page.on('request', request => {
+    const url = request.url();
+    if (/GetFeatureInfo/i.test(url)) {
+      getFeatureInfoRequests.push(url);
+    }
+  });
+
+  const box = await mapTarget.boundingBox();
+  if (!box) {
+    throw new Error('The map target has no bounding box.');
+  }
+
+  await mapTarget.click({
+    position: {
+      x: Math.floor(box.width / 2),
+      y: Math.floor(box.height / 2)
+    }
+  });
+
+  await expect.poll(() => getFeatureInfoRequests[0]).toMatch(/GetFeatureInfo/i);
+
+  await expect(page.getByText(/^UV-Index Station\b/)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/^EUCOS Ground Station\b/)).toBeVisible({ timeout: 15000 });
+});

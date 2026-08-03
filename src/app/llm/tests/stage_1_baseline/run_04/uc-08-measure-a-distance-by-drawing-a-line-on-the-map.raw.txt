@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await expect(measurementButton).toBeVisible();
+
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  if (!(await measurementHeading.isVisible())) {
+    const isPressed = await measurementButton.getAttribute('aria-pressed');
+    if (isPressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').last();
+  await expect(mapCanvas).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(box.width * 0.25),
+      y: Math.round(box.height * 0.35)
+    }
+  });
+  await mapCanvas.click({
+    position: {
+      x: Math.round(box.width * 0.5),
+      y: Math.round(box.height * 0.45)
+    }
+  });
+  await mapCanvas.dblclick({
+    position: {
+      x: Math.round(box.width * 0.72),
+      y: Math.round(box.height * 0.58)
+    }
+  });
+
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+  const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+  const measurementComplementary = page.getByRole('complementary', { name: 'Measurement', exact: true });
+  const measurementTabpanel = page.getByRole('tabpanel', { name: 'Measurement', exact: true });
+
+  let measurementPanel = page.locator('body');
+  if (await measurementDialog.isVisible()) {
+    measurementPanel = measurementDialog;
+  } else if (await measurementRegion.isVisible()) {
+    measurementPanel = measurementRegion;
+  } else if (await measurementComplementary.isVisible()) {
+    measurementPanel = measurementComplementary;
+  } else if (await measurementTabpanel.isVisible()) {
+    measurementPanel = measurementTabpanel;
+  }
+
+  await expect(
+    measurementPanel.getByText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i).first()
+  ).toBeVisible();
+});

@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('load');
+
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+  const beforeOverlayScreenshot = await mapCanvas.screenshot();
+
+  const isUvIndexTileRequest = (url: string, resourceType?: string) => {
+    const normalizedUrl = decodeURIComponent(url).toLowerCase();
+    const isUvIndexRequest = /(uv[-_ ]?index|uvindex)/.test(normalizedUrl);
+    const isTileLikeRequest =
+      resourceType === undefined ||
+      resourceType === 'image' ||
+      resourceType === 'fetch' ||
+      resourceType === 'xhr';
+    return isUvIndexRequest && isTileLikeRequest;
+  };
+
+  const uvIndexTileRequests: string[] = [];
+  page.on('request', request => {
+    if (isUvIndexTileRequest(request.url(), request.resourceType())) {
+      uvIndexTileRequests.push(request.url());
+    }
+  });
+
+  const uvIndexTileResponse = page.waitForResponse(response => {
+    return (
+      isUvIndexTileRequest(response.url(), response.request().resourceType()) &&
+      response.ok()
+    );
+  });
+
+  await uvIndexToggle.click({ force: true });
+  await expect(uvIndexToggle).toBeChecked();
+
+  const tileResponse = await uvIndexTileResponse;
+  expect(tileResponse.ok()).toBeTruthy();
+
+  await expect.poll(() => uvIndexTileRequests.length).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const afterOverlayScreenshot = await mapCanvas.screenshot();
+    return afterOverlayScreenshot.equals(beforeOverlayScreenshot);
+  }).toBe(false);
+});

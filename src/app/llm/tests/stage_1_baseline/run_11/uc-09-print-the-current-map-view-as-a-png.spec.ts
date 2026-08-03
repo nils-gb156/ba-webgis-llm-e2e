@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import * as fs from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const printMapToggle = page.getByRole('button', { name: /^print map$/i });
+  await expect(printMapToggle).toBeVisible();
+
+  const scaleBar = page.locator('.ol-scale-line, .ol-scale-bar').first();
+  await expect(scaleBar).toBeVisible();
+
+  if ((await printMapToggle.getAttribute('aria-pressed')) !== 'true') {
+    await printMapToggle.click();
+  }
+
+  const printPanelDialog = page.getByRole('dialog', { name: /print map/i });
+  const printPanelRoot = (await printPanelDialog.count()) > 0 ? printPanelDialog : page.getByRole('main');
+
+  const titleInput = printPanelRoot.getByRole('textbox', { name: /title/i }).first();
+  await expect(titleInput).toBeVisible();
+
+  if ((await printPanelDialog.count()) > 0) {
+    await expect(printPanelDialog).toBeVisible();
+  }
+
+  const title = 'Use Case 9 PNG Export';
+  await titleInput.fill(title);
+
+  const pngRadio = printPanelRoot.getByRole('radio', { name: /png/i }).first();
+  const formatCombobox = printPanelRoot.getByRole('combobox', { name: /format/i }).first();
+  const pngOption = printPanelRoot.getByRole('option', { name: /png/i }).first();
+  const pngButton = printPanelRoot.getByRole('button', { name: /png/i }).first();
+
+  if (await pngRadio.isVisible()) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else if (await formatCombobox.isVisible()) {
+    await formatCombobox.selectOption({ label: 'PNG' });
+    await expect(formatCombobox).toHaveValue(/png/i);
+  } else if (await pngOption.isVisible()) {
+    await pngOption.click();
+  } else {
+    await expect(pngButton).toBeVisible();
+    await pngButton.click();
+  }
+
+  const exportButton = printPanelRoot.getByRole('button', { name: /^(export|print)$/i }).first();
+  await expect(exportButton).toBeVisible();
+  await expect(exportButton).toBeEnabled();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(await download.failure()).toBeNull();
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  if (!downloadPath) {
+    throw new Error('Download path is not available.');
+  }
+
+  const fileContent = await fs.readFile(downloadPath);
+  expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+  expect(fileContent.length).toBeGreaterThan(1024);
+});

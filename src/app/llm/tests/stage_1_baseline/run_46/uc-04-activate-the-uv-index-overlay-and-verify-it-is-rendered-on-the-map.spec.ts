@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC4 Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const uvIndexName = /^UV-Index(?:\s+overlay)?$/i;
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: uvIndexName });
+  const uvIndexSwitch = page.getByRole('switch', { name: uvIndexName });
+
+  let uvIndexToggle = uvIndexCheckbox;
+  if ((await uvIndexCheckbox.count()) === 0) {
+    uvIndexToggle = uvIndexSwitch;
+  }
+
+  const mapLayers = page.locator('.ol-layers').first();
+
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(mapLayers).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  await page.waitForLoadState('networkidle');
+
+  const beforeMapImage = await mapLayers.screenshot();
+
+  const layerRequests: string[] = [];
+  const layerResponses: string[] = [];
+
+  page.on('request', request => {
+    const url = request.url();
+    if (request.resourceType() === 'image' || /GetMap|wms|tiles?/i.test(url)) {
+      layerRequests.push(url);
+    }
+  });
+
+  page.on('response', response => {
+    const request = response.request();
+    const url = response.url();
+    if (response.ok() && (request.resourceType() === 'image' || /GetMap|wms|tiles?/i.test(url))) {
+      layerResponses.push(url);
+    }
+  });
+
+  await uvIndexToggle.click({ force: true });
+
+  await expect(uvIndexToggle).toBeChecked();
+  await expect.poll(() => layerRequests.length).toBeGreaterThan(0);
+  await expect.poll(() => layerResponses.length).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const currentMapImage = await mapLayers.screenshot();
+    return currentMapImage.equals(beforeMapImage);
+  }).toBe(false);
+});

@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await expect(measurementButton).toBeVisible();
+
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  if (!(await measurementHeading.isVisible().catch(() => false))) {
+    await measurementButton.click();
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const valueWithUnit = page.getByText(/\b\d+(?:[.,]\d+)?\s*(m|km)\b/i);
+  const initialValueCount = await valueWithUnit.count();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas is not interactive because it has no bounding box.');
+  }
+
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+  const point1 = {
+    x: clamp(Math.round(box.width * 0.25), 20, Math.round(box.width) - 20),
+    y: clamp(Math.round(box.height * 0.35), 20, Math.round(box.height) - 20)
+  };
+  const point2 = {
+    x: clamp(Math.round(box.width * 0.45), 20, Math.round(box.width) - 20),
+    y: clamp(Math.round(box.height * 0.45), 20, Math.round(box.height) - 20)
+  };
+  const point3 = {
+    x: clamp(Math.round(box.width * 0.65), 20, Math.round(box.width) - 20),
+    y: clamp(Math.round(box.height * 0.55), 20, Math.round(box.height) - 20)
+  };
+
+  await mapCanvas.click({ position: point1 });
+  await mapCanvas.click({ position: point2 });
+  await mapCanvas.dblclick({ position: point3 });
+
+  await expect.poll(async () => await valueWithUnit.count()).toBeGreaterThan(initialValueCount);
+  await expect(valueWithUnit.last()).toBeVisible();
+});

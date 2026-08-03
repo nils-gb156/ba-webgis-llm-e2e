@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanelByTestId = page.getByTestId('info-panel');
+  const infoPanel =
+    (await infoPanelByTestId.count()) > 0 ? infoPanelByTestId : page.getByRole('complementary').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapByTestId = page.getByTestId('map');
+  const map = (await mapByTestId.count()) > 0 ? mapByTestId : page.locator('.ol-viewport').first();
+  await expect(map).toBeVisible();
+
+  const mapBox = await map.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map is not interactable because its bounding box is unavailable.');
+  }
+
+  await map.click({
+    position: {
+      x: Math.floor(mapBox.width * 0.75),
+      y: Math.floor(mapBox.height * 0.5)
+    }
+  });
+
+  const highlightedPositionByTestId = page.getByTestId('selected-position-marker');
+  if ((await highlightedPositionByTestId.count()) > 0) {
+    await expect(highlightedPositionByTestId).toBeVisible();
+  } else {
+    const highlightedPositionFallback = map.locator(
+      '[aria-label*="selected" i], [aria-label*="highlight" i], img[alt*="selected" i], img[alt*="highlight" i]'
+    );
+    if ((await highlightedPositionFallback.count()) > 0) {
+      await expect(highlightedPositionFallback.first()).toBeVisible();
+    }
+  }
+
+  const weatherForecastSectionByTestId = infoPanel.getByTestId('weather-forecast');
+  if ((await weatherForecastSectionByTestId.count()) > 0) {
+    await expect(weatherForecastSectionByTestId).toBeVisible();
+  } else {
+    const weatherForecastHeading = infoPanel.getByRole('heading', { name: /weather forecast/i });
+    if ((await weatherForecastHeading.count()) > 0) {
+      await expect(weatherForecastHeading).toBeVisible();
+    } else {
+      await expect(infoPanel.getByText(/weather forecast/i)).toBeVisible();
+    }
+  }
+
+  let forecastEntries = infoPanel.getByTestId('weather-forecast-entry');
+  if ((await forecastEntries.count()) === 0) {
+    const listItemsWithTime = infoPanel.getByRole('listitem').filter({ hasText: /\b\d{1,2}:\d{2}\b/ });
+    if ((await listItemsWithTime.count()) > 0) {
+      forecastEntries = listItemsWithTime;
+    } else {
+      forecastEntries = infoPanel.getByRole('row').filter({ hasText: /\b\d{1,2}:\d{2}\b/ });
+    }
+  }
+
+  await expect.poll(async () => await forecastEntries.count()).toBe(24);
+});

@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'fs';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  await expect(printMapButton).toBeVisible();
+
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+  if (!(await titleInput.isVisible())) {
+    await printMapButton.click();
+  }
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'Current map view export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /png/i });
+  const formatSelect = page.getByRole('combobox', { name: /format/i });
+
+  if (await pngRadio.isVisible()) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    await expect(formatSelect).toBeVisible();
+    try {
+      await formatSelect.selectOption('png');
+    } catch {
+      try {
+        await formatSelect.selectOption({ label: 'PNG' });
+      } catch {
+        await formatSelect.selectOption({ value: 'image/png' });
+      }
+    }
+    await expect(formatSelect).toHaveValue(/png/i);
+  }
+
+  const exportButton = page.getByRole('button', { name: /^(Export|Print|Download)$/ });
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  const buffer = await fs.readFile(downloadPath!);
+  expect(buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true);
+  expect(buffer.readUInt32BE(16)).toBeGreaterThan(0);
+  expect(buffer.readUInt32BE(20)).toBeGreaterThan(0);
+  expect(buffer.length).toBeGreaterThan(1024);
+});

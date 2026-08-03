@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const temperatureToggle = page
+    .getByRole('switch', { name: /^Temperature$/i })
+    .or(page.getByRole('checkbox', { name: /^Temperature$/i }))
+    .first();
+  const precipitationToggle = page
+    .getByRole('switch', { name: /^Precipitation$/i })
+    .or(page.getByRole('checkbox', { name: /^Precipitation$/i }))
+    .first();
+  const searchField = page
+    .getByRole('combobox')
+    .or(page.getByRole('searchbox'))
+    .or(page.getByRole('textbox', { name: /search|suche|ort|location|place/i }))
+    .first();
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).toBeVisible();
+  await expect(precipitationToggle).not.toBeChecked();
+  await expect(searchField).toBeVisible();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+
+  const firstResultText = (await firstResult.textContent())?.trim() || 'Münster';
+  const selectedResultFragment =
+    firstResultText.split(',')[0]?.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Münster';
+
+  await firstResult.click();
+
+  await expect(searchField).toHaveValue(new RegExp(selectedResultFragment, 'i'));
+
+  const forecastHeading = page
+    .getByRole('heading', { name: /weather forecast|forecast|vorhersage/i })
+    .or(page.getByText(/weather forecast|forecast|vorhersage/i))
+    .first();
+  await expect(forecastHeading).toBeVisible();
+
+  const forecastTimeLabels = page.getByText(/\b\d{1,2}:\d{2}\b/);
+  await expect.poll(async () => {
+    return await forecastTimeLabels.evaluateAll((nodes) =>
+      nodes.filter((node) => {
+        const element = node as HTMLElement;
+        return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+      }).length
+    );
+  }).toBe(24);
+});

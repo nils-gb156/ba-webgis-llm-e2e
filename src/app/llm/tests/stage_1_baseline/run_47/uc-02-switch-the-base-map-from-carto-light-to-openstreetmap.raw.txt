@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const pickVisible = async (locators: any[]) => {
+    for (const locator of locators) {
+      const candidate = locator.first();
+      if (await candidate.isVisible()) {
+        return candidate;
+      }
+    }
+    return locators[0].first();
+  };
+
+  const pickExisting = async (locators: any[]) => {
+    for (const locator of locators) {
+      const candidate = locator.first();
+      if ((await candidate.count()) > 0) {
+        return candidate;
+      }
+    }
+    return locators[0].first();
+  };
+
+  const getSelectionState = async (locator: any) => {
+    if ((await locator.count()) === 0) {
+      return undefined;
+    }
+
+    return await locator.evaluate((element) => {
+      if (element instanceof HTMLInputElement) {
+        return element.checked;
+      }
+
+      const ariaChecked = element.getAttribute('aria-checked');
+      if (ariaChecked !== null) {
+        return ariaChecked === 'true';
+      }
+
+      const ariaSelected = element.getAttribute('aria-selected');
+      if (ariaSelected !== null) {
+        return ariaSelected === 'true';
+      }
+
+      const ariaPressed = element.getAttribute('aria-pressed');
+      if (ariaPressed !== null) {
+        return ariaPressed === 'true';
+      }
+
+      if (element.getAttribute('data-checked') !== null) {
+        return true;
+      }
+
+      return false;
+    });
+  };
+
+  const baseMapSelectorToggleCandidates = [
+    page.getByRole('button', { name: 'Base map', exact: true }),
+    page.getByRole('button', { name: 'Base maps', exact: true }),
+    page.getByRole('button', { name: 'Basemap', exact: true }),
+    page.getByRole('button', { name: 'Basemaps', exact: true }),
+    page.getByRole('button', { name: 'Background map', exact: true }),
+    page.getByRole('button', { name: 'Background maps', exact: true }),
+    page.getByRole('button', { name: 'Carto Light', exact: true }),
+    page.getByRole('button', { name: 'OpenStreetMap', exact: true })
+  ];
+
+  const openStreetMapLabel = page.getByText('OpenStreetMap', { exact: true }).first();
+  const cartoLightLabel = page.getByText('Carto Light', { exact: true }).first();
+
+  const layerSwitcherIndicator = await pickVisible([
+    ...baseMapSelectorToggleCandidates,
+    cartoLightLabel
+  ]);
+  await expect(layerSwitcherIndicator).toBeVisible();
+
+  if (!(await openStreetMapLabel.isVisible())) {
+    const selectorToggle = await pickVisible(baseMapSelectorToggleCandidates);
+    await expect(selectorToggle).toBeVisible();
+    await selectorToggle.click();
+  }
+
+  await expect(openStreetMapLabel).toBeVisible();
+  await expect(cartoLightLabel).toBeVisible();
+
+  const cartoLightState = await pickExisting([
+    page.getByRole('radio', { name: 'Carto Light', exact: true }),
+    page.getByRole('menuitemradio', { name: 'Carto Light', exact: true }),
+    page.getByRole('option', { name: 'Carto Light', exact: true }),
+    page.getByRole('button', { name: 'Carto Light', exact: true })
+  ]);
+
+  const openStreetMapState = await pickExisting([
+    page.getByRole('radio', { name: 'OpenStreetMap', exact: true }),
+    page.getByRole('menuitemradio', { name: 'OpenStreetMap', exact: true }),
+    page.getByRole('option', { name: 'OpenStreetMap', exact: true }),
+    page.getByRole('button', { name: 'OpenStreetMap', exact: true })
+  ]);
+
+  await expect.poll(async () => await cartoLightState.count()).toBe(1);
+  await expect.poll(async () => await openStreetMapState.count()).toBe(1);
+
+  await expect.poll(() => getSelectionState(cartoLightState)).toBe(true);
+  await expect.poll(() => getSelectionState(openStreetMapState)).toBe(false);
+
+  await openStreetMapState.click({ force: true });
+
+  if (!(await cartoLightLabel.isVisible())) {
+    const reopenToggle = await pickVisible(baseMapSelectorToggleCandidates);
+    await expect(reopenToggle).toBeVisible();
+    await reopenToggle.click();
+    await expect(cartoLightLabel).toBeVisible();
+  }
+
+  await expect.poll(() => getSelectionState(openStreetMapState)).toBe(true);
+  await expect.poll(() => getSelectionState(cartoLightState)).toBe(false);
+});

@@ -1,0 +1,357 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const findFirstVisible = async (candidates: Array<ReturnType<typeof page.locator>>, description: string) => {
+    for (const candidate of candidates) {
+      if ((await candidate.count()) > 0) {
+        const first = candidate.first();
+        try {
+          await expect(first).toBeVisible({ timeout: 3000 });
+          return first;
+        } catch {
+          // try next candidate
+        }
+      }
+    }
+    throw new Error(`Could not find visible ${description}.`);
+  };
+
+  const clickToggle = async (toggle: ReturnType<typeof page.locator>) => {
+    const role = await toggle.getAttribute('role');
+    if (role === 'checkbox' || role === 'switch' || role === 'radio') {
+      await toggle.click({ force: true });
+    } else {
+      await toggle.click();
+    }
+  };
+
+  const assertToggleState = async (toggle: ReturnType<typeof page.locator>, expectedChecked: boolean) => {
+    const role = await toggle.getAttribute('role');
+    if (role === 'checkbox' || role === 'switch' || role === 'radio') {
+      if (expectedChecked) {
+        await expect(toggle).toBeChecked();
+      } else {
+        await expect(toggle).not.toBeChecked();
+      }
+      return;
+    }
+
+    if (expectedChecked) {
+      await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    } else {
+      await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    }
+  };
+
+  const toNumber = (value: unknown): number | undefined => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string' && value.trim() !== '') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return undefined;
+  };
+
+  const extractFirstCoordinate = (value: unknown): { lat: number; lon: number } | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length >= 2) {
+        const lon = toNumber(value[0]);
+        const lat = toNumber(value[1]);
+        if (
+          lon !== undefined &&
+          lat !== undefined &&
+          Math.abs(lon) <= 180 &&
+          Math.abs(lat) <= 90
+        ) {
+          return { lat, lon };
+        }
+      }
+
+      for (const item of value) {
+        const nested = extractFirstCoordinate(item);
+        if (nested) {
+          return nested;
+        }
+      }
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+
+      const lat = toNumber(record.lat ?? record.latitude);
+      const lon = toNumber(record.lon ?? record.lng ?? record.longitude ?? record.long);
+      if (lat !== undefined && lon !== undefined) {
+        return { lat, lon };
+      }
+
+      const geometry = record.geometry;
+      if (geometry && typeof geometry === 'object') {
+        const coordinates = (geometry as Record<string, unknown>).coordinates;
+        if (Array.isArray(coordinates) && coordinates.length >= 2) {
+          const lonFromGeometry = toNumber(coordinates[0]);
+          const latFromGeometry = toNumber(coordinates[1]);
+          if (
+            lonFromGeometry !== undefined &&
+            latFromGeometry !== undefined &&
+            Math.abs(lonFromGeometry) <= 180 &&
+            Math.abs(latFromGeometry) <= 90
+          ) {
+            return { lat: latFromGeometry, lon: lonFromGeometry };
+          }
+        }
+      }
+
+      for (const child of Object.values(record)) {
+        const nested = extractFirstCoordinate(child);
+        if (nested) {
+          return nested;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  const getForecastRequestCoordinate = (urlString: string | undefined): { lat: number; lon: number } | undefined => {
+    if (!urlString) {
+      return undefined;
+    }
+
+    try {
+      const url = new URL(urlString);
+      const lat = toNumber(url.searchParams.get('lat') ?? url.searchParams.get('latitude'));
+      const lon = toNumber(
+        url.searchParams.get('lon') ??
+          url.searchParams.get('lng') ??
+          url.searchParams.get('longitude') ??
+          url.searchParams.get('long')
+      );
+
+      if (lat !== undefined && lon !== undefined) {
+        return { lat, lon };
+      }
+    } catch {
+      // ignore unparsable URL
+    }
+
+    return undefined;
+  };
+
+  const findTwentyFourEntryCollection = (value: unknown): number | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return 24;
+      }
+      for (const item of value) {
+        const nested = findTwentyFourEntryCollection(item);
+        if (nested === 24) {
+          return 24;
+        }
+      }
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      for (const child of Object.values(value as Record<string, unknown>)) {
+        const nested = findTwentyFourEntryCollection(child);
+        if (nested === 24) {
+          return 24;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  const temperatureToggle = await findFirstVisible(
+    [
+      page.getByRole('checkbox', { name: /temperature/i }),
+      page.getByRole('switch', { name: /temperature/i }),
+      page.getByRole('button', { name: /temperature/i })
+    ],
+    'Temperature overlay toggle'
+  );
+
+  const precipitationToggle = await findFirstVisible(
+    [
+      page.getByRole('checkbox', { name: /precipitation/i }),
+      page.getByRole('switch', { name: /precipitation/i }),
+      page.getByRole('button', { name: /precipitation/i })
+    ],
+    'Precipitation overlay toggle'
+  );
+
+  const searchField = await findFirstVisible(
+    [
+      page.getByRole('combobox', { name: /search|location|place/i }),
+      page.getByRole('searchbox', { name: /search|location|place/i }),
+      page.getByRole('textbox', { name: /search|location|place/i }),
+      page.getByRole('combobox').first(),
+      page.getByRole('searchbox').first(),
+      page.getByRole('textbox').first()
+    ],
+    'search field'
+  );
+
+  const infoPanelIndicator = await findFirstVisible(
+    [
+      page.getByRole('complementary', { name: /info|information|weather|forecast/i }),
+      page.getByRole('region', { name: /info|information|weather|forecast/i }),
+      page.getByRole('heading', { name: /weather forecast|forecast|weather/i })
+    ],
+    'info panel'
+  );
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(precipitationToggle).toBeVisible();
+  await expect(searchField).toBeVisible();
+  await expect(infoPanelIndicator).toBeVisible();
+
+  const measurementCandidates = [
+    page.getByRole('button', { name: /measure|measurement/i }),
+    page.getByRole('switch', { name: /measure|measurement/i }),
+    page.getByRole('checkbox', { name: /measure|measurement/i })
+  ];
+
+  for (const candidate of measurementCandidates) {
+    if ((await candidate.count()) > 0) {
+      const measurementControl = candidate.first();
+      if (await measurementControl.isVisible()) {
+        const role = await measurementControl.getAttribute('role');
+        if (role === 'checkbox' || role === 'switch' || role === 'radio') {
+          await expect(measurementControl).not.toBeChecked();
+        } else {
+          await expect(measurementControl).not.toHaveAttribute('aria-pressed', 'true');
+        }
+        break;
+      }
+    }
+  }
+
+  await assertToggleState(temperatureToggle, true);
+  await assertToggleState(precipitationToggle, false);
+
+  await clickToggle(temperatureToggle);
+  await assertToggleState(temperatureToggle, false);
+
+  await clickToggle(precipitationToggle);
+  await assertToggleState(precipitationToggle, true);
+
+  const query = 'Münster';
+  let geocoderPayload: unknown;
+
+  page.on('response', (response) => {
+    if (response.request().method() !== 'GET' || response.status() !== 200) {
+      return;
+    }
+
+    let isGeocoderResponse = /geocod|nominatim|photon/i.test(response.url());
+
+    if (!isGeocoderResponse) {
+      try {
+        const url = new URL(response.url());
+        const q =
+          url.searchParams.get('q') ??
+          url.searchParams.get('query') ??
+          url.searchParams.get('text') ??
+          url.searchParams.get('search');
+        isGeocoderResponse = !!q && q.toLowerCase().includes(query.toLowerCase());
+      } catch {
+        isGeocoderResponse = false;
+      }
+    }
+
+    if (isGeocoderResponse) {
+      void response
+        .json()
+        .then((json) => {
+          geocoderPayload = json;
+        })
+        .catch(() => {
+          // ignore non-JSON responses
+        });
+    }
+  });
+
+  await searchField.click();
+  await searchField.fill(query);
+
+  const resultList = page.getByRole('listbox');
+  if ((await resultList.count()) > 0) {
+    await expect(resultList.first()).toBeVisible();
+  }
+
+  const searchResults = page.getByRole('option');
+  await expect.poll(async () => await searchResults.count()).toBeGreaterThan(0);
+
+  const firstSearchResult = searchResults.first();
+  await expect(firstSearchResult).toBeVisible();
+
+  let forecastRequestUrl: string | undefined;
+  page.on('request', (request) => {
+    if (/forecast|weather/i.test(request.url())) {
+      forecastRequestUrl = request.url();
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse(
+    (response) =>
+      /forecast|weather/i.test(response.url()) &&
+      response.request().method() === 'GET' &&
+      response.status() === 200
+  );
+
+  await firstSearchResult.click();
+
+  await expect(searchField).toHaveValue(/münster/i);
+
+  const forecastResponse = await forecastResponsePromise;
+
+  await expect.poll(() => forecastRequestUrl).toMatch(/forecast|weather/i);
+
+  await expect
+    .poll(() => {
+      const coords = getForecastRequestCoordinate(forecastRequestUrl);
+      return coords ? `${coords.lat},${coords.lon}` : '';
+    })
+    .toMatch(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/);
+
+  const searchedLocation = extractFirstCoordinate(geocoderPayload);
+  if (searchedLocation) {
+    await expect
+      .poll(() => {
+        const forecastCoords = getForecastRequestCoordinate(forecastRequestUrl);
+        if (!forecastCoords) {
+          return Number.POSITIVE_INFINITY;
+        }
+        return Math.max(
+          Math.abs(forecastCoords.lat - searchedLocation.lat),
+          Math.abs(forecastCoords.lon - searchedLocation.lon)
+        );
+      })
+      .toBeLessThan(0.5);
+  }
+
+  const forecastHeading = await findFirstVisible(
+    [
+      page.getByRole('heading', { name: /weather forecast/i }),
+      page.getByRole('heading', { name: /forecast/i })
+    ],
+    'weather forecast heading'
+  );
+
+  await expect(forecastHeading).toBeVisible();
+
+  const forecastPayload = await forecastResponse.json();
+  expect(findTwentyFourEntryCollection(forecastPayload)).toBe(24);
+});

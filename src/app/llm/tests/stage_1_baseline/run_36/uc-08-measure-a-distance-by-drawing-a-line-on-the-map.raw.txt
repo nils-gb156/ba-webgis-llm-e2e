@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementTitle = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const panelVisibleBeforeClick = await measurementTitle.isVisible().catch(() => false);
+  if (!panelVisibleBeforeClick) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementTitle).toBeVisible();
+
+  const panelCandidates = [
+    page.getByRole('dialog').filter({ has: measurementTitle }).first(),
+    page.getByRole('region').filter({ has: measurementTitle }).first(),
+    page.getByRole('complementary').filter({ has: measurementTitle }).first()
+  ];
+
+  let measurementPanel = panelCandidates[0];
+  for (const candidate of panelCandidates) {
+    if (await candidate.isVisible().catch(() => false)) {
+      measurementPanel = candidate;
+      break;
+    }
+  }
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = box!.width;
+  const height = box!.height;
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(width * 0.25),
+      y: Math.round(height * 0.35)
+    }
+  });
+  await mapCanvas.click({
+    position: {
+      x: Math.round(width * 0.45),
+      y: Math.round(height * 0.48)
+    }
+  });
+  await mapCanvas.click({
+    position: {
+      x: Math.round(width * 0.62),
+      y: Math.round(height * 0.40)
+    }
+  });
+  await mapCanvas.dblclick({
+    position: {
+      x: Math.round(width * 0.78),
+      y: Math.round(height * 0.55)
+    }
+  });
+
+  await expect(measurementPanel).toBeVisible();
+  await expect(measurementPanel).toContainText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i);
+});

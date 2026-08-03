@@ -1,0 +1,124 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const temperatureToggle = page.getByRole('checkbox', { name: /temperature/i });
+    const precipitationToggle = page.getByRole('checkbox', { name: /precipitation/i });
+    const searchField = page.getByRole('combobox').first();
+
+    await expect(temperatureToggle).toBeVisible();
+    await expect(precipitationToggle).toBeVisible();
+    await expect(searchField).toBeVisible();
+
+    await expect(temperatureToggle).toBeChecked();
+    await expect(precipitationToggle).not.toBeChecked();
+
+    await temperatureToggle.click({ force: true });
+    await expect(temperatureToggle).not.toBeChecked();
+
+    await precipitationToggle.click({ force: true });
+    await expect(precipitationToggle).toBeChecked();
+
+    await searchField.click();
+    await searchField.fill('Münster');
+
+    const resultList = page.getByRole('listbox');
+    await expect(resultList).toBeVisible();
+
+    let firstResult = resultList.getByRole('option').first();
+    if ((await resultList.getByRole('option').count()) === 0) {
+        firstResult = resultList.getByRole('button').first();
+    }
+
+    await expect(firstResult).toBeVisible();
+    const firstResultText = (await firstResult.innerText()).trim();
+
+    const forecastRequests: string[] = [];
+    page.on('request', request => {
+        if (/forecast/i.test(request.url())) {
+            forecastRequests.push(request.url());
+        }
+    });
+
+    const forecastResponsePromise = page.waitForResponse(response => {
+        return response.ok() && /forecast/i.test(response.url());
+    });
+
+    await firstResult.click();
+
+    await expect(resultList).toBeHidden();
+    await expect(searchField).toHaveValue(/münster/i);
+    await expect.poll(() => forecastRequests.length).toBeGreaterThan(0);
+
+    const forecastResponse = await forecastResponsePromise;
+    const forecastData = await forecastResponse.json();
+
+    const findArrayLength24 = (value: unknown, depth = 0): number | undefined => {
+        if (depth > 8 || value == null) {
+            return undefined;
+        }
+        if (Array.isArray(value)) {
+            return value.length === 24 ? 24 : undefined;
+        }
+        if (typeof value === 'object') {
+            for (const child of Object.values(value as Record<string, unknown>)) {
+                const result = findArrayLength24(child, depth + 1);
+                if (result === 24) {
+                    return result;
+                }
+            }
+        }
+        return undefined;
+    };
+
+    expect(findArrayLength24(forecastData)).toBe(24);
+
+    const forecastHeading = page.getByRole('heading', { name: /forecast|weather|wetter/i }).first();
+    await expect(forecastHeading).toBeVisible();
+
+    await expect.poll(async () => {
+        const visibleTables = page.getByRole('table');
+        const tableCount = await visibleTables.count();
+        for (let i = tableCount - 1; i >= 0; i--) {
+            const table = visibleTables.nth(i);
+            if (!(await table.isVisible())) {
+                continue;
+            }
+            const rowCount = await table.getByRole('row').count();
+            if (rowCount - 1 === 24) {
+                return 24;
+            }
+        }
+
+        const visibleLists = page.getByRole('list');
+        const listCount = await visibleLists.count();
+        for (let i = listCount - 1; i >= 0; i--) {
+            const list = visibleLists.nth(i);
+            if (!(await list.isVisible())) {
+                continue;
+            }
+            const itemCount = await list.getByRole('listitem').count();
+            if (itemCount === 24) {
+                return 24;
+            }
+        }
+
+        const articles = page.getByRole('article');
+        const articleCount = await articles.count();
+        if (articleCount === 24) {
+            return 24;
+        }
+
+        return 0;
+    }).toBe(24);
+
+    if (firstResultText) {
+        await expect(page.getByText(firstResultText, { exact: false }).first()).toBeVisible();
+    }
+
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect(precipitationToggle).toBeChecked();
+});

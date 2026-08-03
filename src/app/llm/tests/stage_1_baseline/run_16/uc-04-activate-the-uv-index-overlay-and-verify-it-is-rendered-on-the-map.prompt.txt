@@ -1,0 +1,28 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map
+
+**Description:** The user activates the initially hidden UV-Index overlay and verifies that the layer is requested and rendered on the map.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The layer switcher (TOC) is visible.
+- The UV-Index overlay layer is initially hidden.
+
+**Steps:**
+
+1. The user clicks the visibility toggle of the UV-Index overlay layer to show it.
+2. The user waits for the map to load the layer tiles.
+
+**Expected results:**
+
+- The UV-Index overlay layer toggle is in the enabled (checked) state.
+- The UV-Index overlay tiles are rendered on the map canvas.
+
+**Complexity:** medium
+
+Return only the test code.

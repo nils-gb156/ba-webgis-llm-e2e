@@ -1,0 +1,27 @@
+Generate a Playwright end-to-end test (TypeScript) for the following use case.
+
+Base URL: http://localhost:5173/ba-webgis-llm-e2e/
+
+Use case:
+## Use Case 1: Show and hide the layer switcher via the toolbar button
+
+**Description:** The user toggles the layer switcher (TOC) panel off and on using the toolbar button.
+
+**Preconditions:**
+
+- The app is loaded successfully.
+- The layer switcher (TOC) is initially visible.
+
+**Steps:**
+
+1. The user clicks the 'Layer Switcher' button in the toolbar to hide the panel.
+2. The user clicks the 'Layer Switcher' button again to show the panel.
+
+**Expected results:**
+
+- After the first click, the layer switcher panel is no longer visible.
+- After the second click, the layer switcher panel is visible again.
+
+**Complexity:** easy
+
+Return only the test code.

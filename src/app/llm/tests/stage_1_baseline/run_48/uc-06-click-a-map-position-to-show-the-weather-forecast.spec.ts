@@ -1,0 +1,149 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+function extractForecastEntryCount(value: unknown): number | undefined {
+    if (value == null) {
+        return undefined;
+    }
+
+    if (Array.isArray(value)) {
+        if (value.length === 24) {
+            return value.length;
+        }
+
+        for (const item of value) {
+            const nestedCount = extractForecastEntryCount(item);
+            if (nestedCount !== undefined) {
+                return nestedCount;
+            }
+        }
+
+        return undefined;
+    }
+
+    if (typeof value !== 'object') {
+        return undefined;
+    }
+
+    const record = value as Record<string, unknown>;
+
+    const preferredCandidates: unknown[] = [
+        typeof record.hourly === 'object' && record.hourly !== null
+            ? (record.hourly as Record<string, unknown>).time
+            : undefined,
+        record.forecast,
+        record.entries,
+        record.list,
+        record.timeseries,
+        typeof record.timelines === 'object' && record.timelines !== null
+            ? (record.timelines as Record<string, unknown>).hourly
+            : undefined,
+        record.data
+    ];
+
+    for (const candidate of preferredCandidates) {
+        if (Array.isArray(candidate) && candidate.length === 24) {
+            return candidate.length;
+        }
+    }
+
+    for (const [key, candidate] of Object.entries(record)) {
+        if (Array.isArray(candidate) && /forecast|hourly|timeseries|entries|list|data/i.test(key) && candidate.length === 24) {
+            return candidate.length;
+        }
+    }
+
+    for (const candidate of Object.values(record)) {
+        const nestedCount = extractForecastEntryCount(candidate);
+        if (nestedCount !== undefined) {
+            return nestedCount;
+        }
+    }
+
+    return undefined;
+}
+
+async function getStableScreenshot(locator: any): Promise<string> {
+    let previous = '';
+
+    await expect
+        .poll(async () => {
+            const current = (await locator.screenshot()).toString('base64');
+            const stable = current === previous ? current : '';
+            previous = current;
+            return stable;
+        })
+        .not.toBe('');
+
+    return previous;
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page).toHaveURL('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const complementaryPanels = page.getByRole('complementary');
+    const infoPanel = (await complementaryPanels.count()) > 0 ? complementaryPanels.first() : page.locator('aside').first();
+    await expect(infoPanel).toBeVisible();
+
+    const mapCanvas = page.locator('canvas').first();
+    await expect(mapCanvas).toBeVisible();
+
+    const beforeClickMapImage = await getStableScreenshot(mapCanvas);
+
+    const weatherRequestUrls: string[] = [];
+    page.on('request', request => {
+        if (/forecast|weather|open-meteo/i.test(request.url())) {
+            weatherRequestUrls.push(request.url());
+        }
+    });
+
+    const forecastResponsePromise = page.waitForResponse(response => {
+        const contentType = response.headers()['content-type'] ?? '';
+        return response.ok()
+            && /forecast|weather|open-meteo/i.test(response.url())
+            && /json/i.test(contentType);
+    });
+
+    const mapBox = await mapCanvas.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map canvas has no bounding box.');
+    }
+
+    await mapCanvas.click({
+        position: {
+            x: mapBox.width * 0.5,
+            y: mapBox.height * 0.5
+        }
+    });
+
+    await expect
+        .poll(async () => (await mapCanvas.screenshot()).toString('base64'))
+        .not.toBe(beforeClickMapImage);
+
+    await expect.poll(() => weatherRequestUrls.length).toBeGreaterThan(0);
+
+    const forecastResponse = await forecastResponsePromise;
+    const forecastJson = await forecastResponse.json();
+    const forecastEntryCount = extractForecastEntryCount(forecastJson);
+    expect(forecastEntryCount).toBe(24);
+
+    await expect
+        .poll(async () => {
+            const heading = page.getByRole('heading', { name: /weather forecast/i });
+            if (await heading.count()) {
+                return await heading.first().isVisible();
+            }
+
+            const text = page.getByText(/weather forecast/i);
+            if (await text.count()) {
+                return await text.first().isVisible();
+            }
+
+            return false;
+        })
+        .toBe(true);
+});

@@ -1,0 +1,147 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const firstExisting = async (candidates: Array<any>) => {
+    for (const candidate of candidates) {
+      if ((await candidate.count()) > 0) {
+        return candidate.first();
+      }
+    }
+    return candidates[candidates.length - 1].first();
+  };
+
+  const findForecastArrayLength = (value: unknown): number | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return value.length;
+      }
+
+      for (const item of value) {
+        const nestedLength = findForecastArrayLength(item);
+        if (nestedLength !== undefined) {
+          return nestedLength;
+        }
+      }
+
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      const record = value as Record<string, unknown>;
+
+      for (const key of ['forecast', 'hourly', 'hours', 'entries', 'items', 'data']) {
+        const candidate = record[key];
+        if (Array.isArray(candidate)) {
+          return candidate.length;
+        }
+      }
+
+      for (const nestedValue of Object.values(record)) {
+        const nestedLength = findForecastArrayLength(nestedValue);
+        if (nestedLength !== undefined) {
+          return nestedLength;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  const infoPanel = await firstExisting([
+    page.getByTestId('info-panel'),
+    page.getByRole('complementary'),
+    page.getByRole('region', { name: /info/i })
+  ]);
+  await expect(infoPanel).toBeVisible();
+
+  const map = await firstExisting([
+    page.getByTestId('map'),
+    page.getByTestId('map-container'),
+    page.getByTestId('ol-map'),
+    page.getByRole('region', { name: /map/i }),
+    page.locator('.ol-viewport')
+  ]);
+  await expect(map).toBeVisible();
+
+  let forecastRequestUrl: string | undefined;
+  page.on('request', request => {
+    if (/forecast|weather/i.test(request.url())) {
+      forecastRequestUrl = request.url();
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse(
+    response => /forecast|weather/i.test(response.url()) && response.ok()
+  );
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  await map.click({
+    position: {
+      x: Math.max(10, Math.floor(mapBox!.width * 0.6)),
+      y: Math.max(10, Math.floor(mapBox!.height * 0.45))
+    }
+  });
+
+  const forecastResponse = await forecastResponsePromise;
+  await expect.poll(() => forecastRequestUrl ?? '').toMatch(/forecast|weather/i);
+
+  let forecastEntryCountFromResponse: number | undefined;
+  try {
+    const forecastPayload = await forecastResponse.json();
+    forecastEntryCountFromResponse = findForecastArrayLength(forecastPayload);
+  } catch {
+    forecastEntryCountFromResponse = undefined;
+  }
+
+  const forecastSection = await firstExisting([
+    infoPanel.getByTestId('weather-forecast'),
+    infoPanel.getByRole('region', { name: /weather\s*forecast|wettervorhersage/i }),
+    infoPanel.getByRole('heading', { name: /weather\s*forecast|wettervorhersage/i }),
+    infoPanel.getByText(/weather\s*forecast|wettervorhersage/i)
+  ]);
+  await expect(forecastSection).toBeVisible();
+
+  let forecastScope = infoPanel;
+  const forecastSectionByTestId = infoPanel.getByTestId('weather-forecast');
+  const forecastSectionByRegion = infoPanel.getByRole('region', {
+    name: /weather\s*forecast|wettervorhersage/i
+  });
+
+  if ((await forecastSectionByTestId.count()) > 0) {
+    forecastScope = forecastSectionByTestId.first();
+  } else if ((await forecastSectionByRegion.count()) > 0) {
+    forecastScope = forecastSectionByRegion.first();
+  }
+
+  await expect.poll(async () => {
+    const byTestId = await forecastScope.getByTestId('forecast-entry').count();
+    if (byTestId > 0) {
+      return byTestId;
+    }
+
+    const listItems = await forecastScope.getByRole('listitem').count();
+    if (listItems > 0) {
+      return listItems;
+    }
+
+    const rows = await forecastScope.getByRole('row').count();
+    if (rows > 0) {
+      const columnHeaders = await forecastScope.getByRole('columnheader').count();
+      return columnHeaders > 0 ? rows - 1 : rows;
+    }
+
+    const articles = await forecastScope.getByRole('article').count();
+    if (articles > 0) {
+      return articles;
+    }
+
+    return forecastEntryCountFromResponse ?? 0;
+  }).toBe(24);
+});

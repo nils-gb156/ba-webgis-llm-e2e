@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({
+  page
+}) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  const mapViewport = page.locator('.ol-viewport').first();
+
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+  await expect(mapViewport).toBeVisible();
+
+  await page.waitForLoadState('networkidle');
+  const mapBefore = await mapViewport.screenshot();
+
+  await uvIndexToggle.click({ force: true });
+  await expect(uvIndexToggle).toBeChecked();
+
+  await page.waitForLoadState('networkidle');
+
+  await expect
+    .poll(async () => {
+      const mapAfter = await mapViewport.screenshot();
+      return mapAfter.equals(mapBefore);
+    })
+    .toBe(false);
+});

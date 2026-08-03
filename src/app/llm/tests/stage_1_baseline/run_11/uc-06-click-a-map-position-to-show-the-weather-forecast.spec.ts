@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+function getForecastEntryCount(data: unknown): number | undefined {
+  if (!data || typeof data !== 'object') {
+    return undefined;
+  }
+
+  const record = data as Record<string, unknown>;
+
+  if (record.hourly && typeof record.hourly === 'object') {
+    const hourly = record.hourly as Record<string, unknown>;
+    for (const key of ['time', 'temperature_2m', 'weathercode', 'weather_code', 'apparent_temperature']) {
+      const value = hourly[key];
+      if (Array.isArray(value)) {
+        return value.length;
+      }
+    }
+    for (const key of ['entries', 'data', 'items']) {
+      const value = hourly[key];
+      if (Array.isArray(value)) {
+        return value.length;
+      }
+    }
+  }
+
+  for (const key of ['forecast', 'entries', 'data', 'items', 'results']) {
+    const value = record[key];
+    if (Array.isArray(value)) {
+      return value.length;
+    }
+  }
+
+  return undefined;
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const infoPanel = page.locator('aside, [role="complementary"]').first();
+  await expect(infoPanel).toBeVisible();
+
+  const map = page.locator('.ol-viewport').first();
+  await expect(map).toBeVisible();
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map viewport is not available.');
+  }
+
+  const beforeClickMapImage = await map.screenshot();
+
+  const forecastUrlPattern = /forecast|weather|open-meteo/i;
+  let forecastRequestUrl: string | undefined;
+
+  page.on('request', (request) => {
+    const url = request.url();
+    if (forecastUrlPattern.test(url)) {
+      forecastRequestUrl = url;
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse((response) => {
+    return forecastUrlPattern.test(response.url()) && response.request().method() === 'GET' && response.ok();
+  });
+
+  await map.click({
+    position: {
+      x: Math.round(mapBox.width * 0.55),
+      y: Math.round(mapBox.height * 0.45)
+    }
+  });
+
+  await expect.poll(() => forecastRequestUrl ?? '').toMatch(forecastUrlPattern);
+
+  const forecastResponse = await forecastResponsePromise;
+  const forecastJson = await forecastResponse.json();
+  expect(getForecastEntryCount(forecastJson)).toBe(24);
+
+  await expect.poll(async () => {
+    const afterClickMapImage = await map.screenshot();
+    return afterClickMapImage.equals(beforeClickMapImage);
+  }).toBe(false);
+
+  const weatherForecastSection = infoPanel.getByText(/weather forecast|forecast/i).first();
+  await expect(weatherForecastSection).toBeVisible();
+});

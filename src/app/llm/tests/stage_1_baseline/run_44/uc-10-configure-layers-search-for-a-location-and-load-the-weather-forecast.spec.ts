@@ -1,0 +1,94 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const getLayerToggle = async (name: string) => {
+    const checkbox = page.getByRole('checkbox', { name, exact: true });
+    if (await checkbox.count()) {
+      return checkbox;
+    }
+
+    const switchToggle = page.getByRole('switch', { name, exact: true });
+    if (await switchToggle.count()) {
+      return switchToggle;
+    }
+
+    return page.getByLabel(name, { exact: true });
+  };
+
+  await expect(page.getByText('Temperature', { exact: true })).toBeVisible();
+  await expect(page.getByText('Precipitation', { exact: true })).toBeVisible();
+
+  const infoPanel = page.getByRole('complementary').first();
+  if (await infoPanel.count()) {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  const measureToggle = page.getByRole('button', { name: /measure/i }).first();
+  if (await measureToggle.count()) {
+    expect(await measureToggle.getAttribute('aria-pressed')).not.toBe('true');
+  }
+
+  const temperatureToggle = await getLayerToggle('Temperature');
+  const precipitationToggle = await getLayerToggle('Precipitation');
+
+  await expect(temperatureToggle).toBeAttached();
+  await expect(precipitationToggle).toBeAttached();
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  let searchField = page.getByRole('combobox', { name: /search|place|address|location/i });
+  if (!(await searchField.count())) {
+    searchField = page.getByRole('combobox').first();
+  }
+  if (!(await searchField.count())) {
+    searchField = page.getByRole('textbox', { name: /search|place|address|location/i }).first();
+  }
+  if (!(await searchField.count())) {
+    searchField = page.getByRole('textbox').first();
+  }
+
+  await expect(searchField).toBeVisible();
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+
+  const selectedResultText = ((await firstResult.textContent()) ?? 'Münster').trim();
+  const selectedResultToken = selectedResultText.split(',')[0]?.trim() || 'Münster';
+  const selectedResultPattern = new RegExp(escapeRegExp(selectedResultToken), 'i');
+
+  const forecastRequestUrls: string[] = [];
+  page.on('request', request => {
+    if (/forecast/i.test(request.url())) {
+      forecastRequestUrls.push(request.url());
+    }
+  });
+
+  await firstResult.click();
+
+  await expect.poll(async () => await searchField.inputValue()).toMatch(selectedResultPattern);
+  await expect.poll(() => forecastRequestUrls.length).toBeGreaterThan(0);
+
+  const forecastHeading = page.getByRole('heading', { name: /weather forecast|forecast/i }).first();
+  await expect(forecastHeading).toBeVisible();
+
+  const forecastEntries = page.getByText(/\b\d{1,2}:\d{2}\b/);
+  await expect.poll(async () => await forecastEntries.count()).toBe(24);
+
+  await expect(temperatureToggle).not.toBeChecked();
+  await expect(precipitationToggle).toBeChecked();
+});

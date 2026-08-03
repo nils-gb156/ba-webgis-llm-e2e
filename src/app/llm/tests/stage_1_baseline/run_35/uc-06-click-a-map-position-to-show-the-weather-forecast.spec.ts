@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.locator('aside, [role="complementary"]').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const forecastRequestPattern = /forecast|weather|open-meteo/i;
+  let forecastRequestUrl: string | undefined;
+
+  page.on('request', request => {
+    const url = request.url();
+    if (forecastRequestPattern.test(url)) {
+      forecastRequestUrl = url;
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse(
+    response => forecastRequestPattern.test(response.url()) && response.ok()
+  );
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(box.width * 0.6),
+      y: Math.round(box.height * 0.4)
+    }
+  });
+
+  const forecastResponse = await forecastResponsePromise;
+  expect(forecastResponse.ok()).toBeTruthy();
+
+  await expect.poll(() => forecastRequestUrl).toMatch(
+    /(?:lat(?:itude)?|lon(?:gitude)?|lng|x|y)=/i
+  );
+
+  await expect(infoPanel).toContainText(/weather forecast/i);
+
+  const forecastData = await forecastResponse.json();
+
+  const forecastEntryCount =
+    Array.isArray(forecastData)
+      ? forecastData.length
+      : Array.isArray(forecastData?.entries)
+        ? forecastData.entries.length
+        : Array.isArray(forecastData?.forecast)
+          ? forecastData.forecast.length
+          : Array.isArray(forecastData?.list)
+            ? forecastData.list.length
+            : Array.isArray(forecastData?.hourly?.time)
+              ? forecastData.hourly.time.length
+              : Array.isArray(forecastData?.hourlyForecast)
+                ? forecastData.hourlyForecast.length
+                : Array.isArray(forecastData?.properties?.timeseries)
+                  ? forecastData.properties.timeseries.length
+                  : undefined;
+
+  expect(forecastEntryCount).toBe(24);
+});

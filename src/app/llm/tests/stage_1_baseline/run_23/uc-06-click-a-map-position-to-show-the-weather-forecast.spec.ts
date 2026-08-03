@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanelCandidates = [
+    page.getByTestId('info-panel'),
+    page.getByTestId('information-panel'),
+    page.getByTestId('details-panel'),
+    page.getByRole('complementary').first(),
+    page.getByRole('region', { name: /information|info|details/i }).first()
+  ];
+
+  let infoPanel = infoPanelCandidates[0];
+  let infoPanelVisible = false;
+
+  for (const candidate of infoPanelCandidates) {
+    try {
+      await expect(candidate).toBeVisible({ timeout: 10000 });
+      infoPanel = candidate;
+      infoPanelVisible = true;
+      break;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  expect(infoPanelVisible).toBeTruthy();
+
+  const mapCandidates = [
+    page.getByTestId('map'),
+    page.getByTestId('map-container'),
+    page.getByTestId('ol-map'),
+    page.locator('canvas').first()
+  ];
+
+  let map = mapCandidates[0];
+  let mapVisible = false;
+
+  for (const candidate of mapCandidates) {
+    try {
+      await expect(candidate).toBeVisible({ timeout: 10000 });
+      map = candidate;
+      mapVisible = true;
+      break;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  expect(mapVisible).toBeTruthy();
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map bounding box is unavailable.');
+  }
+
+  await map.click({
+    position: {
+      x: Math.max(10, Math.floor(mapBox.width * 0.5)),
+      y: Math.max(10, Math.floor(mapBox.height * 0.5))
+    }
+  });
+
+  // The highlighted position is rendered on the map canvas and cannot be asserted
+  // through DOM locators without app-provided map helper functions.
+
+  const forecastSectionCandidates = [
+    infoPanel.getByTestId('weather-forecast'),
+    infoPanel.getByTestId('forecast'),
+    infoPanel.getByRole('region', { name: /weather forecast|wettervorhersage/i }).first(),
+    infoPanel.getByRole('heading', { name: /weather forecast|wettervorhersage/i }).first(),
+    infoPanel.getByText(/weather forecast|wettervorhersage/i).first()
+  ];
+
+  let forecastSection = infoPanel;
+  let forecastSectionVisible = false;
+
+  for (const candidate of forecastSectionCandidates) {
+    try {
+      await expect(candidate).toBeVisible({ timeout: 20000 });
+      forecastSection = candidate;
+      forecastSectionVisible = true;
+      break;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  expect(forecastSectionVisible).toBeTruthy();
+
+  const forecastEntryCandidates = [
+    forecastSection.getByTestId('weather-forecast-entry'),
+    forecastSection.getByTestId(/forecast-entry/i),
+    forecastSection.getByRole('listitem'),
+    forecastSection.getByRole('row'),
+    forecastSection.getByRole('article'),
+    infoPanel.getByTestId('weather-forecast-entry'),
+    infoPanel.getByTestId(/forecast-entry/i),
+    infoPanel.getByRole('listitem'),
+    infoPanel.getByRole('row'),
+    infoPanel.getByRole('article')
+  ];
+
+  let forecastEntriesCounted = false;
+
+  for (const candidate of forecastEntryCandidates) {
+    try {
+      await expect(candidate).toHaveCount(24, { timeout: 20000 });
+      forecastEntriesCounted = true;
+      break;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  expect(forecastEntriesCounted).toBeTruthy();
+});

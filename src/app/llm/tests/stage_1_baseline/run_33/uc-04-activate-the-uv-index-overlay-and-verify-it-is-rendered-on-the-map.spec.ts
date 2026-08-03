@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  const uvIndexSwitch = page.getByRole('switch', { name: 'UV-Index', exact: true });
+
+  await expect
+    .poll(async () => (await uvIndexCheckbox.count()) + (await uvIndexSwitch.count()), {
+      message: 'Expected the UV-Index visibility toggle to be available in the visible layer switcher.'
+    })
+    .toBeGreaterThan(0);
+
+  const uvIndexToggle = (await uvIndexCheckbox.count()) > 0 ? uvIndexCheckbox : uvIndexSwitch;
+
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const mapBeforeEnablingLayer = await mapViewport.screenshot();
+
+  const imageRequestsAfterToggle: string[] = [];
+  let captureRequests = false;
+  page.on('request', request => {
+    if (captureRequests && request.resourceType() === 'image') {
+      imageRequestsAfterToggle.push(request.url());
+    }
+  });
+
+  captureRequests = true;
+  await uvIndexToggle.click({ force: true });
+
+  await expect(uvIndexToggle).toBeChecked();
+
+  await expect
+    .poll(() => imageRequestsAfterToggle.length, {
+      timeout: 15000,
+      message: 'Expected additional map image requests after enabling the UV-Index overlay.'
+    })
+    .toBeGreaterThan(0);
+
+  await expect
+    .poll(async () => {
+      const mapAfterEnablingLayer = await mapViewport.screenshot();
+      return mapAfterEnablingLayer.equals(mapBeforeEnablingLayer);
+    }, {
+      timeout: 15000,
+      message: 'Expected the map canvas to change after the UV-Index overlay was enabled.'
+    })
+    .toBe(false);
+});

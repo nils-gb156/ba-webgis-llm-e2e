@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const complementaryPanels = page.getByRole('complementary');
+  const infoPanel =
+    (await complementaryPanels.count()) > 0 ? complementaryPanels.first() : page.locator('aside').first();
+  await expect(infoPanel).toBeVisible();
+
+  const canvases = page.locator('canvas');
+  const canvasCount = await canvases.count();
+  let mapCanvas = canvases.first();
+
+  for (let i = 0; i < canvasCount; i++) {
+    const candidate = canvases.nth(i);
+    if (await candidate.isVisible()) {
+      mapCanvas = candidate;
+      break;
+    }
+  }
+
+  await expect(mapCanvas).toBeVisible();
+
+  let weatherRequestUrl: string | undefined;
+  page.on('request', request => {
+    if (/(forecast|weather|meteo|wetter)/i.test(request.url())) {
+      weatherRequestUrl = request.url();
+    }
+  });
+
+  const forecastResponsePromise = page
+    .waitForResponse(response => /(forecast|weather|meteo|wetter)/i.test(response.url()) && response.ok())
+    .catch(() => null);
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('No visible map canvas found.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(box.width * 0.5),
+      y: Math.round(box.height * 0.5)
+    }
+  });
+
+  await expect.poll(() => weatherRequestUrl).toMatch(/forecast|weather|meteo|wetter/i);
+  await forecastResponsePromise;
+
+  const forecastHeadingByRole = infoPanel.getByRole('heading', {
+    name: /weather forecast|forecast|wettervorhersage|wetter/i
+  });
+
+  if ((await forecastHeadingByRole.count()) > 0) {
+    await expect(forecastHeadingByRole.first()).toBeVisible();
+  } else {
+    await expect(
+      infoPanel.getByText(/weather forecast|forecast|wettervorhersage|wetter/i).first()
+    ).toBeVisible();
+  }
+
+  const forecastRegion = infoPanel.getByRole('region', {
+    name: /weather forecast|forecast|wettervorhersage|wetter/i
+  });
+  const forecastContainer = (await forecastRegion.count()) > 0 ? forecastRegion.first() : infoPanel;
+
+  await expect.poll(async () => {
+    const listItems = await forecastContainer.getByRole('listitem').count();
+    if (listItems === 24) {
+      return 24;
+    }
+
+    const rows = await forecastContainer.getByRole('row').count();
+    if (rows === 24 || rows === 25) {
+      return 24;
+    }
+
+    const articles = await forecastContainer.getByRole('article').count();
+    if (articles === 24) {
+      return 24;
+    }
+
+    const hourlyTimeLabels = await forecastContainer.getByText(/\b\d{1,2}:\d{2}\b/).count();
+    if (hourlyTimeLabels === 24) {
+      return 24;
+    }
+
+    return Math.max(listItems, rows > 0 ? rows - 1 : 0, articles, hourlyTimeLabels);
+  }).toBe(24);
+});

@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+  await expect(measurementButton).toBeVisible();
+
+  const measurementPanelInitiallyVisible = await measurementHeading.isVisible().catch(() => false);
+  if (!measurementPanelInitiallyVisible) {
+    await measurementButton.click();
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const namedMeasurementPanel = page
+    .getByRole('region', { name: 'Measurement', exact: true })
+    .or(page.getByRole('dialog', { name: 'Measurement', exact: true }))
+    .or(page.getByRole('group', { name: 'Measurement', exact: true }))
+    .first();
+
+  let measurementPanel = namedMeasurementPanel;
+  const namedPanelVisible = await namedMeasurementPanel.isVisible().catch(() => false);
+  if (!namedPanelVisible) {
+    measurementPanel = page
+      .locator('aside, section, [role="region"], [role="dialog"], [role="group"]')
+      .filter({ has: measurementHeading })
+      .first();
+  }
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBox = await mapCanvas.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  const width = Math.round(mapBox!.width);
+  const height = Math.round(mapBox!.height);
+
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.25), y: Math.round(height * 0.35) }
+  });
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.45), y: Math.round(height * 0.4) }
+  });
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.65), y: Math.round(height * 0.5) }
+  });
+  await mapCanvas.dblclick({
+    position: { x: Math.round(width * 0.8), y: Math.round(height * 0.6) }
+  });
+
+  await expect(measurementHeading).toBeVisible();
+
+  const resultScopeVisible = await measurementPanel.isVisible().catch(() => false);
+  const resultScope = resultScopeVisible ? measurementPanel : page.locator('body');
+  await expect(resultScope.getByText(/\b\d+(?:[.,]\d+)?\s?(mm|cm|m|km)\b/i).first()).toBeVisible();
+});

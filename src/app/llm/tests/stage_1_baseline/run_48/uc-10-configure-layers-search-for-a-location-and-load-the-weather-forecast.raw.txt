@@ -1,0 +1,124 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const findNestedArrayOfLength = (value: unknown, length: number): unknown[] | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length === length) {
+        return value;
+      }
+      for (const item of value) {
+        const found = findNestedArrayOfLength(item, length);
+        if (found) {
+          return found;
+        }
+      }
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      for (const nestedValue of Object.values(value as Record<string, unknown>)) {
+        const found = findNestedArrayOfLength(nestedValue, length);
+        if (found) {
+          return found;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  const forecastRequestUrls: string[] = [];
+  page.on('request', request => {
+    if (
+      ['fetch', 'xhr'].includes(request.resourceType()) &&
+      /forecast|weather/i.test(request.url())
+    ) {
+      forecastRequestUrls.push(request.url());
+    }
+  });
+
+  const temperatureLabel = page.getByText(/^(Temperature|Temperatur)$/i).first();
+  const precipitationLabel = page.getByText(/^(Precipitation|Niederschlag)$/i).first();
+
+  await expect(temperatureLabel).toBeVisible();
+  await expect(precipitationLabel).toBeVisible();
+
+  const resolveToggle = async (name: RegExp) => {
+    const checkbox = page.getByRole('checkbox', { name });
+    if ((await checkbox.count()) > 0) {
+      return checkbox.first();
+    }
+    return page.getByRole('switch', { name }).first();
+  };
+
+  const temperatureToggle = await resolveToggle(/temperature|temperatur/i);
+  const precipitationToggle = await resolveToggle(/precipitation|niederschlag/i);
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  const comboboxes = page.getByRole('combobox');
+  const searchField =
+    (await comboboxes.count()) > 0 ? comboboxes.first() : page.getByRole('textbox').first();
+
+  await expect(searchField).toBeVisible();
+
+  const complementaryPanels = page.getByRole('complementary');
+  if ((await complementaryPanels.count()) > 0) {
+    await expect(complementaryPanels.last()).toBeVisible();
+  }
+
+  const measurementButtons = page.getByRole('button', {
+    name: /measure|measurement|messen/i
+  });
+  if ((await measurementButtons.count()) > 0) {
+    await expect.poll(() => measurementButtons.first().getAttribute('aria-pressed')).not.toBe('true');
+  }
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+
+  const forecastRequestCountBeforeSelection = forecastRequestUrls.length;
+  const forecastResponsePromise = page.waitForResponse(response => {
+    return (
+      ['fetch', 'xhr'].includes(response.request().resourceType()) &&
+      /forecast|weather/i.test(response.url()) &&
+      /json/i.test(response.headers()['content-type'] ?? '') &&
+      response.ok()
+    );
+  });
+
+  await firstResult.click();
+
+  await expect(firstResult).toBeHidden();
+  await expect.poll(() => forecastRequestUrls.length).toBeGreaterThan(forecastRequestCountBeforeSelection);
+
+  const forecastResponse = await forecastResponsePromise;
+  let forecastPayload: unknown;
+  try {
+    forecastPayload = await forecastResponse.json();
+  } catch {
+    forecastPayload = undefined;
+  }
+
+  const forecastEntries = findNestedArrayOfLength(forecastPayload, 24);
+  expect(forecastEntries).toBeDefined();
+
+  const forecastHeading = page.getByRole('heading', {
+    name: /weather forecast|forecast|vorhersage|wetter/i
+  }).first();
+  await expect(forecastHeading).toBeVisible();
+});

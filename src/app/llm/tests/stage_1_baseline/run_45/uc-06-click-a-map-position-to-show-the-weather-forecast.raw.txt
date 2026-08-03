@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const waitForFirstVisible = async (candidates: any[]) => {
+    let resolved = candidates[0].first();
+
+    await expect.poll(async () => {
+      for (const candidate of candidates) {
+        const locator = candidate.first();
+        if (await locator.isVisible()) {
+          resolved = locator;
+          return true;
+        }
+      }
+      return false;
+    }).toBe(true);
+
+    return resolved;
+  };
+
+  const infoPanel = await waitForFirstVisible([
+    page.getByTestId('info-panel'),
+    page.getByRole('complementary'),
+    page.getByRole('region', { name: /info|information/i }),
+  ]);
+  await expect(infoPanel).toBeVisible();
+
+  const map = await waitForFirstVisible([
+    page.getByTestId('map'),
+    page.getByTestId('map-container'),
+    page.getByRole('region', { name: /map/i }),
+    page.locator('.ol-viewport'),
+  ]);
+  await expect(map).toBeVisible();
+  await map.scrollIntoViewIfNeeded();
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map is not interactive because its size could not be determined.');
+  }
+
+  const clickX = Math.min(Math.max(20, Math.round(mapBox.width * 0.25)), Math.max(20, Math.round(mapBox.width - 20)));
+  const clickY = Math.min(Math.max(20, Math.round(mapBox.height * 0.5)), Math.max(20, Math.round(mapBox.height - 20)));
+
+  await map.click({
+    position: {
+      x: clickX,
+      y: clickY,
+    },
+  });
+
+  const weatherHeading = await waitForFirstVisible([
+    infoPanel.getByRole('heading', { name: /weather forecast/i }),
+    infoPanel.getByText(/weather forecast/i),
+  ]);
+  await expect(weatherHeading).toBeVisible();
+
+  const weatherSection = await waitForFirstVisible([
+    infoPanel.getByTestId('weather-forecast'),
+    infoPanel.getByRole('region', { name: /weather forecast/i }),
+    infoPanel.locator('section').filter({ has: infoPanel.getByRole('heading', { name: /weather forecast/i }) }),
+    infoPanel.locator('section').filter({ hasText: /weather forecast/i }),
+  ]);
+  await expect(weatherSection).toBeVisible();
+
+  await expect.poll(async () => {
+    const counts = [
+      await weatherSection.getByTestId('weather-forecast-entry').count(),
+      await weatherSection.getByTestId('forecast-entry').count(),
+      await weatherSection.getByRole('listitem').count(),
+      await weatherSection.getByRole('row').count(),
+      await weatherSection.locator('li').count(),
+      await infoPanel.getByTestId('weather-forecast-entry').count(),
+      await infoPanel.getByTestId('forecast-entry').count(),
+    ];
+
+    return counts.includes(24) ? 24 : Math.max(0, ...counts);
+  }).toBe(24);
+});

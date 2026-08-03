@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await expect(measurementButton).toBeVisible();
+
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const panelCandidates = [
+    page.getByTestId('measurement-panel'),
+    page.getByRole('dialog', { name: 'Measurement', exact: true }),
+    page.getByRole('region', { name: 'Measurement', exact: true }),
+    page.getByRole('complementary', { name: 'Measurement', exact: true })
+  ];
+
+  let measurementPanel = panelCandidates[0];
+  let panelAlreadyVisible = false;
+
+  for (const candidate of panelCandidates) {
+    if (await candidate.isVisible().catch(() => false)) {
+      measurementPanel = candidate;
+      panelAlreadyVisible = true;
+      break;
+    }
+  }
+
+  if (!panelAlreadyVisible && !(await measurementHeading.isVisible().catch(() => false))) {
+    await measurementButton.click();
+  }
+
+  let resolvedPanel = false;
+  for (const candidate of panelCandidates) {
+    if (await candidate.isVisible().catch(() => false)) {
+      measurementPanel = candidate;
+      resolvedPanel = true;
+      break;
+    }
+  }
+
+  await expect(measurementHeading).toBeVisible();
+  if (resolvedPanel) {
+    await expect(measurementPanel).toBeVisible();
+  }
+
+  const mapCandidates = [
+    page.getByTestId('map'),
+    page.getByTestId('map-container'),
+    page.getByTestId('ol-map'),
+    page.locator('.ol-viewport').first()
+  ];
+
+  let map = mapCandidates[0];
+  for (const candidate of mapCandidates) {
+    if (await candidate.isVisible().catch(() => false)) {
+      map = candidate;
+      break;
+    }
+  }
+
+  await expect(map).toBeVisible();
+
+  const box = await map.boundingBox();
+  expect(box).not.toBeNull();
+
+  if (!box) {
+    throw new Error('Map container is not available for drawing.');
+  }
+
+  const positions = [
+    { x: Math.round(box.width * 0.28), y: Math.round(box.height * 0.35) },
+    { x: Math.round(box.width * 0.42), y: Math.round(box.height * 0.42) },
+    { x: Math.round(box.width * 0.57), y: Math.round(box.height * 0.49) },
+    { x: Math.round(box.width * 0.72), y: Math.round(box.height * 0.56) }
+  ];
+
+  await map.click({ position: positions[0] });
+  await map.click({ position: positions[1] });
+  await map.click({ position: positions[2] });
+  await map.dblclick({ position: positions[3] });
+
+  const lengthValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km|ft|yd|mi)\b/;
+
+  if (resolvedPanel) {
+    await expect(measurementPanel).toContainText(lengthValuePattern);
+  } else {
+    await expect(page.locator('body')).toContainText(lengthValuePattern);
+  }
+});

@@ -1,0 +1,204 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const parseZoomMetricFromUrl = (url: string): number | undefined => {
+    const extractTrailingNumber = (value: string): number | undefined => {
+      const match = value.match(/(\d+)(?!.*\d)/);
+      return match ? Number(match[1]) : undefined;
+    };
+
+    const extractBboxMetric = (value: string): number | undefined => {
+      const coordinates = value
+        .split(',')
+        .map((part) => Number(part))
+        .filter((part) => !Number.isNaN(part));
+
+      if (coordinates.length !== 4) {
+        return undefined;
+      }
+
+      const spanX = Math.abs(coordinates[2] - coordinates[0]);
+      const spanY = Math.abs(coordinates[3] - coordinates[1]);
+      const span = Math.max(spanX, spanY);
+
+      return span > 0 ? 1 / span : undefined;
+    };
+
+    try {
+      const parsed = new URL(url);
+      const searchParams = parsed.searchParams;
+
+      for (const key of ['z', 'zoom', 'Zoom', 'ZOOM', 'tilematrix', 'tileMatrix', 'TILEMATRIX', 'matrix', 'level', 'lod']) {
+        const value = searchParams.get(key);
+        if (value) {
+          const metric = extractTrailingNumber(value);
+          if (metric !== undefined) {
+            return metric;
+          }
+        }
+      }
+
+      const bbox = searchParams.get('bbox') ?? searchParams.get('BBOX');
+      if (bbox) {
+        const metric = extractBboxMetric(bbox);
+        if (metric !== undefined) {
+          return metric;
+        }
+      }
+
+      const xyzMatch =
+        parsed.pathname.match(/\/(\d+)\/\d+\/\d+(?:\.[^./?#]+)?$/) ??
+        parsed.pathname.match(/\/(\d+)\/\d+\/\d+(?:[/?#]|$)/);
+      if (xyzMatch) {
+        return Number(xyzMatch[1]);
+      }
+    } catch {
+      const zoomParamMatch = url.match(/[?&](?:z|zoom|tilematrix|matrix|level|lod)=([^&]+)/i);
+      if (zoomParamMatch) {
+        const metric = extractTrailingNumber(decodeURIComponent(zoomParamMatch[1]));
+        if (metric !== undefined) {
+          return metric;
+        }
+      }
+
+      const bboxMatch = url.match(/[?&]bbox=([^&]+)/i);
+      if (bboxMatch) {
+        return extractBboxMetric(decodeURIComponent(bboxMatch[1]));
+      }
+
+      const xyzMatch = url.match(/\/(\d+)\/\d+\/\d+(?:\.[^./?#]+)?(?:[?#]|$)/);
+      if (xyzMatch) {
+        return Number(xyzMatch[1]);
+      }
+    }
+
+    return undefined;
+  };
+
+  const getMetrics = (urls: string[]): number[] =>
+    urls
+      .map((url) => parseZoomMetricFromUrl(url))
+      .filter((metric): metric is number => metric !== undefined);
+
+  const getRepresentativeMetric = (urls: string[]): number | undefined => {
+    const metrics = getMetrics(urls);
+    if (metrics.length === 0) {
+      return undefined;
+    }
+
+    const sorted = [...metrics].sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length / 2)];
+  };
+
+  const getAllResourceUrls = async (): Promise<string[]> => {
+    return await page.evaluate(() =>
+      performance.getEntriesByType('resource').map((entry: any) => entry.name)
+    );
+  };
+
+  const getNewResourceUrls = async (startIndex: number): Promise<string[]> => {
+    return await page.evaluate(
+      (start) => performance.getEntriesByType('resource').slice(start).map((entry: any) => entry.name),
+      startIndex
+    );
+  };
+
+  const zoomInButton = page.getByTitle('Zoom in');
+  const zoomOutButton = page.getByTitle('Zoom out');
+  const mapCanvas = page.locator('canvas').first();
+
+  await page.waitForLoadState('domcontentloaded');
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+  await page.waitForLoadState('networkidle');
+
+  let initialMetric: number | undefined;
+  await expect
+    .poll(async () => {
+      initialMetric = getRepresentativeMetric(await getAllResourceUrls());
+      return initialMetric !== undefined;
+    }, { timeout: 15000 })
+    .toBe(true);
+
+  if (initialMetric === undefined) {
+    throw new Error('Could not determine the initial map zoom metric from network resources.');
+  }
+
+  const observedRequestUrls: string[] = [];
+  page.on('request', (request) => {
+    observedRequestUrls.push(request.url());
+  });
+
+  const beforeZoomInScreenshot = await mapCanvas.screenshot();
+
+  const zoomInRequestStart = observedRequestUrls.length;
+  const zoomInResourceStart = await page.evaluate(() => performance.getEntriesByType('resource').length);
+
+  await zoomInButton.click();
+  await page.waitForLoadState('networkidle');
+
+  let afterZoomInScreenshot = beforeZoomInScreenshot;
+  await expect
+    .poll(async () => {
+      afterZoomInScreenshot = await mapCanvas.screenshot();
+      return !beforeZoomInScreenshot.equals(afterZoomInScreenshot);
+    }, { timeout: 15000 })
+    .toBe(true);
+
+  let zoomInMetric: number | undefined;
+  await expect
+    .poll(async () => {
+      const phaseUrls = [
+        ...observedRequestUrls.slice(zoomInRequestStart),
+        ...(await getNewResourceUrls(zoomInResourceStart))
+      ];
+      const higherMetrics = getMetrics(phaseUrls).filter((metric) => metric > initialMetric!);
+      zoomInMetric = higherMetrics.length > 0 ? Math.max(...higherMetrics) : undefined;
+      return zoomInMetric !== undefined;
+    }, { timeout: 15000 })
+    .toBe(true);
+
+  if (zoomInMetric === undefined) {
+    throw new Error('Could not determine a higher zoom metric after clicking the zoom in button.');
+  }
+
+  expect(zoomInMetric).toBeGreaterThan(initialMetric);
+
+  const zoomOutRequestStart = observedRequestUrls.length;
+  const zoomOutResourceStart = await page.evaluate(() => performance.getEntriesByType('resource').length);
+
+  await zoomOutButton.click();
+  await page.waitForLoadState('networkidle');
+
+  let afterZoomOutScreenshot = afterZoomInScreenshot;
+  await expect
+    .poll(async () => {
+      afterZoomOutScreenshot = await mapCanvas.screenshot();
+      return !afterZoomInScreenshot.equals(afterZoomOutScreenshot);
+    }, { timeout: 15000 })
+    .toBe(true);
+
+  let zoomOutMetric: number | undefined;
+  await expect
+    .poll(async () => {
+      const phaseUrls = [
+        ...observedRequestUrls.slice(zoomOutRequestStart),
+        ...(await getNewResourceUrls(zoomOutResourceStart))
+      ];
+      const lowerMetrics = getMetrics(phaseUrls).filter((metric) => metric < zoomInMetric!);
+      zoomOutMetric = lowerMetrics.length > 0 ? Math.min(...lowerMetrics) : undefined;
+      return zoomOutMetric !== undefined;
+    }, { timeout: 15000 })
+    .toBe(true);
+
+  if (zoomOutMetric === undefined) {
+    throw new Error('Could not determine a lower zoom metric after clicking the zoom out button.');
+  }
+
+  expect(zoomOutMetric).toBeLessThan(zoomInMetric);
+});

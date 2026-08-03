@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true }).first();
+  const measurementPanelHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const measurementPanelContainer = page
+    .getByRole('dialog', { name: 'Measurement', exact: true })
+    .or(page.getByRole('region', { name: 'Measurement', exact: true }))
+    .or(page.getByRole('complementary', { name: 'Measurement', exact: true }))
+    .first();
+  const measurementPanelMarker = measurementPanelContainer.or(measurementPanelHeading).first();
+
+  await expect(measurementButton).toBeVisible();
+
+  if (!(await measurementPanelMarker.isVisible())) {
+    await measurementButton.click();
+  }
+
+  await expect(measurementPanelMarker).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+  await mapCanvas.scrollIntoViewIfNeeded();
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const points = [
+    { x: Math.round(box.width * 0.25), y: Math.round(box.height * 0.35) },
+    { x: Math.round(box.width * 0.4), y: Math.round(box.height * 0.45) },
+    { x: Math.round(box.width * 0.58), y: Math.round(box.height * 0.52) },
+    { x: Math.round(box.width * 0.72), y: Math.round(box.height * 0.62) }
+  ];
+
+  await mapCanvas.click({ position: points[0] });
+  await mapCanvas.click({ position: points[1] });
+  await mapCanvas.click({ position: points[2] });
+  await mapCanvas.dblclick({ position: points[3] });
+
+  const resultTextSource = (await measurementPanelContainer.isVisible())
+    ? measurementPanelContainer
+    : page.locator('body');
+
+  const resultPattern = (await measurementPanelContainer.isVisible())
+    ? /\b([0-9]+(?:[.,][0-9]+)?)\s*(mm|cm|m|km)\b/i
+    : /(?:Length|Distance)\s*:?\s*([0-9]+(?:[.,][0-9]+)?)\s*(mm|cm|m|km)\b/i;
+
+  await expect.poll(async () => {
+    const text = (await resultTextSource.textContent()) ?? '';
+    const match = text.match(resultPattern);
+    if (!match) {
+      return 0;
+    }
+    return Number.parseFloat(match[1].replace(',', '.'));
+  }).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const text = (await resultTextSource.textContent()) ?? '';
+    const match = text.match(resultPattern);
+    return match?.[2]?.toLowerCase() ?? '';
+  }).toMatch(/^(mm|cm|m|km)$/);
+});

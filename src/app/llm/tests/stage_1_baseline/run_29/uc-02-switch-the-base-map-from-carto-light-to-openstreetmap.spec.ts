@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const isVisible = async (locator) => {
+    try {
+      return await locator.first().isVisible();
+    } catch {
+      return false;
+    }
+  };
+
+  const baseMapToggle = page.getByRole('button', {
+    name: /^(Base maps|Basemaps|Base map|Background maps|Background map)$/i
+  });
+  const baseMapCombobox = page.getByRole('combobox', {
+    name: /^(Base maps|Basemaps|Base map|Background maps|Background map)$/i
+  });
+  const cartoRadio = page.getByRole('radio', { name: 'Carto Light', exact: true });
+  const osmRadio = page.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+
+  await expect.poll(async () => {
+    return (await isVisible(baseMapToggle)) || (await isVisible(baseMapCombobox)) || (await isVisible(cartoRadio));
+  }).toBe(true);
+
+  if (!(await isVisible(cartoRadio)) && (await isVisible(baseMapToggle))) {
+    const expanded = await baseMapToggle.first().getAttribute('aria-expanded');
+    if (expanded !== 'true') {
+      await baseMapToggle.first().click();
+    }
+  }
+
+  if (await isVisible(baseMapCombobox)) {
+    await baseMapCombobox.first().click();
+  }
+
+  await expect.poll(async () => {
+    return (await isVisible(cartoRadio)) || (await isVisible(baseMapCombobox));
+  }).toBe(true);
+
+  if (await isVisible(cartoRadio)) {
+    await expect(cartoRadio).toBeChecked();
+    await expect(osmRadio).not.toBeChecked();
+
+    await osmRadio.click({ force: true });
+
+    await expect(osmRadio).toBeChecked();
+    await expect(cartoRadio).not.toBeChecked();
+  } else {
+    await expect(baseMapCombobox).toBeVisible();
+
+    await expect.poll(async () => {
+      return await baseMapCombobox.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return select.selectedOptions[0]?.textContent?.trim() ?? '';
+      });
+    }).toBe('Carto Light');
+
+    await baseMapCombobox.selectOption({ label: 'OpenStreetMap' });
+
+    await expect.poll(async () => {
+      return await baseMapCombobox.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return select.selectedOptions[0]?.textContent?.trim() ?? '';
+      });
+    }).toBe('OpenStreetMap');
+
+    await expect.poll(async () => {
+      return await baseMapCombobox.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        return select.selectedOptions[0]?.textContent?.trim() ?? '';
+      });
+    }).not.toBe('Carto Light');
+  }
+});

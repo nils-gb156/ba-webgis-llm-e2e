@@ -1,0 +1,117 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.getByRole('complementary');
+  if ((await infoPanel.count()) > 0) {
+    await expect(infoPanel.first()).toBeVisible();
+  }
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const weatherRequests: string[] = [];
+  page.on('request', request => {
+    if (/weather|forecast|meteo/i.test(request.url())) {
+      weatherRequests.push(request.url());
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse(response => {
+    const contentType = response.headers()['content-type'] ?? '';
+    return /weather|forecast|meteo/i.test(response.url()) && /json/i.test(contentType) && response.ok();
+  });
+
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.max(10, Math.floor(mapBox.width / 2)),
+      y: Math.max(10, Math.floor(mapBox.height / 2))
+    }
+  });
+
+  const forecastResponse = await forecastResponsePromise;
+
+  await expect.poll(() => weatherRequests.length).toBeGreaterThan(0);
+  await expect.poll(() => weatherRequests[weatherRequests.length - 1] ?? '').toMatch(/weather|forecast|meteo/i);
+
+  const forecastPayload: unknown = await forecastResponse.json();
+
+  const hasArrayWith24Entries = (value: unknown): boolean => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return true;
+      }
+      return value.some(item => hasArrayWith24Entries(item));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.values(value as Record<string, unknown>).some(item => hasArrayWith24Entries(item));
+    }
+
+    return false;
+  };
+
+  expect(hasArrayWith24Entries(forecastPayload)).toBeTruthy();
+
+  const forecastHeading = page.getByRole('heading', { name: /weather forecast|forecast/i }).first();
+  await expect(forecastHeading).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        const headings = Array.from(
+          document.querySelectorAll('h1, h2, h3, h4, h5, h6, [role="heading"]')
+        );
+        const heading = headings.find(element =>
+          /weather forecast|forecast/i.test((element.textContent ?? '').trim())
+        );
+
+        if (!heading) {
+          return 0;
+        }
+
+        const getCandidateCounts = (container: Element): number[] => {
+          const listItemRoles = container.querySelectorAll('[role="listitem"]').length;
+          const listItems = container.querySelectorAll('li').length;
+          const tableRows = Array.from(container.querySelectorAll('tr')).filter(
+            row => !row.closest('thead')
+          ).length;
+          const ariaRows = Array.from(container.querySelectorAll('[role="row"]')).filter(
+            row => !row.querySelector('[role="columnheader"], [role="rowheader"]')
+          ).length;
+          const articles = container.querySelectorAll('article').length;
+
+          return [listItemRoles, listItems, tableRows, ariaRows, articles];
+        };
+
+        let current: Element | null = heading.parentElement;
+        let best = 0;
+
+        while (current) {
+          const counts = getCandidateCounts(current);
+
+          if (counts.includes(24)) {
+            return 24;
+          }
+
+          best = Math.max(best, ...counts);
+          current = current.parentElement;
+        }
+
+        return best;
+      });
+    })
+    .toBe(24);
+
+  // The highlighted map position itself is rendered on the map canvas and cannot be
+  // asserted through DOM locators in this application without dedicated map helpers.
+});

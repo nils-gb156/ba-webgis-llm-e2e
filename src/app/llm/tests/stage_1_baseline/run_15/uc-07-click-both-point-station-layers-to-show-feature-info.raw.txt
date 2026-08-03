@@ -1,0 +1,97 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapCandidates = [
+    page.getByTestId('map'),
+    page.getByTestId('map-container'),
+    page.getByTestId('ol-map'),
+    page.locator('.ol-viewport')
+  ];
+
+  let map = mapCandidates[mapCandidates.length - 1].first();
+  for (const candidate of mapCandidates) {
+    if ((await candidate.count()) > 0) {
+      map = candidate.first();
+      break;
+    }
+  }
+
+  await expect(map).toBeVisible();
+
+  const infoPanelCandidates = [
+    page.getByTestId('info-panel'),
+    page.getByTestId('feature-info-panel'),
+    page.getByRole('region', { name: /info/i }),
+    page.getByRole('complementary', { name: /info/i })
+  ];
+
+  let infoPanel = undefined as ReturnType<typeof page.getByTestId> | undefined;
+  for (const candidate of infoPanelCandidates) {
+    if ((await candidate.count()) > 0) {
+      infoPanel = candidate.first();
+      break;
+    }
+  }
+
+  if (infoPanel) {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  for (const layerName of ['UV-Index Stations', 'EUCOS Ground Stations']) {
+    const layerCheckbox = page.getByRole('checkbox', { name: layerName, exact: true });
+    if ((await layerCheckbox.count()) > 0) {
+      if (!(await layerCheckbox.isChecked())) {
+        await layerCheckbox.click({ force: true });
+      }
+      await expect(layerCheckbox).toBeChecked();
+    }
+  }
+
+  for (const measureName of ['Measure', 'Measurement']) {
+    const measureToggle = page.getByRole('button', { name: measureName, exact: true });
+    if ((await measureToggle.count()) > 0) {
+      const pressed = await measureToggle.first().getAttribute('aria-pressed');
+      if (pressed === 'true') {
+        await measureToggle.first().click();
+        await expect(measureToggle.first()).toHaveAttribute('aria-pressed', 'false');
+      }
+      break;
+    }
+  }
+
+  const getFeatureInfoRequests: string[] = [];
+  page.on('request', request => {
+    if (/GetFeatureInfo/i.test(request.url())) {
+      getFeatureInfoRequests.push(request.url());
+    }
+  });
+
+  const mapBox = await map.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await map.click({
+    position: {
+      x: Math.floor(mapBox.width / 2),
+      y: Math.floor(mapBox.height / 2)
+    }
+  });
+
+  await expect.poll(() => getFeatureInfoRequests.length).toBeGreaterThan(0);
+
+  const infoScope = infoPanel ?? page;
+
+  await expect(
+    infoScope.getByRole('heading', { name: 'UV-Index Station', exact: true })
+  ).toBeVisible();
+
+  await expect(
+    infoScope.getByRole('heading', { name: 'EUCOS Ground Station', exact: true })
+  ).toBeVisible();
+});

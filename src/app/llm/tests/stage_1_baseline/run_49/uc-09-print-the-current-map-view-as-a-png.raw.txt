@@ -1,0 +1,91 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapCanvas = page.locator('canvas').first();
+    await expect(mapCanvas).toBeVisible();
+
+    const scaleBar = page.locator('.ol-scale-line, .ol-scale-bar, .ol-scale-line-inner').first();
+    await expect(scaleBar).toBeVisible();
+
+    const printMapToggle = page.getByRole('button', { name: 'Print Map', exact: true }).first();
+    await expect(printMapToggle).toBeVisible();
+    await expect(printMapToggle).toBeEnabled();
+
+    const titleInput = page.getByRole('textbox', { name: /title/i }).first();
+    if (!(await titleInput.isVisible())) {
+        const pressed = await printMapToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await printMapToggle.click();
+        }
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Current map view');
+
+    const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+    if ((await pngRadio.count()) > 0) {
+        const visiblePngRadio = pngRadio.first();
+        await expect(visiblePngRadio).toBeVisible();
+        await visiblePngRadio.click({ force: true });
+        await expect(visiblePngRadio).toBeChecked();
+    } else {
+        const formatCombobox = page.getByRole('combobox', { name: /format/i });
+        if ((await formatCombobox.count()) > 0) {
+            const visibleFormatCombobox = formatCombobox.first();
+            await expect(visibleFormatCombobox).toBeVisible();
+            await visibleFormatCombobox.selectOption({ label: 'PNG' });
+            await expect(visibleFormatCombobox).toHaveValue(/png/i);
+        } else {
+            const formatField = page.getByLabel(/format/i).first();
+            await expect(formatField).toBeVisible();
+            await formatField.selectOption({ label: 'PNG' });
+            await expect(formatField).toHaveValue(/png/i);
+        }
+    }
+
+    const actionButtons = page.getByRole('button', { name: /print|export|download/i });
+    let exportButton = actionButtons.first();
+    for (let index = 0; index < await actionButtons.count(); index++) {
+        const candidate = actionButtons.nth(index);
+        if (!(await candidate.isVisible())) {
+            continue;
+        }
+        const pressed = await candidate.getAttribute('aria-pressed');
+        if (pressed === null) {
+            exportButton = candidate;
+            break;
+        }
+    }
+
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const stats = await fs.stat(downloadPath);
+        expect(stats.size).toBeGreaterThan(10_000);
+
+        const fileContent = await fs.readFile(downloadPath);
+        const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+        expect(fileContent.subarray(0, 8).equals(pngSignature)).toBe(true);
+    }
+
+    await expect(titleInput).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+});

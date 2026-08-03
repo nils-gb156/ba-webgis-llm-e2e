@@ -1,0 +1,114 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.locator('aside, [role="complementary"]').first();
+  await expect(infoPanel).toBeVisible();
+
+  const openLayersViewport = page.locator('.ol-viewport').first();
+  const mapContainer = (await openLayersViewport.count()) > 0 ? openLayersViewport : page.locator('canvas').first();
+  await expect(mapContainer).toBeVisible();
+
+  const mapCanvas =
+    (await mapContainer.locator('canvas').count()) > 0 ? mapContainer.locator('canvas').first() : page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const weatherRequestUrls: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url();
+    if (/(forecast|weather|meteo)/i.test(url) && ['fetch', 'xhr'].includes(request.resourceType())) {
+      weatherRequestUrls.push(url);
+    }
+  });
+
+  const weatherResponsePromise = page.waitForResponse(
+    (response) =>
+      /(forecast|weather|meteo)/i.test(response.url()) &&
+      ['fetch', 'xhr'].includes(response.request().resourceType()) &&
+      response.ok()
+  );
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  await mapContainer.click({
+    position: {
+      x: Math.round(box.width * 0.4),
+      y: Math.round(box.height * 0.4)
+    }
+  });
+
+  await weatherResponsePromise;
+  await expect.poll(() => weatherRequestUrls.length).toBeGreaterThan(0);
+
+  const forecastLabel = infoPanel.getByText(/weather\s*forecast|wettervorhersage|forecast/i).first();
+  await expect(forecastLabel).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      return await page.evaluate(() => {
+        const visible = (el: Element) => {
+          const htmlEl = el as HTMLElement;
+          const style = window.getComputedStyle(htmlEl);
+          const rect = htmlEl.getBoundingClientRect();
+          return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+        };
+
+        const forecastPattern = /weather\s*forecast|wettervorhersage|forecast/i;
+        const roots = Array.from(
+          document.querySelectorAll('aside, [role="complementary"], section, [role="region"], article, div')
+        ).filter((el) => visible(el) && forecastPattern.test(el.textContent ?? ''));
+
+        let best = 0;
+
+        for (const root of roots) {
+          const candidates = new Set<number>();
+          const count = (selector: string) => root.querySelectorAll(selector).length;
+
+          candidates.add(count('[data-testid="weather-forecast-entry"]'));
+          candidates.add(count('[data-testid="forecast-entry"]'));
+          candidates.add(count('[data-testid*="weather-forecast-entry"]'));
+          candidates.add(count('[data-testid*="forecast-entry"]'));
+          candidates.add(count('[role="listitem"]'));
+          candidates.add(count('li'));
+
+          const tbodyRows = count('tbody tr');
+          if (tbodyRows > 0) {
+            candidates.add(tbodyRows);
+          }
+
+          const rows = count('[role="row"]');
+          if (rows > 0) {
+            candidates.add(rows);
+            candidates.add(Math.max(0, rows - 1));
+          }
+
+          const articles = count('article');
+          if (articles > 0) {
+            candidates.add(articles);
+          }
+
+          const genericForecastItems = count('[data-testid*="forecast"]');
+          if (genericForecastItems > 0) {
+            candidates.add(genericForecastItems);
+          }
+
+          if (candidates.has(24)) {
+            return 24;
+          }
+
+          best = Math.max(best, ...Array.from(candidates));
+        }
+
+        return best;
+      });
+    })
+    .toBe(24);
+});

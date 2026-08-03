@@ -1,0 +1,149 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const imageRequests: string[] = [];
+
+  const extractZoomFromApplicationUrl = (rawUrl: string): number | undefined => {
+    try {
+      const url = new URL(rawUrl);
+
+      for (const key of ['z', 'zoom', 'level']) {
+        const value = url.searchParams.get(key);
+        if (value && /^\d+(?:\.\d+)?$/.test(value)) {
+          return Number(value);
+        }
+      }
+
+      const mapParam = url.searchParams.get('map');
+      if (mapParam) {
+        const firstSegment = mapParam.split(/[\/,]/)[0];
+        if (/^\d+(?:\.\d+)?$/.test(firstSegment)) {
+          return Number(firstSegment);
+        }
+      }
+
+      const hash = url.hash.replace(/^#/, '');
+      if (hash) {
+        const normalizedHash = hash.startsWith('map=') ? hash.slice(4) : hash;
+        const firstSegment = normalizedHash.split(/[\/,]/)[0];
+        if (/^\d+(?:\.\d+)?$/.test(firstSegment)) {
+          return Number(firstSegment);
+        }
+      }
+    } catch {
+      // Ignore malformed URLs and fall back to request-based detection.
+    }
+
+    return undefined;
+  };
+
+  const extractZoomFromTileUrl = (rawUrl: string): number | undefined => {
+    try {
+      const url = new URL(rawUrl);
+
+      for (const key of ['z', 'zoom', 'tilematrix', 'TileMatrix', 'TILEMATRIX']) {
+        const value = url.searchParams.get(key);
+        if (!value) {
+          continue;
+        }
+
+        if (/^\d+(?:\.\d+)?$/.test(value)) {
+          return Number(value);
+        }
+
+        const trailingNumberMatch = value.match(/(\d+(?:\.\d+)?)$/);
+        if (trailingNumberMatch) {
+          return Number(trailingNumberMatch[1]);
+        }
+      }
+
+      const pathMatch = url.pathname.match(/\/(\d+)\/\d+\/\d+(?:\.[a-zA-Z0-9]+)?$/);
+      if (pathMatch) {
+        return Number(pathMatch[1]);
+      }
+    } catch {
+      // Ignore malformed URLs.
+    }
+
+    return undefined;
+  };
+
+  const latestRequestedZoom = (urls: string[]): number | undefined => {
+    for (let index = urls.length - 1; index >= 0; index -= 1) {
+      const zoom = extractZoomFromTileUrl(urls[index]);
+      if (zoom !== undefined) {
+        return zoom;
+      }
+    }
+
+    return undefined;
+  };
+
+  page.on('request', request => {
+    if (request.resourceType() === 'image') {
+      imageRequests.push(request.url());
+    }
+  });
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await expect(zoomInButton).toBeEnabled();
+  await expect(zoomOutButton).toBeEnabled();
+
+  let initialZoom = extractZoomFromApplicationUrl(page.url());
+
+  if (initialZoom === undefined) {
+    await page.reload();
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+
+    await expect
+      .poll(() => latestRequestedZoom(imageRequests) ?? Number.NaN)
+      .not.toBeNaN();
+
+    initialZoom = latestRequestedZoom(imageRequests);
+  }
+
+  if (initialZoom === undefined) {
+    throw new Error('Could not determine the initial map zoom level.');
+  }
+
+  const zoomInRequestStart = imageRequests.length;
+  await zoomInButton.click();
+
+  await expect
+    .poll(
+      () =>
+        extractZoomFromApplicationUrl(page.url()) ??
+        latestRequestedZoom(imageRequests.slice(zoomInRequestStart)) ??
+        Number.NaN
+    )
+    .toBeGreaterThan(initialZoom);
+
+  const zoomAfterZoomIn =
+    extractZoomFromApplicationUrl(page.url()) ??
+    latestRequestedZoom(imageRequests.slice(zoomInRequestStart));
+
+  if (zoomAfterZoomIn === undefined) {
+    throw new Error('Could not determine the map zoom level after zooming in.');
+  }
+
+  const zoomOutRequestStart = imageRequests.length;
+  await zoomOutButton.click();
+
+  await expect
+    .poll(
+      () =>
+        extractZoomFromApplicationUrl(page.url()) ??
+        latestRequestedZoom(imageRequests.slice(zoomOutRequestStart)) ??
+        Number.NaN
+    )
+    .toBeLessThan(zoomAfterZoomIn);
+});

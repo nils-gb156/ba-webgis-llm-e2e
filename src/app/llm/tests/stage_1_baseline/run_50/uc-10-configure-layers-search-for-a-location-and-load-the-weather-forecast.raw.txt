@@ -1,0 +1,133 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({
+  page
+}) => {
+  const hasNestedArrayWithLength = (value: unknown, targetLength: number): boolean => {
+    if (Array.isArray(value)) {
+      if (value.length === targetLength) {
+        return true;
+      }
+      return value.some((entry) => hasNestedArrayWithLength(entry, targetLength));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.values(value).some((entry) => hasNestedArrayWithLength(entry, targetLength));
+    }
+
+    return false;
+  };
+
+  const escapeForRegex = (value: string): string =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const getLayerVisibilityControl = async (name: string) => {
+    const switches = page.getByRole('switch', { name, exact: true });
+    if ((await switches.count()) > 0) {
+      return switches;
+    }
+
+    const checkboxes = page.getByRole('checkbox', { name, exact: true });
+    if ((await checkboxes.count()) > 0) {
+      return checkboxes;
+    }
+
+    throw new Error(`No layer visibility control found for "${name}".`);
+  };
+
+  const getSearchField = async () => {
+    const namedCombobox = page.getByRole('combobox', {
+      name: /search|location|address|place/i
+    });
+    if ((await namedCombobox.count()) > 0) {
+      return namedCombobox.first();
+    }
+
+    const namedSearchbox = page.getByRole('searchbox', {
+      name: /search|location|address|place/i
+    });
+    if ((await namedSearchbox.count()) > 0) {
+      return namedSearchbox.first();
+    }
+
+    const comboboxes = page.getByRole('combobox');
+    if ((await comboboxes.count()) > 0) {
+      return comboboxes.first();
+    }
+
+    const searchboxes = page.getByRole('searchbox');
+    if ((await searchboxes.count()) > 0) {
+      return searchboxes.first();
+    }
+
+    const textboxes = page.getByRole('textbox');
+    if ((await textboxes.count()) > 0) {
+      return textboxes.first();
+    }
+
+    throw new Error('No geocoder search field found.');
+  };
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const temperatureToggle = await getLayerVisibilityControl('Temperature');
+  const precipitationToggle = await getLayerVisibilityControl('Precipitation');
+  const searchField = await getSearchField();
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(precipitationToggle).toBeVisible();
+  await expect(searchField).toBeVisible();
+
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const searchResults = page.getByRole('option');
+  await expect(searchResults.first()).toBeVisible();
+
+  const firstResult = searchResults.first();
+  const firstResultText = (await firstResult.textContent())?.trim() ?? 'Münster';
+  const selectedPlaceName = firstResultText.split(',')[0]?.trim() || 'Münster';
+
+  const forecastRequestUrls: string[] = [];
+  const forecastRequestListener = (request: { url: () => string }) => {
+    const url = request.url();
+    if (url.toLowerCase().includes('forecast')) {
+      forecastRequestUrls.push(url);
+    }
+  };
+  page.on('request', forecastRequestListener);
+
+  const forecastResponsePromise = page.waitForResponse((response) => {
+    return response.ok() && response.url().toLowerCase().includes('forecast');
+  });
+
+  await firstResult.click();
+
+  await expect(searchField).toHaveValue(new RegExp(escapeForRegex(selectedPlaceName), 'i'));
+
+  await expect.poll(() => forecastRequestUrls.length).toBeGreaterThan(0);
+
+  const forecastResponse = await forecastResponsePromise;
+  const forecastPayload = await forecastResponse.json();
+
+  const forecastHeading = page.getByRole('heading', {
+    name: /weather forecast|forecast/i
+  });
+  await expect(forecastHeading.first()).toBeVisible();
+
+  expect(hasNestedArrayWithLength(forecastPayload, 24)).toBeTruthy();
+
+  page.off('request', forecastRequestListener);
+});

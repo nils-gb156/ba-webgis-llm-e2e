@@ -1,0 +1,138 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+
+  const uvLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  if ((await uvLayerCheckbox.count()) > 0) {
+    if (!(await uvLayerCheckbox.isChecked())) {
+      await uvLayerCheckbox.click({ force: true });
+    }
+    await expect(uvLayerCheckbox).toBeChecked();
+  }
+
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  if ((await eucosLayerCheckbox.count()) > 0) {
+    if (!(await eucosLayerCheckbox.isChecked())) {
+      await eucosLayerCheckbox.click({ force: true });
+    }
+    await expect(eucosLayerCheckbox).toBeChecked();
+  }
+
+  const mapCanvas = page.locator('canvas').last();
+  await expect(mapCanvas).toBeVisible();
+
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+  const mapPixel = await page.evaluate(([x, y]) => {
+    const queue: unknown[] = [];
+    const seen = new Set<unknown>();
+
+    for (const key of Object.getOwnPropertyNames(window)) {
+      if (['window', 'self', 'globalThis', 'parent', 'top', 'frames'].includes(key)) {
+        continue;
+      }
+      try {
+        queue.push((window as Record<string, unknown>)[key]);
+      } catch {
+        // ignore inaccessible globals
+      }
+    }
+
+    let inspected = 0;
+    while (queue.length > 0 && inspected < 2000) {
+      inspected += 1;
+      const candidate = queue.shift();
+
+      if (
+        !candidate ||
+        seen.has(candidate) ||
+        (typeof candidate !== 'object' && typeof candidate !== 'function')
+      ) {
+        continue;
+      }
+      seen.add(candidate);
+
+      const maybeMap = candidate as {
+        getPixelFromCoordinate?: (coordinate: [number, number]) => unknown;
+        getTargetElement?: () => Element | null;
+        getView?: () => unknown;
+      };
+
+      if (
+        typeof maybeMap.getPixelFromCoordinate === 'function' &&
+        typeof maybeMap.getTargetElement === 'function' &&
+        typeof maybeMap.getView === 'function'
+      ) {
+        try {
+          const pixel = maybeMap.getPixelFromCoordinate([x, y]);
+          if (
+            Array.isArray(pixel) &&
+            pixel.length === 2 &&
+            typeof pixel[0] === 'number' &&
+            Number.isFinite(pixel[0]) &&
+            typeof pixel[1] === 'number' &&
+            Number.isFinite(pixel[1])
+          ) {
+            return { x: pixel[0], y: pixel[1] };
+          }
+        } catch {
+          // ignore non-usable candidates
+        }
+      }
+
+      let propertyNames: string[] = [];
+      try {
+        propertyNames = Object.getOwnPropertyNames(candidate);
+      } catch {
+        propertyNames = [];
+      }
+
+      for (const propertyName of propertyNames) {
+        if (['window', 'self', 'globalThis', 'parent', 'top', 'frames'].includes(propertyName)) {
+          continue;
+        }
+        try {
+          const nestedValue = (candidate as Record<string, unknown>)[propertyName];
+          if (nestedValue && !seen.has(nestedValue)) {
+            queue.push(nestedValue);
+          }
+        } catch {
+          // ignore inaccessible nested values
+        }
+      }
+    }
+
+    return null;
+  }, targetCoordinate);
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  let clickPosition = { x: box.width / 2, y: box.height / 2 };
+  if (
+    mapPixel &&
+    mapPixel.x >= 0 &&
+    mapPixel.x <= box.width &&
+    mapPixel.y >= 0 &&
+    mapPixel.y <= box.height
+  ) {
+    clickPosition = mapPixel;
+  }
+
+  const getFeatureInfoResponse = page.waitForResponse(
+    (response) => response.url().includes('GetFeatureInfo') && response.ok()
+  );
+
+  await mapCanvas.click({ position: clickPosition });
+  await getFeatureInfoResponse;
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

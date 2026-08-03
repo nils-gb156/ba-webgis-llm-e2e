@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const uvIndexStationSection = page.getByRole('heading', {
+    name: 'UV-Index Station',
+    exact: true
+  });
+  const eucosGroundStationSection = page.getByRole('heading', {
+    name: 'EUCOS Ground Station',
+    exact: true
+  });
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  await mapCanvas.click({
+    position: {
+      x: Math.floor(box!.width / 2),
+      y: Math.floor(box!.height / 2)
+    }
+  });
+
+  await expect(uvIndexStationSection).toBeVisible({ timeout: 15000 });
+  await expect(eucosGroundStationSection).toBeVisible({ timeout: 15000 });
+});

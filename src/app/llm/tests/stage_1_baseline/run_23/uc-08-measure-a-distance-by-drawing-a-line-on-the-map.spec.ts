@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+  const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+
+  await expect(measurementButton).toBeVisible();
+
+  let panelVisible = await measurementHeading.isVisible();
+  if (!panelVisible) {
+    panelVisible = await measurementRegion.isVisible();
+  }
+  if (!panelVisible) {
+    panelVisible = await measurementDialog.isVisible();
+  }
+
+  if (!panelVisible) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  if (await measurementHeading.count()) {
+    await expect(measurementHeading).toBeVisible();
+  } else if (await measurementRegion.count()) {
+    await expect(measurementRegion).toBeVisible();
+  } else if (await measurementDialog.count()) {
+    await expect(measurementDialog).toBeVisible();
+  } else {
+    const hasPressedAttribute = (await measurementButton.getAttribute('aria-pressed')) !== null;
+    if (hasPressedAttribute) {
+      await expect.poll(async () => await measurementButton.getAttribute('aria-pressed')).toBe('true');
+    }
+  }
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas bounding box is not available.');
+  }
+
+  const width = mapBox.width;
+  const height = mapBox.height;
+
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.45), y: Math.round(height * 0.35) }
+  });
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.58), y: Math.round(height * 0.43) }
+  });
+  await mapCanvas.click({
+    position: { x: Math.round(width * 0.70), y: Math.round(height * 0.50) }
+  });
+  await mapCanvas.dblclick({
+    position: { x: Math.round(width * 0.82), y: Math.round(height * 0.58) }
+  });
+
+  const resultScope = (await measurementDialog.isVisible())
+    ? measurementDialog
+    : (await measurementRegion.isVisible())
+      ? measurementRegion
+      : page.locator('body');
+
+  const labelledLengthPattern = /(length|distance|result).*\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i;
+  const lengthValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i;
+
+  try {
+    await expect(resultScope.getByText(labelledLengthPattern).first()).toBeVisible({ timeout: 5000 });
+  } catch {
+    await expect(resultScope.getByText(lengthValuePattern).first()).toBeVisible();
+  }
+});

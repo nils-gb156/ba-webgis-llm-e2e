@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+  const mapViewport = page.locator('.ol-viewport').first();
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await expect(mapViewport).toBeVisible();
+
+  await page.waitForLoadState('networkidle');
+
+  const captureMapScreenshot = async (): Promise<string> => {
+    await page.evaluate(() => {
+      const activeElement = document.activeElement;
+      if (activeElement instanceof HTMLElement) {
+        activeElement.blur();
+      }
+    });
+    return (await mapViewport.screenshot({ animations: 'disabled' })).toString('base64');
+  };
+
+  const initialMapImage = await captureMapScreenshot();
+
+  await zoomInButton.click();
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await captureMapScreenshot();
+      return currentMapImage !== initialMapImage;
+    })
+    .toBe(true);
+
+  await page.waitForLoadState('networkidle');
+  const zoomedInMapImage = await captureMapScreenshot();
+  expect(zoomedInMapImage).not.toBe(initialMapImage);
+
+  await zoomOutButton.click();
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await captureMapScreenshot();
+      return currentMapImage !== zoomedInMapImage;
+    })
+    .toBe(true);
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await captureMapScreenshot();
+      return currentMapImage === initialMapImage;
+    })
+    .toBe(true);
+
+  const finalMapImage = await captureMapScreenshot();
+  expect(finalMapImage).toBe(initialMapImage);
+});

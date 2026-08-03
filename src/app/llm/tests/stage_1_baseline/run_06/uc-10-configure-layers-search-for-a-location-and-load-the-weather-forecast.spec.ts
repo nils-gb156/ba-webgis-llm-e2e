@@ -1,0 +1,180 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  let temperatureToggle = page.getByRole('switch', { name: /temperature/i });
+  let temperatureToggleUsesPressedState = false;
+  if ((await temperatureToggle.count()) === 0) {
+    temperatureToggle = page.getByRole('checkbox', { name: /temperature/i });
+  }
+  if ((await temperatureToggle.count()) === 0) {
+    temperatureToggle = page.getByRole('button', { name: /temperature/i });
+    temperatureToggleUsesPressedState = true;
+  }
+  temperatureToggle = temperatureToggle.first();
+
+  let precipitationToggle = page.getByRole('switch', { name: /precipitation/i });
+  let precipitationToggleUsesPressedState = false;
+  if ((await precipitationToggle.count()) === 0) {
+    precipitationToggle = page.getByRole('checkbox', { name: /precipitation/i });
+  }
+  if ((await precipitationToggle.count()) === 0) {
+    precipitationToggle = page.getByRole('button', { name: /precipitation/i });
+    precipitationToggleUsesPressedState = true;
+  }
+  precipitationToggle = precipitationToggle.first();
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(precipitationToggle).toBeVisible();
+
+  let searchField = page.getByRole('searchbox', { name: /search|location|place/i });
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('searchbox');
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('combobox', { name: /search|location|place/i });
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('combobox');
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('textbox', { name: /search|location|place/i });
+  }
+  if ((await searchField.count()) === 0) {
+    searchField = page.getByRole('textbox');
+  }
+  searchField = searchField.first();
+  await expect(searchField).toBeVisible();
+
+  let infoPanel = page.getByRole('complementary');
+  if ((await infoPanel.count()) === 0) {
+    infoPanel = page.getByRole('region', { name: /info|forecast|weather|details/i });
+  }
+  if ((await infoPanel.count()) === 0) {
+    infoPanel = page.getByRole('tabpanel');
+  }
+  if ((await infoPanel.count()) === 0) {
+    infoPanel = page.getByRole('main');
+  }
+  infoPanel = infoPanel.first();
+  await expect(infoPanel).toBeVisible();
+
+  const measurementToggle = page.getByRole('button', { name: /measure|measurement|distance|area/i }).first();
+  if ((await measurementToggle.count()) > 0) {
+    const ariaPressed = await measurementToggle.getAttribute('aria-pressed');
+    if (ariaPressed !== null) {
+      await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+    }
+  }
+
+  if (temperatureToggleUsesPressedState) {
+    await expect(temperatureToggle).toHaveAttribute('aria-pressed', 'true');
+  } else {
+    await expect(temperatureToggle).toBeChecked();
+  }
+
+  if (precipitationToggleUsesPressedState) {
+    await expect(precipitationToggle).toHaveAttribute('aria-pressed', 'false');
+  } else {
+    await expect(precipitationToggle).not.toBeChecked();
+  }
+
+  if (temperatureToggleUsesPressedState) {
+    await temperatureToggle.click();
+    await expect(temperatureToggle).toHaveAttribute('aria-pressed', 'false');
+  } else {
+    await temperatureToggle.click({ force: true });
+    await expect(temperatureToggle).not.toBeChecked();
+  }
+
+  if (precipitationToggleUsesPressedState) {
+    await precipitationToggle.click();
+    await expect(precipitationToggle).toHaveAttribute('aria-pressed', 'true');
+  } else {
+    await precipitationToggle.click({ force: true });
+    await expect(precipitationToggle).toBeChecked();
+  }
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  let firstResult = page.getByRole('option').first();
+  if ((await firstResult.count()) === 0) {
+    firstResult = page.getByRole('button', { name: /münster/i }).first();
+  }
+  if ((await firstResult.count()) === 0) {
+    firstResult = page.getByRole('listitem').filter({ has: page.getByText(/münster/i) }).first();
+  }
+  await expect(firstResult).toBeVisible();
+
+  const hasArrayWith24Entries = (value: unknown): boolean => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return true;
+      }
+      return value.some((item) => hasArrayWith24Entries(item));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.values(value as Record<string, unknown>).some((item) => hasArrayWith24Entries(item));
+    }
+
+    return false;
+  };
+
+  let sawMapReloadRequest = false;
+  let saw24EntryForecastResponse = false;
+
+  page.on('request', (request) => {
+    const url = request.url();
+    if (/service=wms|service=wmts|request=getmap|request=gettile|bbox=|\/tile\/|\/wmts\//i.test(url)) {
+      sawMapReloadRequest = true;
+    }
+  });
+
+  page.on('response', async (response) => {
+    const contentType = response.headers()['content-type'] ?? '';
+    if (!response.ok() || !/json/i.test(contentType)) {
+      return;
+    }
+
+    try {
+      const body = await response.json();
+      if (hasArrayWith24Entries(body)) {
+        saw24EntryForecastResponse = true;
+      }
+    } catch {
+      // Ignore non-JSON or unexpected response bodies.
+    }
+  });
+
+  await firstResult.click();
+
+  await expect(searchField).toHaveValue(/münster/i);
+  await expect.poll(() => sawMapReloadRequest).toBe(true);
+  await expect.poll(() => saw24EntryForecastResponse).toBe(true);
+
+  let weatherForecastSectionTitle = infoPanel.getByRole('heading', {
+    name: /weather forecast|forecast|vorhersage/i
+  });
+  if ((await weatherForecastSectionTitle.count()) === 0) {
+    weatherForecastSectionTitle = infoPanel.getByText(/weather forecast|forecast|vorhersage/i);
+  }
+  await expect(weatherForecastSectionTitle.first()).toBeVisible();
+
+  if (precipitationToggleUsesPressedState) {
+    await expect(precipitationToggle).toHaveAttribute('aria-pressed', 'true');
+  } else {
+    await expect(precipitationToggle).toBeChecked();
+  }
+
+  if (temperatureToggleUsesPressedState) {
+    await expect(temperatureToggle).toHaveAttribute('aria-pressed', 'false');
+  } else {
+    await expect(temperatureToggle).not.toBeChecked();
+  }
+});

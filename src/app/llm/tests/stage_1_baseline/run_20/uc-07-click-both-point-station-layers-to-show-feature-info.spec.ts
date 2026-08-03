@@ -1,0 +1,194 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const findLayerControl = async (name: string) => {
+    const checkbox = page.getByRole('checkbox', { name, exact: true });
+    if ((await checkbox.count()) > 0) {
+      return checkbox;
+    }
+
+    const switchControl = page.getByRole('switch', { name, exact: true });
+    if ((await switchControl.count()) > 0) {
+      return switchControl;
+    }
+
+    return null;
+  };
+
+  const readCheckedState = async (control: ReturnType<typeof page.getByRole>) => {
+    const ariaChecked = await control.getAttribute('aria-checked');
+    if (ariaChecked !== null) {
+      return ariaChecked === 'true';
+    }
+
+    return await control.isChecked();
+  };
+
+  let layersToggleButton = null as ReturnType<typeof page.getByRole> | null;
+  let openedLayersPanel = false;
+
+  for (const candidateName of ['Layers', 'Layer List', 'Layerlist']) {
+    const candidate = page.getByRole('button', { name: candidateName, exact: true });
+    if ((await candidate.count()) > 0) {
+      layersToggleButton = candidate;
+      break;
+    }
+  }
+
+  if (!(await findLayerControl('UV-Index Stations')) || !(await findLayerControl('EUCOS Ground Stations'))) {
+    if (layersToggleButton) {
+      await layersToggleButton.click();
+      openedLayersPanel = true;
+    }
+  }
+
+  const ensureLayerEnabled = async (name: string) => {
+    const control = await findLayerControl(name);
+    if (!control) {
+      throw new Error(`Could not find a layer control for "${name}".`);
+    }
+
+    if (!(await readCheckedState(control))) {
+      await control.click({ force: true });
+      await expect.poll(async () => await readCheckedState(control)).toBe(true);
+    }
+  };
+
+  await ensureLayerEnabled('UV-Index Stations');
+  await ensureLayerEnabled('EUCOS Ground Stations');
+
+  if (openedLayersPanel && layersToggleButton) {
+    await layersToggleButton.click();
+  }
+
+  await expect(page.locator('canvas').first()).toBeVisible();
+
+  const targetCoordinate = [1188692.84, 6767643.28];
+
+  const getMapClickPoint = async () => {
+    return await page.evaluate((coordinate) => {
+      const [x, y] = coordinate;
+
+      const isMapLike = (value: unknown) => {
+        return (
+          !!value &&
+          (typeof value === 'object' || typeof value === 'function') &&
+          typeof (value as { getPixelFromCoordinate?: unknown }).getPixelFromCoordinate === 'function' &&
+          typeof (value as { getView?: unknown }).getView === 'function' &&
+          (typeof (value as { getViewport?: unknown }).getViewport === 'function' ||
+            typeof (value as { getTargetElement?: unknown }).getTargetElement === 'function')
+        );
+      };
+
+      const seeds = [
+        window,
+        document,
+        document.body,
+        ...Array.from(document.querySelectorAll('*')).slice(0, 250)
+      ];
+
+      const queue: Array<{ value: unknown; depth: number }> = seeds.map((value) => ({ value, depth: 0 }));
+      const visited = new WeakSet<object>();
+      let processed = 0;
+
+      while (queue.length > 0 && processed < 6000) {
+        const current = queue.shift();
+        if (!current) {
+          continue;
+        }
+
+        const { value, depth } = current;
+        if (!value || (typeof value !== 'object' && typeof value !== 'function')) {
+          continue;
+        }
+
+        if (visited.has(value as object)) {
+          continue;
+        }
+
+        visited.add(value as object);
+        processed += 1;
+
+        try {
+          if (isMapLike(value)) {
+            const map = value as {
+              getPixelFromCoordinate: (coordinate: number[]) => number[];
+              getViewport?: () => Element;
+              getTargetElement?: () => Element;
+            };
+
+            const pixel = map.getPixelFromCoordinate([x, y]);
+            const target =
+              typeof map.getViewport === 'function' ? map.getViewport() : typeof map.getTargetElement === 'function' ? map.getTargetElement() : null;
+
+            if (Array.isArray(pixel) && target instanceof Element) {
+              const rect = target.getBoundingClientRect();
+              const [pixelX, pixelY] = pixel;
+
+              if (
+                Number.isFinite(pixelX) &&
+                Number.isFinite(pixelY) &&
+                rect.width > 0 &&
+                rect.height > 0 &&
+                pixelX >= 0 &&
+                pixelY >= 0 &&
+                pixelX <= rect.width &&
+                pixelY <= rect.height
+              ) {
+                return {
+                  x: rect.left + pixelX,
+                  y: rect.top + pixelY
+                };
+              }
+            }
+          }
+        } catch {
+          // continue searching
+        }
+
+        if (depth >= 6) {
+          continue;
+        }
+
+        let propertyNames: string[] = [];
+        try {
+          propertyNames = Object.getOwnPropertyNames(value);
+        } catch {
+          propertyNames = [];
+        }
+
+        for (const propertyName of propertyNames.slice(0, 150)) {
+          let child: unknown;
+          try {
+            child = (value as Record<string, unknown>)[propertyName];
+          } catch {
+            continue;
+          }
+
+          if (child && (typeof child === 'object' || typeof child === 'function')) {
+            queue.push({ value: child, depth: depth + 1 });
+          }
+        }
+      }
+
+      return null;
+    }, targetCoordinate);
+  };
+
+  await expect.poll(async () => (await getMapClickPoint()) !== null).toBe(true);
+
+  const clickPoint = await getMapClickPoint();
+  if (!clickPoint) {
+    throw new Error('Could not determine a screen position for the target map coordinate.');
+  }
+
+  await page.mouse.click(clickPoint.x, clickPoint.y);
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

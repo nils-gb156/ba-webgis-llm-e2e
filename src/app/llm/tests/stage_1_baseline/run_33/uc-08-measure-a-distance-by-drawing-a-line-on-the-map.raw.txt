@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const measurementPanel = page
+    .getByRole('dialog')
+    .filter({ has: measurementHeading })
+    .or(page.getByRole('region').filter({ has: measurementHeading }))
+    .or(page.getByRole('complementary').filter({ has: measurementHeading }));
+
+  await expect(measurementButton).toBeVisible();
+
+  const isMeasurementPanelVisible =
+    (await measurementPanel.first().isVisible()) || (await measurementHeading.isVisible());
+
+  if (!isMeasurementPanelVisible) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  let resultRoot = page.locator('body');
+  if (await measurementPanel.first().isVisible()) {
+    resultRoot = measurementPanel.first();
+  }
+
+  const measurementValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km|ft|mi)\b/i;
+  const initialMeasurementTexts = (await resultRoot.getByText(measurementValuePattern).allTextContents()).map((text) =>
+    text.trim()
+  );
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(box.width * 0.55),
+      y: Math.round(box.height * 0.35)
+    }
+  });
+  await mapCanvas.click({
+    position: {
+      x: Math.round(box.width * 0.7),
+      y: Math.round(box.height * 0.45)
+    }
+  });
+  await mapCanvas.dblclick({
+    position: {
+      x: Math.round(box.width * 0.82),
+      y: Math.round(box.height * 0.58)
+    }
+  });
+
+  await expect.poll(async () => {
+    const texts = (await resultRoot.getByText(measurementValuePattern).allTextContents()).map((text) => text.trim());
+    return texts.some((text) => !initialMeasurementTexts.includes(text));
+  }).toBe(true);
+});

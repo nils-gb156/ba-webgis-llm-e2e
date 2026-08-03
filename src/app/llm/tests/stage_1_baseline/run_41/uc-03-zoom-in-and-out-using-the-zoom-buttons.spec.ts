@@ -1,0 +1,90 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+    type Phase = 'initial' | 'zoomIn' | 'zoomOut';
+
+    const extractZoomFromUrl = (rawUrl: string): number | undefined => {
+        try {
+            const url = new URL(rawUrl);
+
+            for (const key of ['z', 'zoom', 'tilematrix', 'TileMatrix']) {
+                const value = url.searchParams.get(key);
+                if (value && /^-?\d+$/.test(value)) {
+                    return Number(value);
+                }
+            }
+
+            const xyzMatch = url.pathname.match(/\/(-?\d+)\/-?\d+\/-?\d+(?:\.[a-z0-9]+)?$/i);
+            if (xyzMatch) {
+                return Number(xyzMatch[1]);
+            }
+
+            return undefined;
+        } catch {
+            return undefined;
+        }
+    };
+
+    const capturedZoomRequests: Array<{ phase: Phase; zoom: number }> = [];
+    let currentPhase: Phase = 'initial';
+
+    const getDominantZoom = (phase: Phase): number | undefined => {
+        const counts = new Map<number, number>();
+
+        for (const entry of capturedZoomRequests) {
+            if (entry.phase === phase) {
+                counts.set(entry.zoom, (counts.get(entry.zoom) ?? 0) + 1);
+            }
+        }
+
+        return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    };
+
+    page.on('request', request => {
+        if (request.resourceType() !== 'image') {
+            return;
+        }
+
+        const zoom = extractZoomFromUrl(request.url());
+        if (zoom !== undefined) {
+            capturedZoomRequests.push({ phase: currentPhase, zoom });
+        }
+    });
+
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const zoomInButton = page.getByRole('button', { name: /^(Zoom in|\+)$/ });
+    const zoomOutButton = page.getByRole('button', { name: /^(Zoom out|−|-)$/ });
+    const mapCanvas = page.locator('canvas').first();
+
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+    await expect(mapCanvas).toBeVisible();
+
+    await expect.poll(() => getDominantZoom('initial') ?? -1).toBeGreaterThanOrEqual(0);
+    const initialZoom = getDominantZoom('initial')!;
+    const initialCanvas = await mapCanvas.screenshot();
+
+    currentPhase = 'zoomIn';
+    await zoomInButton.click();
+
+    await expect.poll(() => getDominantZoom('zoomIn') ?? -1).toBeGreaterThan(initialZoom);
+    const zoomInZoom = getDominantZoom('zoomIn')!;
+    await expect.poll(async () => (await mapCanvas.screenshot()).equals(initialCanvas)).toBe(false);
+    const zoomedInCanvas = await mapCanvas.screenshot();
+
+    currentPhase = 'zoomOut';
+    await zoomOutButton.click();
+
+    await expect.poll(async () => {
+        const zoomOutZoom = getDominantZoom('zoomOut');
+        if (zoomOutZoom !== undefined) {
+            return zoomOutZoom < zoomInZoom;
+        }
+
+        const currentCanvas = await mapCanvas.screenshot();
+        return currentCanvas.equals(initialCanvas) && !currentCanvas.equals(zoomedInCanvas);
+    }).toBe(true);
+});

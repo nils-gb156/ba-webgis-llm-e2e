@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+
+  await expect(printMapButton).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const scaleBar = page.locator('.ol-scale-line').first();
+  await expect(scaleBar).toBeVisible();
+
+  if (!(await titleInput.isVisible())) {
+    await printMapButton.click();
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'E2E PNG Export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+  if ((await pngRadio.count()) > 0) {
+    await expect(pngRadio).toBeVisible();
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatField = page.getByLabel(/format/i);
+    await expect(formatField).toBeVisible();
+    await formatField.selectOption({ label: 'PNG' });
+    await expect(formatField).toHaveValue(/png/i);
+  }
+
+  const exportButton = page.getByRole('button', { name: /^(Export|Print)$/i });
+  await expect(exportButton).toBeVisible();
+  await expect(exportButton).toBeEnabled();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  await expect.poll(() => download.failure()).toBeNull();
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const tempDir = await mkdtemp(join(tmpdir(), 'playwright-print-'));
+  const filePath = join(tempDir, download.suggestedFilename());
+  await download.saveAs(filePath);
+
+  const fileBuffer = await readFile(filePath);
+  expect(fileBuffer.length).toBeGreaterThan(1000);
+
+  const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  expect(fileBuffer.subarray(0, 8).equals(pngSignature)).toBeTruthy();
+
+  const width = fileBuffer.readUInt32BE(16);
+  const height = fileBuffer.readUInt32BE(20);
+  expect(width).toBeGreaterThan(100);
+  expect(height).toBeGreaterThan(100);
+});

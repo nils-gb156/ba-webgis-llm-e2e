@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const layersButton = page.getByRole('button', { name: 'Layers', exact: true });
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+
+  if ((await uviLayerCheckbox.count()) === 0 || (await eucosLayerCheckbox.count()) === 0) {
+    if ((await layersButton.count()) > 0) {
+      const pressed = await layersButton.first().getAttribute('aria-pressed');
+      if (pressed !== 'true') {
+        await layersButton.first().click();
+      }
+    }
+  }
+
+  if ((await uviLayerCheckbox.count()) > 0) {
+    if (!(await uviLayerCheckbox.isChecked())) {
+      await uviLayerCheckbox.click({ force: true });
+    }
+    await expect(uviLayerCheckbox).toBeChecked();
+  }
+
+  if ((await eucosLayerCheckbox.count()) > 0) {
+    if (!(await eucosLayerCheckbox.isChecked())) {
+      await eucosLayerCheckbox.click({ force: true });
+    }
+    await expect(eucosLayerCheckbox).toBeChecked();
+  }
+
+  const measureButton = page.getByRole('button', { name: 'Measure', exact: true });
+  if ((await measureButton.count()) > 0) {
+    const pressed = await measureButton.first().getAttribute('aria-pressed');
+    if (pressed === 'true') {
+      await measureButton.first().click();
+    }
+    await expect(measureButton.first()).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  const box = await mapViewport.boundingBox();
+  if (!box) {
+    throw new Error('Map viewport has no bounding box.');
+  }
+
+  await mapViewport.click({
+    position: {
+      x: Math.floor(box.width / 2),
+      y: Math.floor(box.height / 2)
+    }
+  });
+
+  const uviInfoSection = page.getByText('UV-Index Station', { exact: true });
+  const eucosInfoSection = page.getByText('EUCOS Ground Station', { exact: true });
+
+  await expect(uviInfoSection).toBeVisible();
+  await expect(eucosInfoSection).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      if ((await uviInfoSection.count()) === 0) {
+        return 0;
+      }
+      return await uviInfoSection.first().evaluate((node) => {
+        return (node.parentElement?.textContent?.trim() ?? '').length;
+      });
+    })
+    .toBeGreaterThan('UV-Index Station'.length);
+
+  await expect
+    .poll(async () => {
+      if ((await eucosInfoSection.count()) === 0) {
+        return 0;
+      }
+      return await eucosInfoSection.first().evaluate((node) => {
+        return (node.parentElement?.textContent?.trim() ?? '').length;
+      });
+    })
+    .toBeGreaterThan('EUCOS Ground Station'.length);
+});

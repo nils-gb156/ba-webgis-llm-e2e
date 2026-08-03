@@ -1,0 +1,134 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const getLayerToggle = async (name: RegExp) => {
+    const checkbox = page.getByRole('checkbox', { name });
+    if ((await checkbox.count()) > 0) {
+      return { locator: checkbox.first(), kind: 'checkbox' as const };
+    }
+
+    const switchControl = page.getByRole('switch', { name });
+    if ((await switchControl.count()) > 0) {
+      return { locator: switchControl.first(), kind: 'switch' as const };
+    }
+
+    const button = page.getByRole('button', { name });
+    if ((await button.count()) > 0) {
+      return { locator: button.first(), kind: 'button' as const };
+    }
+
+    throw new Error(`Could not find a layer visibility toggle for ${name}`);
+  };
+
+  const expectToggleState = async (
+    toggle: Awaited<ReturnType<typeof getLayerToggle>>,
+    isVisible: boolean
+  ) => {
+    if (toggle.kind === 'button') {
+      await expect(toggle.locator).toHaveAttribute('aria-pressed', isVisible ? 'true' : 'false');
+    } else if (isVisible) {
+      await expect(toggle.locator).toBeChecked();
+    } else {
+      await expect(toggle.locator).not.toBeChecked();
+    }
+  };
+
+  const clickToggle = async (toggle: Awaited<ReturnType<typeof getLayerToggle>>) => {
+    if (toggle.kind === 'button') {
+      await toggle.locator.click();
+    } else {
+      await toggle.locator.click({ force: true });
+    }
+  };
+
+  const temperatureToggle = await getLayerToggle(/temperature/i);
+  const precipitationToggle = await getLayerToggle(/precipitation/i);
+
+  await expect(temperatureToggle.locator).toBeVisible();
+  await expect(precipitationToggle.locator).toBeVisible();
+  await expectToggleState(temperatureToggle, true);
+  await expectToggleState(precipitationToggle, false);
+
+  const searchField =
+    (await page.getByRole('combobox', { name: /search/i }).count()) > 0
+      ? page.getByRole('combobox', { name: /search/i }).first()
+      : page.getByRole('textbox', { name: /search/i }).first();
+  await expect(searchField).toBeVisible();
+
+  const complementaryRegions = page.getByRole('complementary');
+  if ((await complementaryRegions.count()) > 0) {
+    await expect(complementaryRegions.last()).toBeVisible();
+  }
+
+  const measurementToolButton = page.getByRole('button', { name: /measure/i });
+  if ((await measurementToolButton.count()) > 0) {
+    await expect(measurementToolButton.first()).not.toHaveAttribute('aria-pressed', 'true');
+  }
+
+  await clickToggle(temperatureToggle);
+  await expectToggleState(temperatureToggle, false);
+
+  await clickToggle(precipitationToggle);
+  await expectToggleState(precipitationToggle, true);
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  await expect.poll(async () => await page.getByRole('option').count()).toBeGreaterThan(0);
+  const firstResult = page.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  await expect.poll(async () => await page.getByRole('option').count()).toBe(0);
+
+  const forecastHeading =
+    (await page.getByRole('heading', { name: /weather forecast/i }).count()) > 0
+      ? page.getByRole('heading', { name: /weather forecast/i }).first()
+      : page.getByRole('heading', { name: /forecast/i }).first();
+  await expect(forecastHeading).toBeVisible();
+
+  await expect.poll(async () => {
+    return await page.evaluate(() => {
+      const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'));
+      const heading = headings.find((el) =>
+        /weather forecast|forecast/i.test(el.textContent ?? '')
+      );
+      if (!heading) {
+        return 0;
+      }
+
+      let container: Element | null = heading.parentElement;
+      while (container) {
+        const listItemCount = container.querySelectorAll('li,[role="listitem"]').length;
+        if (listItemCount >= 24) {
+          return listItemCount;
+        }
+
+        const tableRowCount = container.querySelectorAll('tbody tr').length;
+        if (tableRowCount >= 24) {
+          return tableRowCount;
+        }
+
+        const genericRowCount = container.querySelectorAll('[role="row"]').length;
+        if (genericRowCount >= 25) {
+          return genericRowCount - 1;
+        }
+        if (genericRowCount === 24) {
+          return genericRowCount;
+        }
+
+        container = container.parentElement;
+      }
+
+      return 0;
+    });
+  }).toBe(24);
+
+  await expectToggleState(temperatureToggle, false);
+  await expectToggleState(precipitationToggle, true);
+});

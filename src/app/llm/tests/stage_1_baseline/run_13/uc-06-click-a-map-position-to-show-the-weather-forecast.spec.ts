@@ -1,0 +1,110 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  let infoPanel = page.getByTestId('info-panel');
+  if ((await infoPanel.count()) === 0) {
+    infoPanel = page.getByRole('complementary');
+  }
+  if ((await infoPanel.count()) === 0) {
+    infoPanel = page.locator('aside');
+  }
+  if ((await infoPanel.count()) === 0) {
+    infoPanel = page.locator('body');
+  }
+  const infoPanelRoot = infoPanel.first();
+  await expect(infoPanelRoot).toBeVisible();
+
+  let mapTarget = page.getByTestId('map');
+  if ((await mapTarget.count()) === 0) {
+    mapTarget = page.getByTestId('map-container');
+  }
+  if ((await mapTarget.count()) === 0) {
+    mapTarget = page.locator('canvas');
+  }
+  const mapElement = mapTarget.first();
+  await expect(mapElement).toBeVisible();
+
+  const initialPanelText = await infoPanelRoot.innerText();
+
+  const weatherRelatedRequests: string[] = [];
+  page.on('request', request => {
+    const url = request.url();
+    if (/forecast|weather|meteo/i.test(url)) {
+      weatherRelatedRequests.push(url);
+    }
+  });
+
+  const mapBox = await mapElement.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map element has no bounding box.');
+  }
+
+  await mapElement.click({
+    position: {
+      x: Math.max(10, Math.floor(mapBox.width * 0.25)),
+      y: Math.max(10, Math.floor(mapBox.height * 0.5))
+    }
+  });
+
+  await expect.poll(() => weatherRelatedRequests.length).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const currentText = await infoPanelRoot.innerText();
+    return currentText !== initialPanelText && /weather forecast|forecast|wettervorhersage/i.test(currentText);
+  }).toBe(true);
+
+  let forecastSection = page.getByTestId('weather-forecast');
+  if ((await forecastSection.count()) === 0) {
+    forecastSection = infoPanelRoot.getByRole('region', {
+      name: /weather forecast|forecast|wettervorhersage/i
+    });
+  }
+  if ((await forecastSection.count()) === 0) {
+    forecastSection = infoPanelRoot.getByRole('heading', {
+      name: /weather forecast|forecast|wettervorhersage/i
+    });
+  }
+  if ((await forecastSection.count()) === 0) {
+    forecastSection = infoPanelRoot.getByText(/weather forecast|forecast|wettervorhersage/i);
+  }
+  await expect(forecastSection.first()).toBeVisible();
+
+  await expect.poll(async () => {
+    const byTestId = await page.getByTestId('weather-forecast-entry').count();
+    if (byTestId === 24) {
+      return 24;
+    }
+
+    const rows = await infoPanelRoot.getByRole('row').count();
+    if (rows > 0 && rows - 1 === 24) {
+      return 24;
+    }
+
+    const listItems = await infoPanelRoot.getByRole('listitem').count();
+    if (listItems === 24) {
+      return 24;
+    }
+
+    const panelText = await infoPanelRoot.innerText();
+
+    const hour24Matches = panelText.match(/\b(?:[01]\d|2[0-3]):(?:[0-5]\d)\b/g) ?? [];
+    if (new Set(hour24Matches).size === 24) {
+      return 24;
+    }
+
+    const hour12Matches = (panelText.match(/\b(?:1[0-2]|0?[1-9])\s?(?:AM|PM)\b/gi) ?? []).map(value =>
+      value.toUpperCase().replace(/\s+/g, '')
+    );
+    if (new Set(hour12Matches).size === 24) {
+      return 24;
+    }
+
+    return -1;
+  }).toBe(24);
+});

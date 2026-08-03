@@ -1,0 +1,81 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const printMapButton = page.getByRole('button', { name: /^Print Map$/i });
+  await expect(printMapButton).toBeVisible();
+
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+
+  if (!(await titleInput.isVisible())) {
+    await printMapButton.click();
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const printPanelHeading = page.getByRole('heading', { name: /^Print Map$/i });
+  if (await printPanelHeading.isVisible()) {
+    await expect(printPanelHeading).toBeVisible();
+  }
+
+  const printTitle = `Playwright PNG Export ${Date.now()}`;
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: /^PNG$/i });
+  const formatSelect = page.getByRole('combobox', { name: /format/i });
+
+  if (await pngRadio.isVisible()) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else if (await formatSelect.isVisible()) {
+    await formatSelect.selectOption({ label: 'PNG' });
+    await expect(formatSelect).toHaveValue(/png/i);
+  } else {
+    const pngButton = page.getByRole('button', { name: /^PNG$/i });
+    await expect(pngButton).toBeVisible();
+    await pngButton.click();
+  }
+
+  let exportButton = page.getByRole('button', { name: /^Export$/i });
+  if (!(await exportButton.isVisible())) {
+    exportButton = page.getByRole('button', { name: /^Print$/i });
+  }
+  if (!(await exportButton.isVisible())) {
+    exportButton = page.getByRole('button', { name: /^Download$/i });
+  }
+
+  await expect(exportButton).toBeVisible();
+  await expect(exportButton).toBeEnabled();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  const failure = await download.failure();
+  expect(failure).toBeNull();
+
+  const suggestedFilename = download.suggestedFilename();
+  expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+  const downloadedPath = await download.path();
+  if (!downloadedPath) {
+    throw new Error('Expected the PNG export to be downloaded to a local file path.');
+  }
+
+  const fileBuffer = await fs.readFile(downloadedPath);
+  expect(fileBuffer.length).toBeGreaterThan(1000);
+
+  const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  expect(fileBuffer.subarray(0, 8).equals(pngSignature)).toBeTruthy();
+
+  const width = fileBuffer.readUInt32BE(16);
+  const height = fileBuffer.readUInt32BE(20);
+  expect(width).toBeGreaterThan(0);
+  expect(height).toBeGreaterThan(0);
+});

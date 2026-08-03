@@ -1,0 +1,77 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  let infoPanel = page.getByTestId('info-panel');
+  if (!(await infoPanel.isVisible().catch(() => false))) {
+    infoPanel = page.getByTestId('details-panel');
+  }
+  if (!(await infoPanel.isVisible().catch(() => false))) {
+    infoPanel = page.getByRole('complementary').first();
+  }
+  if (!(await infoPanel.isVisible().catch(() => false))) {
+    infoPanel = page.getByRole('region', { name: /info|information/i }).first();
+  }
+  if (!(await infoPanel.isVisible().catch(() => false))) {
+    infoPanel = page.locator('aside').first();
+  }
+  await expect(infoPanel).toBeVisible();
+
+  let map = page.getByTestId('map');
+  if (!(await map.isVisible().catch(() => false))) {
+    map = page.getByTestId('map-container');
+  }
+  if (!(await map.isVisible().catch(() => false))) {
+    map = page.getByTestId('ol-map');
+  }
+  if (!(await map.isVisible().catch(() => false))) {
+    map = page.locator('canvas').first();
+  }
+  await expect(map).toBeVisible();
+
+  const box = await map.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map is not clickable.');
+  }
+
+  await map.click({
+    position: {
+      x: Math.max(10, Math.round(box.width * 0.6)),
+      y: Math.max(10, Math.round(box.height * 0.4))
+    }
+  });
+
+  let forecastHeading = infoPanel.getByRole('heading', { name: /weather forecast/i });
+  if (!(await forecastHeading.isVisible().catch(() => false))) {
+    forecastHeading = infoPanel.getByText(/weather forecast/i).first();
+  }
+  await expect(forecastHeading).toBeVisible();
+
+  let forecastSection = infoPanel.getByTestId('weather-forecast');
+  if (!(await forecastSection.isVisible().catch(() => false))) {
+    forecastSection = infoPanel.getByTestId('forecast');
+  }
+  if (!(await forecastSection.isVisible().catch(() => false))) {
+    forecastSection = page.getByRole('region', { name: /weather forecast/i });
+  }
+  if (!(await forecastSection.isVisible().catch(() => false))) {
+    forecastSection = infoPanel;
+  }
+
+  await expect.poll(async () => {
+    const counts = await Promise.all([
+      forecastSection.getByTestId('forecast-entry').count(),
+      forecastSection.getByTestId('forecast-item').count(),
+      forecastSection.getByTestId('weather-forecast-entry').count(),
+      forecastSection.getByRole('listitem').count(),
+      forecastSection.getByRole('row').count(),
+      forecastSection.locator('article').count()
+    ]);
+    return counts.includes(24);
+  }).toBe(true);
+});

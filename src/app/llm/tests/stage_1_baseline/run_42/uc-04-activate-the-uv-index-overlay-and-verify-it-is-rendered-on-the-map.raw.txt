@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  const checksum = (buffer: Buffer) =>
+    buffer.reduce((sum, byte, index) => (sum + byte * (index + 1)) % 1000000007, 0);
+
+  const normalizeUrl = (url: string) => {
+    try {
+      return decodeURIComponent(url).toLowerCase();
+    } catch {
+      return url.toLowerCase();
+    }
+  };
+
+  const uvIndexTileRequests: string[] = [];
+  const uvIndexTileResponses: string[] = [];
+
+  page.on('request', request => {
+    const url = normalizeUrl(request.url());
+    const resourceType = request.resourceType();
+
+    if (
+      ['image', 'other', 'fetch', 'xhr'].includes(resourceType) &&
+      /(uv[-_\s]?index|uvi)/i.test(url)
+    ) {
+      uvIndexTileRequests.push(request.url());
+    }
+  });
+
+  page.on('response', response => {
+    const url = normalizeUrl(response.url());
+    const resourceType = response.request().resourceType();
+
+    if (
+      response.ok() &&
+      ['image', 'other', 'fetch', 'xhr'].includes(resourceType) &&
+      /(uv[-_\s]?index|uvi)/i.test(url)
+    ) {
+      uvIndexTileResponses.push(response.url());
+    }
+  });
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const beforeOverlayChecksum = checksum(await mapCanvas.screenshot());
+
+  await uvIndexToggle.click({ force: true });
+
+  await expect(uvIndexToggle).toBeChecked();
+  await expect.poll(() => uvIndexTileRequests.length).toBeGreaterThan(0);
+  await expect.poll(() => uvIndexTileResponses.length).toBeGreaterThan(0);
+  await expect.poll(async () => checksum(await mapCanvas.screenshot()) !== beforeOverlayChecksum).toBe(true);
+});

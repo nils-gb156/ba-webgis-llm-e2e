@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const uvIndexLabel = page.getByText('UV-Index', { exact: true });
+  await expect(uvIndexLabel).toBeVisible();
+
+  const uvIndexToggle = page.getByRole('checkbox', { name: /UV-Index/i });
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  const mapViewport = page.locator('.ol-viewport');
+  await expect(mapViewport).toBeVisible();
+
+  const mapBefore = (await mapViewport.screenshot()).toString('base64');
+
+  const getMapRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.resourceType() === 'image' && /[?&]REQUEST=GetMap\b/i.test(request.url())) {
+      getMapRequests.push(request.url());
+    }
+  });
+
+  const getMapResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().resourceType() === 'image' &&
+      /[?&]REQUEST=GetMap\b/i.test(response.url()) &&
+      response.ok()
+  );
+
+  await uvIndexToggle.click({ force: true });
+  await expect(uvIndexToggle).toBeChecked();
+
+  await getMapResponsePromise;
+  await expect.poll(() => getMapRequests.length).toBeGreaterThan(0);
+  await page.waitForLoadState('networkidle');
+
+  await expect
+    .poll(async () => (await mapViewport.screenshot()).toString('base64'))
+    .not.toBe(mapBefore);
+});

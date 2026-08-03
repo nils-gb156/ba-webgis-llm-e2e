@@ -1,0 +1,164 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const extractForecastCount = (value: unknown): number | undefined => {
+    const visit = (node: unknown, path: string[] = []): number | undefined => {
+      if (Array.isArray(node)) {
+        const joinedPath = path.join('.').toLowerCase();
+        const looksLikeForecastPath = /(forecast|hourly|hours|timeseries|entries|weather)/.test(joinedPath);
+        const looksLikeForecastArray =
+          node.length === 24 &&
+          node.every((item) => item !== null && typeof item === 'object');
+
+        if (looksLikeForecastPath && node.length === 24) {
+          return 24;
+        }
+
+        if (looksLikeForecastArray) {
+          return 24;
+        }
+
+        for (const item of node) {
+          const result = visit(item, path);
+          if (result !== undefined) {
+            return result;
+          }
+        }
+
+        return undefined;
+      }
+
+      if (node !== null && typeof node === 'object') {
+        for (const [key, child] of Object.entries(node as Record<string, unknown>)) {
+          const result = visit(child, [...path, key]);
+          if (result !== undefined) {
+            return result;
+          }
+        }
+      }
+
+      return undefined;
+    };
+
+    return visit(value);
+  };
+
+  const complementaryPanels = page.getByRole('complementary');
+  const infoPanel =
+    (await complementaryPanels.count()) > 0
+      ? complementaryPanels.first()
+      : page.locator('aside').first();
+
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBox = await mapCanvas.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas is not interactive.');
+  }
+
+  let captureTraffic = false;
+  let apiRequestsAfterClick = 0;
+  let forecastEntryCountFromResponse: number | undefined;
+
+  page.on('request', (request) => {
+    if (!captureTraffic) {
+      return;
+    }
+
+    if (request.resourceType() === 'fetch' || request.resourceType() === 'xhr') {
+      apiRequestsAfterClick += 1;
+    }
+  });
+
+  page.on('response', async (response) => {
+    if (!captureTraffic) {
+      return;
+    }
+
+    const request = response.request();
+    if (request.resourceType() !== 'fetch' && request.resourceType() !== 'xhr') {
+      return;
+    }
+
+    if (!response.ok()) {
+      return;
+    }
+
+    const contentType = response.headers()['content-type'] ?? '';
+    if (!/json/i.test(contentType)) {
+      return;
+    }
+
+    try {
+      const body = await response.json();
+      const count = extractForecastCount(body);
+      if (count !== undefined) {
+        forecastEntryCountFromResponse = count;
+      }
+    } catch {
+      // Ignore non-JSON or unreadable bodies.
+    }
+  });
+
+  captureTraffic = true;
+  await mapCanvas.click({
+    position: {
+      x: Math.max(10, Math.floor(mapBox.width * 0.35)),
+      y: Math.max(10, Math.floor(mapBox.height * 0.35))
+    }
+  });
+
+  await expect.poll(() => apiRequestsAfterClick).toBeGreaterThan(0);
+
+  const forecastHeadingByRole = infoPanel.getByRole('heading', {
+    name: /weather forecast|wettervorhersage|forecast/i
+  });
+  const forecastHeading =
+    (await forecastHeadingByRole.count()) > 0
+      ? forecastHeadingByRole.first()
+      : infoPanel.getByText(/weather forecast|wettervorhersage|forecast/i).first();
+
+  await expect(forecastHeading).toBeVisible();
+
+  const forecastContainers = infoPanel
+    .locator('section, [role="region"], div')
+    .filter({ has: forecastHeading });
+  const forecastContainer =
+    (await forecastContainers.count()) > 0 ? forecastContainers.last() : infoPanel;
+
+  await expect(forecastContainer).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const listItems = await forecastContainer.getByRole('listitem').count();
+      if (listItems === 24) {
+        return 24;
+      }
+
+      const rows = await forecastContainer.getByRole('row').count();
+      if (rows === 24 || rows === 25) {
+        return 24;
+      }
+
+      const timeLabels = await forecastContainer.getByText(/\b\d{1,2}:\d{2}\b/).count();
+      if (timeLabels === 24) {
+        return 24;
+      }
+
+      const genericItems = await forecastContainer.locator('li, tr, article').count();
+      if (genericItems === 24 || genericItems === 25) {
+        return 24;
+      }
+
+      return forecastEntryCountFromResponse ?? 0;
+    })
+    .toBe(24);
+});

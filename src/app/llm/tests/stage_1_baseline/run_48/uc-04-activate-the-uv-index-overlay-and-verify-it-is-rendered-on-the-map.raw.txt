@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const isUvIndexRequest = (url: string) => {
+    const lowerUrl = url.toLowerCase();
+    return (
+      lowerUrl.includes('uv-index') ||
+      lowerUrl.includes('uv_index') ||
+      lowerUrl.includes('uvindex') ||
+      (lowerUrl.includes('uv') && lowerUrl.includes('index')) ||
+      lowerUrl.includes('layer=uv') ||
+      lowerUrl.includes('layers=uv') ||
+      lowerUrl.includes('uvi')
+    );
+  };
+
+  const uvIndexRequests: string[] = [];
+  const uvIndexResponses: string[] = [];
+
+  page.on('request', (request) => {
+    if (isUvIndexRequest(request.url())) {
+      uvIndexRequests.push(request.url());
+    }
+  });
+
+  page.on('response', (response) => {
+    if (isUvIndexRequest(response.url()) && response.ok()) {
+      uvIndexResponses.push(response.url());
+    }
+  });
+
+  const uvIndexCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  const uvIndexSwitch = page.getByRole('switch', { name: 'UV-Index', exact: true });
+  const uvIndexToggle = (await uvIndexCheckbox.count()) > 0 ? uvIndexCheckbox : uvIndexSwitch;
+
+  await expect(uvIndexToggle).toBeVisible();
+
+  const getToggleState = async () => {
+    const ariaChecked = await uvIndexToggle.getAttribute('aria-checked');
+    if (ariaChecked !== null) {
+      return ariaChecked === 'true';
+    }
+    return await uvIndexToggle.isChecked();
+  };
+
+  await expect.poll(getToggleState).toBe(false);
+
+  const mapViewport = page.locator('.ol-viewport');
+  await expect(mapViewport).toBeVisible();
+
+  await page.waitForLoadState('networkidle');
+  const beforeScreenshot = await mapViewport.screenshot();
+
+  await uvIndexToggle.click({ force: true });
+
+  await expect.poll(getToggleState).toBe(true);
+  await expect.poll(() => uvIndexRequests.length).toBeGreaterThan(0);
+  await expect.poll(() => uvIndexResponses.length).toBeGreaterThan(0);
+
+  await expect
+    .poll(async () => {
+      const afterScreenshot = await mapViewport.screenshot();
+      return !afterScreenshot.equals(beforeScreenshot);
+    })
+    .toBe(true);
+});

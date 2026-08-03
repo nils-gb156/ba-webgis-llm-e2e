@@ -1,0 +1,156 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const getToggleState = async (toggle: any): Promise<boolean> => {
+    const role = await toggle.getAttribute('role');
+    if (role === 'checkbox' || role === 'switch' || role === 'radio') {
+      return await toggle.isChecked();
+    }
+
+    const ariaPressed = await toggle.getAttribute('aria-pressed');
+    if (ariaPressed !== null) {
+      return ariaPressed === 'true';
+    }
+
+    const ariaChecked = await toggle.getAttribute('aria-checked');
+    if (ariaChecked !== null) {
+      return ariaChecked === 'true';
+    }
+
+    throw new Error('Unsupported layer toggle control.');
+  };
+
+  const findForecastEntryCount = (value: unknown): number | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length === 24) {
+        return value.length;
+      }
+
+      for (const item of value) {
+        const nested = findForecastEntryCount(item);
+        if (nested !== undefined) {
+          return nested;
+        }
+      }
+
+      return undefined;
+    }
+
+    if (value && typeof value === 'object') {
+      for (const nested of Object.values(value as Record<string, unknown>)) {
+        const result = findForecastEntryCount(nested);
+        if (result !== undefined) {
+          return result;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  let searchFields = page.getByRole('combobox', { name: /search|location|place/i });
+  if ((await searchFields.count()) === 0) {
+    searchFields = page.getByRole('combobox');
+  }
+  if ((await searchFields.count()) === 0) {
+    searchFields = page.getByRole('textbox', { name: /search|location|place/i });
+  }
+  if ((await searchFields.count()) === 0) {
+    searchFields = page.getByRole('textbox');
+  }
+  const searchField = searchFields.first();
+
+  let temperatureToggles = page.getByRole('checkbox', { name: /temperature/i });
+  if ((await temperatureToggles.count()) === 0) {
+    temperatureToggles = page.getByRole('switch', { name: /temperature/i });
+  }
+  if ((await temperatureToggles.count()) === 0) {
+    temperatureToggles = page.getByRole('button', { name: /temperature/i });
+  }
+  const temperatureToggle = temperatureToggles.first();
+
+  let precipitationToggles = page.getByRole('checkbox', { name: /precipitation/i });
+  if ((await precipitationToggles.count()) === 0) {
+    precipitationToggles = page.getByRole('switch', { name: /precipitation/i });
+  }
+  if ((await precipitationToggles.count()) === 0) {
+    precipitationToggles = page.getByRole('button', { name: /precipitation/i });
+  }
+  const precipitationToggle = precipitationToggles.first();
+
+  await expect(searchField).toBeVisible();
+  await expect(page.getByText(/temperature/i).first()).toBeVisible();
+  await expect(page.getByText(/precipitation/i).first()).toBeVisible();
+
+  const sidePanels = page.getByRole('complementary');
+  if ((await sidePanels.count()) > 0) {
+    await expect(sidePanels.first()).toBeVisible();
+  }
+
+  const measurementButtons = page.getByRole('button', { name: /measure/i });
+  if ((await measurementButtons.count()) > 0) {
+    await expect(measurementButtons.first()).not.toHaveAttribute('aria-pressed', 'true');
+  }
+
+  await expect.poll(async () => await getToggleState(temperatureToggle)).toBe(true);
+  await expect.poll(async () => await getToggleState(precipitationToggle)).toBe(false);
+
+  await temperatureToggle.click({ force: true });
+  await expect.poll(async () => await getToggleState(temperatureToggle)).toBe(false);
+
+  await precipitationToggle.click({ force: true });
+  await expect.poll(async () => await getToggleState(precipitationToggle)).toBe(true);
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const optionResults = page.getByRole('option');
+  const buttonResults = page.getByRole('button', { name: /münster/i });
+  const listItemResults = page.getByRole('listitem').filter({ hasText: /münster/i });
+
+  await expect.poll(async () => {
+    return (await optionResults.count()) + (await buttonResults.count()) + (await listItemResults.count());
+  }).toBeGreaterThan(0);
+
+  let firstResult: any = optionResults.first();
+  if ((await optionResults.count()) === 0 && (await buttonResults.count()) > 0) {
+    firstResult = buttonResults.first();
+  }
+  if ((await optionResults.count()) === 0 && (await buttonResults.count()) === 0) {
+    firstResult = listItemResults.first();
+  }
+
+  await expect(firstResult).toBeVisible();
+  const firstResultText = ((await firstResult.textContent()) ?? 'Münster').trim();
+
+  const forecastResponsePromise = page.waitForResponse((response) => {
+    const url = response.url().toLowerCase();
+    return response.ok() && response.request().method() === 'GET' && url.includes('forecast');
+  });
+
+  await firstResult.click();
+
+  await expect(searchField).toHaveValue(/münster/i);
+  await expect.poll(async () => {
+    const count = await optionResults.count();
+    return count;
+  }).toBe(0);
+
+  const forecastResponse = await forecastResponsePromise;
+  const forecastPayload = await forecastResponse.json();
+  expect(findForecastEntryCount(forecastPayload)).toBe(24);
+
+  if (firstResultText.length > 0) {
+    const mainLabel = firstResultText.split('\n')[0].split(',')[0].trim();
+    if (mainLabel.length > 0) {
+      await expect(searchField).toHaveValue(new RegExp(mainLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+    }
+  }
+
+  await expect.poll(async () => await getToggleState(temperatureToggle)).toBe(false);
+  await expect.poll(async () => await getToggleState(precipitationToggle)).toBe(true);
+});

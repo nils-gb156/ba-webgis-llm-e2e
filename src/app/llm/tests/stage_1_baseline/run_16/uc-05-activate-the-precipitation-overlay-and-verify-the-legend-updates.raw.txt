@@ -1,0 +1,24 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  const legendContainer = page
+    .getByRole('region', { name: 'Legend', exact: true })
+    .or(page.getByRole('tabpanel', { name: 'Legend', exact: true }))
+    .or(page.getByRole('complementary', { name: 'Legend', exact: true }))
+    .first();
+
+  await expect(precipitationToggle).toBeVisible();
+  await expect(precipitationToggle).not.toBeChecked();
+  await expect(legendContainer).toBeVisible();
+
+  await precipitationToggle.click({ force: true });
+
+  await expect(precipitationToggle).toBeChecked();
+  await expect(legendContainer.getByText('Precipitation', { exact: true })).toBeVisible();
+});

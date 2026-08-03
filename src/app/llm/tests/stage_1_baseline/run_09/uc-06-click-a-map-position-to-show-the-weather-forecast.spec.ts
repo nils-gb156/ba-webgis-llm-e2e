@@ -1,0 +1,95 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const forecastRequests: string[] = [];
+  page.on('request', request => {
+    const url = request.url().toLowerCase();
+    const resourceType = request.resourceType();
+    if ((resourceType === 'fetch' || resourceType === 'xhr') && (url.includes('forecast') || url.includes('weather'))) {
+      forecastRequests.push(request.url());
+    }
+  });
+
+  let infoPanel = page.getByRole('complementary').first();
+  if (await page.getByTestId('info-panel').count()) {
+    infoPanel = page.getByTestId('info-panel').first();
+  }
+
+  let map = page.locator('canvas').first();
+  if (await page.getByTestId('map').count()) {
+    map = page.getByTestId('map').first();
+  } else if (await page.getByTestId('map-container').count()) {
+    map = page.getByTestId('map-container').first();
+  }
+
+  await expect(infoPanel).toBeVisible();
+  await expect(map).toBeVisible();
+
+  const mapBox = await map.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map is not visible and cannot be clicked.');
+  }
+
+  const clickPosition = {
+    x: Math.max(30, Math.min(Math.round(mapBox.width / 2), Math.round(mapBox.width - 30))),
+    y: Math.max(30, Math.min(Math.round(mapBox.height / 2), Math.round(mapBox.height - 30)))
+  };
+
+  const highlightClip = {
+    x: Math.round(mapBox.x + clickPosition.x - 20),
+    y: Math.round(mapBox.y + clickPosition.y - 20),
+    width: 40,
+    height: 40
+  };
+
+  const beforeClickImage = await page.screenshot({ clip: highlightClip });
+  const forecastRequestCountBeforeClick = forecastRequests.length;
+
+  const forecastResponsePromise = page.waitForResponse(response => {
+    const url = response.url().toLowerCase();
+    const resourceType = response.request().resourceType();
+    return (resourceType === 'fetch' || resourceType === 'xhr') && (url.includes('forecast') || url.includes('weather')) && response.ok();
+  });
+
+  await map.click({ position: clickPosition });
+  await forecastResponsePromise;
+
+  await expect.poll(() => forecastRequests.length).toBeGreaterThan(forecastRequestCountBeforeClick);
+
+  await expect.poll(async () => {
+    const afterClickImage = await page.screenshot({ clip: highlightClip });
+    return Buffer.compare(beforeClickImage, afterClickImage) !== 0;
+  }).toBe(true);
+
+  let weatherHeading = infoPanel.getByRole('heading', { name: /weather forecast/i }).first();
+  if (!(await weatherHeading.count())) {
+    weatherHeading = infoPanel.getByText(/weather forecast/i).first();
+  }
+
+  await expect(weatherHeading).toBeVisible();
+
+  let weatherContainer = infoPanel;
+  if (await infoPanel.getByTestId('weather-forecast').count()) {
+    weatherContainer = infoPanel.getByTestId('weather-forecast').first();
+  } else {
+    const sectionWithHeading = infoPanel.locator('section').filter({ has: weatherHeading }).first();
+    if (await sectionWithHeading.count()) {
+      weatherContainer = sectionWithHeading;
+    }
+  }
+
+  await expect.poll(async () => {
+    const counts = await Promise.all([
+      weatherContainer.getByTestId('forecast-entry').count(),
+      weatherContainer.getByRole('listitem').count(),
+      weatherContainer.getByRole('row').count(),
+      weatherContainer.getByRole('article').count()
+    ]);
+    return counts;
+  }).toContain(24);
+});

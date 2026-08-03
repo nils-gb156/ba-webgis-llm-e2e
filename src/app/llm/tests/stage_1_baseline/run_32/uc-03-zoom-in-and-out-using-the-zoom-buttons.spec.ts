@@ -1,0 +1,223 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  const zoomRequests: Array<{ url: string; zoom: number; timestamp: number }> = [];
+
+  const extractZoomFromUrl = (urlString: string): number | undefined => {
+    try {
+      const url = new URL(urlString);
+
+      const pathMatch = url.pathname.match(/(?:^|\/)(\d+)\/\d+\/\d+(?:\.[a-z0-9]+)?$/i);
+      if (pathMatch) {
+        return Number(pathMatch[1]);
+      }
+
+      for (const [key, value] of url.searchParams.entries()) {
+        if (/^(z|zoom|level|lod|tilematrix)$/i.test(key)) {
+          const directNumber = Number(value);
+          if (Number.isFinite(directNumber)) {
+            return directNumber;
+          }
+
+          const trailingNumberMatch = value.match(/(\d+)(?!.*\d)/);
+          if (trailingNumberMatch) {
+            return Number(trailingNumberMatch[1]);
+          }
+        }
+      }
+    } catch {
+      // Ignore URLs that cannot be parsed.
+    }
+
+    return undefined;
+  };
+
+  const inferZoomFromRequests = (
+    sinceIndex = 0,
+    direction: 'any' | 'in' | 'out' = 'any'
+  ): number | undefined => {
+    const relevantZooms = zoomRequests.slice(sinceIndex).map((entry) => entry.zoom);
+
+    if (relevantZooms.length === 0) {
+      return undefined;
+    }
+
+    if (direction === 'in') {
+      return Math.max(...relevantZooms);
+    }
+
+    if (direction === 'out') {
+      return Math.min(...relevantZooms);
+    }
+
+    const counts = new Map<number, { count: number; lastIndex: number }>();
+    relevantZooms.forEach((zoom, index) => {
+      const current = counts.get(zoom) ?? { count: 0, lastIndex: index };
+      counts.set(zoom, { count: current.count + 1, lastIndex: index });
+    });
+
+    const sorted = [...counts.entries()].sort((a, b) => {
+      if (b[1].count !== a[1].count) {
+        return b[1].count - a[1].count;
+      }
+      return b[1].lastIndex - a[1].lastIndex;
+    });
+
+    return sorted[0]?.[0];
+  };
+
+  const readWindowExposedZoom = async (): Promise<number | undefined> => {
+    return await page.evaluate(() => {
+      const tryGetZoom = (candidate: unknown): number | undefined => {
+        if (!candidate || (typeof candidate !== 'object' && typeof candidate !== 'function')) {
+          return undefined;
+        }
+
+        try {
+          const maybeMap = candidate as { getView?: () => unknown };
+          if (typeof maybeMap.getView !== 'function') {
+            return undefined;
+          }
+
+          const view = maybeMap.getView() as { getZoom?: () => unknown } | undefined;
+          if (!view || typeof view.getZoom !== 'function') {
+            return undefined;
+          }
+
+          const zoom = view.getZoom();
+          if (typeof zoom === 'number' && Number.isFinite(zoom)) {
+            return zoom;
+          }
+        } catch {
+          // Ignore inaccessible candidates.
+        }
+
+        return undefined;
+      };
+
+      const windowKeys = Object.getOwnPropertyNames(window);
+
+      for (const key of windowKeys) {
+        if (['window', 'self', 'top', 'parent', 'frames'].includes(key)) {
+          continue;
+        }
+
+        try {
+          const value = (window as unknown as Record<string, unknown>)[key];
+          const zoom = tryGetZoom(value);
+          if (zoom !== undefined) {
+            return zoom;
+          }
+        } catch {
+          // Ignore inaccessible globals.
+        }
+      }
+
+      for (const key of windowKeys) {
+        if (!/map|viewer|app|model|store|state/i.test(key)) {
+          continue;
+        }
+
+        try {
+          const root = (window as unknown as Record<string, unknown>)[key];
+          if (!root || (typeof root !== 'object' && typeof root !== 'function')) {
+            continue;
+          }
+
+          for (const nestedKey of Object.getOwnPropertyNames(root as object)) {
+            try {
+              const nestedValue = (root as Record<string, unknown>)[nestedKey];
+              const zoom = tryGetZoom(nestedValue);
+              if (zoom !== undefined) {
+                return zoom;
+              }
+            } catch {
+              // Ignore inaccessible nested values.
+            }
+          }
+        } catch {
+          // Ignore inaccessible roots.
+        }
+      }
+
+      return undefined;
+    });
+  };
+
+  const getCurrentZoom = async (
+    options?: { sinceIndex?: number; direction?: 'any' | 'in' | 'out' }
+  ): Promise<number | undefined> => {
+    const windowZoom = await readWindowExposedZoom();
+    if (windowZoom !== undefined) {
+      return windowZoom;
+    }
+
+    return inferZoomFromRequests(options?.sinceIndex ?? 0, options?.direction ?? 'any');
+  };
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/', { waitUntil: 'domcontentloaded' });
+
+  page.on('request', (request) => {
+    const zoom = extractZoomFromUrl(request.url());
+    if (zoom !== undefined) {
+      zoomRequests.push({
+        url: request.url(),
+        zoom,
+        timestamp: Date.now()
+      });
+    }
+  });
+
+  const zoomInButton = page.getByRole('button', { name: /^(Zoom in|\+)$/ });
+  const zoomOutButton = page.getByRole('button', { name: /^(Zoom out|[-−–])$/ });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await page.waitForLoadState('networkidle');
+
+  let initialZoom: number | undefined;
+  await expect
+    .poll(async () => {
+      initialZoom = await getCurrentZoom();
+      return initialZoom;
+    })
+    .not.toBeUndefined();
+
+  if (initialZoom === undefined) {
+    throw new Error('Could not determine the initial map zoom level.');
+  }
+
+  const zoomRequestsBeforeZoomIn = zoomRequests.length;
+  await zoomInButton.click();
+
+  let zoomAfterZoomIn: number | undefined;
+  await expect.poll(async () => {
+    zoomAfterZoomIn = await getCurrentZoom({
+      sinceIndex: zoomRequestsBeforeZoomIn,
+      direction: 'in'
+    });
+    return zoomAfterZoomIn;
+  }).toBeGreaterThan(initialZoom);
+
+  if (zoomAfterZoomIn === undefined) {
+    throw new Error('Could not determine the map zoom level after clicking "Zoom in".');
+  }
+
+  const zoomRequestsBeforeZoomOut = zoomRequests.length;
+  await zoomOutButton.click();
+
+  let zoomAfterZoomOut: number | undefined;
+  await expect.poll(async () => {
+    zoomAfterZoomOut = await getCurrentZoom({
+      sinceIndex: zoomRequestsBeforeZoomOut,
+      direction: 'out'
+    });
+    return zoomAfterZoomOut;
+  }).toBeLessThan(zoomAfterZoomIn);
+
+  if (zoomAfterZoomOut === undefined) {
+    throw new Error('Could not determine the map zoom level after clicking "Zoom out".');
+  }
+});

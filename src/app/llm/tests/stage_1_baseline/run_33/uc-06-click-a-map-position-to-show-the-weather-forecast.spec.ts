@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanelCandidates = [
+    page.getByTestId('info-panel'),
+    page.getByRole('complementary'),
+    page.getByRole('region', { name: /info|information/i }),
+  ];
+
+  let infoPanel = infoPanelCandidates[0].first();
+  for (const candidate of infoPanelCandidates) {
+    if ((await candidate.count()) > 0) {
+      infoPanel = candidate.first();
+      break;
+    }
+  }
+  await expect(infoPanel).toBeVisible();
+
+  const mapCandidates = [
+    page.getByTestId('map'),
+    page.getByTestId('map-container'),
+    page.getByRole('region', { name: /map/i }),
+    page.locator('.ol-viewport'),
+    page.locator('canvas'),
+  ];
+
+  let map = mapCandidates[0].first();
+  for (const candidate of mapCandidates) {
+    if ((await candidate.count()) > 0) {
+      map = candidate.first();
+      break;
+    }
+  }
+  await expect(map).toBeVisible();
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  const clickPosition = {
+    x: Math.max(50, Math.floor((mapBox?.width ?? 300) * 0.35)),
+    y: Math.max(50, Math.floor((mapBox?.height ?? 300) * 0.5)),
+  };
+
+  let forecastRequestUrl: string | undefined;
+  page.on('request', (request) => {
+    if (
+      (request.resourceType() === 'fetch' || request.resourceType() === 'xhr') &&
+      /forecast|weather/i.test(request.url())
+    ) {
+      forecastRequestUrl = request.url();
+    }
+  });
+
+  const forecastResponsePromise = page.waitForResponse((response) => {
+    const request = response.request();
+    return (
+      (request.resourceType() === 'fetch' || request.resourceType() === 'xhr') &&
+      request.method() === 'GET' &&
+      /forecast|weather/i.test(response.url()) &&
+      response.ok()
+    );
+  });
+
+  await map.click({ position: clickPosition });
+
+  const forecastResponse = await forecastResponsePromise;
+  expect(forecastResponse.ok()).toBeTruthy();
+  await expect.poll(() => forecastRequestUrl).toMatch(/forecast|weather/i);
+
+  const weatherForecastSection = infoPanel.getByText(/weather forecast/i).first();
+  await expect(weatherForecastSection).toBeVisible();
+
+  await expect.poll(async () => {
+    const listItemCount = await infoPanel.getByRole('listitem').count();
+    if (listItemCount === 24) {
+      return 24;
+    }
+
+    const rowCount = await infoPanel.getByRole('row').count();
+    if (rowCount === 24) {
+      return 24;
+    }
+    if (rowCount === 25) {
+      return 24;
+    }
+
+    const articleCount = await infoPanel.getByRole('article').count();
+    if (articleCount === 24) {
+      return 24;
+    }
+
+    const textContent = await infoPanel.textContent();
+    if (!textContent) {
+      return 0;
+    }
+
+    const hourMatches = textContent.match(/\b(?:[01]\d|2[0-3]):00\b/g) ?? [];
+    return new Set(hourMatches).size;
+  }).toBe(24);
+});

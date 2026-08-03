@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('load');
+
+  const infoPanel = page.getByTestId('info-panel');
+  if (await infoPanel.count()) {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const uviLayerSwitch = page.getByRole('switch', { name: 'UV-Index Stations', exact: true });
+  if (await uviLayerCheckbox.count()) {
+    await expect(uviLayerCheckbox).toBeChecked();
+  } else if (await uviLayerSwitch.count()) {
+    await expect(uviLayerSwitch).toBeChecked();
+  }
+
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+  const eucosLayerSwitch = page.getByRole('switch', { name: 'EUCOS Ground Stations', exact: true });
+  if (await eucosLayerCheckbox.count()) {
+    await expect(eucosLayerCheckbox).toBeChecked();
+  } else if (await eucosLayerSwitch.count()) {
+    await expect(eucosLayerSwitch).toBeChecked();
+  }
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBox = await mapCanvas.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    return;
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: mapBox.width / 2,
+      y: mapBox.height / 2
+    }
+  });
+
+  const uvIndexStationSection = page.getByText('UV-Index Station', { exact: true });
+  const eucosGroundStationSection = page.getByText('EUCOS Ground Station', { exact: true });
+
+  await expect(uvIndexStationSection).toBeVisible();
+  await expect(eucosGroundStationSection).toBeVisible();
+});

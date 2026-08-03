@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const measurementPanelVisible = await measurementHeading.isVisible();
+  if (!measurementPanelVisible) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas bounding box is not available.');
+  }
+
+  const point1 = {
+    x: Math.round(Math.max(40, Math.min(box.width - 160, box.width * 0.25))),
+    y: Math.round(Math.max(40, Math.min(box.height - 160, box.height * 0.35)))
+  };
+  const point2 = {
+    x: Math.round(Math.max(80, Math.min(box.width - 120, box.width * 0.45))),
+    y: Math.round(Math.max(60, Math.min(box.height - 120, box.height * 0.45)))
+  };
+  const point3 = {
+    x: Math.round(Math.max(120, Math.min(box.width - 80, box.width * 0.65))),
+    y: Math.round(Math.max(80, Math.min(box.height - 80, box.height * 0.55)))
+  };
+  const endPoint = {
+    x: Math.round(Math.max(160, Math.min(box.width - 40, box.width * 0.78))),
+    y: Math.round(Math.max(100, Math.min(box.height - 40, box.height * 0.42)))
+  };
+
+  await mapCanvas.click({ position: point1 });
+  await mapCanvas.click({ position: point2 });
+  await mapCanvas.click({ position: point3 });
+  await mapCanvas.dblclick({ position: endPoint });
+
+  await expect(measurementHeading).toBeVisible();
+
+  await expect.poll(async () => {
+    return await measurementHeading.evaluate((headingEl) => {
+      const valueWithUnitPattern = /\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km|ft|yd|mi)\b/i;
+      let element: HTMLElement | null = headingEl as HTMLElement;
+
+      for (let level = 0; level < 5 && element; level += 1, element = element.parentElement) {
+        const text = element.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+        if (valueWithUnitPattern.test(text)) {
+          return text;
+        }
+      }
+
+      return '';
+    });
+  }).toMatch(/\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km|ft|yd|mi)\b/i);
+});

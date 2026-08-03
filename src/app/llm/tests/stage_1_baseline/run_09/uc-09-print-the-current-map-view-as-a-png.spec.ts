@@ -1,0 +1,191 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { readFile, stat } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  const baseUrl = 'http://localhost:5173/ba-webgis-llm-e2e/';
+
+  const exists = async (locator: Locator) => {
+    try {
+      return (await locator.count()) > 0;
+    } catch {
+      return false;
+    }
+  };
+
+  const isVisible = async (locator: Locator) => {
+    try {
+      if ((await locator.count()) === 0) {
+        return false;
+      }
+      return await locator.first().isVisible();
+    } catch {
+      return false;
+    }
+  };
+
+  const firstVisible = async (locators: Locator[]) => {
+    for (const locator of locators) {
+      if (await isVisible(locator)) {
+        return locator.first();
+      }
+    }
+    return undefined;
+  };
+
+  await page.goto(baseUrl);
+  await page.waitForLoadState('networkidle');
+
+  const printMapButton =
+    (await firstVisible([
+      page.getByRole('button', { name: 'Print Map', exact: true }),
+      page.getByLabel('Print Map', { exact: true }),
+      page.getByRole('button', { name: /print map/i })
+    ]));
+
+  expect(printMapButton, 'Expected a visible toolbar button to open the print tool.').toBeDefined();
+  await expect(printMapButton!).toBeVisible();
+
+  const printPanelHeading = page.getByRole('heading', { name: 'Print Map', exact: true });
+  const printPanelCandidates = [
+    page.getByRole('dialog', { name: 'Print Map', exact: true }),
+    page.getByRole('complementary', { name: 'Print Map', exact: true }),
+    page.getByRole('region', { name: 'Print Map', exact: true }),
+    page.getByRole('form', { name: 'Print Map', exact: true })
+  ];
+
+  const panelAlreadyVisible =
+    (await isVisible(printPanelHeading)) ||
+    !!(await firstVisible(printPanelCandidates));
+
+  if (!panelAlreadyVisible) {
+    await printMapButton!.click();
+  }
+
+  const panelContainer = await firstVisible(printPanelCandidates);
+  if (panelContainer) {
+    await expect(panelContainer).toBeVisible();
+  } else {
+    await expect(printPanelHeading).toBeVisible();
+  }
+
+  const scope: Page | Locator = panelContainer ?? page;
+
+  const titleInput =
+    (await firstVisible([
+      scope.getByLabel('Title', { exact: true }),
+      scope.getByRole('textbox', { name: 'Title', exact: true }),
+      scope.getByLabel(/title/i),
+      scope.getByRole('textbox', { name: /title/i }),
+      scope.getByPlaceholder(/title/i)
+    ]));
+
+  expect(titleInput, 'Expected a visible title input in the print panel.').toBeDefined();
+
+  const printTitle = 'Current map view';
+  await titleInput!.fill(printTitle);
+  await expect(titleInput!).toHaveValue(printTitle);
+
+  const pngRadio = scope.getByRole('radio', { name: 'PNG', exact: true });
+  const pngCheckbox = scope.getByRole('checkbox', { name: 'PNG', exact: true });
+  const formatSelectCandidates = [
+    scope.getByRole('combobox', { name: 'Format', exact: true }),
+    scope.getByRole('combobox', { name: /format/i }),
+    scope.getByLabel('Format', { exact: true }),
+    scope.getByLabel(/format/i)
+  ];
+
+  if (await exists(pngRadio)) {
+    await pngRadio.first().click({ force: true });
+    await expect(pngRadio.first()).toBeChecked();
+  } else if (await exists(pngCheckbox)) {
+    await pngCheckbox.first().click({ force: true });
+    await expect(pngCheckbox.first()).toBeChecked();
+  } else {
+    const formatSelect = await firstVisible(formatSelectCandidates);
+    expect(formatSelect, 'Expected a visible format selector or PNG choice in the print panel.').toBeDefined();
+
+    let selected = false;
+    try {
+      await formatSelect!.selectOption({ label: 'PNG' });
+      selected = true;
+    } catch {
+      // ignore and try alternative option values below
+    }
+
+    if (!selected) {
+      try {
+        await formatSelect!.selectOption({ value: 'png' });
+        selected = true;
+      } catch {
+        // ignore and try alternative option values below
+      }
+    }
+
+    if (!selected) {
+      try {
+        await formatSelect!.selectOption('PNG');
+        selected = true;
+      } catch {
+        // ignore and try alternative UI patterns below
+      }
+    }
+
+    if (!selected) {
+      await formatSelect!.click();
+      const pngOption = scope.getByRole('option', { name: 'PNG', exact: true });
+      await expect(pngOption).toBeVisible();
+      await pngOption.click();
+    }
+
+    await expect.poll(async () => {
+      try {
+        return await formatSelect!.inputValue();
+      } catch {
+        return '';
+      }
+    }).toMatch(/png/i);
+  }
+
+  const exportButton =
+    (await firstVisible([
+      scope.getByRole('button', { name: 'Export', exact: true }),
+      scope.getByRole('button', { name: 'Print', exact: true }),
+      scope.getByRole('button', { name: 'Download', exact: true }),
+      scope.getByRole('button', { name: /export/i }),
+      scope.getByRole('button', { name: /download/i }),
+      scope.getByRole('button', { name: /^print$/i })
+    ]));
+
+  expect(exportButton, 'Expected a visible export/print button in the print panel.').toBeDefined();
+  await expect(exportButton!).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton!.click();
+
+  const download = await downloadPromise;
+  const suggestedFilename = download.suggestedFilename();
+
+  expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+  const filePath = await download.path();
+  expect(filePath).not.toBeNull();
+
+  const [fileStats, fileBytes] = await Promise.all([
+    stat(filePath!),
+    readFile(filePath!)
+  ]);
+
+  expect(fileStats.size).toBeGreaterThan(1024);
+  expect(fileBytes.subarray(0, 8)).toEqual(
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+  );
+
+  const width = fileBytes.readUInt32BE(16);
+  const height = fileBytes.readUInt32BE(20);
+
+  expect(width).toBeGreaterThan(0);
+  expect(height).toBeGreaterThan(0);
+});

@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 5: Activate the Precipitation overlay and verify the legend updates', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const precipitationToggle = page.getByRole('checkbox', { name: 'Precipitation', exact: true });
+  const legendHeading = page.getByRole('heading', { name: 'Legend', exact: true });
+  const precipitationText = page.getByText('Precipitation', { exact: true });
+
+  await expect(precipitationToggle).toBeAttached();
+  await expect(legendHeading).toBeVisible();
+  await expect(precipitationToggle).not.toBeChecked();
+
+  const initialPrecipitationTextCount = await precipitationText.count();
+
+  await precipitationToggle.click({ force: true });
+
+  await expect(precipitationToggle).toBeChecked();
+
+  const legendContainerCandidates = page
+    .getByRole('region', { name: 'Legend', exact: true })
+    .or(page.getByRole('group', { name: 'Legend', exact: true }))
+    .or(page.getByRole('complementary', { name: 'Legend', exact: true }));
+
+  if ((await legendContainerCandidates.count()) > 0) {
+    await expect(legendContainerCandidates.first().getByText('Precipitation', { exact: true })).toBeVisible();
+  } else {
+    await expect.poll(async () => await precipitationText.count()).toBeGreaterThan(initialPrecipitationTextCount);
+  }
+});

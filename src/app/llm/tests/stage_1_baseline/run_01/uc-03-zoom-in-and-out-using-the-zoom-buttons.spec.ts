@@ -1,0 +1,115 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/', { waitUntil: 'commit' });
+
+  const extractZoomFromUrl = (urlString: string): number | undefined => {
+    try {
+      const url = new URL(urlString);
+
+      const tileMatrix =
+        url.searchParams.get('TileMatrix') ??
+        url.searchParams.get('tilematrix') ??
+        url.searchParams.get('TILEMATRIX');
+      if (tileMatrix) {
+        const match = tileMatrix.match(/(\d+)(?!.*\d)/);
+        if (match) {
+          return Number(match[1]);
+        }
+      }
+
+      const zoomParam =
+        url.searchParams.get('z') ??
+        url.searchParams.get('zoom') ??
+        url.searchParams.get('ZOOM');
+      if (zoomParam && /^\d+$/.test(zoomParam)) {
+        return Number(zoomParam);
+      }
+
+      const xyzMatch = url.pathname.match(/\/(\d+)\/\d+\/\d+(?:\.[a-zA-Z0-9]+)?$/);
+      if (xyzMatch) {
+        return Number(xyzMatch[1]);
+      }
+    } catch {
+      // Ignore malformed URLs and non-tile requests.
+    }
+
+    return undefined;
+  };
+
+  const capturedZooms: number[] = [];
+  page.on('request', request => {
+    const zoom = extractZoomFromUrl(request.url());
+    if (zoom !== undefined) {
+      capturedZooms.push(zoom);
+    }
+  });
+
+  const dominantZoom = (startIndex = 0): number | undefined => {
+    const slice = capturedZooms.slice(startIndex);
+    if (slice.length === 0) {
+      return undefined;
+    }
+
+    const counts = new Map<number, number>();
+    for (const zoom of slice) {
+      counts.set(zoom, (counts.get(zoom) ?? 0) + 1);
+    }
+
+    let result: number | undefined;
+    let highestCount = -1;
+    for (const [zoom, count] of counts.entries()) {
+      if (count > highestCount) {
+        result = zoom;
+        highestCount = count;
+      }
+    }
+
+    return result;
+  };
+
+  const highestZoom = (startIndex = 0): number | undefined => {
+    const slice = capturedZooms.slice(startIndex);
+    if (slice.length === 0) {
+      return undefined;
+    }
+    return Math.max(...slice);
+  };
+
+  const lowestZoom = (startIndex = 0): number | undefined => {
+    const slice = capturedZooms.slice(startIndex);
+    if (slice.length === 0) {
+      return undefined;
+    }
+    return Math.min(...slice);
+  };
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await page.waitForLoadState('load');
+
+  await expect.poll(() => dominantZoom() ?? -1).toBeGreaterThanOrEqual(0);
+  const initialZoom = dominantZoom();
+  if (initialZoom === undefined) {
+    throw new Error('Could not determine the initial map zoom level.');
+  }
+
+  const zoomInRequestStart = capturedZooms.length;
+  await zoomInButton.click();
+
+  await expect.poll(() => highestZoom(zoomInRequestStart) ?? -1).toBeGreaterThan(initialZoom);
+  const zoomAfterZoomIn = highestZoom(zoomInRequestStart);
+  if (zoomAfterZoomIn === undefined) {
+    throw new Error('Could not determine the zoom level after zooming in.');
+  }
+
+  const zoomOutRequestStart = capturedZooms.length;
+  await zoomOutButton.click();
+
+  await expect.poll(() => lowestZoom(zoomOutRequestStart) ?? Number.POSITIVE_INFINITY).toBeLessThan(zoomAfterZoomIn);
+});

@@ -1,0 +1,99 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const complementaryPanels = page.getByRole('complementary');
+  const infoPanel =
+    (await complementaryPanels.count()) > 0
+      ? complementaryPanels.first()
+      : page.getByRole('region').filter({ hasText: /info|weather|forecast|wetter/i }).first();
+
+  await expect(infoPanel).toBeVisible();
+
+  const initialCanvasImage = await mapCanvas.screenshot({ animations: 'disabled' });
+  const mapBounds = await mapCanvas.boundingBox();
+  expect(mapBounds).not.toBeNull();
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(mapBounds!.width * 0.55),
+      y: Math.round(mapBounds!.height * 0.45)
+    }
+  });
+
+  const forecastHeadingCandidates = infoPanel.getByRole('heading', {
+    name: /weather\s*forecast|wettervorhersage|forecast/i
+  });
+  const forecastButtonCandidates = infoPanel.getByRole('button', {
+    name: /weather\s*forecast|wettervorhersage|forecast/i
+  });
+
+  const forecastLabel =
+    (await forecastHeadingCandidates.count()) > 0
+      ? forecastHeadingCandidates.first()
+      : (await forecastButtonCandidates.count()) > 0
+        ? forecastButtonCandidates.first()
+        : infoPanel.getByText(/weather\s*forecast|wettervorhersage|forecast/i).first();
+
+  await expect(forecastLabel).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const updatedCanvasImage = await mapCanvas.screenshot({ animations: 'disabled' });
+      return updatedCanvasImage.equals(initialCanvasImage);
+    })
+    .toBe(false);
+
+  await expect
+    .poll(async () => {
+      let maxCount = 0;
+
+      const lists = infoPanel.getByRole('list');
+      const listCount = await lists.count();
+      for (let i = 0; i < listCount; i += 1) {
+        const entryCount = await lists.nth(i).getByRole('listitem').count();
+        if (entryCount > maxCount) {
+          maxCount = entryCount;
+        }
+      }
+
+      const tables = infoPanel.getByRole('table');
+      const tableCount = await tables.count();
+      for (let i = 0; i < tableCount; i += 1) {
+        const table = tables.nth(i);
+        const rowCount = await table.getByRole('row').count();
+        const hasColumnHeaders = (await table.getByRole('columnheader').count()) > 0;
+        const dataRowCount = hasColumnHeaders && rowCount > 0 ? rowCount - 1 : rowCount;
+        if (dataRowCount > maxCount) {
+          maxCount = dataRowCount;
+        }
+      }
+
+      const grids = infoPanel.getByRole('grid');
+      const gridCount = await grids.count();
+      for (let i = 0; i < gridCount; i += 1) {
+        const grid = grids.nth(i);
+        const rowCount = await grid.getByRole('row').count();
+        const hasColumnHeaders = (await grid.getByRole('columnheader').count()) > 0;
+        const dataRowCount = hasColumnHeaders && rowCount > 0 ? rowCount - 1 : rowCount;
+        if (dataRowCount > maxCount) {
+          maxCount = dataRowCount;
+        }
+      }
+
+      const articles = await infoPanel.getByRole('article').count();
+      if (articles > maxCount) {
+        maxCount = articles;
+      }
+
+      return maxCount;
+    })
+    .toBe(24);
+});

@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const uvSection = page.getByText(/^UV-Index Station\b/);
+  const eucosSection = page.getByText(/^EUCOS Ground Station\b/);
+
+  let map = page.locator('canvas').first();
+  if ((await page.getByTestId('map').count()) > 0) {
+    map = page.getByTestId('map');
+  } else if ((await page.getByTestId('map-container').count()) > 0) {
+    map = page.getByTestId('map-container');
+  } else if ((await page.locator('.ol-viewport').count()) > 0) {
+    map = page.locator('.ol-viewport').first();
+  }
+
+  await expect(map).toBeVisible();
+
+  const box = await map.boundingBox();
+  if (!box) {
+    throw new Error('Map bounding box is not available.');
+  }
+
+  const centerX = box.width / 2;
+  const centerY = box.height / 2;
+  const positions = [
+    { x: centerX, y: centerY },
+    { x: centerX + 12, y: centerY },
+    { x: centerX - 12, y: centerY },
+    { x: centerX, y: centerY + 12 },
+    { x: centerX, y: centerY - 12 }
+  ];
+
+  let foundBothSections = false;
+
+  for (const position of positions) {
+    await map.click({ position });
+
+    try {
+      await expect(uvSection).toBeVisible({ timeout: 4000 });
+      await expect(eucosSection).toBeVisible({ timeout: 4000 });
+      foundBothSections = true;
+      break;
+    } catch {
+      // Try the next nearby click position if the initial click did not hit the shared station location.
+    }
+  }
+
+  expect(foundBothSections).toBeTruthy();
+  await expect(uvSection).toBeVisible();
+  await expect(eucosSection).toBeVisible();
+});

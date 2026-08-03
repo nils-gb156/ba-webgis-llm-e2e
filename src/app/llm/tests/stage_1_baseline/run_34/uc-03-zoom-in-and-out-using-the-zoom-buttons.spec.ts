@@ -1,0 +1,128 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+function parseZoomFromUrl(rawUrl: string): number | undefined {
+    try {
+        const url = new URL(rawUrl);
+
+        const tileMatrixParam = url.searchParams.get('TileMatrix') ?? url.searchParams.get('tilematrix');
+        if (tileMatrixParam) {
+            const match = tileMatrixParam.match(/(\d+)(?!.*\d)/);
+            if (match) {
+                return Number(match[1]);
+            }
+        }
+
+        const zoomParam = url.searchParams.get('z') ?? url.searchParams.get('zoom');
+        if (zoomParam && /^\d+$/.test(zoomParam)) {
+            return Number(zoomParam);
+        }
+
+        const segments = url.pathname.split('/').filter(Boolean);
+        if (segments.length >= 3) {
+            const lastSegment = segments[segments.length - 1].replace(/\.(png|jpg|jpeg|webp|gif|pbf|mvt)$/i, '');
+            const secondLastSegment = segments[segments.length - 2];
+            const thirdLastSegment = segments[segments.length - 3];
+
+            if (/^\d+$/.test(lastSegment) && /^\d+$/.test(secondLastSegment) && /^\d+$/.test(thirdLastSegment)) {
+                return Number(thirdLastSegment);
+            }
+        }
+    } catch {
+        return undefined;
+    }
+
+    return undefined;
+}
+
+function getDominantZoom(levels: number[]): number | undefined {
+    if (levels.length === 0) {
+        return undefined;
+    }
+
+    const counts = new Map<number, number>();
+    for (const level of levels) {
+        counts.set(level, (counts.get(level) ?? 0) + 1);
+    }
+
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0][0];
+}
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+    const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+
+    const getLoadedZoomLevels = async (): Promise<number[]> => {
+        const resourceUrls = await page.evaluate(() =>
+            performance.getEntriesByType('resource').map((entry) => entry.name)
+        );
+
+        return resourceUrls
+            .map((url) => parseZoomFromUrl(url))
+            .filter((level): level is number => level !== undefined);
+    };
+
+    const captureZoomLevelsAfterAction = async (action: () => Promise<void>): Promise<number[]> => {
+        const capturedZoomLevels: number[] = [];
+        const listener = (request: Parameters<typeof page.on<'request'>>[1] extends (arg: infer T) => void ? T : never) => {
+            const level = parseZoomFromUrl(request.url());
+            if (level !== undefined) {
+                capturedZoomLevels.push(level);
+            }
+        };
+
+        page.on('request', listener);
+        try {
+            await action();
+            await expect.poll(() => capturedZoomLevels.length).toBeGreaterThan(0);
+            try {
+                await page.waitForLoadState('networkidle', { timeout: 10000 });
+            } catch {
+            }
+        } finally {
+            page.off('request', listener);
+        }
+
+        return capturedZoomLevels;
+    };
+
+    await expect
+        .poll(async () => {
+            const initialZoom = getDominantZoom(await getLoadedZoomLevels());
+            return initialZoom ?? -1;
+        })
+        .toBeGreaterThanOrEqual(0);
+
+    const initialZoomLevel = getDominantZoom(await getLoadedZoomLevels());
+    if (initialZoomLevel === undefined) {
+        throw new Error('Could not determine the initial map zoom level from loaded tile requests.');
+    }
+
+    const zoomInRequestLevels = await captureZoomLevelsAfterAction(async () => {
+        await zoomInButton.click();
+    });
+
+    const zoomInLevel = getDominantZoom(zoomInRequestLevels);
+    if (zoomInLevel === undefined) {
+        throw new Error('Could not determine the zoom level after clicking "Zoom in".');
+    }
+
+    expect(zoomInLevel).toBeGreaterThan(initialZoomLevel);
+
+    const zoomOutRequestLevels = await captureZoomLevelsAfterAction(async () => {
+        await zoomOutButton.click();
+    });
+
+    const zoomOutLevel = getDominantZoom(zoomOutRequestLevels);
+    if (zoomOutLevel === undefined) {
+        throw new Error('Could not determine the zoom level after clicking "Zoom out".');
+    }
+
+    expect(zoomOutLevel).toBeLessThan(zoomInLevel);
+});

@@ -1,0 +1,106 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page.locator('aside, [role="complementary"]').first();
+  if ((await infoPanel.count()) > 0) {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  const map = page.locator('canvas').first();
+  await expect(map).toBeVisible();
+
+  const mapBox = await map.boundingBox();
+  if (!mapBox) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const weatherRequestUrls: string[] = [];
+  page.on('request', request => {
+    const url = request.url();
+    if (/forecast|weather/i.test(url)) {
+      weatherRequestUrls.push(url);
+    }
+  });
+
+  const clickPosition = {
+    x: Math.max(10, Math.min(Math.round(mapBox.width * 0.4), Math.round(mapBox.width) - 10)),
+    y: Math.max(10, Math.min(Math.round(mapBox.height * 0.4), Math.round(mapBox.height) - 10))
+  };
+
+  await map.click({ position: clickPosition });
+
+  await expect.poll(() => weatherRequestUrls.length).toBeGreaterThan(0);
+
+  const forecastName = /weather forecast|wettervorhersage/i;
+  const forecastHeading = page.getByRole('heading', { name: forecastName });
+  const forecastText = page.getByText(forecastName);
+
+  await expect.poll(async () => {
+    const headingCount = await forecastHeading.count();
+    const textCount = await forecastText.count();
+    return headingCount + textCount;
+  }).toBeGreaterThan(0);
+
+  if ((await forecastHeading.count()) > 0) {
+    await expect(forecastHeading.first()).toBeVisible();
+  } else {
+    await expect(forecastText.first()).toBeVisible();
+  }
+
+  const countForecastEntries = async (): Promise<number> => {
+    const forecastContainers = page
+      .locator('section, [role="region"], article, aside')
+      .filter({ has: page.getByText(forecastName).first() });
+
+    if ((await forecastContainers.count()) > 0) {
+      const container = forecastContainers.first();
+
+      const listItems = await container.getByRole('listitem').count();
+      if (listItems > 0) {
+        return listItems;
+      }
+
+      const rows = await container.getByRole('row').count();
+      if (rows > 0) {
+        return rows === 25 ? 24 : rows;
+      }
+
+      const cards = await container.locator('article').count();
+      if (cards > 0) {
+        return cards;
+      }
+
+      const groups = await container.locator('[role="group"]').count();
+      if (groups > 0) {
+        return groups;
+      }
+    }
+
+    const lists = page.getByRole('list');
+    const listCount = await lists.count();
+    for (let i = 0; i < Math.min(listCount, 3); i++) {
+      const items = await lists.nth(i).getByRole('listitem').count();
+      if (items >= 20) {
+        return items;
+      }
+    }
+
+    const tables = page.getByRole('table');
+    const tableCount = await tables.count();
+    for (let i = 0; i < Math.min(tableCount, 3); i++) {
+      const rows = await tables.nth(i).getByRole('row').count();
+      if (rows >= 24) {
+        return rows === 25 ? 24 : rows;
+      }
+    }
+
+    return 0;
+  };
+
+  await expect.poll(countForecastEntries).toBe(24);
+});

@@ -1,0 +1,204 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const resolveLayerToggle = async (layerName: string) => {
+    const namePattern = new RegExp(`\\b${escapeRegExp(layerName)}\\b`, 'i');
+
+    await expect(page.getByText(namePattern).first()).toBeVisible();
+
+    const directCandidates = [
+      { locator: page.getByRole('switch', { name: namePattern }), kind: 'checkable' as const },
+      { locator: page.getByRole('checkbox', { name: namePattern }), kind: 'checkable' as const },
+      { locator: page.getByRole('button', { name: namePattern }), kind: 'button' as const }
+    ];
+
+    for (const candidate of directCandidates) {
+      if ((await candidate.locator.count()) === 1) {
+        await expect(candidate.locator).toBeVisible();
+        return candidate;
+      }
+    }
+
+    const row = page
+      .locator('[role="listitem"], [role="treeitem"], [role="row"], li')
+      .filter({ has: page.getByText(namePattern) })
+      .first();
+
+    await expect(row).toBeVisible();
+
+    const rowCandidates = [
+      { locator: row.getByRole('switch'), kind: 'checkable' as const },
+      { locator: row.getByRole('checkbox'), kind: 'checkable' as const },
+      { locator: row.getByRole('button'), kind: 'button' as const }
+    ];
+
+    for (const candidate of rowCandidates) {
+      if (await candidate.locator.count()) {
+        await expect(candidate.locator.first()).toBeVisible();
+        return { locator: candidate.locator.first(), kind: candidate.kind };
+      }
+    }
+
+    throw new Error(`Could not resolve a visibility toggle for layer "${layerName}".`);
+  };
+
+  const expectToggleState = async (
+    control: { locator: ReturnType<typeof page.getByRole>; kind: 'checkable' | 'button' },
+    visible: boolean
+  ) => {
+    if (control.kind === 'checkable') {
+      if (visible) {
+        await expect(control.locator).toBeChecked();
+      } else {
+        await expect(control.locator).not.toBeChecked();
+      }
+      return;
+    }
+
+    await expect(control.locator).toHaveAttribute('aria-pressed', visible ? 'true' : 'false');
+  };
+
+  const clickToggle = async (
+    control: { locator: ReturnType<typeof page.getByRole>; kind: 'checkable' | 'button' }
+  ) => {
+    if (control.kind === 'checkable') {
+      await control.locator.click({ force: true });
+    } else {
+      await control.locator.click();
+    }
+  };
+
+  const resolveSearchField = async () => {
+    const candidates = [
+      page.getByRole('combobox', { name: /search|location|place/i }),
+      page.getByRole('searchbox', { name: /search|location|place/i }),
+      page.getByRole('textbox', { name: /search|location|place/i }),
+      page.getByLabel(/search|location|place/i),
+      page.getByRole('combobox'),
+      page.getByRole('searchbox'),
+      page.getByRole('textbox')
+    ];
+
+    for (const candidate of candidates) {
+      if (await candidate.count()) {
+        await expect(candidate.first()).toBeVisible();
+        return candidate.first();
+      }
+    }
+
+    throw new Error('Could not resolve the geocoder search field.');
+  };
+
+  const resolveFirstSearchResult = async () => {
+    await expect
+      .poll(async () => {
+        const optionCount = await page.getByRole('option').count();
+        const listboxButtonCount = await page.getByRole('listbox').getByRole('button').count();
+        const namedButtonCount = await page.getByRole('button', { name: /münster/i }).count();
+        return optionCount + listboxButtonCount + namedButtonCount;
+      })
+      .toBeGreaterThan(0);
+
+    const option = page.getByRole('option').first();
+    if (await option.count()) {
+      await expect(option).toBeVisible();
+      return option;
+    }
+
+    const listboxButton = page.getByRole('listbox').getByRole('button').first();
+    if (await listboxButton.count()) {
+      await expect(listboxButton).toBeVisible();
+      return listboxButton;
+    }
+
+    const namedButton = page.getByRole('button', { name: /münster/i }).first();
+    await expect(namedButton).toBeVisible();
+    return namedButton;
+  };
+
+  const temperatureToggle = await resolveLayerToggle('Temperature');
+  const precipitationToggle = await resolveLayerToggle('Precipitation');
+
+  await expectToggleState(temperatureToggle, true);
+  await expectToggleState(precipitationToggle, false);
+
+  const searchField = await resolveSearchField();
+
+  const complementaryPanels = page.getByRole('complementary');
+  if (await complementaryPanels.count()) {
+    await expect(complementaryPanels.first()).toBeVisible();
+  }
+
+  await clickToggle(temperatureToggle);
+  await expectToggleState(temperatureToggle, false);
+
+  await clickToggle(precipitationToggle);
+  await expectToggleState(precipitationToggle, true);
+
+  await searchField.click();
+  await searchField.fill('');
+  await searchField.pressSequentially('Münster');
+
+  const firstResult = await resolveFirstSearchResult();
+  const firstResultText = ((await firstResult.textContent()) ?? '').trim();
+
+  await firstResult.click();
+
+  await expect
+    .poll(async () => {
+      try {
+        return await searchField.inputValue();
+      } catch {
+        return '';
+      }
+    })
+    .toMatch(/münster/i);
+
+  if (firstResultText) {
+    await expect
+      .poll(async () => {
+        try {
+          return await searchField.inputValue();
+        } catch {
+          return '';
+        }
+      })
+      .toContain('Münster');
+  }
+
+  const forecastHeading = page.getByRole('heading', { name: /weather forecast|forecast/i }).first();
+  if (await forecastHeading.count()) {
+    await expect(forecastHeading).toBeVisible();
+  } else {
+    await expect(page.getByText(/weather forecast|forecast/i).first()).toBeVisible();
+  }
+
+  const forecastContainer = page
+    .locator('section, [role="region"], [role="complementary"], aside, div')
+    .filter({
+      has: (await forecastHeading.count())
+        ? forecastHeading
+        : page.getByText(/weather forecast|forecast/i).first()
+    })
+    .first();
+
+  await expect(forecastContainer).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const roleListItems = await forecastContainer.locator('[role="listitem"]').count();
+      const listItems = await forecastContainer.locator('li').count();
+      const tableRows = await forecastContainer.locator('tbody tr').count();
+      const articles = await forecastContainer.locator('article').count();
+
+      return [roleListItems, listItems, tableRows, articles].find((count) => count === 24) ?? 0;
+    })
+    .toBe(24);
+});

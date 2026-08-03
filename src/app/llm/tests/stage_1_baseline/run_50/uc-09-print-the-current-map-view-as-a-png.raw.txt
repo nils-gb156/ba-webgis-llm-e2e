@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('networkidle');
+
+    const mapCanvas = page.locator('canvas').first();
+    await expect(mapCanvas).toBeVisible();
+
+    const scaleBar = page.locator('.ol-scale-line, .ol-scale-bar').first();
+    await expect(scaleBar).toBeVisible();
+
+    const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+    await expect(printMapButton).toBeVisible();
+
+    const titleInput = page.getByRole('textbox', { name: /title/i });
+
+    if (!(await titleInput.isVisible())) {
+        const pressed = await printMapButton.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await printMapButton.click();
+        }
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Playwright PNG Export');
+
+    const pngRadio = page.getByRole('radio', { name: 'PNG', exact: true });
+    if (await pngRadio.count()) {
+        await expect(pngRadio).toBeVisible();
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const formatSelect = page.getByRole('combobox', { name: /format/i });
+        await expect(formatSelect).toBeVisible();
+        await formatSelect.selectOption({ label: 'PNG' });
+        await expect(formatSelect).toHaveValue(/png/i);
+    }
+
+    const exportButton = page
+        .getByRole('button')
+        .filter({ hasText: /^(Export|Print|Download|Generate)$/i })
+        .first();
+
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(async () => download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileBuffer = await readFile(downloadPath!);
+    expect(fileBuffer.length).toBeGreaterThan(8);
+    expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

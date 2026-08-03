@@ -1,0 +1,81 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+
+  const infoPanel = page.getByRole('complementary').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBox = await mapCanvas.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const clickPosition = {
+    x: Math.round(Math.min(Math.max(mapBox.width * 0.3, 120), mapBox.width - 120)),
+    y: Math.round(Math.min(Math.max(mapBox.height * 0.4, 120), mapBox.height - 120))
+  };
+
+  const clipWidth = 64;
+  const clipHeight = 64;
+  const beforeHighlight = await page.screenshot({
+    clip: {
+      x: Math.max(0, mapBox.x + clickPosition.x - clipWidth / 2),
+      y: Math.max(0, mapBox.y + clickPosition.y - clipHeight / 2),
+      width: clipWidth,
+      height: clipHeight
+    }
+  });
+
+  await mapCanvas.click({ position: clickPosition });
+
+  const forecastLabel = infoPanel.getByText(/weather\s*forecast/i).first();
+  await expect(forecastLabel).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      return await page.screenshot({
+        clip: {
+          x: Math.max(0, mapBox.x + clickPosition.x - clipWidth / 2),
+          y: Math.max(0, mapBox.y + clickPosition.y - clipHeight / 2),
+          width: clipWidth,
+          height: clipHeight
+        }
+      });
+    })
+    .not.toEqual(beforeHighlight);
+
+  await expect.poll(async () => {
+    return await forecastLabel.evaluate((node) => {
+      const container =
+        node.closest('section') ??
+        node.closest('[role="region"]') ??
+        node.parentElement ??
+        node;
+
+      const countFromSelectors = [
+        container.querySelectorAll('[data-testid="forecast-entry"]').length,
+        container.querySelectorAll('li').length,
+        container.querySelectorAll('tbody tr').length,
+        Math.max(0, container.querySelectorAll('[role="row"]').length - 1),
+        container.querySelectorAll('article').length
+      ].find((count) => count > 0);
+
+      if (countFromSelectors) {
+        return countFromSelectors;
+      }
+
+      const text = container.textContent ?? '';
+      const hourlyMatches = text.match(/\b(?:[01]\d|2[0-3]):00\b/g);
+      return hourlyMatches?.length ?? 0;
+    });
+  }).toBe(24);
+});

@@ -1,0 +1,109 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  let infoPanel = page.locator('body');
+  let infoPanelFound = false;
+  for (const testId of ['info-panel', 'details-panel', 'result-panel']) {
+    const candidate = page.getByTestId(testId);
+    if ((await candidate.count()) > 0) {
+      infoPanel = candidate;
+      infoPanelFound = true;
+      break;
+    }
+  }
+  if (!infoPanelFound) {
+    const complementary = page.getByRole('complementary').first();
+    if ((await complementary.count()) > 0) {
+      infoPanel = complementary;
+      infoPanelFound = true;
+    }
+  }
+  if (infoPanelFound) {
+    await expect(infoPanel).toBeVisible();
+  }
+
+  let mapTarget = page.locator('canvas').first();
+  for (const testId of ['map', 'map-container', 'main-map']) {
+    const candidate = page.getByTestId(testId);
+    if ((await candidate.count()) > 0) {
+      mapTarget = candidate;
+      break;
+    }
+  }
+
+  await expect(mapTarget).toBeVisible();
+
+  const box = await mapTarget.boundingBox();
+  if (!box) {
+    throw new Error('Map target has no bounding box.');
+  }
+
+  await mapTarget.click({
+    position: {
+      x: Math.round(box.width * 0.65),
+      y: Math.round(box.height * 0.4)
+    }
+  });
+
+  await expect.poll(async () => {
+    if (await page.getByTestId('weather-forecast').isVisible()) {
+      return true;
+    }
+    if (await page.getByTestId('forecast').isVisible()) {
+      return true;
+    }
+    if (await infoPanel.getByRole('heading', { name: /weather forecast/i }).isVisible()) {
+      return true;
+    }
+    if (await page.getByRole('heading', { name: /weather forecast/i }).isVisible()) {
+      return true;
+    }
+    if (await infoPanel.getByText(/weather forecast/i).first().isVisible()) {
+      return true;
+    }
+    return false;
+  }).toBe(true);
+
+  await expect.poll(async () => {
+    const scopes = [];
+    const weatherForecast = page.getByTestId('weather-forecast');
+    const forecast = page.getByTestId('forecast');
+
+    if ((await weatherForecast.count()) > 0) {
+      scopes.push(weatherForecast);
+    }
+    if ((await forecast.count()) > 0) {
+      scopes.push(forecast);
+    }
+    scopes.push(infoPanel);
+
+    for (const scope of scopes) {
+      const weatherForecastEntries = await scope.getByTestId('weather-forecast-entry').count();
+      if (weatherForecastEntries > 0) {
+        return weatherForecastEntries;
+      }
+
+      const forecastEntries = await scope.getByTestId('forecast-entry').count();
+      if (forecastEntries > 0) {
+        return forecastEntries;
+      }
+
+      const listItems = await scope.getByRole('listitem').count();
+      if (listItems > 0) {
+        return listItems;
+      }
+
+      const rows = await scope.getByRole('row').count();
+      if (rows > 1) {
+        return rows - 1;
+      }
+    }
+
+    return 0;
+  }).toBe(24);
+});

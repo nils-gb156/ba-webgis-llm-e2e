@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+    const measurementRegion = page.getByRole('region', { name: 'Measurement', exact: true });
+    const measurementDialog = page.getByRole('dialog', { name: 'Measurement', exact: true });
+    const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+
+    await expect(measurementButton).toBeVisible();
+
+    const isMeasurementPanelVisible = async () => {
+        return (await measurementRegion.isVisible()) || (await measurementDialog.isVisible()) || (await measurementHeading.isVisible());
+    };
+
+    if (!(await isMeasurementPanelVisible())) {
+        const pressed = await measurementButton.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await measurementButton.click();
+        }
+    }
+
+    await expect.poll(isMeasurementPanelVisible).toBe(true);
+
+    let measurementScope = page.locator('body');
+    if (await measurementRegion.isVisible()) {
+        measurementScope = measurementRegion;
+    } else if (await measurementDialog.isVisible()) {
+        measurementScope = measurementDialog;
+    }
+
+    const measurementValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km|ft|mi)\b/gi;
+
+    const getMeasurementValues = async () => {
+        const text = await measurementScope.innerText();
+        return Array.from(text.matchAll(measurementValuePattern), (match) => match[0].trim());
+    };
+
+    const initialMeasurementValues = await getMeasurementValues();
+
+    const mapCanvas = page.locator('canvas').first();
+    await expect(mapCanvas).toBeVisible();
+
+    const box = await mapCanvas.boundingBox();
+    if (!box) {
+        throw new Error('Map canvas is not interactive because its bounding box is unavailable.');
+    }
+
+    const width = Math.floor(box.width);
+    const height = Math.floor(box.height);
+
+    await mapCanvas.click({
+        position: {
+            x: Math.max(20, Math.min(width - 20, Math.round(width * 0.25))),
+            y: Math.max(20, Math.min(height - 20, Math.round(height * 0.30)))
+        }
+    });
+    await mapCanvas.click({
+        position: {
+            x: Math.max(20, Math.min(width - 20, Math.round(width * 0.50))),
+            y: Math.max(20, Math.min(height - 20, Math.round(height * 0.45)))
+        }
+    });
+    await mapCanvas.dblclick({
+        position: {
+            x: Math.max(20, Math.min(width - 20, Math.round(width * 0.72))),
+            y: Math.max(20, Math.min(height - 20, Math.round(height * 0.62)))
+        }
+    });
+
+    await expect.poll(async () => {
+        const values = await getMeasurementValues();
+        return values.some((value) => {
+            const numericValue = Number.parseFloat(value.replace(',', '.'));
+            return Number.isFinite(numericValue) && numericValue > 0 && !initialMeasurementValues.includes(value);
+        });
+    }).toBe(true);
+});

@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const temperatureToggle = page.getByLabel(/^Temperature$/);
+  const precipitationToggle = page.getByLabel(/^Precipitation$/);
+  const searchField = page.getByRole('combobox').first();
+  const forecastSection = page
+    .getByRole('heading', { name: /weather forecast/i })
+    .or(page.getByRole('button', { name: /weather forecast/i }))
+    .first();
+
+  await expect(temperatureToggle).toBeVisible();
+  await expect(precipitationToggle).toBeVisible();
+  await expect(temperatureToggle).toBeChecked();
+  await expect(precipitationToggle).not.toBeChecked();
+  await expect(searchField).toBeVisible();
+  await expect(forecastSection).toBeVisible();
+
+  await temperatureToggle.click({ force: true });
+  await expect(temperatureToggle).not.toBeChecked();
+
+  await precipitationToggle.click({ force: true });
+  await expect(precipitationToggle).toBeChecked();
+
+  await searchField.click();
+  await searchField.fill('Münster');
+
+  const resultList = page.getByRole('listbox').first();
+  await expect(resultList).toBeVisible();
+
+  const firstResult = resultList.getByRole('option').first();
+  await expect(firstResult).toBeVisible();
+
+  const selectedResultText = ((await firstResult.textContent()) ?? '').trim();
+  const forecastResponsePromise = page.waitForResponse(
+    response => response.url().toLowerCase().includes('forecast') && response.status() === 200
+  );
+
+  await firstResult.click();
+
+  await expect(resultList).toBeHidden();
+
+  if (selectedResultText) {
+    const escapedSelectedResultText = selectedResultText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await expect(searchField).toHaveValue(new RegExp(escapedSelectedResultText, 'i'));
+  } else {
+    await expect(searchField).toHaveValue(/münster/i);
+  }
+
+  await forecastResponsePromise;
+
+  await expect(forecastSection).toBeVisible();
+  await expect.poll(async () => await page.getByText(/\b\d{2}:\d{2}\b/).count()).toBe(24);
+});

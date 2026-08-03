@@ -1,0 +1,126 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+function parseTileZoomFromUrl(url: string): number | undefined {
+    const xyzMatch = url.match(/\/(\d+)\/\d+\/\d+(?:\.\w+)?(?:[?#]|$)/);
+    if (xyzMatch) {
+        return Number(xyzMatch[1]);
+    }
+
+    const tileMatrixMatch = url.match(/[?&]TileMatrix=(\d+)/i);
+    if (tileMatrixMatch) {
+        return Number(tileMatrixMatch[1]);
+    }
+
+    const zoomParamMatch = url.match(/[?&](?:z|zoom)=(\d+)/i);
+    if (zoomParamMatch) {
+        return Number(zoomParamMatch[1]);
+    }
+
+    return undefined;
+}
+
+function dominantZoom(zooms: number[]): number | undefined {
+    if (zooms.length === 0) {
+        return undefined;
+    }
+
+    const counts = new Map<number, { count: number; lastIndex: number }>();
+
+    zooms.forEach((zoom, index) => {
+        const current = counts.get(zoom);
+        counts.set(zoom, {
+            count: (current?.count ?? 0) + 1,
+            lastIndex: index
+        });
+    });
+
+    let bestZoom: number | undefined;
+    let bestCount = -1;
+    let bestLastIndex = -1;
+
+    for (const [zoom, info] of counts.entries()) {
+        if (info.count > bestCount || (info.count === bestCount && info.lastIndex > bestLastIndex)) {
+            bestZoom = zoom;
+            bestCount = info.count;
+            bestLastIndex = info.lastIndex;
+        }
+    }
+
+    return bestZoom;
+}
+
+async function getResourceTileZooms(page: Parameters<typeof test>[0]['page']): Promise<number[]> {
+    const resourceUrls = await page.evaluate(() =>
+        performance.getEntriesByType('resource').map((entry) => entry.name)
+    );
+
+    return resourceUrls
+        .map((url) => parseTileZoomFromUrl(url))
+        .filter((zoom): zoom is number => zoom !== undefined);
+}
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+    const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+    await expect(zoomInButton).toBeVisible();
+    await expect(zoomOutButton).toBeVisible();
+
+    await expect
+        .poll(async () => {
+            const zooms = await getResourceTileZooms(page);
+            return dominantZoom(zooms) ?? -1;
+        })
+        .toBeGreaterThan(-1);
+
+    const initialZooms = await getResourceTileZooms(page);
+    const initialZoom = dominantZoom(initialZooms);
+
+    if (initialZoom === undefined) {
+        throw new Error('Could not infer the initial map zoom level from tile requests.');
+    }
+
+    const zoomInRequestZooms: number[] = [];
+    const onZoomInRequest = (request: { url(): string }) => {
+        const zoom = parseTileZoomFromUrl(request.url());
+        if (zoom !== undefined) {
+            zoomInRequestZooms.push(zoom);
+        }
+    };
+
+    page.on('request', onZoomInRequest);
+    await zoomInButton.click();
+
+    await expect
+        .poll(() => dominantZoom(zoomInRequestZooms) ?? -1)
+        .toBeGreaterThan(initialZoom);
+
+    page.off('request', onZoomInRequest);
+
+    const zoomAfterIn = dominantZoom(zoomInRequestZooms);
+    if (zoomAfterIn === undefined) {
+        throw new Error('Could not infer the zoom level after clicking "Zoom in".');
+    }
+
+    const zoomOutRequestZooms: number[] = [];
+    const onZoomOutRequest = (request: { url(): string }) => {
+        const zoom = parseTileZoomFromUrl(request.url());
+        if (zoom !== undefined) {
+            zoomOutRequestZooms.push(zoom);
+        }
+    };
+
+    page.on('request', onZoomOutRequest);
+    await zoomOutButton.click();
+
+    await expect
+        .poll(() => dominantZoom(zoomOutRequestZooms) ?? Number.POSITIVE_INFINITY)
+        .toBeLessThan(zoomAfterIn);
+
+    page.off('request', onZoomOutRequest);
+});

@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const printMapToggle = page.getByRole('button', { name: 'Print Map', exact: true });
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+  const scaleBar = page.locator('.ol-scale-line').first();
+
+  await expect(printMapToggle).toBeVisible();
+  await expect(scaleBar).toBeVisible();
+
+  if (!(await titleInput.isVisible())) {
+    const pressed = await printMapToggle.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printMapToggle.click();
+    }
+  }
+
+  await expect(titleInput).toBeVisible();
+  await titleInput.fill('Use Case 9 PNG Export');
+  await expect(titleInput).toHaveValue('Use Case 9 PNG Export');
+
+  const pngRadio = page.getByRole('radio', { name: /png/i });
+  const formatSelect = page.getByRole('combobox', { name: /format/i });
+  const pngButton = page.getByRole('button', { name: 'PNG', exact: true });
+
+  if ((await pngRadio.count()) > 0 && (await pngRadio.first().isVisible())) {
+    await pngRadio.first().click({ force: true });
+    await expect(pngRadio.first()).toBeChecked();
+  } else if ((await formatSelect.count()) > 0 && (await formatSelect.first().isVisible())) {
+    await formatSelect.first().selectOption({ label: 'PNG' });
+    await expect(formatSelect.first()).toHaveValue(/png/i);
+  } else if ((await pngButton.count()) > 0 && (await pngButton.first().isVisible())) {
+    await pngButton.first().click();
+  } else {
+    throw new Error('No visible PNG format control found in the print panel.');
+  }
+
+  const exportButtonCandidates = [
+    page.getByRole('button', { name: 'Export', exact: true }),
+    page.getByRole('button', { name: 'Export Map', exact: true }),
+    page.getByRole('button', { name: 'Print', exact: true }),
+    page.getByRole('button', { name: 'Download', exact: true })
+  ];
+
+  let exportButton = exportButtonCandidates[0];
+  let foundExportButton = false;
+
+  for (const candidate of exportButtonCandidates) {
+    if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+      exportButton = candidate.first();
+      foundExportButton = true;
+      break;
+    }
+  }
+
+  if (!foundExportButton) {
+    const printMapButtons = page.getByRole('button', { name: 'Print Map', exact: true });
+    if ((await printMapButtons.count()) > 1 && (await printMapButtons.nth(1).isVisible())) {
+      exportButton = printMapButtons.nth(1);
+      foundExportButton = true;
+    }
+  }
+
+  expect(foundExportButton).toBeTruthy();
+  await expect(exportButton).toBeEnabled();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  const download = await downloadPromise;
+  await expect.poll(() => download.failure()).toBeNull();
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  if (!downloadPath) {
+    throw new Error('Download path was not available for the exported PNG file.');
+  }
+
+  const fileContent = await readFile(downloadPath);
+  const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+  expect(fileContent.subarray(0, 8).equals(pngSignature)).toBeTruthy();
+  expect(fileContent.byteLength).toBeGreaterThan(1000);
+});

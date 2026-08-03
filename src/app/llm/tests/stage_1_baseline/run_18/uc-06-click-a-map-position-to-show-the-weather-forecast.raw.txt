@@ -1,0 +1,128 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mainContent = page.getByRole('main');
+  await expect(mainContent).toBeVisible();
+
+  const infoPanel = page.getByRole('complementary').first();
+  await expect(infoPanel).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const infoPanelTextBeforeClick = ((await infoPanel.textContent()) ?? '').trim();
+
+  const countForecastEntriesInInfoPanel = async () => {
+    return await page.evaluate(() => {
+      const panel = document.querySelector('aside, [role="complementary"]');
+      if (!panel) {
+        return 0;
+      }
+
+      const labelPattern = /weather|forecast|wetter|vorhersage/i;
+      const roots = [panel];
+      for (const candidate of Array.from(
+        panel.querySelectorAll('section, article, div, ul, ol, table')
+      )) {
+        if (labelPattern.test(candidate.textContent ?? '')) {
+          roots.push(candidate);
+        }
+      }
+
+      const uniqueRoots = Array.from(new Set(roots));
+      const selectors = [
+        '[data-testid*="forecast-entry"]',
+        '[data-testid*="forecast-item"]',
+        '[data-testid*="weather-entry"]',
+        '[data-testid*="weather-item"]',
+        '[role="listitem"]',
+        'li',
+        'tbody > tr',
+        'table tbody tr',
+        'time',
+        'tr'
+      ];
+
+      for (const root of uniqueRoots) {
+        for (const selector of selectors) {
+          const count = root.querySelectorAll(selector).length;
+          if (count === 24) {
+            return 24;
+          }
+        }
+
+        const text = root.textContent ?? '';
+        const hourlyMatches = text.match(/\b(?:[01]?\d|2[0-3]):\d{2}\b/g) ?? [];
+        if (new Set(hourlyMatches).size === 24) {
+          return 24;
+        }
+      }
+
+      return 0;
+    });
+  };
+
+  let forecastResponseUrl: string | undefined;
+
+  page.on('response', async (response) => {
+    const contentType = (response.headers()['content-type'] ?? '').toLowerCase();
+    if (!response.ok() || !contentType.includes('json')) {
+      return;
+    }
+
+    const containsForecastWith24Entries = (value: unknown): boolean => {
+      if (Array.isArray(value)) {
+        if (value.length === 24 && value.every((item) => item !== null && typeof item === 'object')) {
+          return true;
+        }
+        return value.some((item) => containsForecastWith24Entries(item));
+      }
+
+      if (value !== null && typeof value === 'object') {
+        return Object.values(value as Record<string, unknown>).some((nested) =>
+          containsForecastWith24Entries(nested)
+        );
+      }
+
+      return false;
+    };
+
+    try {
+      const body = await response.json();
+      if (containsForecastWith24Entries(body)) {
+        forecastResponseUrl = response.url();
+      }
+    } catch {
+      // Ignore non-JSON parse errors from unrelated responses.
+    }
+  });
+
+  const mapCanvasBox = await mapCanvas.boundingBox();
+  if (!mapCanvasBox) {
+    throw new Error('Map canvas is not available for clicking.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: Math.floor(mapCanvasBox.width / 2),
+      y: Math.floor(mapCanvasBox.height / 2)
+    }
+  });
+
+  await expect.poll(() => forecastResponseUrl, { timeout: 15000 }).not.toBeUndefined();
+
+  await expect
+    .poll(async () => ((await infoPanel.textContent()) ?? '').trim(), { timeout: 15000 })
+    .not.toBe(infoPanelTextBeforeClick);
+
+  await expect.poll(async () => {
+    const text = ((await infoPanel.textContent()) ?? '').trim();
+    return /weather|forecast|wetter|vorhersage/i.test(text);
+  }, { timeout: 15000 }).toBe(true);
+
+  await expect.poll(countForecastEntriesInInfoPanel, { timeout: 15000 }).toBe(24);
+});

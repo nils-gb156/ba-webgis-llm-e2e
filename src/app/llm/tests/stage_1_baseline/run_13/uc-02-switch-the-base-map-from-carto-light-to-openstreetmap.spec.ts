@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const openStreetMapLabel = page.getByText(/^OpenStreetMap$/).first();
+  const cartoLightLabel = page.getByText(/^Carto Light$/).first();
+
+  const baseMapToggleCandidates = [
+    page.getByRole('button', { name: /^Base maps?$/i }).first(),
+    page.getByRole('button', { name: /^Basemaps?$/i }).first(),
+    page.getByRole('button', { name: /^Base map$/i }).first(),
+    page.getByRole('button', { name: /^Background maps?$/i }).first()
+  ];
+
+  await expect
+    .poll(async () => {
+      if (await openStreetMapLabel.isVisible()) {
+        return true;
+      }
+
+      for (const toggle of baseMapToggleCandidates) {
+        if (await toggle.isVisible()) {
+          return true;
+        }
+      }
+
+      return false;
+    })
+    .toBe(true);
+
+  if (!(await openStreetMapLabel.isVisible())) {
+    for (const toggle of baseMapToggleCandidates) {
+      if (await toggle.isVisible()) {
+        await toggle.click();
+        break;
+      }
+    }
+  }
+
+  await expect(cartoLightLabel).toBeVisible();
+  await expect(openStreetMapLabel).toBeVisible();
+
+  const cartoLightRadio = page.getByRole('radio', { name: /^Carto Light$/i });
+  const openStreetMapRadio = page.getByRole('radio', { name: /^OpenStreetMap$/i });
+
+  await expect(cartoLightRadio).toBeChecked();
+  await expect(openStreetMapRadio).not.toBeChecked();
+
+  await openStreetMapRadio.click({ force: true });
+
+  await expect(openStreetMapRadio).toBeChecked();
+  await expect(cartoLightRadio).not.toBeChecked();
+});

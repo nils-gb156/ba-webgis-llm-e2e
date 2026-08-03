@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const panelVisible = await measurementHeading.isVisible().catch(() => false);
+  if (!panelVisible) {
+    const pressed = await measurementButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await measurementButton.click();
+    }
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map canvas is not available for interaction.');
+  }
+
+  const point1 = {
+    x: Math.round(Math.max(40, Math.min(box.width - 120, box.width * 0.25))),
+    y: Math.round(Math.max(40, Math.min(box.height - 120, box.height * 0.35)))
+  };
+  const point2 = {
+    x: Math.round(Math.max(80, Math.min(box.width - 80, box.width * 0.45))),
+    y: Math.round(Math.max(60, Math.min(box.height - 80, box.height * 0.45)))
+  };
+  const point3 = {
+    x: Math.round(Math.max(120, Math.min(box.width - 40, box.width * 0.65))),
+    y: Math.round(Math.max(80, Math.min(box.height - 40, box.height * 0.55)))
+  };
+
+  await mapCanvas.click({ position: point1 });
+  await mapCanvas.click({ position: point2 });
+  await mapCanvas.dblclick({ position: point3 });
+
+  await expect(page.getByText(/Length/i)).toBeVisible();
+  await expect(page.getByText(/\b\d+(?:[.,]\d+)?\s*(mm|cm|m|km)\b/i)).toBeVisible();
+});

@@ -1,0 +1,119 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    const containsArrayWithLength = (value: unknown, expectedLength: number): boolean => {
+        if (Array.isArray(value)) {
+            if (value.length === expectedLength) {
+                return true;
+            }
+            return value.some((item) => containsArrayWithLength(item, expectedLength));
+        }
+
+        if (value && typeof value === 'object') {
+            return Object.values(value as Record<string, unknown>).some((item) =>
+                containsArrayWithLength(item, expectedLength)
+            );
+        }
+
+        return false;
+    };
+
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+
+    let infoPanel = page.getByTestId('info-panel');
+    if ((await infoPanel.count()) === 0) {
+        infoPanel = page.getByRole('complementary').first();
+    }
+    if ((await infoPanel.count()) === 0) {
+        infoPanel = page.locator('aside').first();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    let mapTarget = page.getByTestId('map');
+    if ((await mapTarget.count()) === 0) {
+        mapTarget = page.locator('canvas').first();
+    }
+    await expect(mapTarget).toBeVisible();
+
+    const mapBox = await mapTarget.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map is not rendered.');
+    }
+
+    const viewport =
+        page.viewportSize() ??
+        (await page.evaluate(() => ({
+            width: window.innerWidth,
+            height: window.innerHeight
+        })));
+
+    const clickPosition = {
+        x: Math.max(20, Math.round(mapBox.width * 0.55)),
+        y: Math.max(20, Math.round(mapBox.height * 0.45))
+    };
+
+    const clipSize = 24;
+    const clip = {
+        x: Math.min(
+            Math.max(0, Math.round(mapBox.x + clickPosition.x - clipSize / 2)),
+            Math.max(0, viewport.width - clipSize)
+        ),
+        y: Math.min(
+            Math.max(0, Math.round(mapBox.y + clickPosition.y - clipSize / 2)),
+            Math.max(0, viewport.height - clipSize)
+        ),
+        width: clipSize,
+        height: clipSize
+    };
+
+    const beforeClick = await page.screenshot({ clip });
+
+    const forecastResponsePromise = page.waitForResponse((response) => {
+        const contentType = response.headers()['content-type'] ?? '';
+        return response.ok() && /(weather|forecast)/i.test(response.url()) && /json/i.test(contentType);
+    });
+
+    await mapTarget.click({ position: clickPosition });
+
+    await expect
+        .poll(async () => {
+            const afterClick = await page.screenshot({ clip });
+            return !afterClick.equals(beforeClick);
+        })
+        .toBe(true);
+
+    const forecastResponse = await forecastResponsePromise;
+    const forecastPayload = await forecastResponse.json();
+    expect(containsArrayWithLength(forecastPayload, 24)).toBe(true);
+
+    let weatherSection = infoPanel.getByTestId('weather-forecast');
+    if ((await weatherSection.count()) === 0) {
+        weatherSection = infoPanel.getByTestId('forecast-section');
+    }
+
+    if ((await weatherSection.count()) > 0) {
+        await expect(weatherSection.first()).toBeVisible();
+
+        let forecastEntries = weatherSection.getByTestId('forecast-entry');
+        if ((await forecastEntries.count()) > 0) {
+            await expect(forecastEntries).toHaveCount(24);
+        }
+    } else {
+        let weatherHeading = infoPanel.getByRole('heading', { name: /weather forecast/i });
+        if ((await weatherHeading.count()) === 0) {
+            weatherHeading = infoPanel.getByRole('heading', { name: /forecast/i });
+        }
+        if ((await weatherHeading.count()) === 0) {
+            weatherHeading = infoPanel.getByText(/weather forecast/i);
+        }
+        if ((await weatherHeading.count()) === 0) {
+            weatherHeading = infoPanel.getByText(/forecast/i);
+        }
+
+        await expect(weatherHeading.first()).toBeVisible();
+    }
+});

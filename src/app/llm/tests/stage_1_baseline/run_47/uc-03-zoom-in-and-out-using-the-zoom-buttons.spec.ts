@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  const observedTileZoomLevels: number[] = [];
+
+  const parseZoomLevelFromLocation = (urlString: string): number | undefined => {
+    const url = new URL(urlString);
+
+    for (const key of ['z', 'zoom', 'level']) {
+      const value = url.searchParams.get(key);
+      if (value && /^-?\d+(?:\.\d+)?$/.test(value)) {
+        return Number(value);
+      }
+    }
+
+    const hash = url.hash.startsWith('#') ? url.hash.slice(1) : url.hash;
+    const hashMatchers = [
+      /(?:^|[?&])z(?:oom)?=(-?\d+(?:\.\d+)?)(?:$|[&/])/i,
+      /(?:^|[?&])level=(-?\d+(?:\.\d+)?)(?:$|[&/])/i,
+      /^map=(-?\d+(?:\.\d+)?)[/|,]/i,
+      /^(-?\d+(?:\.\d+)?)[/|,]/,
+    ];
+
+    for (const matcher of hashMatchers) {
+      const match = hash.match(matcher);
+      if (match) {
+        return Number(match[1]);
+      }
+    }
+
+    return undefined;
+  };
+
+  const parseZoomLevelFromTileRequest = (urlString: string): number | undefined => {
+    const xyzPathMatch =
+      urlString.match(/\/(\d+)\/\d+\/\d+\.(?:png|jpg|jpeg|webp|pbf|mvt)(?:[?#]|$)/i) ??
+      urlString.match(/\/tile\/(\d+)\/\d+\/\d+(?:\.(?:png|jpg|jpeg|webp|pbf|mvt))?(?:[?#]|$)/i);
+
+    if (xyzPathMatch) {
+      return Number(xyzPathMatch[1]);
+    }
+
+    try {
+      const url = new URL(urlString);
+      const zParam = url.searchParams.get('z') ?? url.searchParams.get('zoom') ?? url.searchParams.get('TILEMATRIX');
+      const xParam = url.searchParams.get('x') ?? url.searchParams.get('tilecol') ?? url.searchParams.get('TILECOL');
+      const yParam = url.searchParams.get('y') ?? url.searchParams.get('tilerow') ?? url.searchParams.get('TILEROW');
+
+      if (zParam && xParam && yParam && /^\d+$/.test(zParam)) {
+        return Number(zParam);
+      }
+    } catch {
+      return undefined;
+    }
+
+    return undefined;
+  };
+
+  page.on('request', (request) => {
+    const zoomLevel = parseZoomLevelFromTileRequest(request.url());
+    if (zoomLevel !== undefined) {
+      observedTileZoomLevels.push(zoomLevel);
+    }
+  });
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const initialUrlZoom = parseZoomLevelFromLocation(page.url());
+
+  if (initialUrlZoom !== undefined) {
+    await zoomInButton.click();
+
+    await expect.poll(() => parseZoomLevelFromLocation(page.url())).toBeGreaterThan(initialUrlZoom);
+
+    const zoomedInZoom = parseZoomLevelFromLocation(page.url());
+    expect(zoomedInZoom).toBeDefined();
+
+    await zoomOutButton.click();
+
+    await expect.poll(() => parseZoomLevelFromLocation(page.url())).toBeLessThan(zoomedInZoom!);
+    return;
+  }
+
+  await expect.poll(() => observedTileZoomLevels.length).toBeGreaterThan(0);
+
+  const initialZoom = Math.max(...observedTileZoomLevels);
+  const requestCountBeforeZoomIn = observedTileZoomLevels.length;
+
+  await zoomInButton.click();
+
+  await expect
+    .poll(() => observedTileZoomLevels.slice(requestCountBeforeZoomIn).filter((z) => z > initialZoom).length)
+    .toBeGreaterThan(0);
+
+  const zoomedInZoom = Math.max(...observedTileZoomLevels.slice(requestCountBeforeZoomIn));
+  const requestCountBeforeZoomOut = observedTileZoomLevels.length;
+
+  await zoomOutButton.click();
+
+  await expect
+    .poll(() => observedTileZoomLevels.slice(requestCountBeforeZoomOut).filter((z) => z < zoomedInZoom).length)
+    .toBeGreaterThan(0);
+});

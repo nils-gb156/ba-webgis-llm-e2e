@@ -1,0 +1,75 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const printMapToolbarButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+  const scaleLine = page.locator('.ol-scale-line').first();
+  const scaleBar = page.locator('.ol-scale-bar').first();
+  const titleInput = page.getByRole('textbox', { name: /title/i });
+
+  await expect(printMapToolbarButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  if (await scaleLine.count()) {
+    await expect(scaleLine).toBeVisible();
+    await expect(scaleLine).toHaveText(/\S+/);
+  } else {
+    await expect(scaleBar).toBeVisible();
+    await expect(scaleBar).toHaveText(/\S+/);
+  }
+
+  if (!(await titleInput.isVisible())) {
+    const pressed = await printMapToolbarButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printMapToolbarButton.click();
+    }
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'UC9 PNG Export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: 'PNG', exact: true });
+  if (await pngRadio.count()) {
+    await expect(pngRadio).toBeVisible();
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatSelect = page.getByRole('combobox', { name: /format/i });
+    await expect(formatSelect).toBeVisible();
+    try {
+      await formatSelect.selectOption({ label: 'PNG' });
+    } catch {
+      await formatSelect.selectOption({ value: 'png' });
+    }
+    await expect(formatSelect).toHaveValue(/png/i);
+  }
+
+  let exportButton = page.getByRole('button', { name: /^export$/i });
+  if ((await exportButton.count()) === 0) {
+    exportButton = page.getByRole('button', { name: /^print$/i });
+  }
+
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+
+  const download = await downloadPromise;
+  await expect(download.failure()).resolves.toBeNull();
+  expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+
+  const fileBuffer = await readFile(downloadPath!);
+  expect(fileBuffer.byteLength).toBeGreaterThan(1000);
+  expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

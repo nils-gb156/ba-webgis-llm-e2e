@@ -1,0 +1,163 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const readZoomLevel = async (): Promise<number | undefined> => {
+    return await page.evaluate(() => {
+      const tryReadZoom = (candidate: unknown): number | undefined => {
+        if (!candidate || (typeof candidate !== 'object' && typeof candidate !== 'function')) {
+          return undefined;
+        }
+
+        try {
+          const mapLike = candidate as {
+            getView?: () => unknown;
+            getTargetElement?: () => unknown;
+            getLayers?: () => unknown;
+            getControls?: () => unknown;
+            render?: () => unknown;
+          };
+
+          const looksLikeMap =
+            typeof mapLike.getView === 'function' &&
+            (typeof mapLike.getTargetElement === 'function' ||
+              typeof mapLike.getLayers === 'function' ||
+              typeof mapLike.getControls === 'function' ||
+              typeof mapLike.render === 'function');
+
+          if (!looksLikeMap) {
+            return undefined;
+          }
+
+          const view = mapLike.getView?.() as { getZoom?: () => unknown } | undefined;
+          if (!view || typeof view.getZoom !== 'function') {
+            return undefined;
+          }
+
+          const zoom = view.getZoom();
+          if (typeof zoom === 'number' && Number.isFinite(zoom)) {
+            return zoom;
+          }
+        } catch {
+          // Ignore inaccessible or non-map objects.
+        }
+
+        return undefined;
+      };
+
+      const queue: unknown[] = [];
+      const seen = new Set<unknown>();
+
+      const push = (value: unknown) => {
+        if (!value || (typeof value !== 'object' && typeof value !== 'function') || seen.has(value)) {
+          return;
+        }
+        seen.add(value);
+        queue.push(value);
+      };
+
+      for (const key of Object.getOwnPropertyNames(window)) {
+        try {
+          push((window as Record<string, unknown>)[key]);
+        } catch {
+          // Ignore window properties that cannot be accessed.
+        }
+      }
+
+      for (const element of Array.from(document.querySelectorAll('*'))) {
+        const candidateElement = element as Element & Record<string, unknown>;
+
+        for (const key of ['map', '_map', '__map', 'olMap', '__ol_map__']) {
+          try {
+            push(candidateElement[key]);
+          } catch {
+            // Ignore inaccessible element properties.
+          }
+        }
+
+        for (const key of Object.getOwnPropertyNames(candidateElement)) {
+          if (key.startsWith('__reactFiber$') || key.startsWith('__reactProps$') || key.startsWith('__reactContainer$')) {
+            try {
+              push(candidateElement[key]);
+            } catch {
+              // Ignore inaccessible React internals.
+            }
+          }
+        }
+      }
+
+      let inspected = 0;
+      while (queue.length > 0 && inspected < 800) {
+        const candidate = queue.shift();
+        inspected += 1;
+
+        const zoom = tryReadZoom(candidate);
+        if (zoom !== undefined) {
+          return zoom;
+        }
+
+        if (candidate && (typeof candidate === 'object' || typeof candidate === 'function')) {
+          for (const key of Object.getOwnPropertyNames(candidate)) {
+            if (key === 'window' || key === 'self' || key === 'parent' || key === 'top') {
+              continue;
+            }
+
+            try {
+              push((candidate as Record<string, unknown>)[key]);
+            } catch {
+              // Ignore inaccessible nested properties.
+            }
+          }
+        }
+      }
+
+      const searchParams = new URLSearchParams(window.location.search);
+      for (const value of [searchParams.get('zoom'), searchParams.get('z')]) {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+
+      const hash = window.location.hash;
+      const hashMatch =
+        hash.match(/(?:^#|[?&])map=(-?\d+(?:\.\d+)?)(?:\/|,)/i) ??
+        hash.match(/(?:^#|[?&])zoom=(-?\d+(?:\.\d+)?)(?:[\/,&]|$)/i) ??
+        hash.match(/(?:^#|[?&])z=(-?\d+(?:\.\d+)?)(?:[\/,&]|$)/i) ??
+        hash.match(/^#(-?\d+(?:\.\d+)?)(?:\/|,)/);
+
+      if (hashMatch) {
+        const parsed = Number(hashMatch[1]);
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+
+      return undefined;
+    });
+  };
+
+  await expect.poll(readZoomLevel).not.toBeUndefined();
+  const initialZoom = await readZoomLevel();
+  expect(initialZoom).toBeDefined();
+
+  await zoomInButton.click();
+
+  await expect.poll(readZoomLevel).toBeGreaterThan(initialZoom!);
+  const zoomedInZoom = await readZoomLevel();
+  expect(zoomedInZoom).toBeDefined();
+
+  await zoomOutButton.click();
+
+  await expect.poll(readZoomLevel).toBeLessThan(zoomedInZoom!);
+});

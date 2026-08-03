@@ -1,0 +1,148 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  test.setTimeout(120000);
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const infoToggle = page.getByRole('button', { name: 'Info', exact: true });
+  if ((await infoToggle.count()) > 0) {
+    const infoPressed = await infoToggle.first().getAttribute('aria-pressed');
+    if (infoPressed !== 'true') {
+      await infoToggle.first().click();
+    }
+  }
+
+  const measurementToggle = page.getByRole('button', { name: /^(Measure|Measurement)$/i });
+  if ((await measurementToggle.count()) > 0) {
+    const measurementPressed = await measurementToggle.first().getAttribute('aria-pressed');
+    if (measurementPressed === 'true') {
+      await measurementToggle.first().click();
+    }
+  }
+
+  const layersToggle = page.getByRole('button', { name: 'Layers', exact: true });
+  const uvLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+
+  let openedLayersPanel = false;
+  if (
+    (!(await uvLayerCheckbox.first().isVisible()) || !(await eucosLayerCheckbox.first().isVisible())) &&
+    (await layersToggle.count()) > 0
+  ) {
+    const layersPressed = await layersToggle.first().getAttribute('aria-pressed');
+    if (layersPressed !== 'true') {
+      await layersToggle.first().click();
+      openedLayersPanel = true;
+    }
+  }
+
+  if (await uvLayerCheckbox.first().isVisible()) {
+    if (!(await uvLayerCheckbox.first().isChecked())) {
+      await uvLayerCheckbox.first().click({ force: true });
+    }
+    await expect(uvLayerCheckbox.first()).toBeChecked();
+  }
+
+  if (await eucosLayerCheckbox.first().isVisible()) {
+    if (!(await eucosLayerCheckbox.first().isChecked())) {
+      await eucosLayerCheckbox.first().click({ force: true });
+    }
+    await expect(eucosLayerCheckbox.first()).toBeChecked();
+  }
+
+  if (openedLayersPanel && (await layersToggle.count()) > 0) {
+    const layersPressed = await layersToggle.first().getAttribute('aria-pressed');
+    if (layersPressed === 'true') {
+      await layersToggle.first().click();
+    }
+  }
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const box = await mapViewport.boundingBox();
+  if (!box) {
+    throw new Error('Map viewport bounding box is not available.');
+  }
+
+  const uvInfoSection = page.getByText('UV-Index Station', { exact: true });
+  const eucosInfoSection = page.getByText('EUCOS Ground Station', { exact: true });
+
+  const toPosition = (xPercent: number, yPercent: number) => ({
+    x: Math.round((box.width * xPercent) / 100),
+    y: Math.round((box.height * yPercent) / 100)
+  });
+
+  const candidatePercents: Array<[number, number]> = [
+    [52, 35],
+    [52, 40],
+    [48, 35],
+    [56, 35],
+    [52, 45],
+    [60, 35],
+    [45, 35],
+    [58, 42],
+    [50, 30],
+    [50, 50],
+    [40, 30],
+    [40, 40],
+    [40, 50],
+    [50, 40],
+    [60, 30],
+    [60, 40],
+    [60, 50],
+    [25, 25],
+    [25, 40],
+    [25, 55],
+    [35, 25],
+    [35, 40],
+    [35, 55],
+    [45, 25],
+    [45, 55],
+    [55, 25],
+    [55, 55],
+    [65, 25],
+    [65, 40],
+    [65, 55],
+    [75, 25],
+    [75, 40],
+    [75, 55]
+  ];
+
+  let foundBothSections = false;
+
+  for (const [xPercent, yPercent] of candidatePercents) {
+    const featureInfoResponse = page
+      .waitForResponse((response) => /GetFeatureInfo/i.test(response.url()), { timeout: 5000 })
+      .catch(() => null);
+
+    await mapViewport.click({ position: toPosition(xPercent, yPercent) });
+    await featureInfoResponse;
+
+    try {
+      await expect
+        .poll(
+          async () => {
+            const uvVisible = await uvInfoSection.isVisible();
+            const eucosVisible = await eucosInfoSection.isVisible();
+            return uvVisible && eucosVisible;
+          },
+          { timeout: 2000, intervals: [200, 400, 800] }
+        )
+        .toBe(true);
+
+      foundBothSections = true;
+      break;
+    } catch {
+      // Try the next map position until both sections appear.
+    }
+  }
+
+  expect(foundBothSections).toBe(true);
+  await expect(uvInfoSection).toBeVisible();
+  await expect(eucosInfoSection).toBeVisible();
+});

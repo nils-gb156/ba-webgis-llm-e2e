@@ -1,0 +1,114 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  await expect(page.locator('body')).toBeVisible();
+
+  const pickVisible = async (candidates: any[]) => {
+    for (const candidate of candidates) {
+      try {
+        if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+          return candidate.first();
+        }
+      } catch {
+        // Try next candidate.
+      }
+    }
+    return null;
+  };
+
+  const infoPanel =
+    (await pickVisible([
+      page.getByTestId('info-panel'),
+      page.getByRole('complementary'),
+      page.getByRole('region', { name: /info|information|details/i }),
+      page.locator('aside')
+    ])) ?? page.locator('aside').first();
+
+  await expect(infoPanel).toBeVisible();
+
+  const map =
+    (await pickVisible([
+      page.getByTestId('map'),
+      page.getByTestId('map-container'),
+      page.locator('canvas')
+    ])) ?? page.locator('canvas').first();
+
+  await expect(map).toBeVisible();
+
+  const beforeMapScreenshot = await map.screenshot();
+
+  const mapBox = await map.boundingBox();
+  expect(mapBox).not.toBeNull();
+  if (!mapBox) {
+    throw new Error('Map bounding box is not available.');
+  }
+
+  await map.click({
+    position: {
+      x: Math.max(10, Math.floor(mapBox.width * 0.4)),
+      y: Math.max(10, Math.floor(mapBox.height * 0.4))
+    }
+  });
+
+  await expect
+    .poll(async () => {
+      const currentScreenshot = await map.screenshot();
+      return currentScreenshot.equals(beforeMapScreenshot);
+    })
+    .toBe(false);
+
+  const forecastSectionLabel = infoPanel.getByText(/weather forecast/i).first();
+  await expect(forecastSectionLabel).toBeVisible();
+
+  const getForecastEntryCount = async () =>
+    await infoPanel.evaluate((panel: Element) => {
+      const normalize = (text: string | null | undefined) =>
+        (text ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+      const descendants = Array.from(panel.querySelectorAll('*'));
+      const label =
+        descendants.find((el) => normalize(el.textContent) === 'weather forecast') ??
+        descendants.find((el) => normalize(el.textContent).includes('weather forecast'));
+
+      let section: Element =
+        label?.closest('section, article, [role="region"], [role="group"], div') ?? panel;
+
+      const nestedContainer =
+        Array.from(section.querySelectorAll('section, article, [role="region"], [role="group"], div')).find(
+          (el) => el.querySelector('time, li, [role="listitem"], tr, [role="row"]')
+        ) ?? section;
+
+      section = nestedContainer;
+
+      const timeElements = section.querySelectorAll('time');
+      if (timeElements.length > 0) {
+        return timeElements.length;
+      }
+
+      const listItems = section.querySelectorAll('li, [role="listitem"]');
+      if (listItems.length > 0) {
+        return listItems.length;
+      }
+
+      const rows = Array.from(section.querySelectorAll('tr, [role="row"]')).filter((row) => {
+        return !row.querySelector('th, [role="columnheader"]');
+      });
+      if (rows.length > 0) {
+        return rows.length;
+      }
+
+      const directChildren = Array.from(section.children).filter((child) => {
+        const text = normalize(child.textContent);
+        return text.length > 0 && text !== 'weather forecast';
+      });
+
+      return directChildren.length;
+    });
+
+  await expect.poll(getForecastEntryCount).toBe(24);
+});

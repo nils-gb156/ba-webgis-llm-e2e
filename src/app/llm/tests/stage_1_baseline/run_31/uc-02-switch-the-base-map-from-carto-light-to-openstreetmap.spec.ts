@@ -1,0 +1,196 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('UC2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const firstExisting = async (candidates: any[]) => {
+    for (const candidate of candidates) {
+      if ((await candidate.count()) > 0) {
+        return candidate.first();
+      }
+    }
+    return candidates[0].first();
+  };
+
+  const basemapSelectorCandidates = () => [
+    page.getByRole('button', {
+      name: /(base maps?|basemaps?|background maps?|base layers?|background layers?)/i
+    }),
+    page.getByRole('tab', {
+      name: /(base maps?|basemaps?|background maps?|base layers?|background layers?)/i
+    }),
+    page.getByRole('button', { name: 'Carto Light', exact: true }),
+    page.getByRole('button', { name: 'OpenStreetMap', exact: true })
+  ];
+
+  const optionCandidates = (name: string) => [
+    page.getByRole('radio', { name, exact: true }),
+    page.getByRole('checkbox', { name, exact: true }),
+    page.getByRole('option', { name, exact: true }),
+    page.getByRole('menuitemradio', { name, exact: true }),
+    page.getByRole('tab', { name, exact: true }),
+    page.getByRole('button', { name, exact: true }),
+    page.getByLabel(name, { exact: true }),
+    page.getByText(name, { exact: true })
+  ];
+
+  const getSelectionState = async (locator: any) => {
+    if ((await locator.count()) === 0) {
+      return undefined;
+    }
+
+    return await locator.first().evaluate((element: Element) => {
+      if (element instanceof HTMLInputElement) {
+        return element.checked;
+      }
+
+      const ariaChecked = element.getAttribute('aria-checked');
+      if (ariaChecked !== null) {
+        return ariaChecked === 'true';
+      }
+
+      const ariaSelected = element.getAttribute('aria-selected');
+      if (ariaSelected !== null) {
+        return ariaSelected === 'true';
+      }
+
+      const ariaPressed = element.getAttribute('aria-pressed');
+      if (ariaPressed !== null) {
+        return ariaPressed === 'true';
+      }
+
+      const ariaCurrent = element.getAttribute('aria-current');
+      if (ariaCurrent !== null) {
+        return ariaCurrent !== 'false';
+      }
+
+      if (element.hasAttribute('data-checked') || element.hasAttribute('data-selected')) {
+        return true;
+      }
+
+      const dataState = element.getAttribute('data-state');
+      if (dataState !== null) {
+        if (['checked', 'active', 'on', 'selected'].includes(dataState)) {
+          return true;
+        }
+        if (['unchecked', 'inactive', 'off', 'unselected'].includes(dataState)) {
+          return false;
+        }
+      }
+
+      const descendantInput = element.querySelector('input[type="radio"], input[type="checkbox"]');
+      if (descendantInput instanceof HTMLInputElement) {
+        return descendantInput.checked;
+      }
+
+      const className = typeof (element as HTMLElement).className === 'string' ? (element as HTMLElement).className : '';
+      if (/\b(unselected|inactive|unchecked)\b/i.test(className)) {
+        return false;
+      }
+      if (/\b(selected|active|checked)\b/i.test(className)) {
+        return true;
+      }
+
+      return undefined;
+    });
+  };
+
+  const clickOption = async (locator: any) => {
+    const kind = await locator.first().evaluate((element: Element) => {
+      if (element instanceof HTMLInputElement) {
+        return `${element.tagName.toLowerCase()}:${element.type}`;
+      }
+      return element.getAttribute('role') ?? element.tagName.toLowerCase();
+    });
+
+    if (kind === 'input:radio' || kind === 'input:checkbox' || kind === 'radio' || kind === 'checkbox' || kind === 'switch') {
+      await locator.first().click({ force: true });
+    } else {
+      await locator.first().click();
+    }
+  };
+
+  const nativeBasemapSelect = page.getByRole('combobox', {
+    name: /(base maps?|basemaps?|background maps?|base layers?|background layers?)/i
+  }).first();
+
+  if ((await nativeBasemapSelect.count()) > 0) {
+    const isNativeSelect = await nativeBasemapSelect
+      .evaluate((element: Element) => element.tagName.toLowerCase() === 'select')
+      .catch(() => false);
+
+    if (isNativeSelect) {
+      await expect(nativeBasemapSelect).toBeVisible();
+
+      await expect.poll(async () => {
+        return await nativeBasemapSelect.evaluate((element: Element) => {
+          const select = element as HTMLSelectElement;
+          return select.selectedOptions[0]?.textContent?.trim() ?? null;
+        });
+      }).toBe('Carto Light');
+
+      await nativeBasemapSelect.selectOption({ label: 'OpenStreetMap' });
+
+      await expect.poll(async () => {
+        return await nativeBasemapSelect.evaluate((element: Element) => {
+          const select = element as HTMLSelectElement;
+          return select.selectedOptions[0]?.textContent?.trim() ?? null;
+        });
+      }).toBe('OpenStreetMap');
+
+      await expect.poll(async () => {
+        return await nativeBasemapSelect.evaluate((element: Element) => {
+          const select = element as HTMLSelectElement;
+          return Array.from(select.selectedOptions).map(option => option.textContent?.trim() ?? '');
+        });
+      }).toEqual(['OpenStreetMap']);
+
+      return;
+    }
+  }
+
+  const cartoLightOptionInitial = await firstExisting(optionCandidates('Carto Light'));
+  const basemapSelectorInitial = await firstExisting(basemapSelectorCandidates());
+
+  if (await cartoLightOptionInitial.isVisible()) {
+    await expect(cartoLightOptionInitial).toBeVisible();
+  } else {
+    await expect(basemapSelectorInitial).toBeVisible();
+  }
+
+  let openStreetMapOption = await firstExisting(optionCandidates('OpenStreetMap'));
+  if (!(await openStreetMapOption.isVisible())) {
+    await expect(basemapSelectorInitial).toBeVisible();
+    await basemapSelectorInitial.click();
+    openStreetMapOption = await firstExisting(optionCandidates('OpenStreetMap'));
+  }
+
+  const cartoLightOption = await firstExisting(optionCandidates('Carto Light'));
+
+  await expect(openStreetMapOption).toBeVisible();
+  await expect(cartoLightOption).toBeVisible();
+
+  await expect.poll(() => getSelectionState(cartoLightOption)).toBe(true);
+  await expect.poll(() => getSelectionState(openStreetMapOption)).toBe(false);
+
+  await clickOption(openStreetMapOption);
+
+  let openStreetMapOptionAfterSelection = await firstExisting(optionCandidates('OpenStreetMap'));
+  if (!(await openStreetMapOptionAfterSelection.isVisible())) {
+    const basemapSelectorAfterSelection = await firstExisting(basemapSelectorCandidates());
+    await expect(basemapSelectorAfterSelection).toBeVisible();
+    await basemapSelectorAfterSelection.click();
+    openStreetMapOptionAfterSelection = await firstExisting(optionCandidates('OpenStreetMap'));
+  }
+
+  const cartoLightOptionAfterSelection = await firstExisting(optionCandidates('Carto Light'));
+
+  await expect(openStreetMapOptionAfterSelection).toBeVisible();
+  await expect(cartoLightOptionAfterSelection).toBeVisible();
+
+  await expect.poll(() => getSelectionState(openStreetMapOptionAfterSelection)).toBe(true);
+  await expect.poll(() => getSelectionState(cartoLightOptionAfterSelection)).toBe(false);
+});

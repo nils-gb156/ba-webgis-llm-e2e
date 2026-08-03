@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  await expect(printMapButton).toBeVisible();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const scaleBar = page.locator('.ol-scale-line').first();
+  await expect(scaleBar).toBeVisible();
+
+  const printPanelHeading = page.getByRole('heading', { name: 'Print Map', exact: true });
+  if (!(await printPanelHeading.isVisible())) {
+    const isPressed = await printMapButton.getAttribute('aria-pressed');
+    if (isPressed !== 'true') {
+      await printMapButton.click();
+    }
+  }
+
+  await expect(printPanelHeading).toBeVisible();
+
+  const titleInput = page.getByLabel('Title', { exact: true });
+  await expect(titleInput).toBeVisible();
+
+  const printTitle = 'E2E PNG map export';
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngRadio = page.getByRole('radio', { name: 'PNG', exact: true });
+  if ((await pngRadio.count()) > 0) {
+    await pngRadio.click({ force: true });
+    await expect(pngRadio).toBeChecked();
+  } else {
+    const formatSelect = page.getByLabel(/format/i);
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption({ label: 'PNG' });
+    await expect(formatSelect).toHaveValue(/png/i);
+  }
+
+  let exportButton = page.getByRole('button', { name: /^Export$/i });
+  if ((await exportButton.count()) === 0) {
+    exportButton = page.getByRole('button', { name: /^Print$/i });
+  }
+  await expect(exportButton).toBeVisible();
+  await expect(exportButton).toBeEnabled();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  await expect.poll(async () => await download.failure()).toBeNull();
+  expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadedFilePath = testInfo.outputPath(download.suggestedFilename());
+  await download.saveAs(downloadedFilePath);
+
+  const fileContent = await fs.readFile(downloadedFilePath);
+  const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+
+  expect(fileContent.subarray(0, 8).equals(pngSignature)).toBe(true);
+  expect(fileContent.byteLength).toBeGreaterThan(5000);
+
+  const width = fileContent.readUInt32BE(16);
+  const height = fileContent.readUInt32BE(20);
+  expect(width).toBeGreaterThan(100);
+  expect(height).toBeGreaterThan(100);
+});

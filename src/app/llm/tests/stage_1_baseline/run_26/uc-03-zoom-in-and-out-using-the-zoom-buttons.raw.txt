@@ -1,0 +1,106 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const getDominantInitialTileZoom = async (): Promise<number | undefined> => {
+    const tileZooms = (await page.evaluate(() => {
+      const pattern = /\/(\d+)\/\d+\/\d+(?:\.\w+)?(?:\?|$)/;
+
+      return performance
+        .getEntriesByType('resource')
+        .filter((entry) => entry.initiatorType === 'img')
+        .map((entry) => {
+          const match = entry.name.match(pattern);
+          return match ? Number(match[1]) : null;
+        })
+        .filter((zoom) => zoom !== null);
+    })) as number[];
+
+    if (tileZooms.length === 0) {
+      return undefined;
+    }
+
+    const counts = new Map<number, number>();
+    for (const zoom of tileZooms) {
+      counts.set(zoom, (counts.get(zoom) ?? 0) + 1);
+    }
+
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  };
+
+  await expect.poll(getDominantInitialTileZoom).not.toBeUndefined();
+  const initialZoom = await getDominantInitialTileZoom();
+  if (initialZoom === undefined) {
+    throw new Error('Could not determine the initial map zoom level from tile requests.');
+  }
+
+  await page.waitForLoadState('networkidle');
+  const initialMapImage = await mapCanvas.screenshot();
+
+  const tileRequestPattern = /\/(\d+)\/\d+\/\d+(?:\.\w+)?(?:\?|$)/;
+  const zoomInRequestZooms: number[] = [];
+  let captureZoomInRequests = false;
+
+  page.on('request', (request) => {
+    if (!captureZoomInRequests || request.resourceType() !== 'image') {
+      return;
+    }
+
+    const match = request.url().match(tileRequestPattern);
+    if (match) {
+      zoomInRequestZooms.push(Number(match[1]));
+    }
+  });
+
+  captureZoomInRequests = true;
+  await zoomInButton.click();
+
+  await expect
+    .poll(() => {
+      const higherZooms = zoomInRequestZooms.filter((zoom) => zoom > initialZoom);
+      return higherZooms.length > 0 ? Math.max(...higherZooms) : -1;
+    })
+    .toBeGreaterThan(initialZoom);
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await mapCanvas.screenshot();
+      return currentMapImage.equals(initialMapImage);
+    })
+    .toBe(false);
+
+  await page.waitForLoadState('networkidle');
+  const zoomedInMapImage = await mapCanvas.screenshot();
+  expect(zoomedInMapImage.equals(initialMapImage)).toBeFalsy();
+
+  await zoomOutButton.click();
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await mapCanvas.screenshot();
+      return currentMapImage.equals(zoomedInMapImage);
+    })
+    .toBe(false);
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await mapCanvas.screenshot();
+      return currentMapImage.equals(initialMapImage);
+    })
+    .toBe(true);
+
+  const zoomedOutMapImage = await mapCanvas.screenshot();
+  expect(zoomedOutMapImage.equals(zoomedInMapImage)).toBeFalsy();
+  expect(zoomedOutMapImage.equals(initialMapImage)).toBeTruthy();
+});

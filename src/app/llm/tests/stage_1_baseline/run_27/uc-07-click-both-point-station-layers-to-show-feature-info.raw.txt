@@ -1,0 +1,99 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const findToggleButton = async (names: string[]) => {
+    for (const name of names) {
+      const buttons = page.getByRole('button', { name, exact: true });
+      const count = await buttons.count();
+      for (let i = 0; i < count; i++) {
+        const button = buttons.nth(i);
+        if ((await button.getAttribute('aria-pressed')) !== null) {
+          return button;
+        }
+      }
+      if (count > 0) {
+        return buttons.first();
+      }
+    }
+    return undefined;
+  };
+
+  const findSectionLocator = async (name: string) => {
+    const button = page.getByRole('button', { name, exact: true });
+    if ((await button.count()) > 0) {
+      return button.first();
+    }
+
+    const heading = page.getByRole('heading', { name, exact: true });
+    if ((await heading.count()) > 0) {
+      return heading.first();
+    }
+
+    return page.getByText(name, { exact: true }).first();
+  };
+
+  const measurementToggle = await findToggleButton(['Measurement', 'Measure', 'Measurements']);
+  if (measurementToggle && (await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+    await measurementToggle.click();
+    await expect(measurementToggle).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  const uviCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const eucosCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+
+  if ((await uviCheckbox.count()) === 0 || (await eucosCheckbox.count()) === 0) {
+    const layersToggle = await findToggleButton(['Layers', 'Layer List', 'Map Layers']);
+    if (layersToggle && (await layersToggle.getAttribute('aria-pressed')) !== 'true') {
+      await layersToggle.click();
+    }
+  }
+
+  await expect.poll(async () => await uviCheckbox.count()).toBeGreaterThan(0);
+  await expect.poll(async () => await eucosCheckbox.count()).toBeGreaterThan(0);
+
+  if (!(await uviCheckbox.isChecked())) {
+    await uviCheckbox.click({ force: true });
+  }
+  await expect(uviCheckbox).toBeChecked();
+
+  if (!(await eucosCheckbox.isChecked())) {
+    await eucosCheckbox.click({ force: true });
+  }
+  await expect(eucosCheckbox).toBeChecked();
+
+  const infoToggle = await findToggleButton(['Info', 'Information', 'Feature Info']);
+  if (infoToggle && (await infoToggle.getAttribute('aria-pressed')) !== 'true') {
+    await infoToggle.click();
+  }
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const getFeatureInfoResponse = page.waitForResponse(
+    response => response.url().includes('GetFeatureInfo') && response.ok()
+  );
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  await mapCanvas.click({
+    position: {
+      x: box.width / 2,
+      y: box.height / 2
+    }
+  });
+
+  await getFeatureInfoResponse;
+
+  const uviSection = await findSectionLocator('UV-Index Station');
+  const eucosSection = await findSectionLocator('EUCOS Ground Station');
+
+  await expect(uviSection).toBeVisible({ timeout: 20000 });
+  await expect(eucosSection).toBeVisible({ timeout: 20000 });
+});

@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  await expect(measurementButton).toBeVisible();
+
+  const measurementPanelHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const panelVisible = await measurementPanelHeading.isVisible();
+  const buttonPressed = (await measurementButton.getAttribute('aria-pressed')) === 'true';
+
+  if (!panelVisible) {
+    if (!buttonPressed) {
+      await measurementButton.click();
+    }
+    await expect(measurementButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(measurementPanelHeading).toBeVisible();
+  } else {
+    await expect(measurementPanelHeading).toBeVisible();
+  }
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  await mapCanvas.click({ position: { x: 120, y: 120 } });
+  await mapCanvas.click({ position: { x: 220, y: 150 } });
+  await mapCanvas.click({ position: { x: 320, y: 200 } });
+  await mapCanvas.dblclick({ position: { x: 420, y: 240 } });
+
+  await expect.poll(async () => {
+    return await measurementPanelHeading.evaluate((node) => {
+      const unitPattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i;
+      let element: HTMLElement | null = node as HTMLElement;
+      let lastText = '';
+
+      for (let depth = 0; depth < 5 && element; depth++) {
+        const text = (element.innerText || element.textContent || '').trim();
+        lastText = text;
+        if (unitPattern.test(text)) {
+          return text;
+        }
+        element = element.parentElement;
+      }
+
+      return lastText;
+    });
+  }).toMatch(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i);
+});

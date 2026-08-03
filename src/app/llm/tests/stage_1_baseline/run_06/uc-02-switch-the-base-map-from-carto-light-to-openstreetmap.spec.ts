@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const cartoLightRadio = page.getByRole('radio', { name: 'Carto Light', exact: true });
+  const openStreetMapRadio = page.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+  const cartoLightLabel = page.getByText('Carto Light', { exact: true });
+  const openStreetMapLabel = page.getByText('OpenStreetMap', { exact: true });
+
+  const baseMapOptionsVisible = await openStreetMapLabel.isVisible();
+  if (!baseMapOptionsVisible) {
+    const baseMapSelectorCandidates = [
+      page.getByRole('button', { name: 'Base maps', exact: true }),
+      page.getByRole('button', { name: 'Base map', exact: true }),
+      page.getByRole('button', { name: 'Basemaps', exact: true }),
+      page.getByRole('tab', { name: 'Base maps', exact: true }),
+      page.getByRole('tab', { name: 'Base map', exact: true }),
+      page.getByRole('tab', { name: 'Basemaps', exact: true })
+    ];
+
+    let selectorOpened = false;
+    for (const candidate of baseMapSelectorCandidates) {
+      if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+        await candidate.first().click();
+        selectorOpened = true;
+        break;
+      }
+    }
+
+    expect(selectorOpened).toBeTruthy();
+  }
+
+  await expect(cartoLightLabel).toBeVisible();
+  await expect(openStreetMapLabel).toBeVisible();
+
+  await expect(cartoLightRadio).toHaveCount(1);
+  await expect(openStreetMapRadio).toHaveCount(1);
+  await expect(cartoLightRadio).toBeChecked();
+
+  await openStreetMapRadio.click({ force: true });
+
+  await expect(openStreetMapRadio).toBeChecked();
+  await expect(cartoLightRadio).not.toBeChecked();
+});

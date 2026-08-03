@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const infoPanel = page
+    .getByTestId('info-panel')
+    .or(page.getByRole('complementary'))
+    .or(page.getByRole('region', { name: /info|information|details/i }))
+    .first();
+  await expect(infoPanel).toBeVisible();
+
+  const map = page
+    .getByTestId('map')
+    .or(page.getByTestId('map-container'))
+    .or(page.locator('.ol-viewport'))
+    .or(page.locator('canvas'))
+    .first();
+  await expect(map).toBeVisible();
+
+  const mapBounds = await map.boundingBox();
+  expect(mapBounds).not.toBeNull();
+
+  const mapBeforeClick = await map.screenshot();
+
+  await map.click({
+    position: {
+      x: Math.floor(mapBounds!.width * 0.35),
+      y: Math.floor(mapBounds!.height * 0.35)
+    }
+  });
+
+  const forecastSection = page
+    .getByTestId('weather-forecast')
+    .or(page.getByRole('region', { name: /weather forecast/i }))
+    .or(page.getByRole('heading', { name: /weather forecast/i }))
+    .or(infoPanel.getByText(/weather forecast/i))
+    .first();
+  await expect(forecastSection).toBeVisible();
+
+  await expect.poll(async () => {
+    const counts = await Promise.all([
+      page.getByTestId('weather-forecast-entry').count(),
+      infoPanel.getByTestId('weather-forecast-entry').count(),
+      page.getByTestId('weather-forecast').getByTestId('weather-forecast-entry').count(),
+      page.getByTestId('weather-forecast').getByRole('listitem').count(),
+      page.getByTestId('weather-forecast').getByRole('row').count(),
+      infoPanel.getByRole('listitem').count(),
+      infoPanel.getByRole('row').count()
+    ]);
+
+    return Math.max(...counts);
+  }).toBe(24);
+
+  const mapAfterClick = await map.screenshot();
+  expect(mapAfterClick.equals(mapBeforeClick)).toBe(false);
+});

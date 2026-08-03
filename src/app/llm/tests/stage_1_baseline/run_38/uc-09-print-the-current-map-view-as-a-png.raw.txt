@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+    await expect(printMapButton).toBeVisible();
+
+    const printPanelHeading = page.getByRole('heading', { name: 'Print Map', exact: true });
+    const panelAlreadyVisible = await printPanelHeading.isVisible();
+
+    if (!panelAlreadyVisible) {
+        const ariaPressed = await printMapButton.getAttribute('aria-pressed');
+        if (ariaPressed !== 'true') {
+            await printMapButton.click();
+        }
+    }
+
+    await expect(printPanelHeading).toBeVisible();
+
+    const printDialog = page.getByRole('dialog', { name: 'Print Map', exact: true });
+    const scope = (await printDialog.isVisible()) ? printDialog : page;
+
+    const titleInput = scope.getByRole('textbox', { name: /title/i }).first();
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Playwright PNG Export');
+
+    const pngRadio = scope.getByRole('radio', { name: 'PNG', exact: true });
+    if (await pngRadio.isVisible()) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const formatSelect = scope.getByRole('combobox', { name: /format/i }).first();
+        await expect(formatSelect).toBeVisible();
+        await formatSelect.selectOption({ label: 'PNG' });
+        await expect(formatSelect).toHaveValue(/png/i);
+    }
+
+    let exportButton = scope.getByRole('button', { name: 'Export', exact: true });
+    if (!(await exportButton.isVisible())) {
+        exportButton = scope.getByRole('button', { name: 'Print', exact: true });
+    }
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(async () => await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const stream = await download.createReadStream();
+    expect(stream).not.toBeNull();
+
+    let downloadedBytes = 0;
+    await new Promise<void>((resolve, reject) => {
+        stream!.on('data', (chunk) => {
+            downloadedBytes += chunk.length;
+        });
+        stream!.on('end', () => resolve());
+        stream!.on('error', reject);
+    });
+
+    expect(downloadedBytes).toBeGreaterThan(0);
+});

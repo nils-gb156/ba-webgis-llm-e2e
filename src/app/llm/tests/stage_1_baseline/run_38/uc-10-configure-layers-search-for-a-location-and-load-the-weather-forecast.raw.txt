@@ -1,0 +1,240 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    type ToggleKind = 'checkbox' | 'switch' | 'button';
+    type ToggleInfo = { locator: any; kind: ToggleKind };
+
+    function escapeRegex(value: string) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    async function pickFirstPresent(candidates: any[], description: string) {
+        for (const candidate of candidates) {
+            if ((await candidate.count()) > 0) {
+                return candidate.first();
+            }
+        }
+        throw new Error(`Could not find ${description}.`);
+    }
+
+    async function findLayerContainer(layerName: string) {
+        const layerText = page.getByText(new RegExp(`^${escapeRegex(layerName)}$`, 'i'));
+        return await pickFirstPresent(
+            [
+                page.getByRole('listitem').filter({ has: layerText }),
+                page.getByRole('row').filter({ has: layerText }),
+                page.getByRole('treeitem').filter({ has: layerText }),
+                page.getByRole('group').filter({ has: layerText })
+            ],
+            `container for layer "${layerName}"`
+        );
+    }
+
+    async function findLayerToggle(layerName: string): Promise<ToggleInfo> {
+        const exactName = new RegExp(`^${escapeRegex(layerName)}$`, 'i');
+        const directCandidates: ToggleInfo[] = [
+            { locator: page.getByRole('checkbox', { name: exactName }), kind: 'checkbox' },
+            { locator: page.getByRole('switch', { name: exactName }), kind: 'switch' },
+            { locator: page.getByRole('button', { name: exactName }), kind: 'button' }
+        ];
+
+        for (const candidate of directCandidates) {
+            if ((await candidate.locator.count()) > 0) {
+                return { locator: candidate.locator.first(), kind: candidate.kind };
+            }
+        }
+
+        const container = await findLayerContainer(layerName);
+        const nestedNamedCandidates: ToggleInfo[] = [
+            { locator: container.getByRole('checkbox', { name: exactName }), kind: 'checkbox' },
+            { locator: container.getByRole('switch', { name: exactName }), kind: 'switch' },
+            { locator: container.getByRole('button', { name: exactName }), kind: 'button' }
+        ];
+
+        for (const candidate of nestedNamedCandidates) {
+            if ((await candidate.locator.count()) > 0) {
+                return { locator: candidate.locator.first(), kind: candidate.kind };
+            }
+        }
+
+        const nestedFallbackCandidates: ToggleInfo[] = [
+            { locator: container.getByRole('checkbox'), kind: 'checkbox' },
+            { locator: container.getByRole('switch'), kind: 'switch' },
+            { locator: container.getByRole('button'), kind: 'button' }
+        ];
+
+        for (const candidate of nestedFallbackCandidates) {
+            if ((await candidate.locator.count()) > 0) {
+                return { locator: candidate.locator.first(), kind: candidate.kind };
+            }
+        }
+
+        throw new Error(`Could not find visibility toggle for layer "${layerName}".`);
+    }
+
+    async function readToggleState(toggle: ToggleInfo): Promise<'visible' | 'hidden' | undefined> {
+        if (toggle.kind === 'checkbox' || toggle.kind === 'switch') {
+            return (await toggle.locator.isChecked()) ? 'visible' : 'hidden';
+        }
+
+        const pressed = await toggle.locator.getAttribute('aria-pressed');
+        if (pressed !== null) {
+            return pressed === 'true' ? 'visible' : 'hidden';
+        }
+
+        const label = (
+            (await toggle.locator.getAttribute('aria-label')) ??
+            (await toggle.locator.getAttribute('title')) ??
+            (await toggle.locator.textContent()) ??
+            ''
+        )
+            .trim()
+            .toLowerCase();
+
+        if (/(disable|hide|visible|shown|on)/i.test(label)) {
+            return 'visible';
+        }
+
+        if (/(enable|show|hidden|off)/i.test(label)) {
+            return 'hidden';
+        }
+
+        return undefined;
+    }
+
+    async function clickToggle(toggle: ToggleInfo) {
+        if (toggle.kind === 'checkbox' || toggle.kind === 'switch') {
+            await toggle.locator.click({ force: true });
+            return;
+        }
+
+        await toggle.locator.click();
+    }
+
+    async function findSearchField() {
+        return await pickFirstPresent(
+            [
+                page.getByRole('combobox', { name: /search|location|place|address/i }),
+                page.getByRole('searchbox', { name: /search|location|place|address/i }),
+                page.getByRole('textbox', { name: /search|location|place|address/i }),
+                page.getByRole('combobox'),
+                page.getByRole('searchbox'),
+                page.getByPlaceholder(/search|location|place|address/i)
+            ],
+            'search field'
+        );
+    }
+
+    async function findFirstSearchResult() {
+        return await pickFirstPresent(
+            [
+                page.getByRole('listbox').getByRole('option').filter({ hasText: /münster|munster/i }),
+                page.getByRole('option').filter({ hasText: /münster|munster/i }),
+                page.getByRole('listbox').getByRole('option'),
+                page.getByRole('option'),
+                page.getByRole('listitem').filter({ hasText: /münster|munster/i }),
+                page.getByRole('button').filter({ hasText: /münster|munster/i }),
+                page.getByText(/münster|munster/i)
+            ],
+            'first geocoder result'
+        );
+    }
+
+    async function countForecastEntriesIn(container: any) {
+        const rowCount = await container.getByRole('row').count();
+        if (rowCount > 1) {
+            return rowCount - 1;
+        }
+
+        const listItemCount = await container.getByRole('listitem').count();
+        if (listItemCount > 0) {
+            return listItemCount;
+        }
+
+        const articleCount = await container.getByRole('article').count();
+        if (articleCount > 0) {
+            return articleCount;
+        }
+
+        const timeCount = await container.getByText(/\b\d{1,2}:\d{2}\b/).count();
+        if (timeCount > 0) {
+            return timeCount;
+        }
+
+        return 0;
+    }
+
+    const temperatureToggle = await findLayerToggle('Temperature');
+    const precipitationToggle = await findLayerToggle('Precipitation');
+
+    await expect(temperatureToggle.locator).toBeVisible();
+    await expect(precipitationToggle.locator).toBeVisible();
+    await expect.poll(async () => await readToggleState(temperatureToggle)).toBe('visible');
+    await expect.poll(async () => await readToggleState(precipitationToggle)).toBe('hidden');
+
+    const searchField = await findSearchField();
+    await expect(searchField).toBeVisible();
+
+    await clickToggle(temperatureToggle);
+    await expect.poll(async () => await readToggleState(temperatureToggle)).toBe('hidden');
+
+    await clickToggle(precipitationToggle);
+    await expect.poll(async () => await readToggleState(precipitationToggle)).toBe('visible');
+
+    await searchField.click();
+    await searchField.fill('Münster');
+
+    const firstResult = await findFirstSearchResult();
+    await expect(firstResult).toBeVisible();
+
+    const postSelectionRequests: string[] = [];
+    const requestListener = (request: any) => {
+        postSelectionRequests.push(request.url());
+    };
+    page.on('request', requestListener);
+
+    try {
+        await firstResult.click();
+
+        const mapNavigationRequestPattern =
+            /(service=wms|request=getmap|wmts|tiles?|\/tile\/|bbox=|[?&]x=\d+[&].*[?&]y=\d+.*[?&]z=\d+)/i;
+
+        await expect
+            .poll(() => postSelectionRequests.filter((url) => mapNavigationRequestPattern.test(url)).length)
+            .toBeGreaterThan(0);
+
+        const forecastHeading = await pickFirstPresent(
+            [
+                page.getByRole('heading', { name: /weather forecast|forecast/i }),
+                page.getByText(/weather forecast|forecast/i)
+            ],
+            'weather forecast heading'
+        );
+        await expect(forecastHeading).toBeVisible();
+
+        await expect.poll(async () => {
+            const forecastRegion = page.getByRole('region', { name: /weather forecast|forecast/i });
+            if ((await forecastRegion.count()) > 0) {
+                return await countForecastEntriesIn(forecastRegion.first());
+            }
+
+            const forecastHeadingLocator = page.getByRole('heading', { name: /weather forecast|forecast/i });
+            const forecastComplementary = page.getByRole('complementary').filter({ has: forecastHeadingLocator });
+            if ((await forecastComplementary.count()) > 0) {
+                return await countForecastEntriesIn(forecastComplementary.first());
+            }
+
+            return await page.getByText(/\b\d{1,2}:\d{2}\b/).count();
+        }).toBe(24);
+    } finally {
+        page.off('request', requestListener);
+    }
+
+    await expect.poll(async () => await readToggleState(temperatureToggle)).toBe('hidden');
+    await expect.poll(async () => await readToggleState(precipitationToggle)).toBe('visible');
+});

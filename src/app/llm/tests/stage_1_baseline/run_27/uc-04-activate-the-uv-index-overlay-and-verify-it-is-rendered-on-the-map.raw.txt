@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  let uvIndexToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  if ((await uvIndexToggle.count()) === 0) {
+    uvIndexToggle = page.getByRole('switch', { name: 'UV-Index', exact: true });
+  }
+
+  await expect(uvIndexToggle).toBeVisible();
+  await expect(uvIndexToggle).not.toBeChecked();
+
+  await page.waitForLoadState('networkidle');
+
+  const mapBox = await mapCanvas.boundingBox();
+  expect(mapBox).not.toBeNull();
+
+  const mapClip = {
+    x: Math.floor(mapBox!.x),
+    y: Math.floor(mapBox!.y),
+    width: Math.ceil(mapBox!.width),
+    height: Math.ceil(mapBox!.height)
+  };
+
+  const beforeMapImage = await page.screenshot({ clip: mapClip });
+
+  const matchesUvIndexRequest = (url: string, postData?: string | null) => {
+    const haystack = (() => {
+      try {
+        return decodeURIComponent(`${url} ${postData ?? ''}`);
+      } catch {
+        return `${url} ${postData ?? ''}`;
+      }
+    })();
+
+    return /(uv[\s_-]*index|uvindex|uvi)/i.test(haystack);
+  };
+
+  const uvIndexRequests: string[] = [];
+  page.on('request', (request) => {
+    if (matchesUvIndexRequest(request.url(), request.postData())) {
+      uvIndexRequests.push(request.url());
+    }
+  });
+
+  const uvIndexTileResponsePromise = page.waitForResponse(
+    (response) => matchesUvIndexRequest(response.request().url(), response.request().postData()) && response.ok()
+  );
+
+  await uvIndexToggle.click({ force: true });
+  await expect(uvIndexToggle).toBeChecked();
+
+  const uvIndexTileResponse = await uvIndexTileResponsePromise;
+  expect(uvIndexTileResponse.ok()).toBeTruthy();
+
+  await expect.poll(() => uvIndexRequests.length > 0).toBeTruthy();
+  await page.waitForLoadState('networkidle');
+  await expect(mapCanvas).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const afterMapImage = await page.screenshot({ clip: mapClip });
+      return Buffer.compare(beforeMapImage, afterMapImage);
+    })
+    .not.toBe(0);
+});

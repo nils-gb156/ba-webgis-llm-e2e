@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  if (!(await measurementHeading.isVisible())) {
+    await measurementButton.click();
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const lengthValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km|ft|yd|mi)\b/i;
+  const lengthValuesBefore = await page.getByText(lengthValuePattern).count();
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  const p1 = { x: Math.round(box!.width * 0.62), y: Math.round(box!.height * 0.32) };
+  const p2 = { x: Math.round(box!.width * 0.72), y: Math.round(box!.height * 0.45) };
+  const p3 = { x: Math.round(box!.width * 0.82), y: Math.round(box!.height * 0.58) };
+  const p4 = { x: Math.round(box!.width * 0.88), y: Math.round(box!.height * 0.68) };
+
+  await mapCanvas.click({ position: p1 });
+  await mapCanvas.click({ position: p2 });
+  await mapCanvas.click({ position: p3 });
+  await mapCanvas.dblclick({ position: p4 });
+
+  await expect.poll(async () => await page.getByText(lengthValuePattern).count()).toBeGreaterThan(lengthValuesBefore);
+  await expect(page.getByText(lengthValuePattern).last()).toBeVisible();
+});

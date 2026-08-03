@@ -1,0 +1,252 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(mapCanvas).toBeVisible();
+
+  const isMapReadyForCoordinate = async (): Promise<boolean> => {
+    return await page.evaluate((coordinate: [number, number]) => {
+      const isOlMap = (candidate: any): boolean => {
+        return Boolean(
+          candidate &&
+            typeof candidate.getPixelFromCoordinate === 'function' &&
+            typeof candidate.getCoordinateFromPixel === 'function' &&
+            typeof candidate.getView === 'function' &&
+            typeof candidate.dispatchEvent === 'function'
+        );
+      };
+
+      const findMap = (): any | undefined => {
+        const queue: Array<{ value: any; depth: number }> = [{ value: window as any, depth: 0 }];
+        const seen = new WeakSet<object>();
+        let examined = 0;
+
+        while (queue.length > 0 && examined < 2500) {
+          const entry = queue.shift();
+          if (!entry) {
+            break;
+          }
+
+          const { value, depth } = entry;
+          const valueType = typeof value;
+          if (!value || (valueType !== 'object' && valueType !== 'function')) {
+            continue;
+          }
+
+          if (seen.has(value as object)) {
+            continue;
+          }
+
+          seen.add(value as object);
+          examined += 1;
+
+          if (isOlMap(value)) {
+            return value;
+          }
+
+          if (depth >= 4) {
+            continue;
+          }
+
+          let propertyNames: string[] = [];
+          try {
+            propertyNames = Object.getOwnPropertyNames(value);
+          } catch {
+            continue;
+          }
+
+          for (const key of propertyNames) {
+            if (
+              key === 'window' ||
+              key === 'self' ||
+              key === 'globalThis' ||
+              key === 'parent' ||
+              key === 'top' ||
+              key === 'frames' ||
+              key === 'frameElement'
+            ) {
+              continue;
+            }
+
+            let nextValue: any;
+            try {
+              nextValue = value[key];
+            } catch {
+              continue;
+            }
+
+            const nextType = typeof nextValue;
+            if (nextValue && (nextType === 'object' || nextType === 'function')) {
+              queue.push({ value: nextValue, depth: depth + 1 });
+            }
+          }
+        }
+
+        return undefined;
+      };
+
+      const map = findMap();
+      if (!map) {
+        return false;
+      }
+
+      const viewport =
+        typeof map.getViewport === 'function'
+          ? map.getViewport()
+          : typeof map.getTargetElement === 'function'
+            ? map.getTargetElement()
+            : undefined;
+
+      const pixel = map.getPixelFromCoordinate(coordinate);
+
+      return Boolean(
+        viewport &&
+          viewport.isConnected &&
+          Array.isArray(pixel) &&
+          pixel.length === 2 &&
+          Number.isFinite(pixel[0]) &&
+          Number.isFinite(pixel[1]) &&
+          viewport.getBoundingClientRect().width > 0 &&
+          viewport.getBoundingClientRect().height > 0
+      );
+    }, targetCoordinate);
+  };
+
+  await expect.poll(isMapReadyForCoordinate).toBe(true);
+
+  const clickWasDispatched = await page.evaluate((coordinate: [number, number]) => {
+    const isOlMap = (candidate: any): boolean => {
+      return Boolean(
+        candidate &&
+          typeof candidate.getPixelFromCoordinate === 'function' &&
+          typeof candidate.getCoordinateFromPixel === 'function' &&
+          typeof candidate.getView === 'function' &&
+          typeof candidate.dispatchEvent === 'function'
+      );
+    };
+
+    const findMap = (): any | undefined => {
+      const queue: Array<{ value: any; depth: number }> = [{ value: window as any, depth: 0 }];
+      const seen = new WeakSet<object>();
+      let examined = 0;
+
+      while (queue.length > 0 && examined < 2500) {
+        const entry = queue.shift();
+        if (!entry) {
+          break;
+        }
+
+        const { value, depth } = entry;
+        const valueType = typeof value;
+        if (!value || (valueType !== 'object' && valueType !== 'function')) {
+          continue;
+        }
+
+        if (seen.has(value as object)) {
+          continue;
+        }
+
+        seen.add(value as object);
+        examined += 1;
+
+        if (isOlMap(value)) {
+          return value;
+        }
+
+        if (depth >= 4) {
+          continue;
+        }
+
+        let propertyNames: string[] = [];
+        try {
+          propertyNames = Object.getOwnPropertyNames(value);
+        } catch {
+          continue;
+        }
+
+        for (const key of propertyNames) {
+          if (
+            key === 'window' ||
+            key === 'self' ||
+            key === 'globalThis' ||
+            key === 'parent' ||
+            key === 'top' ||
+            key === 'frames' ||
+            key === 'frameElement'
+          ) {
+            continue;
+          }
+
+          let nextValue: any;
+          try {
+            nextValue = value[key];
+          } catch {
+            continue;
+          }
+
+          const nextType = typeof nextValue;
+          if (nextValue && (nextType === 'object' || nextType === 'function')) {
+            queue.push({ value: nextValue, depth: depth + 1 });
+          }
+        }
+      }
+
+      return undefined;
+    };
+
+    const map = findMap();
+    if (!map) {
+      return false;
+    }
+
+    const pixel = map.getPixelFromCoordinate(coordinate);
+    const viewport =
+      typeof map.getViewport === 'function'
+        ? map.getViewport()
+        : typeof map.getTargetElement === 'function'
+          ? map.getTargetElement()
+          : undefined;
+
+    if (
+      !viewport ||
+      !Array.isArray(pixel) ||
+      pixel.length !== 2 ||
+      !Number.isFinite(pixel[0]) ||
+      !Number.isFinite(pixel[1])
+    ) {
+      return false;
+    }
+
+    const rect = viewport.getBoundingClientRect();
+    const clientX = rect.left + pixel[0];
+    const clientY = rect.top + pixel[1];
+    const originalEvent = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      clientX,
+      clientY
+    });
+
+    map.dispatchEvent({
+      type: 'singleclick',
+      map,
+      coordinate,
+      pixel,
+      originalEvent
+    });
+
+    return true;
+  }, targetCoordinate);
+
+  expect(clickWasDispatched).toBe(true);
+
+  await expect(page.getByText('UV-Index Station', { exact: true })).toBeVisible();
+  await expect(page.getByText('EUCOS Ground Station', { exact: true })).toBeVisible();
+});

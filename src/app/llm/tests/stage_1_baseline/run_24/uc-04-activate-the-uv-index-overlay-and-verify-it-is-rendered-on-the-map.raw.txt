@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  let uvToggle = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  if ((await uvToggle.count()) === 0) {
+    uvToggle = page.getByRole('switch', { name: 'UV-Index', exact: true });
+  }
+
+  await expect(uvToggle).toBeVisible();
+  await expect(uvToggle).not.toBeChecked();
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapClip = (await page.locator('canvas').evaluateAll((elements) => {
+    const visibleRects = elements
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        if (
+          rect.width <= 0 ||
+          rect.height <= 0 ||
+          style.display === 'none' ||
+          style.visibility === 'hidden' ||
+          style.opacity === '0'
+        ) {
+          return null;
+        }
+
+        return {
+          x: rect.left + window.scrollX,
+          y: rect.top + window.scrollY,
+          width: rect.width,
+          height: rect.height
+        };
+      })
+      .filter((value) => value !== null);
+
+    if (visibleRects.length === 0) {
+      return null;
+    }
+
+    const left = Math.min(...visibleRects.map((rect) => rect!.x));
+    const top = Math.min(...visibleRects.map((rect) => rect!.y));
+    const right = Math.max(...visibleRects.map((rect) => rect!.x + rect!.width));
+    const bottom = Math.max(...visibleRects.map((rect) => rect!.y + rect!.height));
+
+    return {
+      x: Math.floor(left),
+      y: Math.floor(top),
+      width: Math.ceil(right - left),
+      height: Math.ceil(bottom - top)
+    };
+  })) as { x: number; y: number; width: number; height: number } | null;
+
+  expect(mapClip).not.toBeNull();
+  if (!mapClip) {
+    throw new Error('No visible map canvas found.');
+  }
+
+  const beforeMapImage = await page.screenshot({ clip: mapClip });
+
+  const uvRequestPattern = /(?:^|[^a-z])(uv[-_ ]?index|uvindex|uvi)(?:[^a-z]|$)/i;
+  const uvLayerRequests: string[] = [];
+
+  page.on('request', (request) => {
+    const url = decodeURIComponent(request.url());
+    if (['image', 'fetch', 'xhr'].includes(request.resourceType()) && uvRequestPattern.test(url)) {
+      uvLayerRequests.push(url);
+    }
+  });
+
+  const uvLayerResponsePromise = page.waitForResponse((response) => {
+    const url = decodeURIComponent(response.url());
+    return (
+      response.ok() &&
+      ['image', 'fetch', 'xhr'].includes(response.request().resourceType()) &&
+      uvRequestPattern.test(url)
+    );
+  });
+
+  await uvToggle.click({ force: true });
+
+  await expect(uvToggle).toBeChecked();
+  await expect.poll(() => uvLayerRequests.length).toBeGreaterThan(0);
+
+  const uvLayerResponse = await uvLayerResponsePromise;
+  expect(uvLayerResponse.ok()).toBeTruthy();
+
+  await expect
+    .poll(async () => {
+      const currentMapImage = await page.screenshot({ clip: mapClip });
+      return currentMapImage.equals(beforeMapImage);
+    })
+    .toBe(false);
+});

@@ -1,0 +1,82 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const measurementToggle = page.getByRole('button', { name: /^(Measure|Measurement)$/ });
+  if (await measurementToggle.count()) {
+    const measurementButton = measurementToggle.first();
+    if ((await measurementButton.getAttribute('aria-pressed')) === 'true') {
+      await measurementButton.click();
+      await expect(measurementButton).toHaveAttribute('aria-pressed', 'false');
+    }
+  }
+
+  const layersToggle = page.getByRole('button', { name: /^(Layers|Layer List)$/ });
+  const uviLayerCheckbox = page.getByRole('checkbox', { name: 'UV-Index Stations', exact: true });
+  const eucosLayerCheckbox = page.getByRole('checkbox', { name: 'EUCOS Ground Stations', exact: true });
+
+  if (!(await uviLayerCheckbox.isVisible()) || !(await eucosLayerCheckbox.isVisible())) {
+    if (await layersToggle.count()) {
+      const layersButton = layersToggle.first();
+      if ((await layersButton.getAttribute('aria-pressed')) !== 'true') {
+        await layersButton.click();
+      }
+    }
+  }
+
+  await expect(uviLayerCheckbox).toBeVisible();
+  if (!(await uviLayerCheckbox.isChecked())) {
+    await uviLayerCheckbox.click({ force: true });
+  }
+  await expect(uviLayerCheckbox).toBeChecked();
+
+  await expect(eucosLayerCheckbox).toBeVisible();
+  if (!(await eucosLayerCheckbox.isChecked())) {
+    await eucosLayerCheckbox.click({ force: true });
+  }
+  await expect(eucosLayerCheckbox).toBeChecked();
+
+  if (await layersToggle.count()) {
+    const layersButton = layersToggle.first();
+    if ((await layersButton.getAttribute('aria-pressed')) === 'true') {
+      await layersButton.click();
+    }
+  }
+
+  const infoToggle = page.getByRole('button', { name: /^(Info|Information)$/ });
+  if (await infoToggle.count()) {
+    const infoButton = infoToggle.first();
+    if ((await infoButton.getAttribute('aria-pressed')) !== 'true') {
+      await infoButton.click();
+    }
+  }
+
+  const box = await mapViewport.boundingBox();
+  expect(box).not.toBeNull();
+
+  await mapViewport.click({
+    position: {
+      x: box!.width / 2,
+      y: box!.height / 2
+    }
+  });
+
+  const uviSection = page
+    .getByRole('heading', { name: 'UV-Index Station', exact: true })
+    .or(page.getByText('UV-Index Station', { exact: true }))
+    .first();
+  const eucosSection = page
+    .getByRole('heading', { name: 'EUCOS Ground Station', exact: true })
+    .or(page.getByText('EUCOS Ground Station', { exact: true }))
+    .first();
+
+  await expect(uviSection).toBeVisible();
+  await expect(eucosSection).toBeVisible();
+});

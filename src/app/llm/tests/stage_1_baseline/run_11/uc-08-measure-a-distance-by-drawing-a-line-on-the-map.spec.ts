@@ -1,0 +1,138 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const measurementButton = page.getByRole('button', {
+    name: 'Measurement',
+    exact: true
+  });
+  const measurementDialog = page.getByRole('dialog', {
+    name: 'Measurement',
+    exact: true
+  });
+  const measurementRegion = page.getByRole('region', {
+    name: 'Measurement',
+    exact: true
+  });
+  const measurementTabpanel = page.getByRole('tabpanel', {
+    name: 'Measurement',
+    exact: true
+  });
+  const measurementHeading = page.getByRole('heading', {
+    name: 'Measurement',
+    exact: true
+  });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const getVisiblePanelKind = async (): Promise<'dialog' | 'region' | 'tabpanel' | 'heading' | 'none'> => {
+    if (await measurementDialog.isVisible()) {
+      return 'dialog';
+    }
+    if (await measurementRegion.isVisible()) {
+      return 'region';
+    }
+    if (await measurementTabpanel.isVisible()) {
+      return 'tabpanel';
+    }
+    if (await measurementHeading.isVisible()) {
+      return 'heading';
+    }
+    return 'none';
+  };
+
+  if ((await getVisiblePanelKind()) === 'none') {
+    await measurementButton.click();
+  }
+
+  await expect.poll(async () => (await getVisiblePanelKind()) !== 'none').toBe(true);
+
+  const visiblePanelKind = await getVisiblePanelKind();
+
+  if (visiblePanelKind === 'dialog') {
+    await expect(measurementDialog).toBeVisible();
+  } else if (visiblePanelKind === 'region') {
+    await expect(measurementRegion).toBeVisible();
+  } else if (visiblePanelKind === 'tabpanel') {
+    await expect(measurementTabpanel).toBeVisible();
+  } else {
+    await expect(measurementHeading).toBeVisible();
+  }
+
+  let useBodyFallback = false;
+  let textScope = page.locator('body');
+
+  if (visiblePanelKind === 'dialog') {
+    textScope = measurementDialog;
+  } else if (visiblePanelKind === 'region') {
+    textScope = measurementRegion;
+  } else if (visiblePanelKind === 'tabpanel') {
+    textScope = measurementTabpanel;
+  } else {
+    useBodyFallback = true;
+  }
+
+  const measurementValuePattern = /\b(\d+(?:[.,]\d+)?)\s?(km|m)\b/gi;
+
+  const getMeasurementTexts = async () => {
+    const text = await textScope.innerText();
+    return [...text.matchAll(measurementValuePattern)].map((match) => match[0]);
+  };
+
+  const initialMeasurementTexts = useBodyFallback ? await getMeasurementTexts() : [];
+
+  const box = await mapCanvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = box!.width;
+  const height = box!.height;
+
+  await mapCanvas.click({
+    position: {
+      x: Math.round(width * 0.6),
+      y: Math.round(height * 0.35)
+    }
+  });
+  await mapCanvas.click({
+    position: {
+      x: Math.round(width * 0.7),
+      y: Math.round(height * 0.45)
+    }
+  });
+  await mapCanvas.click({
+    position: {
+      x: Math.round(width * 0.8),
+      y: Math.round(height * 0.4)
+    }
+  });
+  await mapCanvas.dblclick({
+    position: {
+      x: Math.round(width * 0.88),
+      y: Math.round(height * 0.55)
+    }
+  });
+
+  if (useBodyFallback) {
+    await expect.poll(async () => {
+      const currentMeasurementTexts = await getMeasurementTexts();
+      return (
+        currentMeasurementTexts.length > initialMeasurementTexts.length ||
+        currentMeasurementTexts.some((value, index) => value !== initialMeasurementTexts[index])
+      );
+    }).toBe(true);
+  } else {
+    await expect.poll(async () => {
+      const currentMeasurementTexts = await getMeasurementTexts();
+      return currentMeasurementTexts.some((value) => {
+        const numericValue = Number(value.replace(',', '.').replace(/[^\d.]/g, ''));
+        return Number.isFinite(numericValue) && numericValue > 0;
+      });
+    }).toBe(true);
+  }
+});

@@ -1,0 +1,111 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  const tileRequests: Array<{ url: string; zoom: number }> = [];
+
+  const extractZoomFromUrl = (urlString: string): number | undefined => {
+    const parseNumericTail = (value: string): number | undefined => {
+      const match = value.match(/(\d+)(?!.*\d)/);
+      return match ? Number(match[1]) : undefined;
+    };
+
+    try {
+      const url = new URL(urlString);
+
+      for (const key of ['z', 'zoom', 'Z', 'Zoom', 'tilematrix', 'TileMatrix', 'TILEMATRIX']) {
+        const value = url.searchParams.get(key);
+        if (!value) {
+          continue;
+        }
+
+        const numeric = parseNumericTail(value);
+        if (numeric !== undefined) {
+          return numeric;
+        }
+      }
+
+      const pathSegments = url.pathname
+        .split('/')
+        .filter(Boolean)
+        .map((segment) => segment.replace(/\.[a-z0-9]+$/i, ''));
+
+      for (let index = 0; index <= pathSegments.length - 3; index++) {
+        const [z, x, y] = pathSegments.slice(index, index + 3);
+        if (/^\d+$/.test(z) && /^\d+$/.test(x) && /^\d+$/.test(y)) {
+          return Number(z);
+        }
+      }
+    } catch {
+      return undefined;
+    }
+
+    return undefined;
+  };
+
+  const dominantZoom = (requests: Array<{ zoom: number }>): number | undefined => {
+    const counts = new Map<number, number>();
+
+    for (const request of requests) {
+      counts.set(request.zoom, (counts.get(request.zoom) ?? 0) + 1);
+    }
+
+    let bestZoom: number | undefined;
+    let bestCount = -1;
+
+    for (const [zoom, count] of counts.entries()) {
+      if (count > bestCount || (count === bestCount && (bestZoom === undefined || zoom > bestZoom))) {
+        bestZoom = zoom;
+        bestCount = count;
+      }
+    }
+
+    return bestZoom;
+  };
+
+  page.on('request', (request) => {
+    if (!['image', 'fetch', 'xhr'].includes(request.resourceType())) {
+      return;
+    }
+
+    const zoom = extractZoomFromUrl(request.url());
+    if (zoom !== undefined) {
+      tileRequests.push({ url: request.url(), zoom });
+    }
+  });
+
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  await page.waitForLoadState('networkidle');
+
+  await expect
+    .poll(() => dominantZoom(tileRequests) ?? -1)
+    .toBeGreaterThanOrEqual(0);
+
+  const initialZoom = dominantZoom(tileRequests);
+  expect(initialZoom).toBeDefined();
+
+  const zoomInStartIndex = tileRequests.length;
+  await zoomInButton.click();
+
+  await expect
+    .poll(() => dominantZoom(tileRequests.slice(zoomInStartIndex)) ?? -1)
+    .toBeGreaterThan(initialZoom!);
+
+  const zoomAfterZoomIn = dominantZoom(tileRequests.slice(zoomInStartIndex));
+  expect(zoomAfterZoomIn).toBeDefined();
+
+  const zoomOutStartIndex = tileRequests.length;
+  await zoomOutButton.click();
+
+  await expect
+    .poll(() => dominantZoom(tileRequests.slice(zoomOutStartIndex)) ?? Number.POSITIVE_INFINITY)
+    .toBeLessThan(zoomAfterZoomIn!);
+});

@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+  const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+  const mapCanvas = page.locator('canvas').first();
+
+  await expect(measurementButton).toBeVisible();
+  await expect(mapCanvas).toBeVisible();
+
+  const panelInitiallyVisible = await measurementHeading.isVisible().catch(() => false);
+  if (!panelInitiallyVisible) {
+    await measurementButton.click();
+  }
+
+  await expect(measurementHeading).toBeVisible();
+
+  const panelCandidates = [
+    page.getByRole('dialog').filter({ has: measurementHeading }).first(),
+    page.getByRole('region').filter({ has: measurementHeading }).first(),
+    page.getByRole('complementary').filter({ has: measurementHeading }).first(),
+    page.locator('aside').filter({ has: measurementHeading }).first(),
+    page.locator('section').filter({ has: measurementHeading }).first()
+  ];
+
+  let measurementTextScope = page.locator('body');
+  for (const candidate of panelCandidates) {
+    if (await candidate.isVisible().catch(() => false)) {
+      measurementTextScope = candidate;
+      break;
+    }
+  }
+
+  const box = await mapCanvas.boundingBox();
+  if (!box) {
+    throw new Error('Map canvas bounding box is not available.');
+  }
+
+  const points = [
+    { x: Math.round(box.width * 0.55), y: Math.round(box.height * 0.35) },
+    { x: Math.round(box.width * 0.65), y: Math.round(box.height * 0.45) },
+    { x: Math.round(box.width * 0.75), y: Math.round(box.height * 0.55) },
+    { x: Math.round(box.width * 0.85), y: Math.round(box.height * 0.65) }
+  ];
+
+  await mapCanvas.click({ position: points[0] });
+  await mapCanvas.click({ position: points[1] });
+  await mapCanvas.click({ position: points[2] });
+  await mapCanvas.dblclick({ position: points[3] });
+
+  await expect
+    .poll(async () => ((await measurementTextScope.textContent()) ?? '').replace(/\s+/g, ' '))
+    .toMatch(/\b\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i);
+});

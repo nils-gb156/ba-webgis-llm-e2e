@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 4: Activate the UV-Index overlay and verify it is rendered on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('load');
+
+  const mapViewport = page.locator('.ol-viewport').first();
+  await expect(mapViewport).toBeVisible();
+
+  const uvCheckbox = page.getByRole('checkbox', { name: 'UV-Index', exact: true });
+  const uvSwitch = page.getByRole('switch', { name: 'UV-Index', exact: true });
+  const uvToggle = (await uvCheckbox.count()) > 0 ? uvCheckbox : uvSwitch;
+
+  await expect(uvToggle).toBeVisible();
+  await expect(uvToggle).not.toBeChecked();
+
+  const beforeMapScreenshot = await mapViewport.screenshot();
+
+  const successfulImageResponses: string[] = [];
+  const uvNamedResponses: string[] = [];
+
+  const safeDecode = (value: string): string => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+
+  page.on('response', async response => {
+    const request = response.request();
+    if (request.resourceType() !== 'image' || !response.ok()) {
+      return;
+    }
+
+    const responseUrl = response.url();
+    successfulImageResponses.push(responseUrl);
+
+    const searchable = `${safeDecode(request.url())} ${safeDecode(request.postData() ?? '')} ${safeDecode(responseUrl)}`;
+    if (/uv[\s_-]?index/i.test(searchable)) {
+      uvNamedResponses.push(responseUrl);
+    }
+  });
+
+  await uvToggle.click({ force: true });
+  await expect(uvToggle).toBeChecked();
+
+  await expect.poll(() => successfulImageResponses.length).toBeGreaterThan(0);
+  await expect.poll(() => uvNamedResponses.length || successfulImageResponses.length).toBeGreaterThan(0);
+
+  await expect.poll(async () => {
+    const afterMapScreenshot = await mapViewport.screenshot();
+    return !afterMapScreenshot.equals(beforeMapScreenshot);
+  }).toBe(true);
+});

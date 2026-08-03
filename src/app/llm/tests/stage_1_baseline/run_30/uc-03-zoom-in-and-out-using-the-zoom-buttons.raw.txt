@@ -1,0 +1,161 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 3: Zoom in and out using the zoom buttons', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const zoomInButton = page.getByRole('button', { name: 'Zoom in', exact: true });
+  const zoomOutButton = page.getByRole('button', { name: 'Zoom out', exact: true });
+
+  await expect(zoomInButton).toBeVisible();
+  await expect(zoomOutButton).toBeVisible();
+
+  const getZoomLevel = async (): Promise<number | undefined> => {
+    return await page.evaluate(() => {
+      const maybeGetZoom = (candidate: unknown): number | undefined => {
+        try {
+          if (
+            candidate &&
+            typeof candidate === 'object' &&
+            'getView' in candidate &&
+            typeof (candidate as { getView?: unknown }).getView === 'function'
+          ) {
+            const view = (candidate as { getView: () => unknown }).getView();
+            if (
+              view &&
+              typeof view === 'object' &&
+              'getZoom' in view &&
+              typeof (view as { getZoom?: unknown }).getZoom === 'function'
+            ) {
+              const zoom = (view as { getZoom: () => unknown }).getZoom();
+              return typeof zoom === 'number' ? zoom : undefined;
+            }
+          }
+        } catch {
+          return undefined;
+        }
+
+        return undefined;
+      };
+
+      const enqueue = (
+        queue: Array<{ value: unknown; depth: number }>,
+        seen: WeakSet<object>,
+        value: unknown,
+        depth: number
+      ) => {
+        if ((!value || typeof value !== 'object') && typeof value !== 'function') {
+          return;
+        }
+
+        const objectValue = value as object;
+        if (seen.has(objectValue)) {
+          return;
+        }
+
+        seen.add(objectValue);
+        queue.push({ value, depth });
+      };
+
+      const globalWindow = window as unknown as Record<string, unknown>;
+      const directCandidates = [
+        globalWindow.map,
+        globalWindow.olMap,
+        globalWindow.openLayersMap,
+        globalWindow.viewer,
+        globalWindow.app,
+        globalWindow.application
+      ];
+
+      for (const candidate of directCandidates) {
+        const zoom = maybeGetZoom(candidate);
+        if (zoom !== undefined) {
+          return zoom;
+        }
+      }
+
+      const queue: Array<{ value: unknown; depth: number }> = [];
+      const seen = new WeakSet<object>();
+
+      for (const candidate of directCandidates) {
+        enqueue(queue, seen, candidate, 0);
+      }
+      enqueue(queue, seen, window, 0);
+
+      const skippedProperties = new Set(['window', 'self', 'top', 'parent', 'frames', 'document']);
+      const maxDepth = 2;
+      let inspected = 0;
+
+      while (queue.length > 0 && inspected < 1500) {
+        const current = queue.shift();
+        if (!current) {
+          break;
+        }
+
+        inspected += 1;
+
+        const zoom = maybeGetZoom(current.value);
+        if (zoom !== undefined) {
+          return zoom;
+        }
+
+        if (current.depth >= maxDepth) {
+          continue;
+        }
+
+        if ((!current.value || typeof current.value !== 'object') && typeof current.value !== 'function') {
+          continue;
+        }
+
+        let propertyNames: string[] = [];
+        try {
+          propertyNames = Object.getOwnPropertyNames(current.value);
+        } catch {
+          continue;
+        }
+
+        for (const propertyName of propertyNames) {
+          if (skippedProperties.has(propertyName)) {
+            continue;
+          }
+
+          let child: unknown;
+          try {
+            child = (current.value as Record<string, unknown>)[propertyName];
+          } catch {
+            continue;
+          }
+
+          const childZoom = maybeGetZoom(child);
+          if (childZoom !== undefined) {
+            return childZoom;
+          }
+
+          enqueue(queue, seen, child, current.depth + 1);
+        }
+      }
+
+      return undefined;
+    });
+  };
+
+  await expect.poll(async () => typeof (await getZoomLevel())).toBe('number');
+  const initialZoom = await getZoomLevel();
+  expect(initialZoom).toBeDefined();
+
+  await zoomInButton.click();
+
+  let zoomAfterZoomIn: number | undefined;
+  await expect
+    .poll(async () => {
+      zoomAfterZoomIn = await getZoomLevel();
+      return zoomAfterZoomIn;
+    })
+    .toBeGreaterThan(initialZoom!);
+
+  await zoomOutButton.click();
+
+  await expect.poll(async () => await getZoomLevel()).toBeLessThan(zoomAfterZoomIn!);
+});

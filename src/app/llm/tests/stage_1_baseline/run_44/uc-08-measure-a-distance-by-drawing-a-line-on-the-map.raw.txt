@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const measurementButton = page.getByRole('button', { name: 'Measurement', exact: true });
+    const measurementHeading = page.getByRole('heading', { name: 'Measurement', exact: true });
+    const mapCanvas = page.locator('canvas').first();
+    const lengthValuePattern = /\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i;
+
+    await expect(measurementButton).toBeVisible();
+    await expect(mapCanvas).toBeVisible();
+
+    const panelVisibleBefore = await measurementHeading.isVisible().catch(() => false);
+    if (!panelVisibleBefore) {
+        const pressed = await measurementButton.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await measurementButton.click();
+        }
+    }
+
+    await expect(measurementHeading).toBeVisible();
+
+    const initialLengthTexts = new Set(
+        await page.getByText(lengthValuePattern).evaluateAll((elements) =>
+            elements
+                .map((element) => element.textContent?.trim() ?? '')
+                .filter((text) => text.length > 0)
+        )
+    );
+
+    const box = await mapCanvas.boundingBox();
+    if (!box) {
+        throw new Error('Map canvas is not available for interaction.');
+    }
+
+    const marginX = Math.max(5, Math.floor(box.width * 0.05));
+    const marginY = Math.max(5, Math.floor(box.height * 0.05));
+    const point = (xFactor: number, yFactor: number) => ({
+        x: Math.min(Math.round(box.width) - marginX, Math.max(marginX, Math.round(box.width * xFactor))),
+        y: Math.min(Math.round(box.height) - marginY, Math.max(marginY, Math.round(box.height * yFactor)))
+    });
+
+    await mapCanvas.click({ position: point(0.25, 0.35) });
+    await mapCanvas.click({ position: point(0.45, 0.42) });
+    await mapCanvas.click({ position: point(0.62, 0.50) });
+    await mapCanvas.dblclick({ position: point(0.78, 0.58) });
+
+    await expect.poll(async () => {
+        const texts = await page.getByText(lengthValuePattern).evaluateAll((elements) =>
+            elements
+                .map((element) => element.textContent?.trim() ?? '')
+                .filter((text) => text.length > 0)
+        );
+
+        return texts.find((text) => !initialLengthTexts.has(text) && lengthValuePattern.test(text)) ?? '';
+    }).toMatch(lengthValuePattern);
+});

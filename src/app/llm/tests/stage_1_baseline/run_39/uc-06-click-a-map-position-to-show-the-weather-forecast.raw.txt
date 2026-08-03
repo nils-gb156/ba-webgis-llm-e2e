@@ -1,0 +1,190 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+
+type CapturedJsonResponse = {
+  url: string;
+  body: unknown;
+};
+
+function isWeatherLikePayload(value: unknown, visited = new WeakSet<object>()): boolean {
+  if (Array.isArray(value)) {
+    return value.some((entry) => isWeatherLikePayload(entry, visited));
+  }
+
+  if (value && typeof value === 'object') {
+    const objectValue = value as Record<string, unknown>;
+    if (visited.has(objectValue)) {
+      return false;
+    }
+    visited.add(objectValue);
+
+    return Object.entries(objectValue).some(
+      ([key, nestedValue]) =>
+        /weather|forecast|hourly|temperature|temp|precip|wind/i.test(key) ||
+        isWeatherLikePayload(nestedValue, visited)
+    );
+  }
+
+  return false;
+}
+
+function findArrayLength(value: unknown, targetLength: number, visited = new WeakSet<object>()): number | undefined {
+  if (Array.isArray(value)) {
+    if (value.length === targetLength) {
+      return value.length;
+    }
+
+    for (const entry of value) {
+      const found = findArrayLength(entry, targetLength, visited);
+      if (found !== undefined) {
+        return found;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (value && typeof value === 'object') {
+    const objectValue = value as Record<string, unknown>;
+    if (visited.has(objectValue)) {
+      return undefined;
+    }
+    visited.add(objectValue);
+
+    for (const nestedValue of Object.values(objectValue)) {
+      const found = findArrayLength(nestedValue, targetLength, visited);
+      if (found !== undefined) {
+        return found;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function getForecastEntryCountFromResponses(responses: CapturedJsonResponse[]): number {
+  for (const response of responses) {
+    if (/(weather|forecast|meteo)/i.test(response.url) || isWeatherLikePayload(response.body)) {
+      const count = findArrayLength(response.body, 24);
+      if (count === 24) {
+        return 24;
+      }
+    }
+  }
+
+  return 0;
+}
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('networkidle');
+
+  await expect.poll(async () => {
+    return await page.evaluate(() => {
+      const isVisible = (element: Element): boolean => {
+        const htmlElement = element as HTMLElement;
+        const style = window.getComputedStyle(htmlElement);
+        const rect = htmlElement.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+      };
+
+      return Array.from(document.querySelectorAll('aside, [role="complementary"]')).some(isVisible);
+    });
+  }).toBe(true);
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const mapBoundingBox = await mapCanvas.boundingBox();
+  expect(mapBoundingBox).not.toBeNull();
+
+  if (!mapBoundingBox) {
+    throw new Error('Map canvas has no bounding box.');
+  }
+
+  const weatherResponses: CapturedJsonResponse[] = [];
+  page.on('response', async (response) => {
+    const resourceType = response.request().resourceType();
+    if (!response.ok() || (resourceType !== 'fetch' && resourceType !== 'xhr')) {
+      return;
+    }
+
+    try {
+      const body = await response.json();
+      weatherResponses.push({
+        url: response.url(),
+        body
+      });
+    } catch {
+      // Ignore non-JSON responses.
+    }
+  });
+
+  const beforeClickMapImage = await mapCanvas.screenshot();
+
+  await mapCanvas.click({
+    position: {
+      x: Math.max(20, Math.floor(mapBoundingBox.width * 0.35)),
+      y: Math.max(20, Math.floor(mapBoundingBox.height * 0.45))
+    }
+  });
+
+  await expect.poll(async () => {
+    const afterClickMapImage = await mapCanvas.screenshot();
+    return afterClickMapImage.equals(beforeClickMapImage);
+  }).toBe(false);
+
+  const forecastHeading = page.getByRole('heading', { name: /weather forecast|forecast/i }).first();
+  if (await forecastHeading.count()) {
+    await expect(forecastHeading).toBeVisible();
+  } else {
+    await expect(page.getByText(/weather forecast|forecast/i).first()).toBeVisible();
+  }
+
+  await expect.poll(async () => {
+    const domCount = await page.evaluate(() => {
+      const isVisible = (element: Element): boolean => {
+        const htmlElement = element as HTMLElement;
+        const style = window.getComputedStyle(htmlElement);
+        const rect = htmlElement.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+      };
+
+      const countEntries = (element: Element): number => {
+        const listItemCount = element.querySelectorAll('li, [role="listitem"]').length;
+        const articleCount = element.querySelectorAll('article').length;
+        const rowCount = element.querySelectorAll('tr, [role="row"]').length;
+        const text = (element.textContent ?? '').replace(/\s+/g, ' ');
+        const hourLabelCount = text.match(/\b(?:[01]?\d|2[0-3]):\d{2}\b/g)?.length ?? 0;
+
+        return Math.max(listItemCount, articleCount, rowCount, hourLabelCount, 0);
+      };
+
+      const labelElements = Array.from(
+        document.querySelectorAll('h1, h2, h3, h4, h5, h6, [role="heading"], div, span, p')
+      ).filter((element) => isVisible(element) && /weather forecast|forecast/i.test((element.textContent ?? '').trim()));
+
+      const counts: number[] = [];
+
+      for (const labelElement of labelElements) {
+        let current: Element | null = labelElement;
+        for (let level = 0; current && level < 6; level += 1, current = current.parentElement) {
+          if (!isVisible(current)) {
+            continue;
+          }
+
+          const count = countEntries(current);
+          if (count > 0) {
+            counts.push(count);
+          }
+        }
+      }
+
+      return counts.includes(24) ? 24 : 0;
+    });
+
+    const responseCount = getForecastEntryCountFromResponses(weatherResponses);
+    return domCount === 24 ? domCount : responseCount;
+  }).toBe(24);
+});

@@ -1,0 +1,189 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  const firstVisible = async (candidates: Locator[]): Promise<Locator | undefined> => {
+    for (const candidate of candidates) {
+      if (await candidate.isVisible().catch(() => false)) {
+        return candidate;
+      }
+    }
+    return undefined;
+  };
+
+  const firstExisting = async (candidates: Locator[]): Promise<Locator> => {
+    for (const candidate of candidates) {
+      if ((await candidate.count().catch(() => 0)) > 0) {
+        return candidate;
+      }
+    }
+    return candidates[0];
+  };
+
+  const mapCanvas = page.locator('canvas').first();
+  await expect(mapCanvas).toBeVisible();
+
+  const scaleBar = page.locator('.ol-scale-line, .ol-scale-bar').first();
+  await expect(scaleBar).toBeVisible();
+
+  const printMapButton = page.getByRole('button', { name: 'Print Map', exact: true });
+  await expect(printMapButton).toBeVisible();
+
+  const titleInputCandidates = [
+    page.getByRole('textbox', { name: /title/i }).first(),
+    page.getByLabel(/title/i).first(),
+    page.getByPlaceholder(/title/i).first()
+  ];
+
+  let titleInput = await firstVisible(titleInputCandidates);
+
+  if (!titleInput) {
+    const pressed = await printMapButton.getAttribute('aria-pressed');
+    if (pressed !== 'true') {
+      await printMapButton.click();
+    }
+    titleInput = await firstExisting(titleInputCandidates);
+  }
+
+  await expect(titleInput).toBeVisible();
+
+  const panelCandidates = [
+    page.getByRole('dialog', { name: /print/i }).first(),
+    page.getByRole('region', { name: /print/i }).first(),
+    page.getByRole('complementary').filter({ has: titleInput }).first(),
+    page.getByRole('dialog').filter({ has: titleInput }).first(),
+    page.getByRole('region').filter({ has: titleInput }).first()
+  ];
+
+  const visiblePanel = await firstVisible(panelCandidates);
+  if (visiblePanel) {
+    await expect(visiblePanel).toBeVisible();
+  } else {
+    await expect(titleInput).toBeVisible();
+  }
+
+  const panelScope = visiblePanel ?? page.locator('body');
+  const printTitle = `UC9 PNG export ${Date.now()}`;
+
+  await titleInput.fill(printTitle);
+  await expect(titleInput).toHaveValue(printTitle);
+
+  const pngChoiceCandidates = [
+    panelScope.getByRole('radio', { name: /^png$/i }).first(),
+    panelScope.getByLabel(/^png$/i).first(),
+    panelScope.getByRole('button', { name: /^png$/i }).first(),
+    panelScope.getByRole('tab', { name: /^png$/i }).first()
+  ];
+
+  const visiblePngChoice = await firstVisible(pngChoiceCandidates);
+
+  if (visiblePngChoice) {
+    const role = await visiblePngChoice.getAttribute('role');
+
+    await visiblePngChoice.click({ force: true });
+
+    if (role === 'radio') {
+      await expect(visiblePngChoice).toBeChecked();
+    } else {
+      const ariaPressed = await visiblePngChoice.getAttribute('aria-pressed');
+      const ariaSelected = await visiblePngChoice.getAttribute('aria-selected');
+
+      if (ariaPressed !== null) {
+        await expect.poll(async () => visiblePngChoice.getAttribute('aria-pressed')).toBe('true');
+      }
+      if (ariaSelected !== null) {
+        await expect.poll(async () => visiblePngChoice.getAttribute('aria-selected')).toBe('true');
+      }
+    }
+  } else {
+    const formatFieldCandidates = [
+      panelScope.getByRole('combobox', { name: /format/i }).first(),
+      panelScope.getByLabel(/format/i).first(),
+      panelScope.getByRole('button', { name: /format/i }).first()
+    ];
+
+    const formatField = await firstExisting(formatFieldCandidates);
+    await expect(formatField).toBeVisible();
+
+    const tagName = await formatField.evaluate((element) => element.tagName.toLowerCase());
+
+    if (tagName === 'select') {
+      await formatField.evaluate((element) => {
+        const select = element as HTMLSelectElement;
+        const pngOption = Array.from(select.options).find((option) => {
+          const text = `${option.label} ${option.text} ${option.value}`;
+          return /png/i.test(text);
+        });
+
+        if (!pngOption) {
+          throw new Error('PNG option not found in print format select.');
+        }
+
+        select.value = pngOption.value;
+        select.dispatchEvent(new Event('input', { bubbles: true }));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+
+      await expect.poll(async () => {
+        return await formatField.evaluate((element) => {
+          const select = element as HTMLSelectElement;
+          const selected = select.selectedOptions[0];
+          return selected ? `${selected.label} ${selected.text} ${selected.value}` : select.value;
+        });
+      }).toMatch(/png/i);
+    } else {
+      await formatField.click();
+
+      const pngOptionCandidates = [
+        page.getByRole('option', { name: /^png$/i }).first(),
+        page.getByRole('menuitemradio', { name: /^png$/i }).first(),
+        page.getByRole('button', { name: /^png$/i }).first(),
+        page.getByText(/^PNG$/i).first()
+      ];
+
+      const pngOption = await firstExisting(pngOptionCandidates);
+      await expect(pngOption).toBeVisible();
+      await pngOption.click({ force: true });
+    }
+  }
+
+  const exportButtonCandidates = [
+    panelScope.getByRole('button', { name: /^export$/i }).first(),
+    panelScope.getByRole('button', { name: /^print$/i }).first(),
+    panelScope.getByRole('button', { name: /^download$/i }).first(),
+    panelScope.getByRole('button', { name: /^create$/i }).first(),
+    panelScope.getByRole('button', { name: /^print map$/i }).first()
+  ];
+
+  const exportButton = await firstExisting(exportButtonCandidates);
+  await expect(exportButton).toBeVisible();
+
+  const downloadPromise = page.waitForEvent('download');
+  await exportButton.click();
+  const download = await downloadPromise;
+
+  await expect.poll(async () => download.suggestedFilename()).toMatch(/\.png$/i);
+
+  const downloadPath = await download.path();
+  if (!downloadPath) {
+    throw new Error('Expected a downloaded PNG file, but no download path was available.');
+  }
+
+  const fileBuffer = await readFile(downloadPath);
+  const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+  expect(fileBuffer.length).toBeGreaterThan(1024);
+  expect(fileBuffer.subarray(0, 8).equals(pngSignature)).toBe(true);
+
+  const imageWidth = fileBuffer.readUInt32BE(16);
+  const imageHeight = fileBuffer.readUInt32BE(20);
+
+  expect(imageWidth).toBeGreaterThan(0);
+  expect(imageHeight).toBeGreaterThan(0);
+});
