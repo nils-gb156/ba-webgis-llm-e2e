@@ -1,0 +1,147 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('networkidle');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printingContent = page.getByTestId('printing');
+    const scaleBar = page.getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingContent).toBeVisible();
+
+    const printTitle = 'Open Pioneer PNG Export';
+
+    if ((await printingPanel.getByLabel(/title/i).count()) > 0) {
+        const titleInput = printingPanel.getByLabel(/title/i).first();
+        await expect(titleInput).toBeVisible();
+        await titleInput.fill(printTitle);
+        await expect(titleInput).toHaveValue(printTitle);
+    } else if ((await printingPanel.getByRole('textbox').count()) > 0) {
+        const titleInput = printingPanel.getByRole('textbox').first();
+        await expect(titleInput).toBeVisible();
+        await titleInput.fill(printTitle);
+        await expect(titleInput).toHaveValue(printTitle);
+    } else {
+        throw new Error('No title input found in the printing panel.');
+    }
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else if ((await printingPanel.getByLabel(/format/i).count()) > 0) {
+        const formatControl = printingPanel.getByLabel(/format/i).first();
+        await expect(formatControl).toBeVisible();
+        const tagName = await formatControl.evaluate((element) => element.tagName.toLowerCase());
+
+        if (tagName === 'select') {
+            try {
+                await formatControl.selectOption({ label: 'PNG' });
+            } catch {
+                try {
+                    await formatControl.selectOption({ value: 'png' });
+                } catch {
+                    await formatControl.selectOption({ value: 'image/png' });
+                }
+            }
+            await expect.poll(() => formatControl.inputValue()).toMatch(/png/i);
+        } else {
+            await formatControl.click();
+            const pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            if ((await pngOption.count()) > 0) {
+                await pngOption.click();
+            } else {
+                const pngMenuItem = page.getByRole('menuitemradio', { name: 'PNG', exact: true });
+                if ((await pngMenuItem.count()) > 0) {
+                    await pngMenuItem.click({ force: true });
+                } else {
+                    const pngButton = page.getByRole('button', { name: 'PNG', exact: true });
+                    await expect(pngButton).toBeVisible();
+                    await pngButton.click();
+                }
+            }
+        }
+    } else if ((await printingPanel.getByRole('combobox').count()) > 0) {
+        const formatSelect = printingPanel.getByRole('combobox').first();
+        await expect(formatSelect).toBeVisible();
+        const tagName = await formatSelect.evaluate((element) => element.tagName.toLowerCase());
+
+        if (tagName === 'select') {
+            try {
+                await formatSelect.selectOption({ label: 'PNG' });
+            } catch {
+                try {
+                    await formatSelect.selectOption({ value: 'png' });
+                } catch {
+                    await formatSelect.selectOption({ value: 'image/png' });
+                }
+            }
+            await expect.poll(() => formatSelect.inputValue()).toMatch(/png/i);
+        } else {
+            await formatSelect.click();
+            const pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            if ((await pngOption.count()) > 0) {
+                await pngOption.click();
+            } else {
+                const pngMenuItem = page.getByRole('menuitemradio', { name: 'PNG', exact: true });
+                if ((await pngMenuItem.count()) > 0) {
+                    await pngMenuItem.click({ force: true });
+                } else {
+                    const pngButton = page.getByRole('button', { name: 'PNG', exact: true });
+                    await expect(pngButton).toBeVisible();
+                    await pngButton.click();
+                }
+            }
+        }
+    } else {
+        throw new Error('No file format control found in the printing panel.');
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: 'Export', exact: true });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: 'Print', exact: true });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print|download/i }).first();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename).toMatch(/\.png$/i);
+
+    const tempDir = await mkdtemp(join(tmpdir(), 'playwright-print-'));
+    const downloadPath = join(tempDir, suggestedFilename || 'map-export.png');
+    await download.saveAs(downloadPath);
+
+    const fileContent = await readFile(downloadPath);
+    expect(fileContent.length).toBeGreaterThan(100);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

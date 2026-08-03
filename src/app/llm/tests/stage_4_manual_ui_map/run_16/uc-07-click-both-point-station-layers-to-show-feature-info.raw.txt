@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const uviSection = page.getByTestId('uvi-station-section');
+    const uviInfo = page.getByTestId('uvi-station-info');
+    const eucosSection = page.getByTestId('eucos-station-section');
+    const eucosInfo = page.getByTestId('eucos-station-info');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+
+    await expect.poll(async () => (await getMapZoomLevel(page)) !== undefined).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+    let clickPosition: { x: number; y: number } | undefined;
+
+    await expect
+        .poll(async () => {
+            const pixelInfo = await page.evaluate((coordinate) => {
+                const map = (globalThis as { __openPioneerMap?: { olMap?: { getPixelFromCoordinate?: (coord: number[]) => number[] | undefined; getSize?: () => number[] | undefined } } }).__openPioneerMap;
+                const pixel = map?.olMap?.getPixelFromCoordinate?.(coordinate);
+                const size = map?.olMap?.getSize?.();
+
+                if (!Array.isArray(pixel) || pixel.length < 2 || !Array.isArray(size) || size.length < 2) {
+                    return undefined;
+                }
+
+                return {
+                    x: Math.round(pixel[0]),
+                    y: Math.round(pixel[1]),
+                    width: size[0],
+                    height: size[1]
+                };
+            }, targetCoordinate);
+
+            if (!pixelInfo) {
+                return false;
+            }
+
+            const withinViewport =
+                pixelInfo.x >= 0 &&
+                pixelInfo.y >= 0 &&
+                pixelInfo.x < pixelInfo.width &&
+                pixelInfo.y < pixelInfo.height;
+
+            if (withinViewport) {
+                clickPosition = { x: pixelInfo.x, y: pixelInfo.y };
+            }
+
+            return withinViewport;
+        })
+        .toBe(true);
+
+    const featureInfoResponsePromise = page
+        .waitForResponse((response) => response.url().toLowerCase().includes('getfeatureinfo') && response.ok())
+        .catch(() => null);
+
+    await mapContainer.click({ position: clickPosition! });
+    await featureInfoResponsePromise;
+
+    await expect(uviSection).toBeVisible();
+    await expect(uviInfo).toBeVisible();
+    await expect(uviInfo).toContainText(/\S/);
+
+    await expect(eucosSection).toBeVisible();
+    await expect(eucosInfo).toBeVisible();
+    await expect(eucosInfo).toContainText(/\S/);
+});

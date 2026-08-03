@@ -1,0 +1,121 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect
+        .poll(async () => {
+            const activeBaseLayer = await getActiveBaseLayerTitle(page);
+            return (
+                activeBaseLayer !== undefined &&
+                ['Carto Light', 'Carto Dark', 'OpenStreetMap'].includes(activeBaseLayer)
+            );
+        })
+        .toBe(true);
+
+    await expect
+        .poll(async () => {
+            const renderedOverlays = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return renderedOverlays.some(Boolean);
+        })
+        .toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    const printingRoot = page.getByTestId('printing');
+    await expect(printingRoot).toBeVisible();
+
+    const printTitle = 'Current weather map';
+
+    let titleInput = printingRoot.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingRoot.getByRole('textbox').first();
+    }
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingRoot.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printingRoot.getByRole('combobox', { name: /format|file/i });
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingRoot.getByRole('combobox').first();
+        }
+
+        if ((await formatControl.count()) > 0) {
+            const tagName = await formatControl.evaluate((element) => element.tagName.toLowerCase());
+            if (tagName === 'select') {
+                await formatControl.selectOption({ label: 'PNG' });
+                await expect(formatControl).toHaveValue(/png/i);
+            } else {
+                await formatControl.click();
+
+                let pngOption = page.getByRole('option', { name: /^png$/i });
+                if ((await pngOption.count()) === 0) {
+                    pngOption = page.getByRole('menuitemradio', { name: /^png$/i });
+                }
+
+                await expect(pngOption.first()).toBeVisible();
+                await pngOption.first().click();
+            }
+        } else {
+            const pngButton = printingRoot.getByRole('button', { name: /^png$/i }).first();
+            await expect(pngButton).toBeVisible();
+            await pngButton.click();
+        }
+    }
+
+    let exportButton = printingRoot.getByRole('button', { name: /^export/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingRoot.getByRole('button', { name: /^print$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingRoot.getByRole('button', { name: /^download/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingRoot.getByRole('button', { name: /create|generate/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print|download|create|generate/i }).first();
+    }
+
+    await expect(exportButton.first()).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.first().click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileBuffer = await readFile(downloadPath);
+        const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+        expect(fileBuffer.byteLength).toBeGreaterThan(1000);
+        expect(fileBuffer.subarray(0, 8).equals(pngSignature)).toBe(true);
+    }
+});

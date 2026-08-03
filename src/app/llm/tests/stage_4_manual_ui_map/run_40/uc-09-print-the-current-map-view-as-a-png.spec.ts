@@ -1,0 +1,168 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { mkdtemp, stat } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printing = page.getByTestId('printing');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+
+    await expect
+        .poll(() => getActiveBaseLayerTitle(page))
+        .toMatch(/^(Carto Light|Carto Dark|OpenStreetMap)$/);
+
+    await expect
+        .poll(async () => {
+            const overlayTitles = [
+                'UV-Index',
+                'Temperature',
+                'Precipitation',
+                'Clouds',
+                'UV-Index Stations',
+                'EUCOS Ground Stations'
+            ];
+
+            const renderedStates = await Promise.all(
+                overlayTitles.map((title) => isLayerRendered(page, title))
+            );
+
+            return renderedStates.filter(Boolean).length;
+        })
+        .toBeGreaterThan(0);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printing).toBeVisible();
+
+    const printTitle = 'Current Weather Map';
+
+    let titleInput = printing.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printing.getByLabel(/title/i);
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printing.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    let pngRadio = printing.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printing.getByRole('combobox', { name: /format/i });
+        if ((await formatControl.count()) === 0) {
+            formatControl = printing.getByLabel(/format/i);
+        }
+        if ((await formatControl.count()) === 0) {
+            formatControl = printing.getByRole('combobox').first();
+        }
+
+        await expect(formatControl).toBeVisible();
+
+        const tagName = await formatControl.evaluate((element) => element.tagName);
+        if (tagName === 'SELECT') {
+            const pngOptionValue = await formatControl.evaluate((element) => {
+                const select = element as HTMLSelectElement;
+                const option = Array.from(select.options).find(
+                    (entry) =>
+                        /png/i.test(entry.label) ||
+                        /png/i.test(entry.text) ||
+                        /png/i.test(entry.value)
+                );
+                return option?.value;
+            });
+
+            expect(pngOptionValue).toBeTruthy();
+            await formatControl.selectOption(pngOptionValue!);
+
+            await expect
+                .poll(() =>
+                    formatControl.evaluate((element) => {
+                        const select = element as HTMLSelectElement;
+                        const selected = select.options[select.selectedIndex];
+                        return selected?.text ?? selected?.label ?? '';
+                    })
+                )
+                .toMatch(/png/i);
+        } else {
+            await formatControl.click();
+
+            let pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            if ((await pngOption.count()) === 0) {
+                pngOption = page.getByRole('menuitemradio', { name: 'PNG', exact: true });
+            }
+
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+            await expect(formatControl).toContainText(/png/i);
+        }
+    }
+
+    let exportButton = printing.getByRole('button', { name: 'Export', exact: true });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button', { name: 'Print', exact: true });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button', { name: 'Download', exact: true });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button', { name: /export|print|download/i }).first();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+    await expect(download.failure()).resolves.toBeNull();
+
+    const downloadDir = await mkdtemp(join(tmpdir(), 'playwright-print-'));
+    const downloadPath = join(downloadDir, download.suggestedFilename());
+
+    await download.saveAs(downloadPath);
+
+    const downloadedFile = await stat(downloadPath);
+    expect(downloadedFile.size).toBeGreaterThan(0);
+
+    await expect(scaleBar).toBeVisible();
+
+    await expect
+        .poll(async () => {
+            const overlayTitles = [
+                'UV-Index',
+                'Temperature',
+                'Precipitation',
+                'Clouds',
+                'UV-Index Stations',
+                'EUCOS Ground Stations'
+            ];
+
+            const renderedStates = await Promise.all(
+                overlayTitles.map((title) => isLayerRendered(page, title))
+            );
+
+            return renderedStates.filter(Boolean).length;
+        })
+        .toBeGreaterThan(0);
+});

@@ -1,0 +1,157 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect
+        .poll(async () => (await getActiveBaseLayerTitle(page)) ?? '')
+        .toMatch(/.+/);
+
+    await expect
+        .poll(async () => {
+            const visibleLayers = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations'),
+                isLayerRendered(page, 'UV-Index'),
+                isLayerRendered(page, 'Precipitation'),
+                isLayerRendered(page, 'Clouds')
+            ]);
+            return visibleLayers.some((visible) => visible);
+        })
+        .toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    const printingRoot = page.getByTestId('printing');
+    await expect(printingRoot).toBeVisible();
+
+    const printTitle = 'Current weather map';
+
+    let titleInput = printingRoot.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingRoot.getByLabel(/title/i);
+    }
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingRoot.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printingRoot.getByRole('combobox', { name: /format/i });
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingRoot.getByLabel(/format/i);
+        }
+
+        if ((await formatControl.count()) > 0) {
+            await expect(formatControl).toBeVisible();
+
+            let formatSelected = false;
+
+            for (const option of ['PNG', 'png', 'image/png', '.png']) {
+                try {
+                    await formatControl.selectOption(option);
+                    formatSelected = true;
+                    break;
+                } catch {
+                    // ignore and try next strategy
+                }
+            }
+
+            if (!formatSelected) {
+                try {
+                    await formatControl.selectOption({ label: 'PNG' });
+                    formatSelected = true;
+                } catch {
+                    // ignore and try next strategy
+                }
+            }
+
+            if (!formatSelected) {
+                await formatControl.click();
+
+                const pngOption = page.getByRole('option', { name: /^png$/i });
+                if ((await pngOption.count()) > 0) {
+                    await pngOption.click();
+                    formatSelected = true;
+                }
+            }
+
+            if (!formatSelected) {
+                const pngMenuItem = page.getByRole('menuitemradio', { name: /^png$/i });
+                if ((await pngMenuItem.count()) > 0) {
+                    await pngMenuItem.click({ force: true });
+                    formatSelected = true;
+                }
+            }
+
+            expect(formatSelected).toBe(true);
+        } else {
+            let pngButton = printingRoot.getByRole('button', { name: /^png$/i });
+            if ((await pngButton.count()) === 0) {
+                pngButton = printingRoot.getByText(/^png$/i);
+            }
+            await expect(pngButton).toBeVisible();
+            await pngButton.click();
+        }
+    }
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect
+        .poll(async () => {
+            const visibleLayers = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations'),
+                isLayerRendered(page, 'UV-Index'),
+                isLayerRendered(page, 'Precipitation'),
+                isLayerRendered(page, 'Clouds')
+            ]);
+            return visibleLayers.some((visible) => visible);
+        })
+        .toBe(true);
+
+    const downloadPromise = page.waitForEvent('download');
+
+    let exportButton = printingRoot.getByRole('button', { name: /^(print|export|download)$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingRoot.getByRole('button', { name: /(print|export|download)/i });
+    }
+    await expect(exportButton).toBeVisible();
+    await exportButton.click();
+
+    const download = await downloadPromise;
+    const failure = await download.failure();
+    expect(failure).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const stream = await download.createReadStream();
+    expect(stream).not.toBeNull();
+    if (!stream) {
+        throw new Error('Expected a downloadable PNG file stream, but no stream was available.');
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+
+    const fileBytes = Buffer.concat(chunks);
+    expect(fileBytes.length).toBeGreaterThan(8);
+    expect(fileBytes.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+});

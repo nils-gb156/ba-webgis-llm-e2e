@@ -1,0 +1,127 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printing = page.getByTestId('printing');
+    const scaleBar = page.getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(printToggle).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const rendered = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return rendered.some(Boolean);
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printing).toBeVisible();
+
+    let titleInput = printing.getByLabel(/title/i);
+    if ((await titleInput.count()) === 0) {
+        titleInput = printing.getByRole('textbox', { name: /title/i });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printing.getByRole('textbox').first();
+    }
+
+    const printTitle = 'Current weather map';
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printing.getByRole('radio', { name: /png/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printing.getByLabel(/format/i);
+        if ((await formatControl.count()) === 0) {
+            formatControl = printing.getByRole('combobox', { name: /format/i });
+        }
+        if ((await formatControl.count()) === 0) {
+            formatControl = printing.getByRole('combobox').first();
+        }
+
+        await expect(formatControl).toBeVisible();
+
+        const tagName = (await formatControl.evaluate((el) => el.tagName)).toLowerCase();
+        if (tagName === 'select') {
+            const pngValue = await formatControl.evaluate((el) => {
+                const select = el as HTMLSelectElement;
+                const option = Array.from(select.options).find(
+                    (entry) =>
+                        /png/i.test(entry.label) ||
+                        /png/i.test(entry.text) ||
+                        /png/i.test(entry.value)
+                );
+                return option?.value;
+            });
+
+            expect(pngValue).toBeTruthy();
+            await formatControl.selectOption(pngValue!);
+            await expect.poll(() => formatControl.inputValue()).toMatch(/png/i);
+        } else {
+            await formatControl.click();
+            const pngOption = page.getByRole('option', { name: /png/i }).first();
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+        }
+    }
+
+    let exportButton = printing.getByRole('button', { name: /export/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button', { name: /print/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button').last();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    await expect.poll(() => download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    const fileContent = await readFile(downloadPath);
+    expect(fileContent.length).toBeGreaterThan(1024);
+    expect(fileContent.subarray(0, 8)).toEqual(
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    );
+
+    await expect(scaleBar).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const rendered = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return rendered.some(Boolean);
+        })
+        .toBe(true);
+});

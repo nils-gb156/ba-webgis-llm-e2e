@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+
+    await expect.poll(() => getMapCenter(page)).toBeDefined();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const uviSection = page.getByTestId('uvi-station-section');
+    const uviInfo = page.getByTestId('uvi-station-info');
+    const eucosSection = page.getByTestId('eucos-station-section');
+    const eucosInfo = page.getByTestId('eucos-station-info');
+
+    await expect(uviSection).toBeHidden();
+    await expect(uviInfo).toBeHidden();
+    await expect(eucosSection).toBeHidden();
+    await expect(eucosInfo).toBeHidden();
+
+    const clickPixel = await page.evaluate(() => {
+        const map = (globalThis as { __openPioneerMap?: { olMap: { getPixelFromCoordinate: (coordinate: number[]) => number[] | undefined } } })
+            .__openPioneerMap;
+        const pixel = map?.olMap.getPixelFromCoordinate([1188692.84, 6767643.28]);
+        if (!pixel || pixel.length < 2) {
+            return undefined;
+        }
+        return { x: pixel[0], y: pixel[1] };
+    });
+
+    expect(clickPixel).toBeDefined();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    expect(clickPixel!.x).toBeGreaterThanOrEqual(0);
+    expect(clickPixel!.y).toBeGreaterThanOrEqual(0);
+    expect(clickPixel!.x).toBeLessThanOrEqual(mapBox!.width);
+    expect(clickPixel!.y).toBeLessThanOrEqual(mapBox!.height);
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(clickPixel!.x),
+            y: Math.round(clickPixel!.y)
+        }
+    });
+
+    await expect(uviSection).toBeVisible();
+    await expect(uviInfo).toBeVisible();
+    await expect(eucosSection).toBeVisible();
+    await expect(eucosInfo).toBeVisible();
+});

@@ -1,0 +1,98 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printingContent = printingPanel.getByTestId('printing');
+    const scaleBar = page.getByTestId('footer').getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingContent).toBeVisible();
+
+    let titleInput = printingPanel.getByLabel(/title/i);
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+
+    const printTitle = 'Current Weather Map';
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const formatCombobox = printingPanel.getByRole('combobox', { name: /format/i });
+        if ((await formatCombobox.count()) > 0) {
+            await formatCombobox.selectOption({ label: 'PNG' });
+            await expect.poll(() => formatCombobox.inputValue()).toMatch(/png/i);
+        } else {
+            const formatButton = printingPanel.getByRole('button', { name: /format/i });
+            await expect(formatButton).toBeVisible();
+            await formatButton.click();
+
+            const pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            if ((await pngOption.count()) > 0) {
+                await pngOption.click();
+            } else {
+                const pngMenuItem = page.getByRole('menuitemradio', { name: 'PNG', exact: true });
+                await expect(pngMenuItem).toBeVisible();
+                await pngMenuItem.click();
+            }
+
+            await expect(formatButton).toContainText('PNG');
+        }
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: /^export$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /^print$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /^download$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /print map/i });
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileBytes = await readFile(downloadPath!);
+    expect(fileBytes.length).toBeGreaterThan(1024);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

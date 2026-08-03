@@ -1,0 +1,143 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printing = page.getByTestId('printing');
+    const scaleBar = page.getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(printToggle).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const renderedStates = await Promise.all(
+                ['Temperature', 'UV-Index Stations', 'EUCOS Ground Stations'].map((title) =>
+                    isLayerRendered(page, title)
+                )
+            );
+            return renderedStates.some(Boolean);
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printing).toBeVisible();
+
+    const printTitle = 'E2E PNG Map Export';
+    const labeledTitleInput = printing.getByLabel(/title/i);
+    const titleInput =
+        (await labeledTitleInput.count()) > 0
+            ? labeledTitleInput.first()
+            : printing.getByRole('textbox').first();
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printing.getByRole('radio', { name: /png/i });
+    const pngButton = printing.getByRole('button', { name: /^png$/i });
+    const labeledFormatCombobox = printing.getByLabel(/format/i);
+    const anyCombobox = printing.getByRole('combobox');
+
+    if ((await pngRadio.count()) > 0) {
+        const pngFormatRadio = pngRadio.first();
+        await expect(pngFormatRadio).toBeVisible();
+        await pngFormatRadio.click({ force: true });
+        await expect(pngFormatRadio).toBeChecked();
+    } else if ((await pngButton.count()) > 0) {
+        const pngFormatButton = pngButton.first();
+        await expect(pngFormatButton).toBeVisible();
+        await pngFormatButton.click();
+    } else if ((await labeledFormatCombobox.count()) > 0 || (await anyCombobox.count()) > 0) {
+        const formatControl =
+            (await labeledFormatCombobox.count()) > 0
+                ? labeledFormatCombobox.first()
+                : anyCombobox.first();
+
+        await expect(formatControl).toBeVisible();
+
+        const tagName = await formatControl.evaluate((element) => element.tagName.toLowerCase());
+
+        if (tagName === 'select') {
+            const pngValue = await formatControl.evaluate((element) => {
+                const select = element as HTMLSelectElement;
+                const pngOption = Array.from(select.options).find((option) =>
+                    /png/i.test(`${option.label} ${option.text} ${option.value}`)
+                );
+                return pngOption?.value ?? null;
+            });
+
+            expect(pngValue, 'A PNG option should be available in the format select.').not.toBeNull();
+
+            if (pngValue !== null) {
+                await formatControl.selectOption(pngValue);
+                await expect
+                    .poll(() =>
+                        formatControl.evaluate((element) => {
+                            const select = element as HTMLSelectElement;
+                            return select.selectedOptions[0]?.text ?? select.value;
+                        })
+                    )
+                    .toMatch(/png/i);
+            }
+        } else {
+            await formatControl.click();
+
+            const pngOption = page.getByRole('option', { name: /png/i });
+            if ((await pngOption.count()) > 0) {
+                await pngOption.first().click();
+            } else {
+                expect(false, 'Could not find a PNG option in the opened format chooser.').toBe(true);
+            }
+        }
+    } else {
+        expect(false, 'Could not find a file format control for selecting PNG.').toBe(true);
+    }
+
+    const exactExportButton = printing.getByRole('button', { name: /^(export|print)$/i });
+    const fallbackExportButton = printing.getByRole('button', { name: /export|print/i });
+    const exportButton =
+        (await exactExportButton.count()) > 0 ? exactExportButton.first() : fallbackExportButton.first();
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+    const savedFilePath = testInfo.outputPath(suggestedFilename);
+    await download.saveAs(savedFilePath);
+
+    const downloadedFile = await readFile(savedFilePath);
+    expect(downloadedFile.length).toBeGreaterThan(8);
+    expect(Array.from(downloadedFile.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    await expect(scaleBar).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const renderedStates = await Promise.all(
+                ['Temperature', 'UV-Index Stations', 'EUCOS Ground Stations'].map((title) =>
+                    isLayerRendered(page, title)
+                )
+            );
+            return renderedStates.some(Boolean);
+        })
+        .toBe(true);
+});

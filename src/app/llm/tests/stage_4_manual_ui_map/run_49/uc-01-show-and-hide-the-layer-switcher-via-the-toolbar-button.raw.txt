@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 1: Show and hide the layer switcher via the toolbar button', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    const mapContainer = page.getByTestId('map-container');
+    const toolbar = page.getByTestId('map-toolbar');
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const layerSwitcherToggle = page.getByTestId('layer-switcher-toggle');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(toolbar).toBeVisible();
+    await expect(layerSwitcherToggle).toBeVisible();
+
+    await expect(layerSwitcher).toBeVisible();
+
+    if (await layerSwitcher.isVisible()) {
+        await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeHidden();
+
+    if (!(await layerSwitcher.isVisible())) {
+        await layerSwitcherToggle.click();
+    }
+    await expect(layerSwitcher).toBeVisible();
+});

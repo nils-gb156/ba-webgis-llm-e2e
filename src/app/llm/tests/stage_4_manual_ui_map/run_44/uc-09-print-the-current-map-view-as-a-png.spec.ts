@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'Weather map export';
+
+    const titledTextbox = printingPanel.getByRole('textbox', { name: /title/i });
+    const titleInput =
+        (await titledTextbox.count()) > 0
+            ? titledTextbox
+            : printingPanel.getByRole('textbox').first();
+
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /^PNG$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const formatCombobox = printingPanel.getByRole('combobox', { name: /format/i });
+        if ((await formatCombobox.count()) > 0) {
+            try {
+                await formatCombobox.selectOption({ label: 'PNG' });
+            } catch {
+                await formatCombobox.selectOption('png');
+            }
+        } else {
+            await printingPanel.getByRole('button', { name: /^PNG$/i }).click();
+        }
+    }
+
+    const exportButton = printingPanel.getByRole('button', { name: /print|export/i }).first();
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileBuffer = await readFile(downloadPath);
+        expect(fileBuffer.length).toBeGreaterThan(1000);
+        expect(fileBuffer.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+    }
+});

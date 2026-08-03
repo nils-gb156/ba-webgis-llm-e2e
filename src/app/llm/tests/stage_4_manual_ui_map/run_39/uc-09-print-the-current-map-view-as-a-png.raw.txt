@@ -1,0 +1,97 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import {
+    getActiveBaseLayerTitle,
+    isLayerRendered
+} from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printingContent = page.getByTestId('printing');
+    const scaleBar = page.getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toMatch(
+        /^(Carto Light|Carto Dark|OpenStreetMap)$/
+    );
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingContent).toBeVisible();
+
+    const title = 'Current Map View';
+    let titleInput = printingPanel.getByLabel(/title/i);
+    if (!(await titleInput.isVisible())) {
+        titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    }
+    if (!(await titleInput.isVisible())) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(title);
+    await expect(titleInput).toHaveValue(title);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /png/i });
+    if (await pngRadio.isVisible()) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatSelect = printingPanel.getByRole('combobox', { name: /format|file format/i });
+        if (!(await formatSelect.isVisible())) {
+            formatSelect = printingPanel.getByRole('combobox').first();
+        }
+
+        await expect(formatSelect).toBeVisible();
+        await formatSelect.selectOption({ label: 'PNG' });
+        await expect(formatSelect).toHaveValue(/png/i);
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: /^Export$/i });
+    if (!(await exportButton.isVisible())) {
+        exportButton = printingPanel.getByRole('button', { name: /^Print$/i });
+    }
+    if (!(await exportButton.isVisible())) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print/i }).last();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    if (!downloadPath) {
+        throw new Error('Download path is not available.');
+    }
+
+    const fileBuffer = await readFile(downloadPath);
+    expect(fileBuffer.byteLength).toBeGreaterThan(8);
+    expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    await expect(scaleBar).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toMatch(
+        /^(Carto Light|Carto Dark|OpenStreetMap)$/
+    );
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

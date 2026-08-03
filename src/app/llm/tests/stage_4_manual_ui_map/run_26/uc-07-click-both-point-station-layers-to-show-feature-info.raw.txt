@@ -1,0 +1,77 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+
+    await expect
+        .poll(async () => {
+            const zoom = await getMapZoomLevel(page);
+            return zoom === undefined ? 'undefined' : String(zoom);
+        })
+        .toMatch(/^-?\d+(\.\d+)?$/);
+
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const stationCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const getClickPosition = async (): Promise<{ x: number; y: number } | undefined> =>
+        page.evaluate((coordinate) => {
+            const map = (globalThis as any).__openPioneerMap;
+            const pixel = map?.olMap?.getPixelFromCoordinate?.(coordinate);
+            const size = map?.olMap?.getSize?.();
+
+            if (!Array.isArray(pixel) || pixel.length < 2) {
+                return undefined;
+            }
+            if (!Array.isArray(size) || size.length < 2) {
+                return undefined;
+            }
+
+            const [x, y] = pixel;
+            if (typeof x !== 'number' || typeof y !== 'number') {
+                return undefined;
+            }
+            if (x < 0 || y < 0 || x > size[0] || y > size[1]) {
+                return undefined;
+            }
+
+            return { x: Math.round(x), y: Math.round(y) };
+        }, stationCoordinate);
+
+    await expect
+        .poll(async () => {
+            const position = await getClickPosition();
+            return position ? `${position.x},${position.y}` : 'undefined';
+        })
+        .toMatch(/^\d+,\d+$/);
+
+    const clickPosition = await getClickPosition();
+    expect(clickPosition).toBeDefined();
+
+    await mapContainer.click({ position: clickPosition! });
+
+    const uviSection = infoPanel.getByTestId('uvi-station-section');
+    const uviInfo = infoPanel.getByTestId('uvi-station-info');
+    const eucosSection = infoPanel.getByTestId('eucos-station-section');
+    const eucosInfo = infoPanel.getByTestId('eucos-station-info');
+
+    await expect(uviSection).toBeVisible();
+    await expect(uviInfo).toBeVisible();
+    await expect(uviInfo).toContainText(/\S+/);
+
+    await expect(eucosSection).toBeVisible();
+    await expect(eucosInfo).toBeVisible();
+    await expect(eucosInfo).toContainText(/\S+/);
+});

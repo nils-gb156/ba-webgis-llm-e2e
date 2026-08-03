@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import * as fs from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printingContent = page.getByTestId('printing');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const visibleStates = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return visibleStates.some(Boolean);
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        const pressed = await printToggle.getAttribute('aria-pressed');
+        if (pressed === 'true') {
+            throw new Error('The print toggle is already pressed, but the printing panel is not visible.');
+        }
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingContent).toBeVisible();
+
+    const titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    const printTitle = 'Current map view';
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /^png$/i });
+    const formatCombobox = printingPanel.getByRole('combobox', { name: /format/i });
+    const pngButton = printingPanel.getByRole('button', { name: /^png$/i });
+
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else if ((await formatCombobox.count()) > 0) {
+        await expect(formatCombobox).toBeVisible();
+        const tagName = await formatCombobox.evaluate((element) => element.tagName.toLowerCase());
+        if (tagName === 'select') {
+            await formatCombobox.selectOption({ label: 'PNG' });
+            await expect(formatCombobox).toHaveValue(/png/i);
+        } else {
+            await formatCombobox.click();
+            const pngOption = page.getByRole('option', { name: /^png$/i });
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+        }
+    } else {
+        await expect(pngButton).toBeVisible();
+        await pngButton.click();
+    }
+
+    await expect(scaleBar).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const visibleStates = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return visibleStates.some(Boolean);
+        })
+        .toBe(true);
+
+    const exportButtonCandidates = [
+        printingPanel.getByRole('button', { name: /^export$/i }),
+        printingPanel.getByRole('button', { name: /^print$/i }),
+        printingPanel.getByRole('button', { name: /^export map$/i }),
+        printingPanel.getByRole('button', { name: /^print map$/i }),
+        printingPanel.getByRole('button', { name: /^download$/i })
+    ];
+
+    let exportButton = exportButtonCandidates[0];
+    let exportButtonFound = false;
+    for (const candidate of exportButtonCandidates) {
+        if ((await candidate.count()) > 0) {
+            exportButton = candidate;
+            exportButtonFound = true;
+            break;
+        }
+    }
+
+    if (!exportButtonFound) {
+        throw new Error('Could not find an export/print button in the printing panel.');
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(() => download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = testInfo.outputPath(download.suggestedFilename());
+    await download.saveAs(downloadPath);
+
+    const fileContent = await fs.readFile(downloadPath);
+    expect(fileContent.length).toBeGreaterThan(8);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

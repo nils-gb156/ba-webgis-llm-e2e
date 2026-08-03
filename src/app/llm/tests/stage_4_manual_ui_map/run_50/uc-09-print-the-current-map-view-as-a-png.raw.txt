@@ -1,0 +1,154 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+    const selectPngFromPopup = async () => {
+        const option = page.getByRole('option', { name: /png/i }).first();
+        try {
+            await expect(option).toBeVisible({ timeout: 2000 });
+            await option.click();
+            return;
+        } catch {
+            // fall through
+        }
+
+        const menuitemRadio = page.getByRole('menuitemradio', { name: /png/i }).first();
+        try {
+            await expect(menuitemRadio).toBeVisible({ timeout: 2000 });
+            await menuitemRadio.click();
+            return;
+        } catch {
+            // fall through
+        }
+
+        const radio = page.getByRole('radio', { name: /png/i }).first();
+        await expect(radio).toBeVisible();
+        await radio.click({ force: true });
+        await expect(radio).toBeChecked();
+    };
+
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'E2E PNG Map Export';
+
+    let titleInput = printingPanel.getByLabel(/title/i);
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox');
+    }
+
+    await expect(titleInput.first()).toBeVisible();
+    await titleInput.first().fill(printTitle);
+    await expect(titleInput.first()).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /png/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.first().click({ force: true });
+        await expect(pngRadio.first()).toBeChecked();
+    } else {
+        let formatControl = printingPanel.getByLabel(/format/i);
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingPanel.getByRole('combobox', { name: /format/i });
+        }
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingPanel.getByRole('combobox');
+        }
+
+        if ((await formatControl.count()) > 0) {
+            const formatWidget = formatControl.first();
+            await expect(formatWidget).toBeVisible();
+
+            const tagName = await formatWidget.evaluate((el) => el.tagName.toLowerCase());
+            if (tagName === 'select') {
+                const pngValue = await formatWidget.evaluate((el) => {
+                    const select = el as HTMLSelectElement;
+                    const option = Array.from(select.options).find(
+                        (entry) =>
+                            /png/i.test(entry.label) ||
+                            /png/i.test(entry.text) ||
+                            /png/i.test(entry.value)
+                    );
+                    return option?.value;
+                });
+
+                expect(pngValue).toBeTruthy();
+                await formatWidget.selectOption(pngValue!);
+                await expect
+                    .poll(() =>
+                        formatWidget.evaluate((el) => {
+                            const select = el as HTMLSelectElement;
+                            const selectedOption = select.options[select.selectedIndex];
+                            return `${selectedOption?.text ?? ''} ${select.value}`.trim();
+                        })
+                    )
+                    .toMatch(/png/i);
+            } else {
+                await formatWidget.click();
+                await selectPngFromPopup();
+                await expect
+                    .poll(() =>
+                        formatWidget.evaluate((el) => {
+                            if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) {
+                                return `${el.value} ${el.textContent ?? ''}`.trim();
+                            }
+                            return (el.textContent ?? '').trim();
+                        })
+                    )
+                    .toMatch(/png/i);
+            }
+        } else {
+            const formatButton = printingPanel.getByRole('button', { name: /format/i }).first();
+            await expect(formatButton).toBeVisible();
+            await formatButton.click();
+            await selectPngFromPopup();
+            await expect
+                .poll(() => formatButton.evaluate((el) => (el.textContent ?? '').trim()))
+                .toMatch(/png/i);
+        }
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: /^(export|print|download)$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print|download/i });
+    }
+
+    await expect(exportButton.first()).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.first().click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const filePath = testInfo.outputPath(download.suggestedFilename());
+    await download.saveAs(filePath);
+
+    const fileContent = await readFile(filePath);
+    expect(fileContent.byteLength).toBeGreaterThan(8);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

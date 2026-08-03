@@ -1,0 +1,151 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const pickFirstExisting = async (candidates: Locator[], description: string): Promise<Locator> => {
+        for (const candidate of candidates) {
+            if ((await candidate.count()) > 0 && (await candidate.first().isVisible())) {
+                return candidate.first();
+            }
+        }
+        for (const candidate of candidates) {
+            if ((await candidate.count()) > 0) {
+                return candidate.first();
+            }
+        }
+        throw new Error(`Could not find ${description}`);
+    };
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(async () => (await getActiveBaseLayerTitle(page)) ?? '').toMatch(/\S+/);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    const printToggle = page.getByTestId('print-toggle');
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingPanel.getByTestId('printing')).toBeVisible();
+
+    const printingRoot = printingPanel.getByTestId('printing');
+    const printTitle = `Playwright PNG Export ${Date.now()}`;
+
+    const titleInput = await pickFirstExisting(
+        [
+            printingRoot.getByRole('textbox', { name: /^title$/i }),
+            printingRoot.getByRole('textbox', { name: /title/i }),
+            printingRoot.getByLabel(/^title$/i),
+            printingRoot.getByLabel(/title/i),
+            printingRoot.getByPlaceholder(/title/i),
+            printingRoot.getByRole('textbox')
+        ],
+        'print title input'
+    );
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+
+    const pngRadio = printingRoot.getByRole('radio', { name: 'PNG', exact: true });
+    const pngButton = printingRoot.getByRole('button', { name: 'PNG', exact: true });
+    const pngTab = printingRoot.getByRole('tab', { name: 'PNG', exact: true });
+
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.first().click({ force: true });
+        await expect(pngRadio.first()).toBeChecked();
+    } else if ((await pngButton.count()) > 0) {
+        await pngButton.first().click();
+    } else if ((await pngTab.count()) > 0) {
+        await pngTab.first().click();
+        await expect(pngTab.first()).toHaveAttribute('aria-selected', 'true');
+    } else {
+        const formatControl = await pickFirstExisting(
+            [
+                printingRoot.getByRole('combobox', { name: /^format$/i }),
+                printingRoot.getByRole('combobox', { name: /format/i }),
+                printingRoot.getByLabel(/^format$/i),
+                printingRoot.getByLabel(/format/i),
+                printingRoot.getByRole('combobox')
+            ],
+            'format selector'
+        );
+
+        await expect(formatControl).toBeVisible();
+
+        let pngSelected = false;
+
+        try {
+            await formatControl.selectOption({ label: 'PNG' });
+            pngSelected = true;
+        } catch {
+            // not a native <select> with label "PNG"
+        }
+
+        if (!pngSelected) {
+            try {
+                await formatControl.selectOption({ value: 'png' });
+                pngSelected = true;
+            } catch {
+                // not a native <select> with value "png"
+            }
+        }
+
+        if (!pngSelected) {
+            await formatControl.click();
+            const pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            await expect(pngOption.first()).toBeVisible();
+            await pngOption.first().click();
+            pngSelected = true;
+        }
+
+        expect(pngSelected).toBe(true);
+    }
+
+    const exportButton = await pickFirstExisting(
+        [
+            printingRoot.getByRole('button', { name: /^export$/i }),
+            printingRoot.getByRole('button', { name: /export/i }),
+            printingRoot.getByRole('button', { name: /^print$/i }),
+            printingRoot.getByRole('button', { name: /print/i }),
+            printingRoot.getByRole('button', { name: /^download$/i }),
+            printingRoot.getByRole('button', { name: /download/i }),
+            printingRoot.getByRole('button', { name: /^generate$/i }),
+            printingRoot.getByRole('button', { name: /generate/i })
+        ],
+        'export button'
+    );
+
+    await expect(exportButton).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(async () => (await getActiveBaseLayerTitle(page)) ?? '').toMatch(/\S+/);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const stream = await download.createReadStream();
+    expect(stream).not.toBeNull();
+
+    let fileBuffer = Buffer.alloc(0);
+    for await (const chunk of stream!) {
+        fileBuffer = Buffer.concat([fileBuffer, Buffer.from(chunk)]);
+    }
+
+    expect(fileBuffer.length).toBeGreaterThan(8);
+    expect(fileBuffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe(true);
+});

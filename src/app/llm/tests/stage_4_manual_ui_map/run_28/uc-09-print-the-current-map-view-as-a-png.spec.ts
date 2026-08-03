@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toMatch(
+        /^(Carto Light|Carto Dark|OpenStreetMap)$/
+    );
+
+    await expect
+        .poll(async () => {
+            const visibleOperationalLayers = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations'),
+                isLayerRendered(page, 'UV-Index'),
+                isLayerRendered(page, 'Precipitation'),
+                isLayerRendered(page, 'Clouds')
+            ]);
+            return visibleOperationalLayers.some(Boolean);
+        })
+        .toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    const printing = printingPanel.getByTestId('printing');
+    await expect(printing).toBeVisible();
+
+    const title = `E2E map export ${Date.now()}`;
+
+    let titleInput = printing.getByLabel('Title', { exact: true });
+    if (!(await titleInput.count())) {
+        titleInput = printing.getByRole('textbox', { name: /title/i });
+    }
+    if (!(await titleInput.count())) {
+        titleInput = printing.getByRole('textbox').first();
+    }
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(title);
+    await expect(titleInput).toHaveValue(title);
+
+    const pngRadio = printing.getByRole('radio', { name: 'PNG', exact: true });
+    if (await pngRadio.count()) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printing.getByLabel('Format', { exact: true });
+        if (!(await formatControl.count())) {
+            formatControl = printing.getByRole('combobox', { name: /format/i });
+        }
+        if (!(await formatControl.count())) {
+            formatControl = printing.getByRole('combobox').first();
+        }
+
+        await expect(formatControl).toBeVisible();
+
+        try {
+            await formatControl.selectOption({ label: 'PNG' });
+        } catch {
+            try {
+                await formatControl.selectOption('PNG');
+            } catch {
+                await formatControl.selectOption('png');
+            }
+        }
+
+        await expect.poll(async () => await formatControl.inputValue()).toMatch(/png/i);
+    }
+
+    let exportButton = printing.getByRole('button', { name: 'Export', exact: true });
+    if (!(await exportButton.count())) {
+        exportButton = printing.getByRole('button', { name: 'Print', exact: true });
+    }
+    if (!(await exportButton.count())) {
+        exportButton = printing.getByRole('button', { name: /export|print/i }).first();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename).toMatch(/\.png$/i);
+
+    const downloadPath = testInfo.outputPath(suggestedFilename);
+    await download.saveAs(downloadPath);
+
+    const fileBuffer = await readFile(downloadPath);
+    expect(fileBuffer.length).toBeGreaterThan(0);
+    expect(fileBuffer.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+});

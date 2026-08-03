@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const layerSwitcher = page.getByTestId('layer-switcher');
+  const infoPanel = page.getByTestId('info-panel');
+  const measurementPanel = page.getByTestId('measurement-panel');
+  const geocoderInput = page.getByTestId('geocoder-input');
+  const geocoderResults = page.getByTestId('geocoder-results');
+  const weatherForecast = page.getByTestId('weather-forecast');
+  const weatherForecastEntries = page.getByTestId('weather-forecast-entry');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(layerSwitcher).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect(geocoderInput).toBeVisible();
+  await expect(measurementPanel).toBeHidden();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    return Array.isArray(center) && center.length === 2;
+  }).toBe(true);
+
+  const temperatureCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Temperature', exact: true });
+  const precipitationCheckbox = layerSwitcher.getByRole('checkbox', { name: 'Precipitation', exact: true });
+
+  await expect(temperatureCheckbox).toBeChecked();
+  await expect(precipitationCheckbox).not.toBeChecked();
+
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+  await temperatureCheckbox.click({ force: true });
+  await expect(temperatureCheckbox).not.toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+  await precipitationCheckbox.click({ force: true });
+  await expect(precipitationCheckbox).toBeChecked();
+  await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+  const initialCenter = await getMapCenter(page);
+  expect(initialCenter).toBeDefined();
+  const initialCenterString = JSON.stringify(initialCenter);
+
+  await geocoderInput.click();
+  await geocoderInput.fill('Münster');
+  await expect(page.getByTestId('geocoder-clear-button')).toBeVisible();
+
+  await expect(geocoderResults).toBeVisible();
+  const firstResult = geocoderResults.getByTestId(/geocoder-result-item-/).first();
+  await expect(firstResult).toBeVisible();
+  await firstResult.click();
+
+  await expect.poll(async () => {
+    const center = await getMapCenter(page);
+    return Array.isArray(center) && JSON.stringify(center) !== initialCenterString;
+  }).toBe(true);
+
+  await expect(weatherForecast).toBeVisible();
+  await expect(weatherForecastEntries).toHaveCount(24);
+});

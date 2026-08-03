@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'E2E PNG Export';
+
+    let titleInput = printingPanel.getByLabel('Title', { exact: true });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox', { name: 'Title', exact: true });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByLabel(/title/i);
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await expect(pngRadio).toBeVisible();
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printingPanel.getByLabel('Format', { exact: true });
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingPanel.getByRole('combobox', { name: 'Format', exact: true });
+        }
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingPanel.getByLabel(/format/i);
+        }
+
+        await expect(formatControl).toBeVisible();
+
+        try {
+            await formatControl.selectOption({ label: 'PNG' });
+        } catch {
+            await formatControl.click();
+            const pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+        }
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: 'Export', exact: true });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: 'Print', exact: true });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print/i }).first();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    const failure = await download.failure();
+    expect(failure).toBeNull();
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileContent = await readFile(downloadPath);
+        expect(fileContent.length).toBeGreaterThan(0);
+        expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+    }
+});

@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('load');
+
+    const mapContainer = page.getByTestId('map-container');
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printingTool = page.getByTestId('printing');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toMatch(/^(Carto Light|Carto Dark|OpenStreetMap)$/);
+
+    await expect
+        .poll(async () => [
+            await isLayerRendered(page, 'UV-Index'),
+            await isLayerRendered(page, 'Temperature'),
+            await isLayerRendered(page, 'Precipitation'),
+            await isLayerRendered(page, 'Clouds'),
+            await isLayerRendered(page, 'UV-Index Stations'),
+            await isLayerRendered(page, 'EUCOS Ground Stations')
+        ])
+        .toContain(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingTool).toBeVisible();
+
+    let titleInput = printingTool.getByLabel(/title/i);
+    if (!(await titleInput.count())) {
+        titleInput = printingTool.getByRole('textbox', { name: /title/i });
+    }
+    if (!(await titleInput.count())) {
+        titleInput = printingTool.getByPlaceholder(/title/i);
+    }
+    if (!(await titleInput.count())) {
+        titleInput = printingTool.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Playwright PNG export');
+
+    let pngRadio = printingTool.getByRole('radio', { name: 'PNG', exact: true });
+    if (await pngRadio.count()) {
+        await expect(pngRadio).toBeVisible();
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatCombobox = printingTool.getByRole('combobox', { name: /format/i });
+        if (!(await formatCombobox.count())) {
+            formatCombobox = printingTool.getByRole('combobox').first();
+        }
+
+        await expect(formatCombobox).toBeVisible();
+
+        try {
+            await formatCombobox.selectOption({ label: 'PNG' });
+        } catch {
+            try {
+                await formatCombobox.selectOption('PNG');
+            } catch {
+                await formatCombobox.selectOption('png');
+            }
+        }
+
+        await expect(formatCombobox).toHaveValue(/png/i);
+    }
+
+    await expect(scaleBar).toBeVisible();
+
+    let exportButton = printingTool.getByRole('button', { name: /^Export$/i });
+    if (!(await exportButton.count())) {
+        exportButton = printingTool.getByRole('button', { name: /^Print$/i });
+    }
+    if (!(await exportButton.count())) {
+        exportButton = printingTool.getByRole('button', { name: /^Print Map$/i });
+    }
+    if (!(await exportButton.count())) {
+        exportButton = printingTool.getByRole('button', { name: /export|print/i }).last();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const tempDir = await mkdtemp(join(tmpdir(), 'playwright-print-'));
+    const filePath = join(tempDir, download.suggestedFilename());
+    await download.saveAs(filePath);
+
+    const fileBuffer = await readFile(filePath);
+    expect(fileBuffer.length).toBeGreaterThan(8);
+    expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+});

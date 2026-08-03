@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const baseMapSelector = layerSwitcher.getByRole('combobox');
+    await expect(baseMapSelector).toBeVisible();
+
+    const tagName = await baseMapSelector.evaluate((element) => element.tagName.toLowerCase());
+
+    if (tagName === 'select') {
+        await baseMapSelector.selectOption({ label: 'OpenStreetMap' });
+    } else {
+        await baseMapSelector.click();
+        await page.getByRole('option', { name: 'OpenStreetMap', exact: true }).click();
+    }
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+});

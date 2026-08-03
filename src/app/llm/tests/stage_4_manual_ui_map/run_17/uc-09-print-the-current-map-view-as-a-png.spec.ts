@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import {
+    getActiveBaseLayerTitle,
+    isLayerRendered
+} from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect
+        .poll(async () => (await getActiveBaseLayerTitle(page)) ?? '')
+        .toMatch(/^(Carto Light|Carto Dark|OpenStreetMap)$/);
+
+    await expect
+        .poll(async () => {
+            const visibleOperationalLayers = await Promise.all([
+                isLayerRendered(page, 'UV-Index'),
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'Precipitation'),
+                isLayerRendered(page, 'Clouds'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return visibleOperationalLayers.some(Boolean);
+        })
+        .toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    const printToggle = page.getByTestId('print-toggle');
+
+    if (!(await printingPanel.isVisible())) {
+        await expect(printToggle).toHaveAttribute('aria-pressed', /^(false)?$/);
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'Playwright PNG export';
+
+    let titleInput = printingPanel.getByLabel(/title/i);
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatControl = printingPanel.getByLabel(/format/i);
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingPanel.getByRole('combobox', { name: /format/i });
+        }
+        if ((await formatControl.count()) === 0) {
+            formatControl = printingPanel.getByRole('combobox').first();
+        }
+
+        await expect(formatControl).toBeVisible();
+        await formatControl.selectOption({ label: 'PNG' });
+        await expect.poll(() => formatControl.inputValue()).toMatch(/png/i);
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: /^(Export|Print)$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print/i }).first();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    if (!downloadPath) {
+        throw new Error('Expected the PNG export to be stored locally.');
+    }
+
+    const fileContent = await readFile(downloadPath);
+    expect(fileContent.byteLength).toBeGreaterThan(1024);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

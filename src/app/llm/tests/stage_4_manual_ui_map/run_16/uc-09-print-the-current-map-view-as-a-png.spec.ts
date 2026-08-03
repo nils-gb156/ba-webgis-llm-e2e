@@ -1,0 +1,128 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printingContent = page.getByTestId('printing');
+    const scaleBar = page.getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBeUndefined();
+
+    await expect
+        .poll(async () => {
+            const [temperature, uvIndexStations, eucosGroundStations] = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return temperature || uvIndexStations || eucosGroundStations;
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printingContent).toBeVisible();
+
+    const printTitle = 'Current map view PNG export';
+
+    let titleInput = printingContent.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingContent.getByRole('textbox').first();
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingContent.getByRole('radio', { name: /^png$/i });
+    const pngTab = printingContent.getByRole('tab', { name: /^png$/i });
+    const pngButton = printingContent.getByRole('button', { name: /^png$/i });
+    const labeledFormatCombobox = printingContent.getByRole('combobox', { name: /format/i });
+    const anyFormatCombobox = printingContent.getByRole('combobox');
+
+    if ((await pngRadio.count()) > 0) {
+        await expect(pngRadio).toBeVisible();
+        if (!(await pngRadio.isChecked())) {
+            await pngRadio.click({ force: true });
+        }
+        await expect(pngRadio).toBeChecked();
+    } else if ((await pngTab.count()) > 0) {
+        await expect(pngTab).toBeVisible();
+        await pngTab.click();
+        await expect(pngTab).toHaveAttribute('aria-selected', 'true');
+    } else if ((await labeledFormatCombobox.count()) > 0 || (await anyFormatCombobox.count()) > 0) {
+        const formatCombobox =
+            (await labeledFormatCombobox.count()) > 0
+                ? labeledFormatCombobox
+                : anyFormatCombobox.first();
+
+        await expect(formatCombobox).toBeVisible();
+
+        try {
+            await formatCombobox.selectOption({ label: 'PNG' });
+        } catch {
+            try {
+                await formatCombobox.selectOption({ value: 'png' });
+            } catch {
+                await formatCombobox.selectOption({ value: 'image/png' });
+            }
+        }
+
+        await expect(formatCombobox).toHaveValue(/png/i);
+    } else if ((await pngButton.count()) > 0) {
+        await expect(pngButton).toBeVisible();
+        await pngButton.click();
+    }
+
+    let exportButton = printingContent.getByRole('button', { name: /export|print/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingContent.getByRole('button').last();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const stream = await download.createReadStream();
+    expect(stream).not.toBeNull();
+
+    let downloadedBytes = 0;
+    await new Promise<void>((resolve, reject) => {
+        stream!.on('data', (chunk) => {
+            downloadedBytes += chunk.length;
+        });
+        stream!.on('end', resolve);
+        stream!.on('error', reject);
+    });
+
+    expect(downloadedBytes).toBeGreaterThan(0);
+});

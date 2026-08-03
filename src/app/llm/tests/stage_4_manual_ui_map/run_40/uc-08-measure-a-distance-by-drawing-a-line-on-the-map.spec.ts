@@ -1,0 +1,54 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementContent = page.getByTestId('measurement');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    await expect
+        .poll(async () => ((await getMapZoomLevel(page)) === undefined ? 'not-ready' : 'ready'))
+        .toBe('ready');
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Expected map container bounding box to be available.');
+    }
+
+    const point1 = {
+        x: Math.round(mapBox.width * 0.35),
+        y: Math.round(mapBox.height * 0.68)
+    };
+    const point2 = {
+        x: Math.round(mapBox.width * 0.5),
+        y: Math.round(mapBox.height * 0.58)
+    };
+    const point3 = {
+        x: Math.round(mapBox.width * 0.65),
+        y: Math.round(mapBox.height * 0.46)
+    };
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.dblclick({ position: point3 });
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toContainText(/\b\d[\d.,]*\s?(?:mm|cm|m|km)\b/i);
+});

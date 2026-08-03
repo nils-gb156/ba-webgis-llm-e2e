@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+
+    if (!(await infoPanel.isVisible())) {
+        await page.getByTestId('info-panel-toggle').click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if (await measurementPanel.isVisible()) {
+        await page.getByTestId('measurement-toggle').click();
+    }
+    await expect(measurementPanel).toBeHidden();
+
+    const ensureOperationalLayerActive = async (layerTitle: string) => {
+        if (!(await isLayerRendered(page, layerTitle))) {
+            const layerSwitcher = page.getByTestId('layer-switcher');
+            if (!(await layerSwitcher.isVisible())) {
+                await page.getByTestId('layer-switcher-toggle').click();
+            }
+            await expect(layerSwitcher).toBeVisible();
+
+            const checkbox = layerSwitcher.getByRole('checkbox', { name: layerTitle, exact: true });
+            await checkbox.click({ force: true });
+            await expect(checkbox).toBeChecked();
+        }
+
+        await expect.poll(() => isLayerRendered(page, layerTitle)).toBe(true);
+    };
+
+    await ensureOperationalLayerActive('UV-Index Stations');
+    await ensureOperationalLayerActive('EUCOS Ground Stations');
+
+    await page.getByTestId('initial-extent-button').click();
+
+    const stationCoordinate: [number, number] = [1188692.84, 6767643.28];
+    let clickPosition: { x: number; y: number } | undefined;
+
+    await expect
+        .poll(async () => {
+            const box = await mapContainer.boundingBox();
+            const pixel = await page.evaluate(([x, y]) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap: {
+                                getPixelFromCoordinate: (coordinate: [number, number]) => number[] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+                const result = map?.olMap.getPixelFromCoordinate([x, y]);
+                return Array.isArray(result) && result.length >= 2 ? [result[0], result[1]] : undefined;
+            }, stationCoordinate);
+
+            if (!box || !pixel) {
+                return false;
+            }
+
+            const roundedX = Math.round(pixel[0]);
+            const roundedY = Math.round(pixel[1]);
+            clickPosition = { x: roundedX, y: roundedY };
+
+            return (
+                Number.isFinite(roundedX) &&
+                Number.isFinite(roundedY) &&
+                roundedX >= 0 &&
+                roundedY >= 0 &&
+                roundedX <= box.width &&
+                roundedY <= box.height
+            );
+        })
+        .toBe(true);
+
+    expect(clickPosition).toBeDefined();
+    await mapContainer.click({ position: clickPosition! });
+
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    const uviStationInfo = page.getByTestId('uvi-station-info');
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+    const eucosStationInfo = page.getByTestId('eucos-station-info');
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(uviStationInfo).toBeVisible();
+    await expect(uviStationInfo).toContainText(/\S/);
+
+    await expect(eucosStationSection).toBeVisible();
+    await expect(eucosStationInfo).toBeVisible();
+    await expect(eucosStationInfo).toContainText(/\S/);
+});

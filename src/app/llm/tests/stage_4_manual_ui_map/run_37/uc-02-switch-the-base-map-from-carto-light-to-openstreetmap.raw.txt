@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from "../../../map-model-helpers";
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const selectOpenStreetMapOption = async () => {
+        const option = page.getByRole('option', { name: 'OpenStreetMap', exact: true });
+        if (await option.count()) {
+            await option.first().click();
+            return;
+        }
+
+        const menuItemRadio = page.getByRole('menuitemradio', { name: 'OpenStreetMap', exact: true });
+        if (await menuItemRadio.count()) {
+            await menuItemRadio.first().click();
+            return;
+        }
+
+        const radio = page.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+        if (await radio.count()) {
+            await radio.first().click({ force: true });
+            await expect(radio.first()).toBeChecked();
+            return;
+        }
+
+        await page.getByText('OpenStreetMap', { exact: true }).click();
+    };
+
+    const baseMapSelector = layerSwitcher.getByRole('combobox');
+    if ((await baseMapSelector.count()) > 0) {
+        const selector = baseMapSelector.first();
+        await expect(selector).toBeVisible();
+
+        const tagName = await selector.evaluate((element) => element.tagName);
+        if (tagName === 'SELECT') {
+            await selector.selectOption({ label: 'OpenStreetMap' });
+        } else {
+            await selector.click();
+            await selectOpenStreetMapOption();
+        }
+    } else {
+        const currentBaseMapButton = layerSwitcher.getByRole('button', { name: 'Carto Light', exact: true });
+        if ((await currentBaseMapButton.count()) > 0) {
+            await expect(currentBaseMapButton.first()).toBeVisible();
+            await currentBaseMapButton.first().click();
+        } else {
+            const buttons = layerSwitcher.getByRole('button');
+            await expect(buttons.first()).toBeVisible();
+            await buttons.first().click();
+        }
+
+        await selectOpenStreetMapOption();
+    }
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+});

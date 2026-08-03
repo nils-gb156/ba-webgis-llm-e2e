@@ -1,0 +1,106 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from "../../../map-model-helpers";
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }, testInfo) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const printToggle = page.getByTestId('print-toggle');
+    const printPanel = page.getByTestId('printing-panel');
+    const printing = printPanel.getByTestId('printing');
+    const scaleBar = page.getByTestId('scale-bar');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toMatch(/.+/);
+
+    await expect.poll(async () => {
+        const visibleOperationalLayers = await Promise.all([
+            isLayerRendered(page, 'Temperature'),
+            isLayerRendered(page, 'UV-Index Stations'),
+            isLayerRendered(page, 'EUCOS Ground Stations')
+        ]);
+        return visibleOperationalLayers.some(Boolean);
+    }).toBe(true);
+
+    if (!(await printPanel.isVisible())) {
+        const pressed = await printToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await printToggle.click();
+        }
+    }
+
+    await expect(printPanel).toBeVisible();
+    await expect(printing).toBeVisible();
+
+    const title = `E2E Print ${Date.now()}`;
+    const labeledTitleField = printing.getByLabel(/title/i);
+    const titleField =
+        (await labeledTitleField.count()) > 0
+            ? labeledTitleField.first()
+            : printing.getByRole('textbox').first();
+
+    await expect(titleField).toBeVisible();
+    await titleField.fill(title);
+    await expect(titleField).toHaveValue(title);
+
+    const pngRadio = printing.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.first().click({ force: true });
+        await expect(pngRadio.first()).toBeChecked();
+    } else {
+        const pngButton = printing.getByRole('button', { name: /^png$/i });
+        if ((await pngButton.count()) > 0) {
+            await pngButton.first().click();
+            await expect(pngButton.first()).toBeVisible();
+        } else {
+            const labeledFormatField = printing.getByLabel(/format/i);
+            const formatField =
+                (await labeledFormatField.count()) > 0
+                    ? labeledFormatField.first()
+                    : printing.getByRole('combobox').first();
+
+            await expect(formatField).toBeVisible();
+
+            const pngOption = await formatField.locator('option').evaluateAll((options) => {
+                const matchingOption = options
+                    .map((option) => ({
+                        value: (option as HTMLOptionElement).value,
+                        label: option.textContent?.trim() ?? ''
+                    }))
+                    .find((option) => /png/i.test(option.label) || /png/i.test(option.value));
+                return matchingOption ?? null;
+            });
+
+            if (!pngOption) {
+                throw new Error('Could not find a PNG option in the print format control.');
+            }
+
+            await formatField.selectOption(pngOption.value);
+            await expect.poll(() => formatField.inputValue()).toBe(pngOption.value);
+        }
+    }
+
+    const exportButton = printing.getByRole('button', { name: /export|print|download/i }).first();
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename).toMatch(/\.png$/i);
+
+    const downloadPath = testInfo.outputPath(
+        suggestedFilename.replace(/[^\w.-]+/g, '_') || 'printed-map.png'
+    );
+    await download.saveAs(downloadPath);
+
+    const fileBytes = await readFile(downloadPath);
+    expect(fileBytes.byteLength).toBeGreaterThan(100);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

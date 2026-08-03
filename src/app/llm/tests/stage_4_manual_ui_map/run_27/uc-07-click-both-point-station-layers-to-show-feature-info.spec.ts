@@ -1,0 +1,83 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    const uviStationInfo = page.getByTestId('uvi-station-info');
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+    const eucosStationInfo = page.getByTestId('eucos-station-info');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+    let clickPosition: { x: number; y: number } | undefined;
+
+    await expect
+        .poll(async () => {
+            const pixel = await page.evaluate(([x, y]) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (coordinate: [number, number]) => number[] | undefined;
+                                getSize?: () => number[] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+                const olMap = map?.olMap;
+                const mapPixel = olMap?.getPixelFromCoordinate?.([x, y]);
+                const mapSize = olMap?.getSize?.();
+
+                if (!mapPixel || !mapSize || mapPixel.length < 2 || mapSize.length < 2) {
+                    return undefined;
+                }
+
+                const [pixelX, pixelY] = mapPixel;
+                const [width, height] = mapSize;
+
+                if (!Number.isFinite(pixelX) || !Number.isFinite(pixelY)) {
+                    return undefined;
+                }
+
+                return {
+                    x: Math.round(pixelX),
+                    y: Math.round(pixelY),
+                    width,
+                    height
+                };
+            }, targetCoordinate);
+
+            if (!pixel) {
+                clickPosition = undefined;
+                return false;
+            }
+
+            clickPosition = { x: pixel.x, y: pixel.y };
+
+            return pixel.x >= 0 && pixel.y >= 0 && pixel.x <= pixel.width && pixel.y <= pixel.height;
+        })
+        .toBe(true);
+
+    expect(clickPosition).toBeDefined();
+
+    await mapContainer.click({ position: clickPosition! });
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(uviStationInfo).toBeVisible();
+    await expect(eucosStationSection).toBeVisible();
+    await expect(eucosStationInfo).toBeVisible();
+});

@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    const uviStationInfo = page.getByTestId('uvi-station-info');
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+    const eucosStationInfo = page.getByTestId('eucos-station-info');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+
+    await expect(uviStationSection).toBeHidden();
+    await expect(eucosStationSection).toBeHidden();
+
+    await expect.poll(async () => (await getMapCenter(page)) !== undefined).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const getClickPosition = async (): Promise<{ x: number; y: number } | undefined> => {
+        return await page.evaluate((coordinate: [number, number]) => {
+            const map = (
+                globalThis as {
+                    __openPioneerMap?: {
+                        olMap?: {
+                            getPixelFromCoordinate?: (
+                                coordinate: [number, number]
+                            ) => [number, number] | number[] | undefined;
+                            getSize?: () => [number, number] | number[] | undefined;
+                        };
+                    };
+                }
+            ).__openPioneerMap;
+
+            const pixel = map?.olMap?.getPixelFromCoordinate?.(coordinate);
+            const size = map?.olMap?.getSize?.();
+
+            if (!pixel || pixel.length < 2 || !size || size.length < 2) {
+                return undefined;
+            }
+
+            const [x, y] = pixel;
+            const [width, height] = size;
+
+            if (
+                !Number.isFinite(x) ||
+                !Number.isFinite(y) ||
+                !Number.isFinite(width) ||
+                !Number.isFinite(height) ||
+                x < 0 ||
+                y < 0 ||
+                x > width ||
+                y > height
+            ) {
+                return undefined;
+            }
+
+            return { x, y };
+        }, targetCoordinate);
+    };
+
+    await expect.poll(async () => (await getClickPosition()) !== undefined).toBe(true);
+
+    const clickPosition = await getClickPosition();
+    if (!clickPosition) {
+        throw new Error('Could not determine a clickable pixel position for the target map coordinate.');
+    }
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(uviStationInfo).toBeVisible();
+    await expect(eucosStationSection).toBeVisible();
+    await expect(eucosStationInfo).toBeVisible();
+});

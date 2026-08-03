@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printPanel = page.getByTestId('printing-panel');
+    if (!(await printPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printPanel).toBeVisible();
+    const printing = page.getByTestId('printing');
+    await expect(printing).toBeVisible();
+
+    const titleInput = printing.getByRole('textbox', { name: /title/i });
+    await expect(titleInput).toBeVisible();
+    const printTitle = 'Current Weather Map';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const formatSelect = printing.getByRole('combobox', { name: /format/i });
+    await expect(formatSelect).toBeVisible();
+    await formatSelect.selectOption({ label: 'PNG' });
+
+    const downloadPromise = page.waitForEvent('download');
+    const exportButton = printing.getByRole('button', { name: /export|print/i }).first();
+    await expect(exportButton).toBeVisible();
+    await exportButton.click();
+
+    const download = await downloadPromise;
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileBuffer = await readFile(downloadPath);
+        expect(fileBuffer.length).toBeGreaterThan(0);
+        expect(Array.from(fileBuffer.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+    }
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+});
