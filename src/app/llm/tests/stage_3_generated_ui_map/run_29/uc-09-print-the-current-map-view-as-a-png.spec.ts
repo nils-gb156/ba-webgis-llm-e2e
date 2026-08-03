@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile, stat } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => ({
+            temperature: await isLayerRendered(page, 'Temperature'),
+            uvIndexStations: await isLayerRendered(page, 'UV-Index Stations'),
+            eucosStations: await isLayerRendered(page, 'EUCOS Ground Stations')
+        }))
+        .toEqual({
+            temperature: true,
+            uvIndexStations: true,
+            eucosStations: true
+        });
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    if (!(await printingPanel.isVisible())) {
+        await expect(printToggle).toHaveAttribute('aria-pressed', 'false');
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const titledTextbox = printingPanel.getByRole('textbox', { name: /title/i });
+    const titleInput =
+        (await titledTextbox.count()) > 0 ? titledTextbox : printingPanel.getByRole('textbox').first();
+    const printTitle = 'Current Weather Map Export';
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /png/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const namedCombobox = printingPanel.getByRole('combobox', { name: /format|file format|type/i });
+        const formatCombobox =
+            (await namedCombobox.count()) > 0 ? namedCombobox : printingPanel.getByRole('combobox').first();
+
+        await expect(formatCombobox).toBeVisible();
+
+        const pngValue = await formatCombobox.evaluate((element) => {
+            const select = element as HTMLSelectElement;
+            const options = Array.from(select.options);
+            return options.find(
+                (option) =>
+                    /png/i.test(option.label) || /png/i.test(option.text) || /png/i.test(option.value)
+            )?.value;
+        });
+
+        if (!pngValue) {
+            throw new Error('PNG format option not found in print format selector.');
+        }
+
+        await formatCombobox.selectOption(pngValue);
+        await expect
+            .poll(() => formatCombobox.evaluate((element) => (element as HTMLSelectElement).value))
+            .toBe(pngValue);
+    }
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    const exportButton = printingPanel.getByRole('button', { name: /export|print|download/i });
+    await expect(exportButton).toBeVisible();
+
+    const [download] = await Promise.all([page.waitForEvent('download'), exportButton.click()]);
+
+    const suggestedFilename = download.suggestedFilename();
+    expect(suggestedFilename.toLowerCase()).toMatch(/\.png$/);
+
+    const downloadedFilePath = await download.path();
+    if (!downloadedFilePath) {
+        throw new Error('Download path is unavailable.');
+    }
+
+    const downloadedFileStats = await stat(downloadedFilePath);
+    expect(downloadedFileStats.size).toBeGreaterThan(1000);
+
+    const fileBytes = await readFile(downloadedFilePath);
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    expect(fileBytes.subarray(0, 8).equals(pngSignature)).toBe(true);
+});

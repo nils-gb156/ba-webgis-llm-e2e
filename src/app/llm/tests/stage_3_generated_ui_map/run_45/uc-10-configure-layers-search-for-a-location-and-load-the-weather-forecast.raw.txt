@@ -1,0 +1,91 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const geocoderInput = page.getByTestId('geocoder-input');
+
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+    await expect(geocoderInput).toBeVisible();
+
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+
+    const getLayerToggle = async (layerName: string) => {
+        const checkbox = layerSwitcher.getByRole('checkbox', { name: layerName, exact: true });
+        if ((await checkbox.count()) > 0) {
+            return checkbox.first();
+        }
+
+        const switchControl = layerSwitcher.getByRole('switch', { name: layerName, exact: true });
+        if ((await switchControl.count()) > 0) {
+            return switchControl.first();
+        }
+
+        throw new Error(`Could not find a visibility toggle for layer "${layerName}".`);
+    };
+
+    const temperatureToggle = await getLayerToggle('Temperature');
+    const precipitationToggle = await getLayerToggle('Precipitation');
+
+    await expect(temperatureToggle).toBeChecked();
+    await expect(precipitationToggle).not.toBeChecked();
+
+    let initialCenter: [number, number] | undefined;
+    await expect
+        .poll(async () => {
+            initialCenter = await getMapCenter(page);
+            return initialCenter;
+        })
+        .toBeDefined();
+
+    if (!initialCenter) {
+        throw new Error('Map center was not available after the app loaded.');
+    }
+
+    await temperatureToggle.click({ force: true });
+    await expect(temperatureToggle).not.toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await precipitationToggle.click({ force: true });
+    await expect(precipitationToggle).toBeChecked();
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    const geocoderResults = page.getByTestId('geocoder-results');
+    const firstResult = page.getByTestId('geocoder-result-item-0');
+
+    await expect(geocoderResults).toBeVisible();
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    const [initialX, initialY] = initialCenter;
+
+    await expect
+        .poll(async () => {
+            const center = await getMapCenter(page);
+            if (!center) {
+                return 0;
+            }
+
+            return Math.hypot(center[0] - initialX, center[1] - initialY);
+        })
+        .toBeGreaterThan(1000);
+
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+    const weatherForecastEntries = page.getByTestId('weather-forecast-entry');
+
+    await expect(infoPanel).toBeVisible();
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastEntries).toHaveCount(24);
+});

@@ -1,0 +1,95 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from "../../../map-model-helpers";
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('load');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const namedTitleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    const titleInput =
+        (await namedTitleInput.count()) > 0
+            ? namedTitleInput.first()
+            : printingPanel.getByRole('textbox').first();
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Current map view');
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const namedFormatCombobox = printingPanel.getByRole('combobox', { name: /format/i });
+        const formatCombobox =
+            (await namedFormatCombobox.count()) > 0
+                ? namedFormatCombobox.first()
+                : printingPanel.getByRole('combobox').first();
+
+        await expect(formatCombobox).toBeVisible();
+
+        const tagName = await formatCombobox.evaluate((element) => element.tagName.toLowerCase());
+        if (tagName === 'select') {
+            await formatCombobox.selectOption({ label: 'PNG' });
+        } else {
+            await formatCombobox.click();
+            const pngOption = page.getByRole('option', { name: 'PNG', exact: true });
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+        }
+
+        await expect.poll(async () => {
+            return await formatCombobox.evaluate((element) => {
+                if (element instanceof HTMLSelectElement) {
+                    const selected = element.selectedOptions[0];
+                    return (selected?.label || selected?.text || selected?.value || '').trim();
+                }
+                return ((element.getAttribute('value') ?? element.textContent) || '').trim();
+            });
+        }).toMatch(/png/i);
+    }
+
+    const exactExportButton = printingPanel.getByRole('button', { name: 'Export', exact: true });
+    const exactPrintButton = printingPanel.getByRole('button', { name: 'Print', exact: true });
+    const exportButton =
+        (await exactExportButton.count()) > 0
+            ? exactExportButton
+            : (await exactPrintButton.count()) > 0
+              ? exactPrintButton
+              : printingPanel.getByRole('button', { name: /export|print/i }).first();
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename().toLowerCase()).toMatch(/\.png$/);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    if (!downloadPath) {
+        throw new Error('Expected downloaded PNG file to have a local path.');
+    }
+
+    const fileContent = await readFile(downloadPath);
+    expect(fileContent.length).toBeGreaterThan(8);
+    expect([...fileContent.subarray(0, 8)]).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+});

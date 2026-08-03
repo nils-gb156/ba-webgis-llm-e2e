@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const forecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const clickPosition = {
+        x: Math.min(mapBox.width - 20, Math.max(80, Math.floor(mapBox.width * 0.75))),
+        y: Math.min(mapBox.height - 20, Math.max(80, Math.floor(mapBox.height * 0.45)))
+    };
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+    await expect(forecastSection).toBeVisible();
+    await expect(forecastSection.getByTestId('weather-forecast-entry')).toHaveCount(24);
+});

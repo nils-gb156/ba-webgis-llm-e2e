@@ -1,0 +1,97 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(async () => {
+        const visibleOverlays = await Promise.all([
+            isLayerRendered(page, 'Temperature'),
+            isLayerRendered(page, 'UV-Index Stations'),
+            isLayerRendered(page, 'EUCOS Ground Stations')
+        ]);
+        return visibleOverlays.some(Boolean);
+    }).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'Current Weather Map';
+
+    const namedTitleInputs = printingPanel.getByRole('textbox', { name: /title/i });
+    if ((await namedTitleInputs.count()) > 0) {
+        const titleInput = namedTitleInputs.first();
+        await titleInput.fill(printTitle);
+        await expect(titleInput).toHaveValue(printTitle);
+    } else {
+        const titleInput = printingPanel.getByRole('textbox').first();
+        await expect(titleInput).toBeVisible();
+        await titleInput.fill(printTitle);
+        await expect(titleInput).toHaveValue(printTitle);
+    }
+
+    const pngRadios = printingPanel.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadios.count()) > 0) {
+        const pngRadio = pngRadios.first();
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const pngButtons = printingPanel.getByRole('button', { name: /^png$/i });
+        if ((await pngButtons.count()) > 0) {
+            await pngButtons.first().click();
+        } else {
+            const namedFormatComboboxes = printingPanel.getByRole('combobox', { name: /format/i });
+            const formatCombobox =
+                (await namedFormatComboboxes.count()) > 0
+                    ? namedFormatComboboxes.first()
+                    : printingPanel.getByRole('combobox').first();
+
+            await expect(formatCombobox).toBeVisible();
+
+            try {
+                await formatCombobox.selectOption({ label: 'PNG' });
+                await expect(formatCombobox).toHaveValue(/png/i);
+            } catch {
+                await formatCombobox.click();
+                const pngOption = page.getByRole('option', { name: /^png$/i }).first();
+                await expect(pngOption).toBeVisible();
+                await pngOption.click();
+            }
+        }
+    }
+
+    const exportButton = printingPanel.getByRole('button', { name: /export|print|download/i }).first();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(() => download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const pngBytes = await readFile(downloadPath!);
+    expect(pngBytes.length).toBeGreaterThan(1000);
+    expect(Array.from(pngBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+    expect(pngBytes.toString('ascii', 12, 16)).toBe('IHDR');
+    expect(pngBytes.readUInt32BE(16)).toBeGreaterThan(0);
+    expect(pngBytes.readUInt32BE(20)).toBeGreaterThan(0);
+});

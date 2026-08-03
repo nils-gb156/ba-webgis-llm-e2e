@@ -1,0 +1,110 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+    await expect(printingPanel).toBeVisible();
+
+    const namedTitleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    const titleInput =
+        (await namedTitleInput.count()) > 0
+            ? namedTitleInput.first()
+            : printingPanel.getByRole('textbox').first();
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Weather map export');
+
+    let pngSelected = false;
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+        pngSelected = true;
+    }
+
+    if (!pngSelected) {
+        const comboboxes = printingPanel.getByRole('combobox');
+        const comboboxCount = await comboboxes.count();
+
+        for (let i = 0; i < comboboxCount; i++) {
+            const combobox = comboboxes.nth(i);
+            const pngValue = await combobox.evaluate((element) => {
+                if (!(element instanceof HTMLSelectElement)) {
+                    return undefined;
+                }
+
+                const pngOption = Array.from(element.options).find((option) => {
+                    const optionText = option.textContent?.trim().toLowerCase();
+                    const optionValue = option.value.trim().toLowerCase();
+                    return optionText === 'png' || optionValue === 'png';
+                });
+
+                return pngOption?.value;
+            });
+
+            if (pngValue) {
+                await combobox.selectOption(pngValue);
+                await expect
+                    .poll(() =>
+                        combobox.evaluate((element) => {
+                            if (element instanceof HTMLSelectElement) {
+                                return element.value;
+                            }
+                            return undefined;
+                        })
+                    )
+                    .toBe(pngValue);
+                pngSelected = true;
+                break;
+            }
+        }
+    }
+
+    expect(pngSelected).toBe(true);
+
+    const namedExportButton = printingPanel.getByRole('button', { name: /export|print/i });
+    const exportButton =
+        (await namedExportButton.count()) > 0
+            ? namedExportButton.first()
+            : printingPanel.getByRole('button').last();
+
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(() => download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+    if (!downloadPath) {
+        throw new Error('Expected the generated PNG file to be available on disk.');
+    }
+
+    const fileBytes = await readFile(downloadPath);
+    expect(fileBytes.length).toBeGreaterThan(8);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

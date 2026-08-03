@@ -1,0 +1,58 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getHighlightedCoordinate } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const weatherForecastSection = infoPanel.getByTestId('weather-forecast-section');
+    const weatherForecastEntries = weatherForecastSection.getByTestId('weather-forecast-entry');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const infoPanelBox = await infoPanel.boundingBox();
+    const mapCenterX = mapBox.x + mapBox.width / 2;
+    const mapCenterY = mapBox.y + mapBox.height / 2;
+
+    let xRatio = 0.5;
+    let yRatio = 0.5;
+
+    if (infoPanelBox) {
+        const infoPanelCenterX = infoPanelBox.x + infoPanelBox.width / 2;
+        const infoPanelCenterY = infoPanelBox.y + infoPanelBox.height / 2;
+        xRatio = infoPanelCenterX < mapCenterX ? 0.75 : 0.25;
+        yRatio = infoPanelCenterY < mapCenterY ? 0.75 : 0.25;
+    }
+
+    const clickPosition = {
+        x: Math.max(40, Math.min(mapBox.width - 40, mapBox.width * xRatio)),
+        y: Math.max(40, Math.min(mapBox.height - 40, mapBox.height * yRatio))
+    };
+
+    const formatCoordinate = (coordinate: [number, number] | undefined) =>
+        coordinate ? coordinate.map((value) => value.toFixed(2)).join(',') : 'none';
+
+    const initialHighlight = await getHighlightedCoordinate(page);
+    const initialHighlightKey = formatCoordinate(initialHighlight);
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect
+        .poll(async () => formatCoordinate(await getHighlightedCoordinate(page)))
+        .not.toBe(initialHighlightKey);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastEntries).toHaveCount(24);
+});

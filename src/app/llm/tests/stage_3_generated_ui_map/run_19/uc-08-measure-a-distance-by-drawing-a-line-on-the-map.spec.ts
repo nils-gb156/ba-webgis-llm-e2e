@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementContent = page.getByTestId('measurement');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const point1 = {
+        x: Math.round(mapBox.width * 0.25),
+        y: Math.round(mapBox.height * 0.35)
+    };
+    const point2 = {
+        x: Math.round(mapBox.width * 0.42),
+        y: Math.round(mapBox.height * 0.48)
+    };
+    const point3 = {
+        x: Math.round(mapBox.width * 0.60),
+        y: Math.round(mapBox.height * 0.40)
+    };
+    const finishPoint = {
+        x: Math.round(mapBox.width * 0.75),
+        y: Math.round(mapBox.height * 0.55)
+    };
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.click({ position: point3 });
+    await mapContainer.dblclick({ position: finishPoint });
+
+    await expect.poll(async () => {
+        const text = (await measurementContent.textContent()) ?? '';
+        const match = text.match(/(\d+(?:[.,]\d+)?)\s*(mm|cm|m|km)\b/i);
+        if (!match) {
+            return undefined;
+        }
+
+        const value = Number(match[1].replace(',', '.'));
+        const unit = match[2].toLowerCase();
+        const meters =
+            unit === 'km' ? value * 1000 :
+            unit === 'm' ? value :
+            unit === 'cm' ? value / 100 :
+            value / 1000;
+
+        return meters;
+    }).toBeGreaterThan(0);
+});

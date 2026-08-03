@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import {
+    getActiveBaseLayerTitle,
+    getMapCenter,
+    getHighlightedCoordinate
+} from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    const clickPosition = {
+        x: Math.round((mapBox?.width ?? 400) * 0.5),
+        y: Math.round((mapBox?.height ?? 300) * 0.5)
+    };
+
+    await mapContainer.click({ position: clickPosition });
+
+    await expect.poll(() => getHighlightedCoordinate(page)).not.toBeUndefined();
+
+    const weatherForecastSection = infoPanel.getByTestId('weather-forecast-section');
+    const weatherForecastEntries = infoPanel.getByTestId('weather-forecast-entry');
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastEntries).toHaveCount(24);
+});

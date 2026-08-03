@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeDefined();
+
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementContent = page.getByTestId('measurement');
+
+    if (!(await measurementPanel.isVisible())) {
+        await expect(measurementToggle).toBeVisible();
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toBeVisible();
+
+    const mapContainer = page.getByTestId('map-container');
+    const box = await mapContainer.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const point1 = {
+        x: Math.min(box.width - 60, Math.max(60, Math.floor(box.width * 0.68))),
+        y: Math.min(box.height - 60, Math.max(60, Math.floor(box.height * 0.35)))
+    };
+    const point2 = {
+        x: Math.min(box.width - 60, Math.max(60, Math.floor(box.width * 0.78))),
+        y: Math.min(box.height - 60, Math.max(60, Math.floor(box.height * 0.48)))
+    };
+    const point3 = {
+        x: Math.min(box.width - 60, Math.max(60, Math.floor(box.width * 0.86))),
+        y: Math.min(box.height - 60, Math.max(60, Math.floor(box.height * 0.60)))
+    };
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.dblclick({ position: point3 });
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toContainText(/\b\d+(?:[.,]\d+)?\s?(?:mm|cm|m|km)\b/i);
+});

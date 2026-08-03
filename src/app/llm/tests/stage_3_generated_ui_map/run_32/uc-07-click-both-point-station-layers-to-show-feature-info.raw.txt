@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await infoPanel.isVisible())) {
+        await page.getByTestId('info-panel-toggle').click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if (await measurementPanel.isVisible()) {
+        await page.getByTestId('measurement-toggle').click();
+    }
+    await expect(measurementPanel).toBeHidden();
+
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const getPixelForCoordinate = async (): Promise<[number, number] | undefined> => {
+        return await page.evaluate(([x, y]) => {
+            const map = (globalThis as { __openPioneerMap?: any }).__openPioneerMap;
+            const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+            return Array.isArray(pixel) &&
+                pixel.length >= 2 &&
+                Number.isFinite(pixel[0]) &&
+                Number.isFinite(pixel[1])
+                ? [Math.round(pixel[0]), Math.round(pixel[1])]
+                : undefined;
+        }, targetCoordinate);
+    };
+
+    await expect.poll(() => getPixelForCoordinate()).not.toBeUndefined();
+    const pixel = await getPixelForCoordinate();
+    if (!pixel) {
+        throw new Error('Could not determine map pixel for target coordinate.');
+    }
+
+    const getFeatureInfoResponse = page.waitForResponse(
+        (response) => /GetFeatureInfo/i.test(response.url()) && response.ok()
+    );
+
+    await Promise.all([
+        getFeatureInfoResponse,
+        mapContainer.click({
+            position: {
+                x: pixel[0],
+                y: pixel[1]
+            }
+        })
+    ]);
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(eucosStationSection).toBeVisible();
+
+    await expect.poll(async () => ((await uviStationSection.textContent()) ?? '').trim().length).toBeGreaterThan(16);
+    await expect.poll(async () => ((await eucosStationSection.textContent()) ?? '').trim().length).toBeGreaterThan(20);
+});

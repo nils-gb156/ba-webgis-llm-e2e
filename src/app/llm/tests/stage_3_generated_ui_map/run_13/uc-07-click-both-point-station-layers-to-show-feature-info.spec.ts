@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+
+    await expect(mapContainer).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(async () => (await getMapZoomLevel(page)) !== undefined).toBe(true);
+
+    if (!(await infoPanel.isVisible())) {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if (await measurementPanel.isVisible()) {
+        await measurementToggle.click();
+    }
+    await expect(measurementPanel).toBeHidden();
+
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+    let mapPixel: [number, number] | undefined;
+
+    await expect
+        .poll(async () => {
+            mapPixel = await page.evaluate(([x, y]) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (
+                                    coordinate: [number, number]
+                                ) => [number, number] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+
+                const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+                if (!pixel || pixel.length < 2) {
+                    return undefined;
+                }
+
+                return [pixel[0], pixel[1]] as [number, number];
+            }, targetCoordinate);
+
+            return (
+                Array.isArray(mapPixel) &&
+                mapPixel.length === 2 &&
+                mapPixel.every((value) => typeof value === 'number' && Number.isFinite(value))
+            );
+        })
+        .toBe(true);
+
+    await mapContainer.click({
+        position: { x: mapPixel![0], y: mapPixel![1] }
+    });
+
+    await expect(infoPanel).toBeVisible();
+
+    const uviStationSection = infoPanel.getByTestId('uvi-station-section');
+    const eucosStationSection = infoPanel.getByTestId('eucos-station-section');
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(uviStationSection).toContainText('UV-Index Station');
+    await expect
+        .poll(async () => ((await uviStationSection.textContent()) ?? '').replace(/\s+/g, ' ').trim().length)
+        .toBeGreaterThan('UV-Index Station'.length);
+
+    await expect(eucosStationSection).toBeVisible();
+    await expect(eucosStationSection).toContainText('EUCOS Ground Station');
+    await expect
+        .poll(async () => ((await eucosStationSection.textContent()) ?? '').replace(/\s+/g, ' ').trim().length)
+        .toBeGreaterThan('EUCOS Ground Station'.length);
+});

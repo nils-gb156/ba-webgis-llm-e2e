@@ -1,0 +1,129 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, getMapZoomLevel, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 10: Configure layers, search for a location and load the weather forecast', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    const infoPanel = page.getByTestId('info-panel');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const geocoderRoot = page.getByTestId('geocoder-input');
+    const geocoderResults = page.getByTestId('geocoder-results');
+    const firstGeocoderResult = page.getByTestId('geocoder-result-item-0');
+    const weatherForecastSection = page.getByTestId('weather-forecast-section');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(layerSwitcher).toBeVisible();
+    await expect(infoPanel).toBeVisible();
+    await expect(measurementPanel).toBeHidden();
+    await expect(geocoderRoot).toBeVisible();
+
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(false);
+    await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    const resolveLayerToggle = async (layerName: string) => {
+        for (const role of ['checkbox', 'switch', 'button'] as const) {
+            const locator = layerSwitcher.getByRole(role, { name: layerName, exact: true });
+            if ((await locator.count()) > 0) {
+                return { locator, role };
+            }
+        }
+        throw new Error(`No layer visibility toggle found for "${layerName}".`);
+    };
+
+    const clickLayerToggle = async (
+        locator: any,
+        role: 'checkbox' | 'switch' | 'button'
+    ) => {
+        if (role === 'checkbox' || role === 'switch') {
+            await locator.click({ force: true });
+        } else {
+            await locator.click();
+        }
+    };
+
+    const expectLayerToggleState = async (
+        locator: any,
+        role: 'checkbox' | 'switch' | 'button',
+        enabled: boolean
+    ) => {
+        if (role === 'checkbox' || role === 'switch') {
+            if (enabled) {
+                await expect(locator).toBeChecked();
+            } else {
+                await expect(locator).not.toBeChecked();
+            }
+            return;
+        }
+
+        const ariaPressed = await locator.getAttribute('aria-pressed');
+        if (ariaPressed !== null) {
+            await expect(locator).toHaveAttribute('aria-pressed', enabled ? 'true' : 'false');
+            return;
+        }
+
+        const ariaChecked = await locator.getAttribute('aria-checked');
+        if (ariaChecked !== null) {
+            await expect(locator).toHaveAttribute('aria-checked', enabled ? 'true' : 'false');
+            return;
+        }
+
+        throw new Error('The layer toggle button does not expose a checkable ARIA state.');
+    };
+
+    const { locator: temperatureToggle, role: temperatureToggleRole } = await resolveLayerToggle('Temperature');
+    const { locator: precipitationToggle, role: precipitationToggleRole } = await resolveLayerToggle('Precipitation');
+
+    await clickLayerToggle(temperatureToggle, temperatureToggleRole);
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(false);
+
+    await clickLayerToggle(precipitationToggle, precipitationToggleRole);
+    await expect.poll(() => isLayerRendered(page, 'Precipitation')).toBe(true);
+
+    await expectLayerToggleState(temperatureToggle, temperatureToggleRole, false);
+    await expectLayerToggleState(precipitationToggle, precipitationToggleRole, true);
+
+    const initialCenter = await getMapCenter(page);
+    const initialZoom = await getMapZoomLevel(page);
+
+    if (!initialCenter || initialZoom === undefined) {
+        throw new Error('Initial map view is not available after readiness checks.');
+    }
+
+    const geocoderTagName = await geocoderRoot.evaluate((element) => element.tagName.toLowerCase());
+    const geocoderInput =
+        geocoderTagName === 'input' || geocoderTagName === 'textarea'
+            ? geocoderRoot
+            : geocoderRoot.getByRole('textbox');
+
+    await geocoderInput.click();
+    await geocoderInput.fill('Münster');
+
+    await expect(geocoderResults).toBeVisible();
+    await expect(firstGeocoderResult).toBeVisible();
+    await firstGeocoderResult.click();
+
+    await expect
+        .poll(async () => {
+            const center = await getMapCenter(page);
+            const zoom = await getMapZoomLevel(page);
+
+            if (!center || zoom === undefined) {
+                return false;
+            }
+
+            return (
+                center[0] !== initialCenter[0] ||
+                center[1] !== initialCenter[1] ||
+                zoom !== initialZoom
+            );
+        })
+        .toBe(true);
+
+    await expect(weatherForecastSection).toBeVisible();
+    await expect(weatherForecastSection.getByTestId('weather-forecast-entry')).toHaveCount(24);
+});

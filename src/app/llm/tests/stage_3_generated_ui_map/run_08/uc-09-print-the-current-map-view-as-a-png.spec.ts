@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile, stat } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('UC9 - Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+    await expect
+        .poll(async () => (await getActiveBaseLayerTitle(page)) ?? '')
+        .toMatch(/^(Carto Light|Carto Dark|OpenStreetMap)$/);
+
+    await expect
+        .poll(async () => {
+            const [temperatureVisible, uviStationsVisible, eucosVisible] = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations'),
+            ]);
+            return temperatureVisible || uviStationsVisible || eucosVisible;
+        })
+        .toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'Current Weather Map';
+
+    const titledInput = printingPanel.getByRole('textbox', { name: /title/i });
+    const titleInput =
+        (await titledInput.count()) > 0 ? titledInput : printingPanel.getByRole('textbox').first();
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const namedFormatSelect = printingPanel.getByRole('combobox', { name: /format/i });
+        const formatSelect =
+            (await namedFormatSelect.count()) > 0
+                ? namedFormatSelect
+                : printingPanel.getByRole('combobox').first();
+
+        await expect(formatSelect).toBeVisible();
+
+        const pngOptionValue = await formatSelect.evaluate((element) => {
+            const select = element as HTMLSelectElement;
+            const pngOption = Array.from(select.options).find(
+                (option) => /png/i.test(option.label) || /png/i.test(option.value)
+            );
+            return pngOption?.value;
+        });
+
+        expect(pngOptionValue).toBeTruthy();
+        await formatSelect.selectOption(pngOptionValue!);
+
+        await expect
+            .poll(() => formatSelect.evaluate((element) => (element as HTMLSelectElement).value))
+            .toMatch(/png/i);
+    }
+
+    const exactExportButton = printingPanel.getByRole('button', {
+        name: /^(export|print|download)$/i,
+    });
+    const broadExportButton = printingPanel.getByRole('button', {
+        name: /export|print|download/i,
+    });
+    const exportButton =
+        (await exactExportButton.count()) > 0 ? exactExportButton : broadExportButton.first();
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const filePath = test.info().outputPath(download.suggestedFilename());
+    await download.saveAs(filePath);
+
+    const fileStats = await stat(filePath);
+    expect(fileStats.size).toBeGreaterThan(8);
+
+    const fileBytes = await readFile(filePath);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

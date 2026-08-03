@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getHighlightedCoordinate, getMapCenter } from '../../../map-model-helpers';
+
+test('Use Case 6: Click a map position to show the weather forecast', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+  const mapContainer = page.getByTestId('map-container');
+  const infoPanel = page.getByTestId('info-panel');
+  const weatherForecastSection = infoPanel.getByTestId('weather-forecast-section');
+  const weatherForecastEntries = weatherForecastSection.getByTestId('weather-forecast-entry');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(infoPanel).toBeVisible();
+  await expect.poll(() => getMapCenter(page)).not.toBeUndefined();
+
+  const highlightBefore = await getHighlightedCoordinate(page);
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) {
+    throw new Error('Map container has no bounding box.');
+  }
+
+  const clickX = Math.min(Math.max(20, box.width * 0.75), box.width - 20);
+  const clickY = Math.min(Math.max(20, box.height * 0.5), box.height - 20);
+
+  await mapContainer.click({
+    position: {
+      x: clickX,
+      y: clickY,
+    },
+  });
+
+  await expect
+    .poll(async () => {
+      const highlightAfter = await getHighlightedCoordinate(page);
+      if (!highlightAfter) {
+        return undefined;
+      }
+      if (!highlightBefore) {
+        return 'new-highlight';
+      }
+      return highlightAfter[0] !== highlightBefore[0] || highlightAfter[1] !== highlightBefore[1]
+        ? 'changed-highlight'
+        : undefined;
+    })
+    .toMatch(/highlight/);
+
+  await expect(weatherForecastSection).toBeVisible();
+  await expect(weatherForecastEntries).toHaveCount(24);
+});

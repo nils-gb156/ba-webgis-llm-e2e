@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementContent = page.getByTestId('measurement');
+
+    await expect(mapContainer).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).not.toBeUndefined();
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toBeVisible();
+
+    const box = await mapContainer.boundingBox();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(box.width * 0.58),
+            y: Math.round(box.height * 0.30)
+        }
+    });
+    await mapContainer.click({
+        position: {
+            x: Math.round(box.width * 0.68),
+            y: Math.round(box.height * 0.40)
+        }
+    });
+    await mapContainer.click({
+        position: {
+            x: Math.round(box.width * 0.78),
+            y: Math.round(box.height * 0.50)
+        }
+    });
+    await mapContainer.dblclick({
+        position: {
+            x: Math.round(box.width * 0.88),
+            y: Math.round(box.height * 0.62)
+        }
+    });
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementContent).toContainText(/\b\d+(?:[.,]\d+)?\s?(?:m|km)\b/i);
+});

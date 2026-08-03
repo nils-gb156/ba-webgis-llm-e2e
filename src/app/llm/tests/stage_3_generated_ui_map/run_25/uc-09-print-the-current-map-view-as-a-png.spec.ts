@@ -1,0 +1,120 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { stat } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+    const printing = page.getByTestId('printing');
+    const printTitle = 'Current Weather Map';
+
+    await expect(scaleBar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toMatch(
+        /^(Carto Light|Carto Dark|OpenStreetMap)$/
+    );
+
+    await expect
+        .poll(async () => {
+            const visibleOverlays = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations')
+            ]);
+            return visibleOverlays.some(Boolean);
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(printing).toBeVisible();
+
+    let titleInput = printing.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printing.getByRole('textbox').first();
+    }
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+
+    let pngFormatSelected = false;
+
+    const formatCombobox = printing.getByRole('combobox', { name: /format/i });
+    if ((await formatCombobox.count()) > 0) {
+        await expect(formatCombobox).toBeVisible();
+        const tagName = await formatCombobox.evaluate((element) => element.tagName);
+
+        if (tagName === 'SELECT') {
+            try {
+                await formatCombobox.selectOption({ label: 'PNG' });
+            } catch {
+                try {
+                    await formatCombobox.selectOption('png');
+                } catch {
+                    await formatCombobox.selectOption('image/png');
+                }
+            }
+            await expect(formatCombobox).toHaveValue(/png/i);
+            pngFormatSelected = true;
+        } else {
+            await formatCombobox.click();
+            const pngOption = page.getByRole('option', { name: /^png$/i });
+            if ((await pngOption.count()) > 0) {
+                await pngOption.click();
+                pngFormatSelected = true;
+            }
+        }
+    }
+
+    if (!pngFormatSelected) {
+        const pngRadio = printing.getByRole('radio', { name: /^png$/i });
+        if ((await pngRadio.count()) > 0) {
+            await pngRadio.click({ force: true });
+            await expect(pngRadio).toBeChecked();
+            pngFormatSelected = true;
+        }
+    }
+
+    if (!pngFormatSelected) {
+        const pngText = page.getByText(/^png$/i);
+        if ((await pngText.count()) > 0) {
+            await pngText.first().click();
+            pngFormatSelected = true;
+        }
+    }
+
+    expect(pngFormatSelected).toBe(true);
+
+    let exportButton = printing.getByRole('button', { name: /^(print|export|download)$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button', { name: /print|export|download/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printing.getByRole('button').last();
+    }
+
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+    expect(await download.failure()).toBeNull();
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileInfo = await stat(downloadPath);
+        expect(fileInfo.size).toBeGreaterThan(0);
+    }
+});

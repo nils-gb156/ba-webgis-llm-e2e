@@ -1,0 +1,96 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from "../../../map-model-helpers";
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+
+    await expect
+        .poll(async () => (await getActiveBaseLayerTitle(page)) ?? '')
+        .toMatch(/^(Carto Light|Carto Dark|OpenStreetMap)$/);
+
+    await expect
+        .poll(async () => {
+            const renderedStates = await Promise.all([
+                isLayerRendered(page, 'Temperature'),
+                isLayerRendered(page, 'UV-Index Stations'),
+                isLayerRendered(page, 'EUCOS Ground Stations'),
+                isLayerRendered(page, 'UV-Index'),
+                isLayerRendered(page, 'Precipitation'),
+                isLayerRendered(page, 'Clouds')
+            ]);
+            return renderedStates.some(Boolean);
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const labeledTitleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    const titleInput =
+        (await labeledTitleInput.count()) > 0
+            ? labeledTitleInput
+            : printingPanel.getByRole('textbox').first();
+
+    await expect(titleInput).toBeVisible();
+
+    const printTitle = 'Current weather map';
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /png/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const labeledFormatSelect = printingPanel.getByRole('combobox', {
+            name: /format|file format|output format/i
+        });
+        const formatSelect =
+            (await labeledFormatSelect.count()) > 0
+                ? labeledFormatSelect
+                : printingPanel.getByRole('combobox').first();
+
+        await expect(formatSelect).toBeVisible();
+        await formatSelect.selectOption({ label: 'PNG' });
+        await expect(formatSelect).toHaveValue(/png/i);
+    }
+
+    const downloadPromise = page.waitForEvent('download');
+
+    const namedExportButton = printingPanel.getByRole('button', {
+        name: /^(print|export|download)( map)?$/i
+    });
+    if ((await namedExportButton.count()) > 0) {
+        await namedExportButton.click();
+    } else {
+        await printingPanel.getByRole('button').last().click();
+    }
+
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileContent = await readFile(downloadPath!);
+    expect(fileContent.length).toBeGreaterThan(8);
+    expect(fileContent.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+});

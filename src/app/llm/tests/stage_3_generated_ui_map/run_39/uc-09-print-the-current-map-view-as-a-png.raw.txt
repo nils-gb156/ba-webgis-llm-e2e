@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect(page.getByTestId('print-toggle')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    const printToggle = page.getByTestId('print-toggle');
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const titleInput = printingPanel.getByRole('textbox').first();
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Current map view');
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /png/i }).first();
+    if ((await printingPanel.getByRole('radio', { name: /png/i }).count()) > 0) {
+        if (!(await pngRadio.isChecked())) {
+            await pngRadio.click({ force: true });
+        }
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const formatSelect = printingPanel.getByRole('combobox').first();
+        await expect(formatSelect).toBeVisible();
+
+        const pngOptionValue = await formatSelect.evaluate((element) => {
+            if (!(element instanceof HTMLSelectElement)) {
+                return undefined;
+            }
+
+            const option = Array.from(element.options).find((entry) =>
+                /png/i.test(`${entry.label} ${entry.text} ${entry.value}`)
+            );
+
+            return option?.value;
+        });
+
+        expect(pngOptionValue).toBeTruthy();
+        await formatSelect.selectOption(pngOptionValue!);
+        await expect.poll(() => formatSelect.inputValue()).toBe(pngOptionValue!);
+    }
+
+    const exportButton = printingPanel.getByRole('button', { name: /export|print|download/i }).first();
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect(printingPanel).toBeVisible();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+    expect(await download.failure()).toBeNull();
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    const fileBytes = await readFile(downloadPath!);
+    expect(fileBytes.length).toBeGreaterThan(1000);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

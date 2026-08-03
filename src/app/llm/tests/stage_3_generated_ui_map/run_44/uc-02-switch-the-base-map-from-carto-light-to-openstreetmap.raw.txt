@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 2: Switch the base map from Carto Light to OpenStreetMap', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const layerSwitcher = page.getByTestId('layer-switcher');
+    await expect(layerSwitcher).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const openStreetMapRadioInLayerSwitcher = layerSwitcher.getByRole('radio', {
+        name: 'OpenStreetMap',
+        exact: true
+    });
+
+    let openStreetMapChoiceVisible =
+        (await openStreetMapRadioInLayerSwitcher.count()) > 0 &&
+        (await openStreetMapRadioInLayerSwitcher.first().isVisible());
+
+    if (!openStreetMapChoiceVisible) {
+        const triggerCandidates = [
+            layerSwitcher.getByRole('button', { name: 'Carto Light', exact: true }),
+            layerSwitcher.getByRole('combobox', { name: 'Carto Light', exact: true }),
+            layerSwitcher.getByRole('button', { name: /base maps?/i }),
+            layerSwitcher.getByRole('combobox', { name: /base maps?/i })
+        ];
+
+        let selectorOpened = false;
+
+        for (const trigger of triggerCandidates) {
+            if ((await trigger.count()) > 0 && (await trigger.first().isVisible())) {
+                await trigger.first().click();
+                selectorOpened = true;
+                break;
+            }
+        }
+
+        if (!selectorOpened) {
+            const buttons = layerSwitcher.getByRole('button');
+            const buttonCount = await buttons.count();
+
+            for (let i = 0; i < buttonCount; i++) {
+                const button = buttons.nth(i);
+                if (await button.isVisible()) {
+                    await button.click();
+
+                    const osmRadio = page.getByRole('radio', { name: 'OpenStreetMap', exact: true });
+                    const osmMenuItemRadio = page.getByRole('menuitemradio', {
+                        name: 'OpenStreetMap',
+                        exact: true
+                    });
+                    const osmOption = page.getByRole('option', {
+                        name: 'OpenStreetMap',
+                        exact: true
+                    });
+
+                    const radioVisible =
+                        (await osmRadio.count()) > 0 && (await osmRadio.first().isVisible());
+                    const menuItemRadioVisible =
+                        (await osmMenuItemRadio.count()) > 0 &&
+                        (await osmMenuItemRadio.first().isVisible());
+                    const optionVisible =
+                        (await osmOption.count()) > 0 && (await osmOption.first().isVisible());
+
+                    if (radioVisible || menuItemRadioVisible || optionVisible) {
+                        selectorOpened = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        expect(selectorOpened).toBe(true);
+    }
+
+    const openStreetMapRadio = page.getByRole('radio', {
+        name: 'OpenStreetMap',
+        exact: true
+    });
+    const openStreetMapMenuItemRadio = page.getByRole('menuitemradio', {
+        name: 'OpenStreetMap',
+        exact: true
+    });
+    const openStreetMapOption = page.getByRole('option', {
+        name: 'OpenStreetMap',
+        exact: true
+    });
+    const openStreetMapButton = page.getByRole('button', {
+        name: 'OpenStreetMap',
+        exact: true
+    });
+
+    let selected = false;
+
+    if ((await openStreetMapRadio.count()) > 0 && (await openStreetMapRadio.first().isVisible())) {
+        await openStreetMapRadio.first().click({ force: true });
+        await expect(openStreetMapRadio.first()).toBeChecked();
+        selected = true;
+    } else if (
+        (await openStreetMapMenuItemRadio.count()) > 0 &&
+        (await openStreetMapMenuItemRadio.first().isVisible())
+    ) {
+        await openStreetMapMenuItemRadio.first().click();
+        selected = true;
+    } else if (
+        (await openStreetMapOption.count()) > 0 &&
+        (await openStreetMapOption.first().isVisible())
+    ) {
+        await openStreetMapOption.first().click();
+        selected = true;
+    } else if (
+        (await openStreetMapButton.count()) > 0 &&
+        (await openStreetMapButton.first().isVisible())
+    ) {
+        await openStreetMapButton.first().click();
+        selected = true;
+    }
+
+    expect(selected).toBe(true);
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('OpenStreetMap');
+    await expect.poll(() => getActiveBaseLayerTitle(page)).not.toBe('Carto Light');
+});

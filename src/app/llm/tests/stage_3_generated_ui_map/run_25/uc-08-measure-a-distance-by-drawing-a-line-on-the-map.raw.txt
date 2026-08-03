@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+  await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+  await page.waitForLoadState('domcontentloaded');
+
+  await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+  const mapContainer = page.getByTestId('map-container');
+  const measurementToggle = page.getByTestId('measurement-toggle');
+  const measurementPanel = page.getByTestId('measurement-panel');
+  const measurementResult = page.getByTestId('measurement');
+
+  await expect(mapContainer).toBeVisible();
+  await expect(measurementToggle).toBeVisible();
+
+  if (!(await measurementPanel.isVisible())) {
+    await measurementToggle.click();
+  }
+
+  await expect(measurementPanel).toBeVisible();
+
+  const box = await mapContainer.boundingBox();
+  expect(box).not.toBeNull();
+
+  const width = box!.width;
+  const height = box!.height;
+
+  await mapContainer.click({
+    position: { x: Math.round(width * 0.52), y: Math.round(height * 0.36) }
+  });
+  await mapContainer.click({
+    position: { x: Math.round(width * 0.63), y: Math.round(height * 0.43) }
+  });
+  await mapContainer.click({
+    position: { x: Math.round(width * 0.74), y: Math.round(height * 0.52) }
+  });
+  await mapContainer.dblclick({
+    position: { x: Math.round(width * 0.83), y: Math.round(height * 0.61) }
+  });
+
+  await expect(measurementResult).toBeVisible();
+  await expect(measurementResult).toContainText(/\b\d[\d.,]*\s?(m|km)\b/i);
+});

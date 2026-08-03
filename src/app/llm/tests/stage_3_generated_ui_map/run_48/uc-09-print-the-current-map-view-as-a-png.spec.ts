@@ -1,0 +1,97 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const scaleBar = page.getByTestId('scale-bar');
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(scaleBar).toBeVisible();
+    await expect(printToggle).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const [temperatureVisible, uvStationsVisible, eucosStationsVisible] =
+                await Promise.all([
+                    isLayerRendered(page, 'Temperature'),
+                    isLayerRendered(page, 'UV-Index Stations'),
+                    isLayerRendered(page, 'EUCOS Ground Stations')
+                ]);
+            return temperatureVisible && uvStationsVisible && eucosStationsVisible;
+        })
+        .toBe(true);
+
+    if (!(await printingPanel.isVisible())) {
+        await printToggle.click();
+    }
+    await expect(printingPanel).toBeVisible();
+
+    const printTitle = 'Weather map export';
+
+    let titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: 'PNG', exact: true });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatSelect = printingPanel.getByRole('combobox', { name: /format/i });
+        if ((await formatSelect.count()) === 0) {
+            formatSelect = printingPanel.getByRole('combobox').first();
+        }
+        await expect(formatSelect).toBeVisible();
+        await formatSelect.selectOption({ label: 'PNG' });
+        await expect(formatSelect).toHaveValue(/png/i);
+    }
+
+    await expect(scaleBar).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect
+        .poll(async () => {
+            const [temperatureVisible, uvStationsVisible, eucosStationsVisible] =
+                await Promise.all([
+                    isLayerRendered(page, 'Temperature'),
+                    isLayerRendered(page, 'UV-Index Stations'),
+                    isLayerRendered(page, 'EUCOS Ground Stations')
+                ]);
+            return temperatureVisible && uvStationsVisible && eucosStationsVisible;
+        })
+        .toBe(true);
+
+    let exportButton = printingPanel.getByRole('button', { name: /export|print|download/i });
+    if ((await exportButton.count()) > 1) {
+        exportButton = exportButton.first();
+    }
+    await expect(exportButton).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(() => download.suggestedFilename()).toMatch(/\.png$/i);
+    await expect.poll(() => download.failure()).toBeNull();
+
+    const downloadPath = await download.path();
+    expect(downloadPath).toBeTruthy();
+    if (!downloadPath) {
+        throw new Error('Expected a downloadable PNG file, but no download path was available.');
+    }
+
+    const fileBytes = await readFile(downloadPath);
+    expect(fileBytes.length).toBeGreaterThan(8);
+    expect(Array.from(fileBytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

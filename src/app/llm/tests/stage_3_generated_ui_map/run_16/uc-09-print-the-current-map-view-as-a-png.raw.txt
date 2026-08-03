@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    if (!(await printingPanel.isVisible())) {
+        await page.getByTestId('print-toggle').click();
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const titleInput =
+        (await printingPanel.getByRole('textbox', { name: /title/i }).count()) > 0
+            ? printingPanel.getByRole('textbox', { name: /title/i }).first()
+            : printingPanel.getByRole('textbox').first();
+
+    const printTitle = 'Current Weather Map';
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        const formatCombobox =
+            (await printingPanel.getByRole('combobox', { name: /format/i }).count()) > 0
+                ? printingPanel.getByRole('combobox', { name: /format/i }).first()
+                : printingPanel.getByRole('combobox').first();
+
+        await expect(formatCombobox).toBeVisible();
+
+        const tagName = await formatCombobox.evaluate((element) => element.tagName.toLowerCase());
+        if (tagName === 'select') {
+            const pngOptionValue = await formatCombobox.evaluate((element) => {
+                const select = element as HTMLSelectElement;
+                const option = Array.from(select.options).find(
+                    (entry) =>
+                        /png/i.test(entry.label) ||
+                        /png/i.test(entry.text) ||
+                        /png/i.test(entry.value)
+                );
+                return option?.value;
+            });
+
+            expect(pngOptionValue).toBeTruthy();
+            await formatCombobox.selectOption(pngOptionValue!);
+            await expect(formatCombobox).toHaveValue(/png/i);
+        } else {
+            await formatCombobox.click();
+            const pngOption = page.getByRole('option', { name: /^png$/i }).first();
+            await expect(pngOption).toBeVisible();
+            await pngOption.click();
+            await expect(formatCombobox).toContainText(/png/i);
+        }
+    }
+
+    const exportButtonCandidates = [
+        printingPanel.getByRole('button', { name: /^export$/i }),
+        printingPanel.getByRole('button', { name: /^print$/i }),
+        printingPanel.getByRole('button', { name: /^download$/i }),
+        printingPanel.getByRole('button', { name: /export|print|download/i })
+    ];
+
+    let exportButton = exportButtonCandidates[0];
+    for (const candidate of exportButtonCandidates) {
+        if ((await candidate.count()) > 0) {
+            exportButton = candidate.first();
+            break;
+        }
+    }
+
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(await download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const outputPath = test.info().outputPath(download.suggestedFilename());
+    await download.saveAs(outputPath);
+
+    const fileContent = await readFile(outputPath);
+    expect(fileContent.length).toBeGreaterThan(1000);
+    expect(fileContent.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+});

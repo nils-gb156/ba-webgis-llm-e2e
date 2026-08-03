@@ -1,0 +1,110 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapCenter, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const infoPanel = page.getByTestId('info-panel');
+    if (!(await infoPanel.isVisible())) {
+        await page.getByTestId('info-panel-toggle').click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    const measurementPanel = page.getByTestId('measurement-panel');
+    if (await measurementPanel.isVisible()) {
+        await page.getByTestId('measurement-toggle').click();
+    }
+    await expect(measurementPanel).toBeHidden();
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect.poll(() => getMapCenter(page)).toBeTruthy();
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const mapContainer = page.getByTestId('map-container');
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    let clickPosition: { x: number; y: number } | undefined;
+    await expect
+        .poll(async () => {
+            clickPosition = await page.evaluate(([x, y]) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (
+                                    coordinate: [number, number]
+                                ) => [number, number] | undefined;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+
+                const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+                if (!Array.isArray(pixel) || pixel.length < 2) {
+                    return undefined;
+                }
+
+                const [pixelX, pixelY] = pixel;
+                if (
+                    typeof pixelX !== 'number' ||
+                    typeof pixelY !== 'number' ||
+                    Number.isNaN(pixelX) ||
+                    Number.isNaN(pixelY)
+                ) {
+                    return undefined;
+                }
+
+                return { x: pixelX, y: pixelY };
+            }, targetCoordinate);
+
+            return clickPosition ? [clickPosition.x, clickPosition.y] : undefined;
+        })
+        .toBeTruthy();
+
+    expect(clickPosition).toBeTruthy();
+
+    const mapBounds = await mapContainer.boundingBox();
+    expect(mapBounds).not.toBeNull();
+    expect(clickPosition!.x).toBeGreaterThanOrEqual(0);
+    expect(clickPosition!.y).toBeGreaterThanOrEqual(0);
+    expect(clickPosition!.x).toBeLessThanOrEqual(mapBounds!.width);
+    expect(clickPosition!.y).toBeLessThanOrEqual(mapBounds!.height);
+
+    const getFeatureInfoResponse = page.waitForResponse(
+        (response) => response.ok() && response.url().toLowerCase().includes('getfeatureinfo')
+    );
+
+    await mapContainer.click({
+        position: {
+            x: Math.round(clickPosition!.x),
+            y: Math.round(clickPosition!.y)
+        }
+    });
+
+    await getFeatureInfoResponse;
+
+    const uviStationSection = infoPanel.getByTestId('uvi-station-section');
+    const eucosStationSection = infoPanel.getByTestId('eucos-station-section');
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(eucosStationSection).toBeVisible();
+    await expect(uviStationSection).toContainText('UV-Index Station');
+    await expect(eucosStationSection).toContainText('EUCOS Ground Station');
+
+    await expect
+        .poll(async () => {
+            const text = ((await uviStationSection.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+            return text.length;
+        })
+        .toBeGreaterThan('UV-Index Station'.length);
+
+    await expect
+        .poll(async () => {
+            const text = ((await eucosStationSection.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+            return text.length;
+        })
+        .toBeGreaterThan('EUCOS Ground Station'.length);
+});

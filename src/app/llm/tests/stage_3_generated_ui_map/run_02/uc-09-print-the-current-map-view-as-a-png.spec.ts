@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printingPanel = page.getByTestId('printing-panel');
+    const printToggle = page.getByTestId('print-toggle');
+
+    if (!(await printingPanel.isVisible())) {
+        if ((await printToggle.getAttribute('aria-pressed')) !== 'true') {
+            await printToggle.click();
+        }
+    }
+
+    await expect(printingPanel).toBeVisible();
+
+    const printingRoot = page.getByTestId('printing');
+    await expect(printingRoot).toBeVisible();
+
+    const titleInputByLabel = printingRoot.getByLabel(/title/i);
+    const titleInput =
+        (await titleInputByLabel.count()) > 0
+            ? titleInputByLabel.first()
+            : printingRoot.getByRole('textbox').first();
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Current weather map');
+
+    const pngRadio = printingRoot.getByRole('radio', { name: /png/i });
+    if ((await pngRadio.count()) > 0) {
+        const pngOption = pngRadio.first();
+        if (!(await pngOption.isChecked())) {
+            await pngOption.click({ force: true });
+        }
+        await expect(pngOption).toBeChecked();
+    } else {
+        let formatField = printingRoot.getByLabel(/format/i);
+        if ((await formatField.count()) === 0) {
+            formatField = printingRoot.getByRole('combobox');
+        }
+
+        const formatControl = formatField.first();
+        await expect(formatControl).toBeVisible();
+
+        const pngOption = await formatControl.evaluate((element) => {
+            const select = element as HTMLSelectElement;
+            const option = Array.from(select.options).find(
+                (entry) => /png/i.test(entry.label) || /png/i.test(entry.value)
+            );
+            return option ? { label: option.label, value: option.value } : undefined;
+        });
+
+        expect(pngOption).toBeDefined();
+        await formatControl.selectOption(pngOption!.value);
+        await expect(formatControl).toHaveValue(/png/i);
+    }
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBeTruthy();
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const exportButton = printingRoot.getByRole('button', { name: /export|print/i }).first();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    await expect.poll(() => download.failure()).toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).toBeTruthy();
+
+    const fileContent = await readFile(downloadPath!);
+    expect(fileContent.length).toBeGreaterThan(8);
+    expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+});

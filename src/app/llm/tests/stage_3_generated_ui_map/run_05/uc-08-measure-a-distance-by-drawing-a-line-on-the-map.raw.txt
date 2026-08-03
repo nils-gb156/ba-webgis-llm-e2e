@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('UC8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(async () => (await getMapZoomLevel(page)) ?? -1).toBeGreaterThanOrEqual(0);
+
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurement = page.getByTestId('measurement');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect(mapToolbar).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+    await expect(mapContainer).toBeVisible();
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurement).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    expect(mapBox).not.toBeNull();
+
+    const width = mapBox!.width;
+    const height = mapBox!.height;
+
+    const points = [
+        { x: Math.round(width * 0.62), y: Math.round(height * 0.32) },
+        { x: Math.round(width * 0.74), y: Math.round(height * 0.42) },
+        { x: Math.round(width * 0.80), y: Math.round(height * 0.58) },
+        { x: Math.round(width * 0.70), y: Math.round(height * 0.72) }
+    ];
+
+    await mapContainer.click({ position: points[0] });
+    await mapContainer.click({ position: points[1] });
+    await mapContainer.click({ position: points[2] });
+    await mapContainer.dblclick({ position: points[3] });
+
+    await expect.poll(async () => {
+        return ((await measurement.textContent()) ?? '').replace(/\s+/g, ' ').trim();
+    }).toMatch(/\b\d+(?:[.,]\d+)?\s*(?:m|km)\b/i);
+});

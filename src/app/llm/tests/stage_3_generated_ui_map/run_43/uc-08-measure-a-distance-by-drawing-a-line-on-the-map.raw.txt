@@ -1,0 +1,62 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const mapToolbar = page.getByTestId('map-toolbar');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(mapToolbar).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(async () => (await getMapZoomLevel(page)) ?? -1).toBeGreaterThan(-1);
+
+    const measurementPanelVisible = await measurementPanel.isVisible();
+    if (!measurementPanelVisible) {
+        const pressed = await measurementToggle.getAttribute('aria-pressed');
+        if (pressed !== 'true') {
+            await measurementToggle.click();
+        }
+    }
+
+    await expect(measurementPanel).toBeVisible();
+
+    const box = await mapContainer.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const point1 = {
+        x: Math.round(box.width * 0.58),
+        y: Math.round(box.height * 0.35)
+    };
+    const point2 = {
+        x: Math.round(box.width * 0.68),
+        y: Math.round(box.height * 0.42)
+    };
+    const point3 = {
+        x: Math.round(box.width * 0.78),
+        y: Math.round(box.height * 0.48)
+    };
+    const point4 = {
+        x: Math.round(box.width * 0.86),
+        y: Math.round(box.height * 0.56)
+    };
+
+    await mapContainer.click({ position: point1 });
+    await mapContainer.click({ position: point2 });
+    await mapContainer.click({ position: point3 });
+    await mapContainer.dblclick({ position: point4 });
+
+    const measurementValue = measurementPanel.getByTestId('measurement');
+    await expect(measurementValue).toBeVisible();
+    await expect(measurementValue).toContainText(/[0-9]+(?:[.,][0-9]+)?\s*(mm|cm|m|km)\b/i);
+});

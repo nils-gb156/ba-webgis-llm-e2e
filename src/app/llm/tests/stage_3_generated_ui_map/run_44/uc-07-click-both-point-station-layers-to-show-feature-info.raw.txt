@@ -1,0 +1,95 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    if (!(await infoPanel.isVisible()) && (await infoPanelToggle.getAttribute('aria-pressed')) !== 'true') {
+        await infoPanelToggle.click();
+    }
+    await expect(infoPanel).toBeVisible();
+
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    if ((await measurementToggle.getAttribute('aria-pressed')) === 'true') {
+        await measurementToggle.click();
+    }
+    await expect(measurementPanel).toBeHidden();
+
+    const mapContainer = page.getByTestId('map-container');
+    await expect(mapContainer).toBeVisible();
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    await expect
+        .poll(async () => {
+            return await page.evaluate(([x, y]) => {
+                const map = (
+                    globalThis as {
+                        __openPioneerMap?: {
+                            olMap?: {
+                                getPixelFromCoordinate?: (coordinate: [number, number]) => number[] | null;
+                            };
+                        };
+                    }
+                ).__openPioneerMap;
+                const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+                return Array.isArray(pixel) &&
+                    pixel.length >= 2 &&
+                    typeof pixel[0] === 'number' &&
+                    typeof pixel[1] === 'number'
+                    ? { x: Math.round(pixel[0]), y: Math.round(pixel[1]) }
+                    : undefined;
+            }, targetCoordinate);
+        })
+        .not.toBeUndefined();
+
+    const clickPixel = await page.evaluate(([x, y]) => {
+        const map = (
+            globalThis as {
+                __openPioneerMap?: {
+                    olMap?: {
+                        getPixelFromCoordinate?: (coordinate: [number, number]) => number[] | null;
+                    };
+                };
+            }
+        ).__openPioneerMap;
+        const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+        return Array.isArray(pixel) &&
+            pixel.length >= 2 &&
+            typeof pixel[0] === 'number' &&
+            typeof pixel[1] === 'number'
+            ? { x: Math.round(pixel[0]), y: Math.round(pixel[1]) }
+            : undefined;
+    }, targetCoordinate);
+
+    expect(clickPixel).toBeDefined();
+    if (!clickPixel) {
+        throw new Error('Could not resolve a click position for the target map coordinate.');
+    }
+
+    await mapContainer.click({ position: clickPixel });
+
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(uviStationSection).toContainText('UV-Index Station');
+    await expect
+        .poll(async () => ((await uviStationSection.textContent()) ?? '').trim())
+        .toMatch(/UV-Index Station[\s\S]*\S/);
+
+    await expect(eucosStationSection).toBeVisible();
+    await expect(eucosStationSection).toContainText('EUCOS Ground Station');
+    await expect
+        .poll(async () => ((await eucosStationSection.textContent()) ?? '').trim())
+        .toMatch(/EUCOS Ground Station[\s\S]*\S/);
+});

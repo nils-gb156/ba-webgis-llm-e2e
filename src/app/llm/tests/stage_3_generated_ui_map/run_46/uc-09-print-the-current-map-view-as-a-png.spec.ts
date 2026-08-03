@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { promises as fs } from 'node:fs';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 9: Print the current map view as a PNG', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+
+    const printToggle = page.getByTestId('print-toggle');
+    const printingPanel = page.getByTestId('printing-panel');
+
+    await expect(printToggle).toBeVisible();
+
+    const panelInitiallyVisible = await printingPanel.isVisible();
+    const togglePressed = (await printToggle.getAttribute('aria-pressed')) === 'true';
+
+    if (!panelInitiallyVisible) {
+        if (!togglePressed) {
+            await printToggle.click();
+        }
+    }
+
+    await expect(printingPanel).toBeVisible();
+    await expect(page.getByTestId('printing')).toBeVisible();
+
+    const printTitle = 'Current weather map';
+
+    let titleInput = printingPanel.getByLabel(/title/i);
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox', { name: /title/i });
+    }
+    if ((await titleInput.count()) === 0) {
+        titleInput = printingPanel.getByRole('textbox').first();
+    }
+
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill(printTitle);
+    await expect(titleInput).toHaveValue(printTitle);
+
+    const pngRadio = printingPanel.getByRole('radio', { name: /^png$/i });
+    if ((await pngRadio.count()) > 0) {
+        await pngRadio.click({ force: true });
+        await expect(pngRadio).toBeChecked();
+    } else {
+        let formatSelect = printingPanel.getByLabel(/format/i);
+        if ((await formatSelect.count()) === 0) {
+            formatSelect = printingPanel.getByRole('combobox', { name: /format/i });
+        }
+        if ((await formatSelect.count()) === 0) {
+            formatSelect = printingPanel.getByRole('combobox').first();
+        }
+
+        await expect(formatSelect).toBeVisible();
+
+        let selectedPng = false;
+        for (const option of [{ label: 'PNG' }, 'png', 'image/png']) {
+            try {
+                await formatSelect.selectOption(option as never);
+                selectedPng = true;
+                break;
+            } catch {
+                // try the next option value
+            }
+        }
+
+        expect(selectedPng).toBe(true);
+        await expect.poll(async () => (await formatSelect.inputValue()).toLowerCase()).toMatch(/png/);
+    }
+
+    let exportButton = printingPanel.getByRole('button', { name: /^export$/i });
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /^print$/i });
+    }
+    if ((await exportButton.count()) === 0) {
+        exportButton = printingPanel.getByRole('button', { name: /export|print/i }).first();
+    }
+
+    await expect(exportButton).toBeVisible();
+    await expect(exportButton).toBeEnabled();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/i);
+
+    const downloadPath = await download.path();
+    expect(downloadPath).not.toBeNull();
+
+    if (downloadPath) {
+        const fileContent = await fs.readFile(downloadPath);
+        expect(fileContent.byteLength).toBeGreaterThan(8);
+        expect(Array.from(fileContent.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+    }
+
+    await expect(page.getByTestId('scale-bar')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'Temperature')).toBe(true);
+});

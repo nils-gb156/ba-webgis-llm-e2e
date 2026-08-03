@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    await expect(page.getByTestId('map-toolbar')).toBeVisible();
+    await expect(page.getByTestId('map-container')).toBeVisible();
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurement = page.getByTestId('measurement');
+    const mapContainer = page.getByTestId('map-container');
+
+    await expect(measurementToggle).toBeVisible();
+
+    if (!(await measurementPanel.isVisible())) {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurement).toBeVisible();
+
+    const box = await mapContainer.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+    const x = (ratio: number) => clamp(Math.round(box.width * ratio), 40, Math.round(box.width) - 40);
+    const y = (ratio: number) => clamp(Math.round(box.height * ratio), 40, Math.round(box.height) - 40);
+
+    const positions = [
+        { x: x(0.35), y: y(0.45) },
+        { x: x(0.45), y: y(0.55) },
+        { x: x(0.55), y: y(0.42) },
+        { x: x(0.62), y: y(0.50) }
+    ];
+
+    await mapContainer.click({ position: positions[0] });
+    await mapContainer.click({ position: positions[1] });
+    await mapContainer.click({ position: positions[2] });
+    await mapContainer.dblclick({ position: positions[3] });
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurement).toContainText(/(?:[1-9]\d*(?:[.,]\d+)?|0[.,]\d+)\s*(?:m|km)\b/i);
+});

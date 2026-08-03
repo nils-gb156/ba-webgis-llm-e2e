@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getMapZoomLevel } from '../../../map-model-helpers';
+
+test('Use Case 8: Measure a distance by drawing a line on the map', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementResult = page.getByTestId('measurement');
+
+    await expect(mapContainer).toBeVisible();
+    await expect(measurementToggle).toBeVisible();
+    await expect.poll(() => getMapZoomLevel(page)).toBeGreaterThan(0);
+
+    const panelVisibleBefore = await measurementPanel.isVisible();
+    const togglePressedBefore = await measurementToggle.getAttribute('aria-pressed');
+    if (!panelVisibleBefore && togglePressedBefore !== 'true') {
+        await measurementToggle.click();
+    }
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementResult).toBeVisible();
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    const positions = [
+        { x: Math.round(mapBox.width * 0.55), y: Math.round(mapBox.height * 0.35) },
+        { x: Math.round(mapBox.width * 0.65), y: Math.round(mapBox.height * 0.42) },
+        { x: Math.round(mapBox.width * 0.75), y: Math.round(mapBox.height * 0.5) },
+        { x: Math.round(mapBox.width * 0.82), y: Math.round(mapBox.height * 0.6) }
+    ];
+
+    await mapContainer.click({ position: positions[0] });
+    await mapContainer.click({ position: positions[1] });
+    await mapContainer.click({ position: positions[2] });
+    await mapContainer.dblclick({ position: positions[3] });
+
+    await expect(measurementPanel).toBeVisible();
+    await expect(measurementResult).toContainText(/\d+(?:[.,]\d+)?\s*(?:mm|cm|m|km)\b/i);
+});

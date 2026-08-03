@@ -1,0 +1,102 @@
+// SPDX-FileCopyrightText: 2023-2025 Open Pioneer project (https://github.com/open-pioneer)
+// SPDX-License-Identifier: Apache-2.0
+import { test, expect } from '@playwright/test';
+import { getActiveBaseLayerTitle, isLayerRendered } from '../../../map-model-helpers';
+
+test('Use Case 7: Click both point station layers to show feature info', async ({ page }) => {
+    await page.goto('http://localhost:5173/ba-webgis-llm-e2e/');
+
+    const mapContainer = page.getByTestId('map-container');
+    const infoPanel = page.getByTestId('info-panel');
+    const infoPanelToggle = page.getByTestId('info-panel-toggle');
+    const measurementPanel = page.getByTestId('measurement-panel');
+    const measurementToggle = page.getByTestId('measurement-toggle');
+    const uviStationSection = page.getByTestId('uvi-station-section');
+    const eucosStationSection = page.getByTestId('eucos-station-section');
+
+    await expect(mapContainer).toBeVisible();
+
+    await expect.poll(() => getActiveBaseLayerTitle(page)).toBe('Carto Light');
+    await expect.poll(() => isLayerRendered(page, 'UV-Index Stations')).toBe(true);
+    await expect.poll(() => isLayerRendered(page, 'EUCOS Ground Stations')).toBe(true);
+
+    if (!(await infoPanel.isVisible())) {
+        const infoPressed = await infoPanelToggle.getAttribute('aria-pressed');
+        if (infoPressed !== 'true') {
+            await infoPanelToggle.click();
+        }
+    }
+    await expect(infoPanel).toBeVisible();
+
+    if (await measurementPanel.isVisible()) {
+        const measurementPressed = await measurementToggle.getAttribute('aria-pressed');
+        if (measurementPressed === 'true' || measurementPressed === null) {
+            await measurementToggle.click();
+        }
+    }
+    await expect(measurementPanel).toBeHidden();
+
+    await expect(uviStationSection).toBeHidden();
+    await expect(eucosStationSection).toBeHidden();
+
+    const targetCoordinate: [number, number] = [1188692.84, 6767643.28];
+
+    const clickPosition = await page.evaluate(([x, y]) => {
+        const map = (globalThis as {
+            __openPioneerMap?: {
+                olMap?: {
+                    getPixelFromCoordinate?: (coordinate: [number, number]) => number[] | undefined;
+                };
+            };
+        }).__openPioneerMap;
+        const pixel = map?.olMap?.getPixelFromCoordinate?.([x, y]);
+        if (!pixel || pixel.length < 2) {
+            return undefined;
+        }
+
+        const [pixelX, pixelY] = pixel;
+        if (!Number.isFinite(pixelX) || !Number.isFinite(pixelY)) {
+            return undefined;
+        }
+
+        return {
+            x: Math.round(pixelX),
+            y: Math.round(pixelY)
+        };
+    }, targetCoordinate);
+
+    if (!clickPosition) {
+        throw new Error('Could not determine a clickable pixel position for the target map coordinate.');
+    }
+
+    const mapBox = await mapContainer.boundingBox();
+    if (!mapBox) {
+        throw new Error('Map container has no bounding box.');
+    }
+
+    expect(clickPosition.x).toBeGreaterThanOrEqual(0);
+    expect(clickPosition.y).toBeGreaterThanOrEqual(0);
+    expect(clickPosition.x).toBeLessThan(mapBox.width);
+    expect(clickPosition.y).toBeLessThan(mapBox.height);
+
+    const getFeatureInfoResponse = page.waitForResponse((response) => {
+        return response.ok() && response.url().toLowerCase().includes('getfeatureinfo');
+    });
+
+    await mapContainer.click({ position: clickPosition });
+    await getFeatureInfoResponse;
+
+    await expect(infoPanel).toBeVisible();
+
+    await expect(uviStationSection).toBeVisible();
+    await expect(uviStationSection).toContainText('UV-Index Station');
+    await expect.poll(async () => {
+        return ((await uviStationSection.textContent()) ?? '').replace(/\s+/g, ' ').trim().length;
+    }).toBeGreaterThan('UV-Index Station'.length);
+
+    await expect(eucosStationSection).toBeVisible();
+    await expect(eucosStationSection).toContainText('EUCOS Ground Station');
+    await expect.poll(async () => {
+        return ((await eucosStationSection.textContent()) ?? '').replace(/\s+/g, ' ').trim().length;
+    }).toBeGreaterThan('EUCOS Ground Station'.length);
+});
