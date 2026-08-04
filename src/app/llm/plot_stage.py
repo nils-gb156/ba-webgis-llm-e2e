@@ -40,6 +40,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 import pandas as pd
 
@@ -84,13 +85,15 @@ SCORE_DIMS = ["coverage_score", "selector_score", "map_interaction_score",
               "assertion_score"]
 
 # Einheitliches Farbschema für die ordinalen Judge-Scores (1-4) in
-# score_distribution UND score_heatmap: sequenzieller Helligkeitsverlauf
-# einer Farbe (Blau), hell = niedriger Score, dunkel = hoher Score.
-# Sequenziell statt divergierend, weil die Skala ordinal ohne natürlichen
-# Mittelpunkt ist; ein Ein-Farben-Verlauf bleibt auch in Graustufen und
-# bei Farbfehlsichtigkeit eindeutig lesbar.
-SCORE_CMAP = "Blues"
-SCORE_LEVEL_COLORS = {1: "#DBE9F6", 2: "#9DC8E4", 3: "#4A97C9", 4: "#0B559F"}
+# score_distribution UND score_heatmap: Farbverlauf aus der Okabe-Ito-Palette
+# der anderen Grafiken -- Score 1 = dunkelorange, 2 = hellorange, 3 = hellblau,
+# 4 = dunkelblau. Die Orangetöne sind identisch mit exec_category_by_uc
+# (#D55E00 = INFRA_FAIL, #E69F00 = ASSERTION_FAIL). Colorblind-sicher; die
+# vier diskreten Stufen sind exakt die Stützstellen des kontinuierlichen
+# Verlaufs, damit score_distribution und score_heatmap dieselbe Farblogik nutzen.
+SCORE_GRADIENT = ["#D55E00", "#E69F00", "#56B4E9", "#0072B2"]
+SCORE_CMAP = LinearSegmentedColormap.from_list("score_orange_blue", SCORE_GRADIENT)
+SCORE_LEVEL_COLORS = {1: "#D55E00", 2: "#E69F00", 3: "#56B4E9", 4: "#0072B2"}
 
 # Farbverlauf für die PASS-Iteration in Stage-5-Plots (früh = dunkelblau,
 # spät = hell), FAIL = vermilion. Colorblind-sicher gewählt.
@@ -178,10 +181,9 @@ def plot_score_distribution(df: pd.DataFrame, out: Path, stage_label: str):
         # an Segmenthelligkeit anpassen (helle Segmente -> schwarze Schrift)
         for bar, h, b in zip(bars, heights, bottom):
             if h >= 3:
-                txt_color = "white" if level >= 3 else "black"
                 ax.text(bar.get_x() + bar.get_width() / 2, b + h / 2,
                         str(h), ha="center", va="center",
-                        color=txt_color, fontsize=9, fontweight="bold")
+                        color="black", fontsize=9, fontweight="bold")
         bottom = [b + h for b, h in zip(bottom, heights)]
 
     ax.set_ylabel("Anzahl Testdateien")
@@ -201,12 +203,12 @@ def plot_score_heatmap(df: pd.DataFrame, out: Path, stage_label: str):
     matrix = [[df[df.uc_id == uc][dim].mean() for dim in dims] for uc in ucs]
 
     fig, ax = plt.subplots(figsize=(6.5, 7))
-    # Sequenzieller Ein-Farben-Verlauf (Helligkeit kodiert den Score):
-    # hell = niedriger Score, dunkel = hoher Score. Gleiche Farblogik wie in
-    # score_distribution, dadurch sind beide Grafiken gemeinsam lesbar.
+    # Farbverlauf orange/gelb -> hellblau -> dunkelblau (Okabe-Ito):
+    # niedriger Score = orange, hoher Score = dunkelblau. Gleiche Farblogik wie
+    # in score_distribution, dadurch sind beide Grafiken gemeinsam lesbar.
     # map_interaction_score ist für Nicht-Karten-UCs "n/a" -> NaN im Mittel.
     # Solche Zellen neutral grau (set_bad) statt als Score einfärben.
-    cmap = plt.get_cmap(SCORE_CMAP).copy()
+    cmap = SCORE_CMAP.copy()
     cmap.set_bad(color="#E5E5E5")
     matrix_ma = np.ma.masked_invalid(matrix)
     im = ax.imshow(matrix_ma, cmap=cmap, vmin=1, vmax=4, aspect="auto")
@@ -218,10 +220,9 @@ def plot_score_heatmap(df: pd.DataFrame, out: Path, stage_label: str):
         for j in range(len(dims)):
             v = matrix[i][j]
             if pd.notna(v):
-                # dunkle Zellen (hoher Score) -> weiße Schrift
-                txt_color = "white" if v >= 2.9 else "black"
+                # einheitliche Schriftfarbe (schwarz) für alle Zellen
                 ax.text(j, i, f"{v:.1f}", ha="center", va="center",
-                        fontsize=8, color=txt_color)
+                        fontsize=8, color="black")
             else:
                 # n/a (map_interaction für Nicht-Karten-UCs)
                 ax.text(j, i, "n/a", ha="center", va="center",
