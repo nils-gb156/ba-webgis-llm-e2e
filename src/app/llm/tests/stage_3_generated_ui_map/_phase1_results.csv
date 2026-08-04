@@ -785,7 +785,7 @@ waiting for event ""download""
   60 |   ]);
   61 |
     at C:\Users\n.beikel\repos\ba-webgis-llm-e2e\src\ap",False
-stage_3_generated_ui_map,run_08,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_08/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_3_generated_ui_map,run_08,uc-10,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_08/uc-10-configure-layers-search-for-a-location-and-load-the-weather-forecast.spec.ts,COMPILE_ERROR,0.0,Fehlendes // in mehrzeiligem Kommentar,True
 stage_3_generated_ui_map,run_09,uc-01,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_09/uc-01-show-and-hide-the-layer-switcher-via-the-toolbar-button.spec.ts,PASS,2.71,,False
 stage_3_generated_ui_map,run_09,uc-02,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_09/uc-02-switch-the-base-map-from-carto-light-to-openstreetmap.spec.ts,INFRA_FAIL,30.03,"Test timeout of 30000ms exceeded.
 Error: locator.click: Test timeout of 30000ms exceeded.
@@ -3855,7 +3855,7 @@ Call Log:
      |                                                           ^
   20 |
   21 |   // Wait ",False
-stage_3_generated_ui_map,run_40,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_40/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_3_generated_ui_map,run_40,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_40/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,COMPILE_ERROR,0.0,	Leerzeichen im Identifier (__open pioneerMap),True
 stage_3_generated_ui_map,run_40,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_40/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,2.61,"TypeError: page.mouse.dblClick is not a function
 TypeError: page.mouse.dblClick is not a function
 
@@ -4748,7 +4748,7 @@ Call Log:
   20 |   // We use expect.poll to wait for the highlight to appear
 > 21 |   await expect.poll(() => getHighlightedCoordinate(page)).toBeTruthy();
      |                             ",False
-stage_3_generated_ui_map,run_50,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_50/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_3_generated_ui_map,run_50,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_50/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,COMPILE_ERROR,0.0,Leerzeichen im Identifier (__open pioneerMap),True
 stage_3_generated_ui_map,run_50,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_3_generated_ui_map/run_50/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,7.26,"Error: expect(locator).toBeVisible() failed
 
 Locator:  getByTestId('coordinate-viewer')

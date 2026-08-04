@@ -243,7 +243,7 @@ Locator: getByTestId('layer-switcher').getByRole('button', { name: /Base Map/i }
 Expected: visible
 Timeout: 5000ms
 Erro",False
-stage_1_baseline,run_03,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_1_baseline/run_03/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_1_baseline,run_03,uc-03,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_1_baseline/run_03/uc-03-zoom-in-and-out-using-the-zoom-buttons.spec.ts,COMPILE_ERROR,0.0,Doppelte const-Deklaration (mapCanvas zweimal im selben Scope),True
 stage_1_baseline,run_03,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_1_baseline/run_03/uc-04-activate-the-uv-index-overlay-and-verify-it-is-rendered-on-the-map.spec.ts,INFRA_FAIL,6.99,"Error: expect(locator).toBeVisible() failed
 
 Locator: getByRole('tree', { name: /layer|toc/i })
@@ -2019,7 +2019,7 @@ Error: element(s) not found
 Call log:
   - Expect ""toBeVisible"" with timeout 5000ms
   - waitin",False
-stage_1_baseline,run_15,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_1_baseline/run_15/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_1_baseline,run_15,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_1_baseline/run_15/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,GENERATION_ERROR,0.0,Degenerierte Wiederholung (kompletter Codeblock inkl. Deklaration erneut ausgegeben),True
 stage_1_baseline,run_15,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_1_baseline/run_15/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,INFRA_FAIL,2.23,"Error: expect(locator).toBeVisible() failed
 
 Locator: locator('canvas')

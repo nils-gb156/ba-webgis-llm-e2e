@@ -4893,7 +4893,7 @@ Locator:  getByTestId('weather-forecast-section').locator('li')
 Expected: 24
 Received: 0
 Ti",False
-stage_2_accessibility_snapshot,run_46,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_2_accessibility_snapshot/run_46/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_2_accessibility_snapshot,run_46,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_2_accessibility_snapshot/run_46/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,COMPILE_ERROR,0.0,const/if als Property in Objektliteral (.click({..., const...})),True
 stage_2_accessibility_snapshot,run_46,uc-08,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_2_accessibility_snapshot/run_46/uc-08-measure-a-distance-by-drawing-a-line-on-the-map.spec.ts,ASSERTION_FAIL,8.86,"Error: expect(received).toMatch(expected)
 
 Expected pattern: /[\d.,]+\s*(m|km|mi|ft)/i

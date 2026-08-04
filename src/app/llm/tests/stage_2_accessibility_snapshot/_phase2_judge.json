@@ -8212,7 +8212,7 @@
   "run": "run_46",
   "uc_id": "uc-07",
   "file": "C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_2_accessibility_snapshot/run_46/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts",
-  "exec_category": "TIMEOUT",
+  "exec_category": "COMPILE_ERROR",
   "coverage_score": 4,
   "selector_score": 4,
   "map_interaction_score": 1,

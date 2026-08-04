@@ -4594,7 +4594,7 @@
   "run": "run_26",
   "uc_id": "uc-06",
   "file": "C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts",
-  "exec_category": "TIMEOUT",
+  "exec_category": "COMPILE_ERROR",
   "coverage_score": 4,
   "selector_score": 4,
   "map_interaction_score": 2,
@@ -4603,7 +4603,7 @@
   "reasoning": {
    "coverage": "Der Kartenklick und das Warten auf den Forecast stehen unbedingt im Code; alle drei erwarteten Ergebnisse (Highlight, Forecast-Sektion/-Inhalt, 24 Eintraege) werden adressiert. Vollstaendig abgedeckt.",
    "selector": "Alle benutzten Locator sind real: map-container, info-panel, weather-forecast(-section) und weather-forecast-entry - genau die Elemente des Referenztests, keine Erfindungen.",
-   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: TIMEOUT ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
+   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: COMPILE_ERROR ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
    "assertion": "Alle drei erwarteten Ergebnisse werden unbedingt und zustandstragend geprueft: der Highlight ueber den wartenden Map-Model-Poll, der geladene Forecast ueber das erst bei Daten gerenderte weather-forecast und die Eintragszahl ueber toHaveCount(24) bzw. einen wartenden Count-Poll."
   }
  },
@@ -4954,7 +4954,7 @@
   "run": "run_28",
   "uc_id": "uc-06",
   "file": "C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts",
-  "exec_category": "TIMEOUT",
+  "exec_category": "COMPILE_ERROR",
   "coverage_score": 4,
   "selector_score": 4,
   "map_interaction_score": 2,
@@ -4963,7 +4963,7 @@
   "reasoning": {
    "coverage": "Der Kartenklick und das Warten auf den Forecast stehen unbedingt im Code; alle drei erwarteten Ergebnisse (Highlight, Forecast-Sektion/-Inhalt, 24 Eintraege) werden adressiert. Vollstaendig abgedeckt.",
    "selector": "Alle benutzten Locator sind real: map-container, info-panel, weather-forecast(-section) und weather-forecast-entry - genau die Elemente des Referenztests, keine Erfindungen.",
-   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: TIMEOUT ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
+   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: COMPILE_ERROR ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
    "assertion": "Alle drei erwarteten Ergebnisse werden unbedingt und zustandstragend geprueft: der Highlight ueber den wartenden Map-Model-Poll, der geladene Forecast ueber das erst bei Daten gerenderte weather-forecast und die Eintragszahl ueber toHaveCount(24) bzw. einen wartenden Count-Poll."
   }
  },
@@ -7114,7 +7114,7 @@
   "run": "run_40",
   "uc_id": "uc-06",
   "file": "C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts",
-  "exec_category": "TIMEOUT",
+  "exec_category": "COMPILE_ERROR",
   "coverage_score": 4,
   "selector_score": 4,
   "map_interaction_score": 2,
@@ -7123,7 +7123,7 @@
   "reasoning": {
    "coverage": "Der Kartenklick und das Warten auf den Forecast stehen unbedingt im Code; alle drei erwarteten Ergebnisse (Highlight, Forecast-Sektion/-Inhalt, 24 Eintraege) werden adressiert. Vollstaendig abgedeckt.",
    "selector": "Alle benutzten Locator sind real: map-container, info-panel, weather-forecast(-section) und weather-forecast-entry - genau die Elemente des Referenztests, keine Erfindungen.",
-   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: TIMEOUT ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
+   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: COMPILE_ERROR ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
    "assertion": "Highlight und Eintragszahl werden wartend geprueft, fuer 'Forecast geladen' aber nur die weather-forecast-section, die immer sichtbar ist (Platzhaltertext) und damit nicht zustandstragend. Eine der drei Erwartungen bleibt ungeprueft."
   }
  },
@@ -7654,7 +7654,7 @@
   "run": "run_43",
   "uc_id": "uc-06",
   "file": "C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts",
-  "exec_category": "TIMEOUT",
+  "exec_category": "COMPILE_ERROR",
   "coverage_score": 4,
   "selector_score": 4,
   "map_interaction_score": 2,
@@ -7663,7 +7663,7 @@
   "reasoning": {
    "coverage": "Der Kartenklick und das Warten auf den Forecast stehen unbedingt im Code; alle drei erwarteten Ergebnisse (Highlight, Forecast-Sektion/-Inhalt, 24 Eintraege) werden adressiert. Vollstaendig abgedeckt.",
    "selector": "Alle benutzten Locator sind real: map-container, info-panel, weather-forecast(-section) und weather-forecast-entry - genau die Elemente des Referenztests, keine Erfindungen.",
-   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: TIMEOUT ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
+   "map_interaction": "Der Helper wird aus \"../../map-model-helpers\" importiert; korrekt waere \"../../../map-model-helpers\". Der Zugriffspfad auf das Map-Model geht damit ins Leere (Phase 1: COMPILE_ERROR ohne Report) - fehlerhafter Versuch kartenspezifischer Interaktion (Regel 21).",
    "assertion": "Alle drei erwarteten Ergebnisse werden unbedingt und zustandstragend geprueft: der Highlight ueber den wartenden Map-Model-Poll, der geladene Forecast ueber das erst bei Daten gerenderte weather-forecast und die Eintragszahl ueber toHaveCount(24) bzw. einen wartenden Count-Poll."
   }
  },

@@ -2160,7 +2160,7 @@ stage_4_manual_ui_map,run_26,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src
     1) <input checked value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_d_:input"" aria-labelledby=""checkbox:_r_d_:label""/> aka getByRole('checkbox', { name: 'UV-Index Stations' })
     2) <input value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_p_:input"" aria-labelledby=""checkbox:_r_p_:label""/> aka getByRole('checkbox', { name: 'UV-Index', exact: true",False
 stage_4_manual_ui_map,run_26,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,2.47,,False
-stage_4_manual_ui_map,run_26,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_4_manual_ui_map,run_26,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,COMPILE_ERROR,0.0,Falscher relativer Import-Pfad (../../ statt vorgegebenem ../../../map-model-helpers),True
 stage_4_manual_ui_map,run_26,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_26/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,6.17,"Error: expect(locator).toBeVisible() failed
 
 Locator: getByTestId('uvi-station-info')
@@ -2309,7 +2309,7 @@ stage_4_manual_ui_map,run_28,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src
     1) <input checked value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_d_:input"" aria-labelledby=""checkbox:_r_d_:label""/> aka getByRole('checkbox', { name: 'UV-Index Stations' })
     2) <input value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_p_:input"" aria-labelledby=""checkbox:_r_p_:label""/> aka getByRole('checkbox', { name: 'UV-Index', exact: true",False
 stage_4_manual_ui_map,run_28,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,2.37,,False
-stage_4_manual_ui_map,run_28,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_4_manual_ui_map,run_28,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,COMPILE_ERROR,0.0,Falscher relativer Import-Pfad (../../ statt vorgegebenem ../../../map-model-helpers),True
 stage_4_manual_ui_map,run_28,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_28/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,INFRA_FAIL,6.14,"Error: expect(locator).toBeVisible() failed
 
 Locator: getByTestId('uvi-station-section')
@@ -3294,7 +3294,7 @@ stage_4_manual_ui_map,run_40,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src
     1) <input checked value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_d_:input"" aria-labelledby=""checkbox:_r_d_:label""/> aka getByRole('checkbox', { name: 'UV-Index Stations' })
     2) <input value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_p_:input"" aria-labelledby=""checkbox:_r_p_:label""/> aka getByRole('checkbox', { name: 'UV-Index', exact: true",False
 stage_4_manual_ui_map,run_40,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,2.39,,False
-stage_4_manual_ui_map,run_40,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_4_manual_ui_map,run_40,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,COMPILE_ERROR,0.0,Falscher relativer Import-Pfad (../../ statt vorgegebenem ../../../map-model-helpers),True
 stage_4_manual_ui_map,run_40,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_40/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,30.03,"Test timeout of 30000ms exceeded.
 Error: locator.click: Test timeout of 30000ms exceeded.
 Call log:
@@ -3549,7 +3549,7 @@ stage_4_manual_ui_map,run_43,uc-04,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src
     1) <input checked value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_d_:input"" aria-labelledby=""checkbox:_r_d_:label""/> aka getByRole('checkbox', { name: 'UV-Index Stations' })
     2) <input value=""on"" type=""checkbox"" aria-invalid=""false"" id=""checkbox:_r_p_:input"" aria-labelledby=""checkbox:_r_p_:label""/> aka getByRole('checkbox', { name: 'UV-Index', exact: true",False
 stage_4_manual_ui_map,run_43,uc-05,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-05-activate-the-precipitation-overlay-and-verify-the-legend-updates.spec.ts,PASS,2.4,,False
-stage_4_manual_ui_map,run_43,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,TIMEOUT,0.0,Nicht im Playwright-Report erfasst (Prozess-Guard?),True
+stage_4_manual_ui_map,run_43,uc-06,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-06-click-a-map-position-to-show-the-weather-forecast.spec.ts,COMPILE_ERROR,0.0,Falscher relativer Import-Pfad (../../ statt vorgegebenem ../../../map-model-helpers),True
 stage_4_manual_ui_map,run_43,uc-07,C:/Users/n.beikel/repos/ba-webgis-llm-e2e/src/app/llm/tests/stage_4_manual_ui_map/run_43/uc-07-click-both-point-station-layers-to-show-feature-info.spec.ts,ASSERTION_FAIL,30.04,"Test timeout of 30000ms exceeded.
 Error: locator.click: Test timeout of 30000ms exceeded.
 Call log:
