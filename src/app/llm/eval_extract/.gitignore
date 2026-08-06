@@ -1,0 +1,3 @@
+__pycache__/
+# Zwischenergebnisse der Aggregation (werden von run_all.py neu erzeugt, ~13 MB)
+_out/
