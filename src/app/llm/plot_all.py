@@ -16,11 +16,19 @@ Erzeugt in tests/plots_combined/:
     score_heatmap_grid.png         2x2-Raster: mittlerer Judge-Score je
                                     UC × Dimension, Stufen 1-4, gemeinsame
                                     Farbskala
+    stage5_score_heatmap.png       Einzel-Heatmap (nur Stufe 5): mittlerer
+                                    Judge-Score je UC × Dimension, gleiches
+                                    Format wie ein Panel des 1-4-Rasters
+    stage5_loop_grid.png           1x2-Raster (nur Stufe 5): Loop-Konvergenz
+                                    und PASS-Iteration pro UC nebeneinander,
+                                    gemeinsame Legende
 
-Stufe 5 ist bewusst nicht enthalten (eigenes Ausführungsmodell, siehe
-Kapitel 6.4 der Arbeit).
+Stufe 5 hat ein eigenes Ausführungsmodell (Self-Improvement-Loop, siehe
+Kapitel 6.4 der Arbeit) und wird daher in einem separaten kombinierten
+Bild dargestellt.
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -46,6 +54,17 @@ STAGE_LABELS = {
     "stage3": "Stufe 3: Automatisch generierte UI-Map",
     "stage4": "Stufe 4: Manuell erstellte UI-Map",
 }
+
+# Stufe 5 wird getrennt behandelt (eigenes Ausführungsmodell, Loop-Plots aus
+# _stage_5_all_runs.jsonl statt der Standard-CSV).
+STAGE5_DIR = "stage_5_self_improvement_loop"
+STAGE5_LABEL = "Bonus-Stufe 5: Self-Improvement-Loop"
+
+# Farbverlauf für die PASS-Iteration in Stage-5-Plots identisch zu
+# plot_stage.py (früh = dunkelblau, spät = hell), FAIL = vermilion.
+# Bei Änderung dort MUSS hier synchron angepasst werden.
+ITER_COLORS = {0: "#0072B2", 1: "#56B4E9", 2: "#88CCEE", 3: "#B8E0F5", 4: "#DDEEF9"}
+FAIL_COLOR = "#D55E00"
 
 # Identisch zu plot_stage.py -- bewusst dupliziert statt importiert, damit
 # dieses Skript unabhängig von der internen Struktur von plot_stage.py
@@ -198,6 +217,121 @@ def plot_heatmap_grid(means_by_stage: dict[str, pd.DataFrame], out: Path):
     plt.close(fig)
 
 
+def plot_heatmap_single(means: pd.DataFrame, out: Path, stage_label: str):
+    """Einzelne Score-Heatmap (UC × Dimension) im selben Format wie ein Panel
+    des Stufen-1-4-Rasters: identische Farbskala, Zellbeschriftung und
+    horizontale Colorbar unten. Für Stufe 5, die getrennt dargestellt wird."""
+    fig, ax = plt.subplots(figsize=(5.5, 5.5), constrained_layout=True)
+    im = plot_heatmap_panel(ax, means, stage_label)
+    fig.colorbar(im, ax=ax, orientation="horizontal", location="bottom",
+                 shrink=0.5, pad=0.03, fraction=0.05, label="Ø Score (1–4)")
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Stufe 5: kombinierte Loop-Plots (Datenquelle: _stage_5_all_runs.jsonl).
+# Logik identisch zu plot_stage.py, hier nur so umgebaut, dass beide
+# Diagramme in einem Bild nebeneinander liegen.
+# ---------------------------------------------------------------------------
+
+def load_loop_jsonl(stage_dir: Path) -> list[dict]:
+    jsonl = stage_dir / "_stage_5_all_runs.jsonl"
+    if not jsonl.exists():
+        print(f"[WARNUNG] {jsonl} fehlt -- Stufe-5-Plot wird übersprungen")
+        return []
+    entries = []
+    with jsonl.open(encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                entries.append(json.loads(line))
+    return entries
+
+
+def pass_iteration(entry: dict) -> int | None:
+    """Iteration (0-basiert), in der der Loop bestanden hat, oder None."""
+    for it in entry.get("iterations", []):
+        if it.get("passed"):
+            return int(it.get("iteration", 0))
+    return None
+
+
+def plot_loop_convergence_panel(ax, entries: list[dict], max_iters: int):
+    """Kumulierte PASS-Rate nach Iteration k über alle UC×Run-Einträge."""
+    n = len(entries)
+    pass_iters = [pass_iteration(e) for e in entries]
+    cumulative = []
+    for k in range(max_iters):
+        passed_by_k = sum(1 for p in pass_iters if p is not None and p <= k)
+        cumulative.append(100.0 * passed_by_k / n if n else 0.0)
+
+    xs = list(range(max_iters))
+    ax.plot(xs, cumulative, marker="o", color="#0072B2")
+    for x, y in zip(xs, cumulative):
+        ax.annotate(f"{y:.0f}%", (x, y), textcoords="offset points",
+                    xytext=(0, 8), ha="center", fontsize=11)
+    ax.set_xticks(xs)
+    ax.set_xlabel("Iteration", fontsize=12)
+    ax.set_ylabel("Kumulierte PASS-Rate (%)", fontsize=12)
+    ax.set_ylim(0, 105)
+    ax.tick_params(axis="both", labelsize=11)
+    ax.set_title(f"Loop-Konvergenz: kumulierte PASS-Rate (n={n})", fontsize=14)
+    ax.grid(axis="y", alpha=0.3)
+
+
+def plot_loop_iterations_by_uc_panel(ax, entries: list[dict], max_iters: int):
+    """Pro UC gestapelte Balken: in welcher Iteration wurde bestanden
+    (Farbverlauf früh -> spät), plus finale FAILs (vermilion)."""
+    ucs = sorted({f"uc-{int(e['uc_id']):02d}" for e in entries})
+    by_uc: dict[str, list] = {uc: [] for uc in ucs}
+    for e in entries:
+        by_uc[f"uc-{int(e['uc_id']):02d}"].append(pass_iteration(e))
+
+    bottom = [0] * len(ucs)
+    handles = {}
+    for k in range(max_iters):
+        heights = [sum(1 for p in by_uc[uc] if p == k) for uc in ucs]
+        bars = ax.bar(ucs, heights, bottom=bottom, label=f"PASS in Iter. {k}",
+                      color=ITER_COLORS.get(k, "#DDEEF9"), edgecolor="white",
+                      linewidth=0.4)
+        handles[f"PASS in Iter. {k}"] = bars
+        bottom = [b + h for b, h in zip(bottom, heights)]
+    fail_heights = [sum(1 for p in by_uc[uc] if p is None) for uc in ucs]
+    bars = ax.bar(ucs, fail_heights, bottom=bottom, label="FAIL (alle Iter.)",
+                  color=FAIL_COLOR, edgecolor="white", linewidth=0.4)
+    handles["FAIL (alle Iter.)"] = bars
+
+    ax.set_ylabel("Anzahl Läufe", fontsize=12)
+    ax.set_xlabel("Use Case", fontsize=12)
+    ax.set_title("PASS-Iteration pro Use Case", fontsize=14)
+    ax.tick_params(axis="y", labelsize=11)
+    ax.tick_params(axis="x", rotation=45, labelsize=11)
+    for label in ax.get_xticklabels():
+        label.set_ha("right")
+    return handles
+
+
+def plot_loop_grid(entries: list[dict], max_iters: int, out: Path,
+                   stage_label: str):
+    """1x2-Raster: Loop-Konvergenz (links) und PASS-Iteration pro UC
+    (rechts) nebeneinander, mit gemeinsamer Legende unter dem Raster."""
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6),
+                             gridspec_kw={"width_ratios": [1, 1.6]})
+    plot_loop_convergence_panel(axes[0], entries, max_iters)
+    handles = plot_loop_iterations_by_uc_panel(axes[1], entries, max_iters)
+
+    legend_labels = list(handles.keys())
+    fig.legend([handles[l] for l in legend_labels], legend_labels,
+               loc="lower center", bbox_to_anchor=(0.5, 0.0),
+               ncol=min(len(legend_labels), 7), fontsize=12)
+
+    fig.suptitle(stage_label, fontsize=16)
+    fig.tight_layout(rect=[0, 0.08, 1, 0.95])
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+
+
 def main():
     dfs = {}
     for key, dirname in STAGE_DIRS.items():
@@ -217,6 +351,23 @@ def main():
 
     plot_heatmap_grid(means_by_stage, out_dir / "score_heatmap_grid.png")
     print(f"[OK] geschrieben: {out_dir / 'score_heatmap_grid.png'}")
+
+    stage5_dir = SCRIPT_DIR / "tests" / STAGE5_DIR
+    stage5_means = load_phase2_uc_dimension_means(stage5_dir)
+    plot_heatmap_single(stage5_means, out_dir / "stage5_score_heatmap.png",
+                        STAGE5_LABEL)
+    print(f"[OK] geschrieben: {out_dir / 'stage5_score_heatmap.png'}")
+
+    entries = load_loop_jsonl(stage5_dir)
+    if entries:
+        max_iters = max(
+            (len(e.get("iterations", [])) for e in entries), default=5)
+        max_iters = max(max_iters,
+                        max((int(e.get("max_iterations", 5)) for e in entries),
+                            default=5))
+        plot_loop_grid(entries, max_iters, out_dir / "stage5_loop_grid.png",
+                       STAGE5_LABEL)
+        print(f"[OK] geschrieben: {out_dir / 'stage5_loop_grid.png'}")
 
 
 if __name__ == "__main__":
