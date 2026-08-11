@@ -1,18 +1,21 @@
+import os
 import re
 from pathlib import Path
 from typing import Any, Dict, List
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from playwright.sync_api import sync_playwright, Page
 
 
 # --- Configuration ---
-LM_STUDIO_BASE_URL = "http://dgx01:8000/v1"
-LM_STUDIO_API_KEY = "lm-studio"
-MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
-MODEL_QUANTIZATION = "FP8"
-TEMPERATURE = 0.6
-MAX_TOKENS = 64 * 1024
+load_dotenv()
+
+AZURE_BASE_URL = "https://foundry-playwright-e2e-tests.services.ai.azure.com/openai/v1"
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+MODEL_NAME = "deployment_gpt-5.4"
+REASONING_EFFORT = "medium"
+MAX_COMPLETION_TOKENS = 64 * 1024
 
 STAGE = "stage_2_accessibility_snapshot"
 NUM_RUNS = 50  # number of full generation passes; each pass -> tests/<stage>/run_NN/
@@ -23,7 +26,10 @@ SKILL_FILE = SCRIPT_DIR / "SKILL.md"
 OUTPUT_DIR = SCRIPT_DIR / "tests" / STAGE
 BASE_URL = "http://localhost:5173/ba-webgis-llm-e2e/"
 
-client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY)
+if not AZURE_API_KEY:
+    raise RuntimeError("AZURE_API_KEY is not set. Add it to your .env file.")
+
+client = OpenAI(base_url=AZURE_BASE_URL, api_key=AZURE_API_KEY)
 
 
 # Turns a title into a filesystem-safe, lowercase, hyphenated slug.
@@ -191,8 +197,8 @@ def check_generated_code(ts_code: str) -> List[str]:
 def call_llm(skill: str, prompt: str) -> str:
     response = client.chat.completions.create(
         model=MODEL_NAME,
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
+        reasoning_effort=REASONING_EFFORT,
+        max_completion_tokens=MAX_COMPLETION_TOKENS,
         messages=[
             {"role": "system", "content": skill},   # CONSTANT skill
             {"role": "user", "content": prompt},     # use case + UI context

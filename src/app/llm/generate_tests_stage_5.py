@@ -1,26 +1,29 @@
 import base64
 import json
+import os
 import re
 import subprocess
 import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from playwright.sync_api import sync_playwright, Page
 
 
 # --- Configuration ---
-LLM_BASE_URL = "http://dgx01:8000/v1"
-LLM_API_KEY = "lm-studio"  # any non-empty string; vLLM does not validate it
-MODEL_NAME = "Qwen/Qwen3.6-35B-A3B-FP8"
-MODEL_QUANTIZATION = "FP8"
-TEMPERATURE = 0.6
-MAX_TOKENS = 64 * 1024
+load_dotenv()
+
+AZURE_BASE_URL = "https://foundry-playwright-e2e-tests.services.ai.azure.com/openai/v1"
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+MODEL_NAME = "deployment_gpt-5.4"
+REASONING_EFFORT = "medium"
+MAX_COMPLETION_TOKENS = 64 * 1024
 
 STAGE = "stage_5_self_improvement_loop"
 MAX_ITERATIONS = 10         # abort criterion: PASS or 10 iterations, whichever comes first
-NUM_RUNS = 2              # number of full passes; each pass -> tests/<stage>/run_NN/
+NUM_RUNS = 50              # number of full passes; each pass -> tests/<stage>/run_NN/
 
 SCRIPT_DIR = Path(__file__).parent
 USE_CASES_FILE = SCRIPT_DIR / "use_cases.md"
@@ -76,7 +79,10 @@ VIEWPORT = {"width": 1920, "height": 1080}
 # time for the tiles to be drawn onto the canvas before capturing.
 MAP_SETTLE_MS = 2000
 
-client = OpenAI(base_url=LLM_BASE_URL, api_key=LLM_API_KEY)
+if not AZURE_API_KEY:
+    raise RuntimeError("AZURE_API_KEY is not set. Add it to your .env file.")
+
+client = OpenAI(base_url=AZURE_BASE_URL, api_key=AZURE_API_KEY)
 
 
 # Turns a title into a filesystem-safe, lowercase, hyphenated slug.
@@ -352,8 +358,8 @@ def call_llm(skill: str, prompt: str, screenshot_png: Optional[bytes] = None) ->
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
+        reasoning_effort=REASONING_EFFORT,
+        max_completion_tokens=MAX_COMPLETION_TOKENS,
         messages=[
             {"role": "system", "content": skill},
             {"role": "user", "content": user_content},
