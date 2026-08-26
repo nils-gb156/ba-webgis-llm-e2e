@@ -6,6 +6,7 @@ import { pioneer } from "@open-pioneer/vite-plugin-pioneer";
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 
 // @ts-expect-error Invalid typings
 import eslint from "vite-plugin-eslint";
@@ -44,7 +45,9 @@ export default defineConfig(({ mode }) => {
             // This makes it easier for vite's dev server to find dependencies,
             // and thereby reduces the number of repeated bundler executions on dev server startup.
             // Adapt the file patterns if your service modules used a different naming scheme.
-            entries: ["**/*.html", "**/services.{ts,js}", "!**/dist/**"]
+            // The app/llm/tests directory holds tens of thousands of generated Playwright
+            // artifacts; excluding it keeps the dependency scan from hanging on startup.
+            entries: ["**/*.html", "**/services.{ts,js}", "!**/dist/**", "!**/app/llm/**"]
         },
         plugins: [
             pioneer({
@@ -82,6 +85,9 @@ export default defineConfig(({ mode }) => {
             environment: "happy-dom",
             setupFiles: ["testing/global-setup.ts"],
 
+            // Generated Playwright tests live here; they must not be run by vitest.
+            exclude: [...configDefaults.exclude, "**/app/llm/tests/**", "**/app/tests/manual/**"],
+
             server: {
                 deps: {
                     // Workaround to fix some import issues, see
@@ -102,12 +108,24 @@ export default defineConfig(({ mode }) => {
             // See also: https://vitejs.dev/config/server-options.html#server-hmr
             // hmr: false
 
+            // The app/llm/tests directory holds tens of thousands of generated Playwright
+            // artifacts. Ignoring it prevents the file watcher from choking on startup.
+            watch: {
+                ignored: ["**/app/llm/tests/**"]
+            },
+
             proxy: {
                 // Proxy DWD WMS GetFeatureInfo requests to avoid CORS (server sends no Access-Control-Allow-Origin)
                 "/dwd-wms": {
                     target: "https://maps.dwd.de",
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/dwd-wms/, "/geoserver/dwd/wms")
+                },
+                // Proxy DWD WFS requests (EUCOS ground stations vector layer) to avoid CORS in dev
+                "/dwd-ows": {
+                    target: "https://maps.dwd.de",
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/dwd-ows/, "/geoserver/dwd/ows")
                 }
             }
         }

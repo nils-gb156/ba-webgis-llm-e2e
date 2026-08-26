@@ -19,6 +19,7 @@ export default tseslint.config(
             "**/temp",
             "**/test-data",
             "support/licenses",
+            "src/app/llm/tests",
             "**/.*"
         ]
     },

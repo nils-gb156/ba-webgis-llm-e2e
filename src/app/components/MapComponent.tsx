@@ -86,7 +86,9 @@ export function MapComponent() {
     const [eucosVisible, setEucosVisible] = useState(true);
     // Cached references to the station layers/sources, populated once the map loads.
     const uviSourceRef = useRef<TileWMS | null>(null);
-    const eucosSourceRef = useRef<TileWMS | null>(null);
+    // The EUCOS layer is a WFS vector layer; we keep a reference to the OpenLayers
+    // layer instance so feature queries can be scoped to it via a layer filter.
+    const eucosLayerInstanceRef = useRef<unknown>(null);
     const uviLayerRef = useRef<{
         getVisible?: () => boolean;
         on?: (event: string, handler: () => void) => void;
@@ -124,7 +126,7 @@ export function MapComponent() {
         setUviVisible(uviLayer?.getVisible?.() ?? true);
 
         const eucosLayer = findLayerByTitle(map.olMap, EUCOS_LAYER_TITLE) as OlLayer | undefined;
-        eucosSourceRef.current = eucosLayer?.getSource?.() ?? null;
+        eucosLayerInstanceRef.current = eucosLayer ?? null;
         eucosLayerRef.current = eucosLayer ?? null;
         setEucosVisible(eucosLayer?.getVisible?.() ?? true);
     }, [map]);
@@ -373,72 +375,49 @@ export function MapComponent() {
             return;
         }
 
-        // Same GetFeatureInfo query as above, but for the EUCOS ground stations.
-        const source = eucosSourceRef.current;
-        const view = map.olMap.getView();
-        const resolution = view.getResolution();
-
-        if (!resolution || !source?.getFeatureInfoUrl) {
+        // The EUCOS ground stations are a client-side WFS vector layer, so instead
+        // of a WMS GetFeatureInfo request we query the rendered vector features at
+        // the clicked pixel directly from the OpenLayers map.
+        const eucosLayer = eucosLayerInstanceRef.current;
+        if (!eucosLayer) {
             setEucosFeatureInfo({ status: "error", message: "EUCOS layer not available." });
             return;
         }
 
-        const url = source.getFeatureInfoUrl(
-            clickedLocation.mapCoordinate,
-            resolution,
-            view.getProjection(),
-            { INFO_FORMAT: "application/json", FEATURE_COUNT: "5", BUFFER: "10" }
-        );
-
-        if (!url) {
+        const pixel = map.olMap.getPixelFromCoordinate(clickedLocation.mapCoordinate);
+        if (!pixel) {
             setEucosFeatureInfo({ status: "empty" });
             return;
         }
 
-        const controller = new AbortController();
-        setEucosFeatureInfo({ status: "loading" });
+        const features: { id?: string; properties: Record<string, unknown> }[] = [];
+        map.olMap.forEachFeatureAtPixel(
+            pixel,
+            (feature) => {
+                const olFeature = feature as {
+                    getId?: () => string | number | undefined;
+                    getProperties?: () => Record<string, unknown>;
+                    getGeometryName?: () => string;
+                };
+                const allProps = olFeature.getProperties?.() ?? {};
+                const geometryName = olFeature.getGeometryName?.() ?? "geometry";
+                // Drop the geometry property so only attribute data is displayed.
+                const properties = Object.fromEntries(
+                    Object.entries(allProps).filter(([key]) => key !== geometryName)
+                );
+                const rawId = olFeature.getId?.();
+                features.push({
+                    id: rawId != null ? String(rawId) : undefined,
+                    properties
+                });
+            },
+            {
+                layerFilter: (layer) => layer === eucosLayer,
+                hitTolerance: 5
+            }
+        );
 
-        const proxiedUrl = import.meta.env.DEV
-            ? url.replace(/^https:\/\/maps\.dwd\.de\/geoserver\/dwd\/wms/, "/dwd-wms")
-            : url;
-        fetch(proxiedUrl, { signal: controller.signal })
-            .then((response) => {
-                if (!response.ok) throw new Error("Failed to load station info.");
-                const contentType = response.headers.get("content-type") ?? "";
-                if (contentType.includes("application/json")) {
-                    return response.json().then((data) => ({ kind: "json", data }));
-                }
-                return response.text().then((data) => ({ kind: "text", data }));
-            })
-            .then((payload) => {
-                if (payload.kind === "json") {
-                    const features = Array.isArray(payload.data?.features)
-                        ? payload.data.features.map(
-                              (feature: { id?: string; properties?: unknown }) => ({
-                                  id: feature.id,
-                                  properties:
-                                      feature.properties && typeof feature.properties === "object"
-                                          ? (feature.properties as Record<string, unknown>)
-                                          : {}
-                              })
-                          )
-                        : [];
-                    setEucosFeatureInfo(
-                        features.length ? { status: "json", features } : { status: "empty" }
-                    );
-                    return;
-                }
-                const text = payload.data?.toString().trim();
-                setEucosFeatureInfo(text ? { status: "text", content: text } : { status: "empty" });
-            })
-            .catch((err: unknown) => {
-                if (err instanceof Error && err.name === "AbortError") return;
-                setEucosFeatureInfo({ status: "error", message: "Failed to load station info." });
-            });
-
-        return () => {
-            controller.abort();
-        };
+        setEucosFeatureInfo(features.length ? { status: "json", features } : { status: "empty" });
     }, [map, clickedLocation, eucosVisible]);
 
     if (!map) {

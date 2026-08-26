@@ -1,8 +1,17 @@
 {
     "permissions": {
         "allow": [
-            "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\nilsg\\\\repos\\\\ba-webgis-llm-e2e\\\\node_modules\\\\@open-pioneer\" -Recurse -Name)",
-            "Bash(Select-Object -First 50)"
+            "Bash(python *)",
+            "Bash(find:*)",
+            "Bash(grep:*)",
+            "Bash(wc:*)",
+            "Bash(head:*)",
+            "Bash(cat:*)",
+            "Bash(ls:*)",
+            "Bash(awk:*)",
+            "Bash(awk -F, 'NR>1{print $5}' _phase1_results.csv)",
+            "Bash(python -c ' *)",
+            "Bash(python -)"
         ]
     }
 }

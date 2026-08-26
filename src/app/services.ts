@@ -12,31 +12,19 @@ import { CloudsLegend } from "./styles/CloudsLegend";
 import { UviStationsLegend } from "./styles/UviStationsLegend";
 import { UvIndexLegend } from "./styles/UvIndexLegend";
 import { EucosStationsLegend } from "./styles/EucosStationsLegend";
+import { eucosStationStyle, EUCOS_WFS_URL } from "./styles/eucosStyle";
+import { buildUvIndexTimeExtent } from "./styles/uvIndexTime";
 import TileLayer from "ol/layer/Tile";
+import VectorLayer from "ol/layer/Vector";
 import OSM from "ol/source/OSM";
 import TileWMS from "ol/source/TileWMS";
+import VectorSource from "ol/source/Vector";
 import XYZ from "ol/source/XYZ";
+import GeoJSON from "ol/format/GeoJSON";
 
 export const MAP_ID = "main";
 // API key for the OpenWeatherMap tile layers, injected at build time via Vite.
 const OPEN_WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
-
-/**
- * Builds the WMS time dimension extent for the DWD UV-Index layer dynamically.
- *
- * The extent spans from the start of the current day (UTC) to two days ahead
- * with a daily interval (P1D), so the demo always requests an up-to-date,
- * valid time range instead of a fixed (and eventually stale) date.
- */
-function buildUvIndexTimeExtent(daysAhead = 2): string {
-    const start = new Date();
-    start.setUTCHours(0, 0, 0, 0);
-
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + daysAhead);
-
-    return `${start.toISOString()}/${end.toISOString()}/P1D`;
-}
 
 export class MainMapProvider implements MapConfigProvider {
     mapId = MAP_ID;
@@ -202,21 +190,12 @@ export class MainMapProvider implements MapConfigProvider {
                     type: SimpleLayer,
                     title: "EUCOS Ground Stations",
                     visible: true,
-                    olLayer: new TileLayer({
-                        source: new TileWMS({
-                            url: "https://maps.dwd.de/geoserver/dwd/wms",
-                            params: {
-                                CRS: "EPSG:3857",
-                                dpiMode: "7",
-                                featureCount: "10",
-                                FORMAT: "image/png",
-                                LAYERS: "EUCOS_surface_stations",
-                                STYLES: "",
-                                tilePixelRatio: "0"
-                            },
-                            serverType: "geoserver",
-                            crossOrigin: "anonymous"
+                    olLayer: new VectorLayer({
+                        source: new VectorSource({
+                            format: new GeoJSON(),
+                            url: EUCOS_WFS_URL
                         }),
+                        style: eucosStationStyle,
                         properties: { title: "EUCOS Ground Stations" }
                     }),
                     attributes: {

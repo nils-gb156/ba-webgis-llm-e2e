@@ -1,0 +1,256 @@
+{
+    "layers": {
+        "basemaps": {
+            "controlType": "dropdown",
+            "selection": "single",
+            "options": ["Carto Light", "Carto Dark", "OpenStreetMap"],
+            "default": "Carto Light"
+        },
+        "operational": {
+            "controlType": "checkbox-list",
+            "selection": "multiple",
+            "options": [
+                "UV-Index",
+                "Temperature",
+                "Precipitation",
+                "Clouds",
+                "UV-Index Stations",
+                "EUCOS Ground Stations"
+            ],
+            "defaults": ["Temperature", "UV-Index Stations", "EUCOS Ground Stations"]
+        }
+    },
+    "elements": [
+        {
+            "data-testid": "map-container",
+            "visibleByDefault": true,
+            "elements": [
+                {
+                    "data-testid": "map-controls-panel",
+                    "visibleByDefault": true,
+                    "elements": [
+                        {
+                            "data-testid": "layer-switcher",
+                            "visibleByDefault": true
+                        },
+                        {
+                            "data-testid": "legend",
+                            "visibleByDefault": true
+                        }
+                    ]
+                },
+                {
+                    "data-testid": "map-toolbar",
+                    "visibleByDefault": true,
+                    "elements": [
+                        {
+                            "data-testid": "initial-extent-button",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true
+                        },
+                        {
+                            "data-testid": "zoom-in-button",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true
+                        },
+                        {
+                            "data-testid": "zoom-out-button",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true
+                        },
+                        {
+                            "data-testid": "measurement-toggle",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true,
+                            "toggles": "measurement-panel"
+                        },
+                        {
+                            "data-testid": "print-toggle",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true,
+                            "toggles": "printing-panel"
+                        },
+                        {
+                            "data-testid": "layer-switcher-toggle",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true,
+                            "toggles": "layer-switcher"
+                        },
+                        {
+                            "data-testid": "legend-toggle",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true,
+                            "toggles": "legend"
+                        },
+                        {
+                            "data-testid": "info-panel-toggle",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": true,
+                            "toggles": "info-panel"
+                        }
+                    ]
+                },
+                {
+                    "data-testid": "geocoder-panel",
+                    "visibleByDefault": true,
+                    "elements": [
+                        {
+                            "data-testid": "geocoder-input",
+                            "type": "input",
+                            "actions": ["type"],
+                            "visibleByDefault": true
+                        },
+                        {
+                            "data-testid": "geocoder-clear-button",
+                            "type": "button",
+                            "actions": ["click"],
+                            "visibleByDefault": false,
+                            "visibleWhen": {
+                                "condition": "query non-empty",
+                                "description": "Appears when the search input contains text"
+                            }
+                        },
+                        {
+                            "data-testid": "geocoder-results",
+                            "visibleByDefault": false,
+                            "visibleWhen": {
+                                "condition": "results available",
+                                "description": "Appears after typing characters and Nominatim returns results"
+                            },
+                            "elements": [
+                                {
+                                    "data-testid": "geocoder-result-item-${index}",
+                                    "dynamic": true,
+                                    "type": "listitem",
+                                    "actions": ["click"]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "data-testid": "info-panel",
+                    "visibleByDefault": true,
+                    "toggledBy": {
+                        "action": "click",
+                        "target": "info-panel-toggle"
+                    },
+                    "elements": [
+                        {
+                            "data-testid": "weather-forecast-section",
+                            "visibleByDefault": true,
+                            "elements": [
+                                {
+                                    "data-testid": "weather-forecast",
+                                    "visibleByDefault": false,
+                                    "visibleWhen": {
+                                        "action": "click",
+                                        "target": "map-container",
+                                        "description": "Appears after the user clicks on the map and the forecast loads"
+                                    },
+                                    "elements": [
+                                        {
+                                            "data-testid": "weather-forecast-entry",
+                                            "dynamic": true,
+                                            "description": "One entry per forecast time step"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "data-testid": "uvi-station-section",
+                            "visibleByDefault": false,
+                            "visibleWhen": {
+                                "condition": "uviFeatureInfo.status === 'json' or 'text'",
+                                "description": "Shown when the UV-Index Stations layer is visible and the map click hits a station"
+                            },
+                            "elements": [
+                                {
+                                    "data-testid": "uvi-station-info",
+                                    "visibleByDefault": false,
+                                    "visibleWhen": {
+                                        "condition": "uviFeatureInfo.status === 'json' or 'text'"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "data-testid": "eucos-station-section",
+                            "visibleByDefault": false,
+                            "visibleWhen": {
+                                "condition": "eucosFeatureInfo.status === 'json' or 'text'",
+                                "description": "Shown when the EUCOS Ground Stations layer is visible and the map click hits a station"
+                            },
+                            "elements": [
+                                {
+                                    "data-testid": "eucos-station-info",
+                                    "visibleByDefault": false,
+                                    "visibleWhen": {
+                                        "condition": "eucosFeatureInfo.status === 'json' or 'text'"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "data-testid": "measurement-panel",
+                    "visibleByDefault": false,
+                    "note": "Draggable floating panel (position: fixed). Rendered directly inside map-container, not inside an anchor.",
+                    "toggledBy": {
+                        "action": "click",
+                        "target": "measurement-toggle"
+                    },
+                    "elements": [
+                        {
+                            "data-testid": "measurement",
+                            "visibleByDefault": false
+                        }
+                    ]
+                },
+                {
+                    "data-testid": "printing-panel",
+                    "visibleByDefault": false,
+                    "note": "Draggable floating panel (position: fixed)",
+                    "toggledBy": {
+                        "action": "click",
+                        "target": "print-toggle"
+                    },
+                    "elements": [
+                        {
+                            "data-testid": "printing",
+                            "visibleByDefault": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "data-testid": "footer",
+            "visibleByDefault": true,
+            "elements": [
+                {
+                    "data-testid": "coordinate-viewer",
+                    "visibleByDefault": true
+                },
+                {
+                    "data-testid": "scale-bar",
+                    "visibleByDefault": true
+                },
+                {
+                    "data-testid": "scale-viewer",
+                    "visibleByDefault": true
+                }
+            ]
+        }
+    ]
+}
