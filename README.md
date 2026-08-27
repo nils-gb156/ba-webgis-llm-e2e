@@ -126,7 +126,7 @@ prompts, Phase 1/2 results and the evaluation reports.
 ### Citing this run
 
 This branch is tagged **`qwen-v1.0`** for a stable, citable snapshot:
-<https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/thesis-run-qwen-v1.0>
+<https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/qwen-v1.0>
 
 The secondary transferability run (GPT-5.4, thesis appendix C) lives on the
 [`gpt/test-generation`](https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/gpt/test-generation)
