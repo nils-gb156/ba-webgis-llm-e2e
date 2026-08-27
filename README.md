@@ -1,9 +1,13 @@
 # Weather WebGIS Demo
 
 A small web-based GIS demo application that combines weather information with
-interactive map layers. It was developed as part of a bachelor thesis on the
-end-to-end use of LLMs in web development, building on the
+interactive map layers. It is the demo application (the "application under test")
+of a bachelor thesis on **LLM-assisted generation of Playwright end-to-end tests
+from use cases** — the influence of UI context, using WebGIS applications as an
+example. It is built on the
 [Open Pioneer Trails](https://github.com/open-pioneer) framework.
+
+> **Live demo:** <https://nils-gb156.github.io/ba-webgis-llm-e2e/>
 
 ## Features
 
@@ -69,11 +73,34 @@ For deploying to a real server or cloud, see
 src/
   app/                  # Application code (entry point, services, components)
     components/         # React components (map, info panel, geocoder, ...)
+    llm/                # Thesis test-generation tooling (use cases, skill, stage scripts, helpers)
     styles/             # Layer legend components
   packages/             # Local Open Pioneer packages
 docs/                   # Documentation and tutorials
 support/                # Build helpers (license report, SBOM, ...)
 ```
+
+## Bachelor thesis & experiment artifacts
+
+This repository serves a double purpose: it hosts the demo WebGIS application described
+above and the experiment of the underlying bachelor thesis, which studies how the UI
+context provided in a prompt influences the quality of LLM-generated Playwright E2E
+tests.
+
+The reusable test-generation tooling lives under [`src/app/llm/`](src/app/llm):
+
+- `use_cases.md` — the ten use cases used as the functional input
+- `SKILL.md` — the OPT Playwright skill given to the model in the system prompt
+- `generate_tests_stage_1.py` … `generate_tests_stage_5.py` — the five context stages
+- `map-model-helpers.ts`, `generate-ui-map.ts`, `manual-ui-map.json` — map-state helpers and UI maps
+- `run_phase1_eval.py`, `phase2_judge_prompt.md`, `plot_stage.py` — the two-phase evaluation
+
+The **full generation runs** — all generated tests, prompts, Phase 1/2 results and the
+evaluation reports under `docs/eval/` — are kept on dedicated, frozen branches so this
+branch stays focused on the application and the reusable tooling:
+
+- [`qwen/test-generation`](https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/qwen/test-generation) — main run (Qwen3.6-35B-A3B)
+- [`gpt/test-generation`](https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/gpt/test-generation) — secondary run for transferability (GPT-5.4, thesis appendix C)
 
 ## License
 
