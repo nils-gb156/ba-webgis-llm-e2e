@@ -1,9 +1,17 @@
 # Weather WebGIS Demo
 
 A small web-based GIS demo application that combines weather information with
-interactive map layers. It was developed as part of a bachelor thesis on the
-end-to-end use of LLMs in web development, building on the
+interactive map layers. It is the demo application (the "application under test")
+of a bachelor thesis on **LLM-assisted generation of Playwright end-to-end tests
+from use cases** — the influence of UI context, using WebGIS applications as an
+example. It is built on the
 [Open Pioneer Trails](https://github.com/open-pioneer) framework.
+
+> **Live demo:** <https://nils-gb156.github.io/ba-webgis-llm-e2e/>
+>
+> **This is the `qwen/test-generation` branch** — a frozen snapshot of the thesis'
+> main generation run (Qwen3.6-35B-A3B). See
+> [Bachelor thesis & experiment artifacts](#bachelor-thesis--experiment-artifacts).
 
 ## Features
 
@@ -39,6 +47,11 @@ in your browser.
 
 Configure these in `.env` (see `.env.example`):
 
+| Variable                   | Description                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `VITE_OPENWEATHER_API_KEY` | API key for the OpenWeatherMap weather overlays (temperature, precipitation, clouds) |
+| `VITE_CARTO_API_KEY`       | API key for the CARTO basemaps (Carto Light/Dark); required for the deployed site    |
+
 ## Scripts
 
 | Command            | Description                                                                       |
@@ -69,11 +82,55 @@ For deploying to a real server or cloud, see
 src/
   app/                  # Application code (entry point, services, components)
     components/         # React components (map, info panel, geocoder, ...)
+    llm/                # Thesis test-generation tooling (use cases, skill, stage scripts, helpers)
     styles/             # Layer legend components
   packages/             # Local Open Pioneer packages
-docs/                   # Documentation and tutorials
+docs/                   # Documentation and tutorials (incl. docs/eval evaluation reports)
 support/                # Build helpers (license report, SBOM, ...)
 ```
+
+## Bachelor thesis & experiment artifacts
+
+This repository has a double purpose: it hosts the demo WebGIS application described
+above and the experiment of the underlying bachelor thesis, which studies how the UI
+context provided in a prompt influences the quality of LLM-generated Playwright E2E
+tests.
+
+**This `qwen/test-generation` branch is a frozen snapshot of the thesis' main
+generation run.** Alongside the reusable tooling it contains all generated tests,
+prompts, Phase 1/2 results and the evaluation reports.
+
+### Run configuration
+
+| Aspect                   | Value                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| Model                    | Qwen3.6-35B-A3B (FP8), served via vLLM on an NVIDIA DGX Spark                               |
+| Sampling                 | temperature 0.6, thinking mode, 262,144-token context, 65,536-token max output              |
+| Generation               | 25–27 July 2026 — 5 context stages × 50 runs × 10 use cases (~2,500 tests; stage 3 has 499) |
+| Phase 1 (execution)      | Playwright 1.60 / Chromium against the local demo app                                       |
+| Phase 2 (LLM-as-a-judge) | Claude Opus 5, 31 July – 3 August 2026                                                      |
+
+### Where to find things
+
+- **Reusable tooling** — [`src/app/llm/`](src/app/llm): `use_cases.md` (the ten use cases),
+  `SKILL.md` (the OPT Playwright skill in the system prompt),
+  `generate_tests_stage_1.py` … `generate_tests_stage_5.py` (the five context stages),
+  `map-model-helpers.ts`, `generate-ui-map.ts`, `manual-ui-map.json` (map-state helpers and
+  UI maps), and the two-phase evaluation (`run_phase1_eval.py`, `phase2_judge_prompt.md`,
+  `plot_stage.py`).
+- **Generated tests, prompts and per-stage results** — [`src/app/llm/tests/`](src/app/llm/tests):
+  `stage_1_baseline` … `stage_5_self_improvement_loop`, each with 50 runs plus the
+  `_phase1_results.csv` / `_phase2_judge.csv` result files.
+- **Evaluation reports** — [`docs/eval/`](docs/eval).
+
+### Citing this run
+
+This branch is tagged **`qwen-v1.0`** for a stable, citable snapshot:
+<https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/thesis-run-qwen-v1.0>
+
+The secondary transferability run (GPT-5.4, thesis appendix C) lives on the
+[`gpt/test-generation`](https://github.com/nils-gb156/ba-webgis-llm-e2e/tree/gpt/test-generation)
+branch, tagged `gpt-v1.0`.
 
 ## License
 
