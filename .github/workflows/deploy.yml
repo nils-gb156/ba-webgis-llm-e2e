@@ -33,6 +33,7 @@ jobs:
         run: pnpm build
         env:
           VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
+          VITE_CARTO_API_KEY: ${{ secrets.VITE_CARTO_API_KEY }}
 
       - name: Add .nojekyll file
         run: touch dist/www/.nojekyll

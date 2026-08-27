@@ -43,6 +43,11 @@ in your browser.
 
 Configure these in `.env` (see `.env.example`):
 
+| Variable                   | Description                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `VITE_OPENWEATHER_API_KEY` | API key for the OpenWeatherMap weather overlays (temperature, precipitation, clouds) |
+| `VITE_CARTO_API_KEY`       | API key for the CARTO basemaps (Carto Light/Dark); required for the deployed site    |
+
 ## Scripts
 
 | Command            | Description                                                                       |

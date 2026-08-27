@@ -25,6 +25,9 @@ import GeoJSON from "ol/format/GeoJSON";
 export const MAP_ID = "main";
 // API key for the OpenWeatherMap tile layers, injected at build time via Vite.
 const OPEN_WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+// API key for the CARTO basemaps (Carto Light/Dark), injected at build time via Vite.
+// CARTO watermarks tiles served without a key on public domains.
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY;
 
 export class MainMapProvider implements MapConfigProvider {
     mapId = MAP_ID;
@@ -45,7 +48,9 @@ export class MainMapProvider implements MapConfigProvider {
                     title: "Carto Light",
                     olLayer: new TileLayer({
                         source: new XYZ({
-                            url: "https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                            url:
+                                "https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png?key=" +
+                                CARTO_API_KEY,
                             crossOrigin: "anonymous"
                         }),
                         properties: { title: "Carto Light" }
@@ -57,7 +62,9 @@ export class MainMapProvider implements MapConfigProvider {
                     title: "Carto Dark",
                     olLayer: new TileLayer({
                         source: new XYZ({
-                            url: "https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            url:
+                                "https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png?key=" +
+                                CARTO_API_KEY,
                             crossOrigin: "anonymous"
                         }),
                         properties: { title: "Carto Dark" }
